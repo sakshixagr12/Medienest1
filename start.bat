@@ -7,8 +7,8 @@ echo Installing missing dependencies if any...
 call npm install
 
 echo.
-echo Launching Backend and Frontend concurrently...
-echo You can stop both servers by pressing Ctrl+C in this window.
+echo Launching Dashboard (Frontend + Backend) and Admin (Frontend + Backend) concurrently...
+echo You can stop all servers by pressing Ctrl+C in this window.
 echo.
 
 npm run dev

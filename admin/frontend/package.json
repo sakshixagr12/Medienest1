@@ -1,0 +1,7 @@
+{
+  "name": "medinest-admin-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx serve -l 3001 ."
+  }
+}
