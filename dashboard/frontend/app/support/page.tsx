@@ -1,109 +1,58 @@
-"use client";
-
 import Link from "next/link";
-import Image from "next/image";
+import PublicNav from "@/components/PublicNav";
+import PublicFooter from "@/components/PublicFooter";
 import styles from "../privacy/page.module.css";
 
 export default function ContactSupport() {
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.navLogo}>
-          <Image
-            src="/assets/jirova_care_logo.png"
-            alt="Jirova Care"
-            width={32}
-            height={32}
-          />
-          <span>Jirova Care</span>
-        </Link>
-        <Link href="/" className={styles.btnSolidNav}>
-          Back to Home
-        </Link>
-      </nav>
+      <PublicNav />
 
       <div className={styles.container}>
         <div className={styles.header}>
           <h1>Contact Support</h1>
-          <p>We're here to help keep your sanctuary running smoothly.</p>
+          <p>We are here to help keep your clinical workflows running smoothly.</p>
         </div>
 
         <div className={styles.content}>
-          <h2>How can we help?</h2>
+          <h2>How to Reach Us</h2>
           <p>
-            Whether you need help configuring your clinic, importing prior
-            patient data, or resolving technical issues, our dedicated
-            onboarding and support concierge team is ready to assist you.
+            For any queries, technical support, billing inquiries, or feedback, our dedicated support concierge is ready to assist you.
           </p>
 
-          <div
-            style={{
-              marginTop: "40px",
-              background: "#f4f3ed",
-              padding: "32px",
-              borderRadius: "16px",
-            }}
-          >
-            <h3
-              style={{ margin: "0 0 16px", color: "#1e1b4b", fontSize: "18px" }}
-            >
-              Email Support
-            </h3>
-            <p
-              style={{ margin: "0 0 16px", color: "#4b5563", fontSize: "15px" }}
-            >
-              For standard inquiries, technical bug reports, or feature
-              requests, reach out to our team via email. We typically respond
-              within 2-4 hours during business days.
+          <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "24px", borderRadius: "12px", marginBottom: "24px" }}>
+            <h3 style={{ margin: "0 0 8px 0", color: "#1e3a8a" }}>Contact Email</h3>
+            <p style={{ margin: "0 0 12px 0", fontSize: "14px", color: "#64748b" }}>
+              Please drop us an email describing your issue or request.
             </p>
-            <a
-              href="mailto:support@jirovacare.com"
-              style={{
-                display: "inline-block",
-                background: "#1e1b4b",
-                color: "white",
-                padding: "12px 24px",
-                borderRadius: "30px",
-                textDecoration: "none",
-                fontWeight: "bold",
-              }}
-            >
-              Email support@jirovacare.com
-            </a>
+            <a href="mailto:support@jirovacare.com" style={{ fontWeight: "bold", color: "#3b82f6" }}>support@jirovacare.com</a>
           </div>
 
-          <div
-            style={{
-              marginTop: "24px",
-              background: "#f4f3ed",
-              padding: "32px",
-              borderRadius: "16px",
-            }}
-          >
-            <h3
-              style={{ margin: "0 0 16px", color: "#1e1b4b", fontSize: "18px" }}
-            >
-              Emergency Escalation
-            </h3>
-            <p
-              style={{ margin: "0 0 4px", color: "#4b5563", fontSize: "15px" }}
-            >
-              If you are facing an urgent critical failure preventing patient
-              consultations, please call our emergency hotline:
-            </p>
-            <p
-              style={{
-                margin: "0 0 16px",
-                color: "#1e1b4b",
-                fontSize: "16px",
-                fontWeight: "bold",
-              }}
-            >
-              +91 7380520XXX
+          <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "24px", borderRadius: "12px", marginBottom: "24px" }}>
+            <h3 style={{ margin: "0 0 8px 0", color: "#1e3a8a" }}>Response Time</h3>
+            <p style={{ margin: 0, fontSize: "14px", color: "#475569" }}>
+              Typical response within 24-48 business hours.
             </p>
           </div>
+
+          <h2>Bug Reports</h2>
+          <p>
+            If you encounter a technical bug or system failure, please email us with details of the issue, screenshots if possible, and your registered clinic name. We will investigate and deploy hotfixes as a high priority.
+          </p>
+
+          <h2>Billing Questions</h2>
+          <p>
+            For any issues related to payment processing, invoice generation, subscription upgrades, or plan cancellations, reach out directly with your billing identifiers to speed up resolutions.
+          </p>
+
+          <h2>Feature Requests</h2>
+          <p>
+            We love building custom workflow enhancements for our practitioners. If you have requests for custom prescription templates, database field customizations, or analytics dashboards, write to us!
+          </p>
         </div>
       </div>
+
+      <PublicFooter />
     </div>
   );
 }
