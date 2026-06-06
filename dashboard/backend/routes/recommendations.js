@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
+const { z } = require('zod');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -425,15 +426,31 @@ async function suggestClinicalPath(cc, findings, context = {}) {
     } catch (err) { return { error: err.message }; }
 }
 
+const recommendSchema = z.object({
+    cc:           z.string().min(1, 'Chief complaint is required').max(500),
+    findings:     z.string().max(500).optional(),
+    age:          z.number().min(0).max(130).optional(),
+    gender:       z.enum(['M', 'F', 'O']).optional(),
+    specialty:    z.string().max(100).optional(),
+    weight:       z.number().min(0).max(500).optional(),
+    is_pregnant:  z.boolean().optional(),
+    is_lactating: z.boolean().optional(),
+});
+
 router.post('/suggest', async (req, res) => {
-    const { cc, findings, age, gender, specialty, weight, is_pregnant, is_lactating } = req.body;
+    const parsed = recommendSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ success: false, error: 'Invalid input', details: parsed.error.flatten() });
+    }
+
+    const { cc, findings, age, gender, specialty, weight, is_pregnant, is_lactating } = parsed.data;
     
     // Tier 6.0: Pass extended clinical context
     const suggestions = await suggestClinicalPath(cc, findings, { 
-        age: parseInt(age) || 30, 
+        age: age ?? 30, 
         gender: gender || 'M', 
         specialty,
-        weight: parseFloat(weight) || 70.0,
+        weight: weight ?? 70.0,
         is_pregnant: !!is_pregnant,
         is_lactating: !!is_lactating
     });

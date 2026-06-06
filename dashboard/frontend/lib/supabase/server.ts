@@ -1,15 +1,19 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-const HARDCODED_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sbbinqrgczoynwizmnwc.supabase.co';
-const HARDCODED_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiYmlucXJnY3pveW53aXptbndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NjM1MDMsImV4cCI6MjA5NjMzOTUwM30.M4wZIozWu_jbjISfNRA_D875OvmGMJsWbA1aJ0hwI30';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error('[Supabase] NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in .env.local');
+}
 
 export async function createServerSupabase() {
   const cookieStore = await cookies();
 
   return createServerClient(
-    HARDCODED_URL,
-    HARDCODED_KEY,
+    SUPABASE_URL!,
+    SUPABASE_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -36,8 +40,8 @@ export async function createServerSupabase() {
 
 export function createMiddlewareSupabase(request: any, response: any) {
   return createServerClient(
-    HARDCODED_URL,
-    HARDCODED_KEY,
+    SUPABASE_URL!,
+    SUPABASE_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -45,15 +49,15 @@ export function createMiddlewareSupabase(request: any, response: any) {
         },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options });
-          response = response || {}; 
+          response = response || {};
           if (response.cookies) {
-             response.cookies.set({ name, value, ...options });
+            response.cookies.set({ name, value, ...options });
           }
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: '', ...options });
           if (response.cookies) {
-             response.cookies.set({ name, value: '', ...options });
+            response.cookies.set({ name, value: '', ...options });
           }
         },
       },

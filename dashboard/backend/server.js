@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { z } = require('zod');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -30,11 +32,42 @@ function isValidHindi(text) {
 
 // Middleware
 app.use(helmet()); // Professional security headers
+
+// ─── CORS (Allow only known origins) ────────────────────────────────────────
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
 app.use(cors({
-    origin: '*',
+    origin: (origin, callback) => {
+        // Allow server-to-server / curl (no origin header) in dev only
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS: Origin '${origin}' not allowed`));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// ─── RATE LIMITING ───────────────────────────────────────────────────────────
+// General limiter — all routes
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 300,                  // 300 requests per window per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many requests. Please try again later.' }
+});
+
+// Strict limiter — AI endpoints (cost control)
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 10,             // 10 AI calls per minute per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'AI rate limit reached. Please wait before generating another summary.' }
+});
+
+app.use(generalLimiter);
 app.use(express.json());
 app.use('/api/patient-history', requireAuth, requireClinicAccess, patientHistoryRouter);
 app.use('/api/recommendations', requireAuth, recommendationsRouter);
@@ -73,22 +106,25 @@ app.get('/api/ping', async (req, res) => {
 
 
 
-// ─── Secure DB Operations (Example) ───
-app.post('/api/secure-save', async (req, res) => {
-    const { table, data } = req.body;
-    try {
-        const { data: result, error } = await supabase.from(table).insert(data).select();
-        if (error) throw error;
-        res.json({ success: true, data: result });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
+// ─── AI SUMMARY (PRODUCTION GRADE) ──────────────────────────────────────────
+const aiSummarySchema = z.object({
+    lang: z.enum(['English', 'Hindi']).default('English'),
+    persist: z.union([z.boolean(), z.literal('true'), z.literal('false')]).default(true),
 });
 
-// ─── AI SUMMARY (PRODUCTION GRADE) ──────────────────────────────────
-app.post('/api/prescriptions/:id/ai-summary', async (req, res) => {
+app.post('/api/prescriptions/:id/ai-summary', requireAuth, aiLimiter, async (req, res) => {
     const { id } = req.params;
-    const { lang = 'English', persist = true } = req.body || req.query || {};
+
+    // Validate id format (must be a UUID)
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        return res.status(400).json({ success: false, error: 'Invalid prescription ID format' });
+    }
+
+    const parsed = aiSummarySchema.safeParse(req.body || {});
+    if (!parsed.success) {
+        return res.status(400).json({ success: false, error: 'Invalid request body', details: parsed.error.flatten() });
+    }
+    const { lang, persist } = parsed.data;
     
     console.log(`🤖 [AI] Starting clinical snapshot for Rx: ${id} (Language: ${lang}, Persist: ${persist})`);
 
