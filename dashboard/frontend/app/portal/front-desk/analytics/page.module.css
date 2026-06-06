@@ -32,7 +32,7 @@
   background: var(--sanctuary-white);
   padding: 1rem 1.5rem;
   border-radius: 20px;
-  box-shadow: 0 6px 20px -8px rgba(0,0,0,0.03);
+  box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.03);
 }
 
 .timeSelect {
@@ -87,7 +87,7 @@
   width: 100%;
 }
 
-/* 💎 Premium Floating Dashboard Layout */
+/* Premium Floating Dashboard Layout */
 .mainLayout {
   display: flex;
   gap: 2rem;
@@ -106,8 +106,13 @@
   gap: 2rem;
 }
 @media (max-width: 1024px) {
-  .mainLayout { flex-direction: column; }
-  .leftColumn, .rightColumn { width: 100%; }
+  .mainLayout {
+    flex-direction: column;
+  }
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+  }
 }
 
 .glassCard {
@@ -125,7 +130,9 @@
   gap: 2rem;
 }
 @media (max-width: 768px) {
-  .splitRow { grid-template-columns: 1fr; }
+  .splitRow {
+    grid-template-columns: 1fr;
+  }
 }
 
 .cardHeaderTitle {
@@ -152,7 +159,9 @@
   gap: 1.5rem;
 }
 @media (max-width: 768px) {
-  .metricGrid { grid-template-columns: 1fr; }
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .metricBox {
@@ -160,22 +169,35 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px -12px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
 }
 .metricBox::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: -20px; right: -20px;
-  width: 120px; height: 120px;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
   pointer-events: none;
 }
-.boxLavender { background: #f0e6fc; }
-.boxTeal { background: #d7f2ef; }
-.boxGold { background: #ffevc2; background-color: #fceec5; }
+.boxLavender {
+  background: #f0e6fc;
+}
+.boxTeal {
+  background: #d7f2ef;
+}
+.boxGold {
+  background: #ffevc2;
+  background-color: #fceec5;
+}
 
 .metricLabel {
   font-size: 0.85rem;
@@ -187,9 +209,10 @@
   gap: 8px;
 }
 .metricIconWrapper {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,7 +245,7 @@
   padding: 8px 0;
   transition: 0.2s;
   cursor: pointer;
-  border-bottom: 1px solid rgba(0,0,0,0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
 }
 .clickableRow:hover {
   transform: translateX(4px);
@@ -255,15 +278,24 @@
   border-radius: 6px;
   margin-left: 8px;
 }
-.trendUp { background: #dcfce7; color: #16a34a; }
-.trendDown { background: #fef2f2; color: #dc2626;  }
-.trendNeutral { background: #f3f4f6; color: #6b7280; }
+.trendUp {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.trendDown {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.trendNeutral {
+  background: #f3f4f6;
+  color: #6b7280;
+}
 
 .categoryTag {
   font-size: 0.65rem;
   color: var(--sanctuary-ink-l);
   font-weight: 800;
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px 8px;
   border-radius: 6px;
   margin-right: 8px;
@@ -304,14 +336,14 @@
   border-radius: 50%;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
 }
 .pieContainer::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 140px; /* Thicker ring -> larger inner hole */
   height: 140px;
@@ -414,11 +446,13 @@
   color: var(--sanctuary-primary);
 }
 
-
 /* Modal */
 .modalOverlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(23, 3, 55, 0.4);
   backdrop-filter: blur(4px);
   z-index: 1000;
@@ -479,9 +513,21 @@
   border-color: var(--sanctuary-primary);
   background: var(--sanctuary-gray-low);
 }
-.patName { font-weight: 800; font-size: 1.05rem; }
-.patSub { font-size: 0.85rem; color: var(--sanctuary-ink-l); font-weight: 600; margin-top: 4px; }
-.patDate { font-size: 0.8rem; font-weight: 700; color: var(--sanctuary-primary); }
+.patName {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.patSub {
+  font-size: 0.85rem;
+  color: var(--sanctuary-ink-l);
+  font-weight: 600;
+  margin-top: 4px;
+}
+.patDate {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--sanctuary-primary);
+}
 
 .showMoreBtn {
   width: 100%;
@@ -503,10 +549,13 @@
   border-color: var(--sanctuary-ink-l);
 }
 
-/* 🏰 Revenue Drawer Styles */
+/* Revenue Drawer Styles */
 .drawerOverlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(23, 3, 55, 0.4);
   backdrop-filter: blur(8px);
   z-index: 2000;
@@ -520,7 +569,7 @@
   width: 100%;
   max-width: 500px;
   height: 100%;
-  box-shadow: -10px 0 50px rgba(0,0,0,0.1);
+  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -528,8 +577,12 @@
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .drawerHeader {
@@ -614,8 +667,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .refreshBtn {
@@ -651,6 +708,10 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

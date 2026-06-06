@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import Script from 'next/script';
-import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from "react";
+import Script from "next/script";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 const generateNonce = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < 32; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -17,39 +18,41 @@ const generateNonce = () => {
 const sha256 = async (plain: string) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(plain);
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 };
 
 export default function GoogleOneTap() {
   const supabase = createClient();
   const router = useRouter();
-  const nonceRef = useRef<string>('');
+  const nonceRef = useRef<string>("");
 
   const handleCredentialResponse = async (response: any) => {
     try {
-      console.log('🌐 GoogleOneTap: Credential received from Google');
-      
+      console.log("GoogleOneTap: Credential received from Google");
+
       const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
+        provider: "google",
         token: response.credential,
         nonce: nonceRef.current || undefined,
       });
 
       if (error) {
-        console.error('❌ Supabase Auth Error Object:', error);
+        console.error("Supabase Auth Error Object:", error);
         throw error;
       }
 
       if (data?.user) {
-        console.log('✅ GoogleOneTap: Login successful for:', data.user.email);
-        router.replace('/portal');
+        console.log("GoogleOneTap: Login successful for:", data.user.email);
+        router.replace("/portal");
       }
     } catch (error: any) {
-      console.error('❌ GoogleOneTap Exception:', error);
+      console.error("GoogleOneTap Exception:", error);
       if (error.status === 500) {
-        console.error('💡 TIP: Check your Supabase Dashboard -> Authentication -> Providers -> Google. Ensure "Client Secret" is set and "Enabled" is ON.');
+        console.error(
+          'TIP: Check your Supabase Dashboard -> Authentication -> Providers -> Google. Ensure "Client Secret" is set and "Enabled" is ON.',
+        );
       }
     }
   };
@@ -79,7 +82,10 @@ export default function GoogleOneTap() {
       // (The parent component should ideally handle this check too)
       window.google.accounts.id.prompt((notification: any) => {
         if (notification.isNotDisplayed()) {
-          console.log('ℹ️ OneTap display issue:', notification.getNotDisplayedReason());
+          console.log(
+            "ℹ️ OneTap display issue:",
+            notification.getNotDisplayedReason(),
+          );
         }
       });
     };

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useClinic } from '@/context/ClinicContext';
-import { createClient } from '@/lib/supabase/client';
-import TopBar from '@/components/TopBar';
-import styles from './view.module.css';
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useClinic } from "@/context/ClinicContext";
+import { createClient } from "@/lib/supabase/client";
+import TopBar from "@/components/TopBar";
+import styles from "./view.module.css";
 
 interface ServiceItem {
   desc: string;
@@ -31,7 +31,15 @@ interface ReceiptData {
 
 export default function WrappedReceiptView() {
   return (
-    <Suspense fallback={<div style={{ padding: 100, textAlign: 'center', color: 'var(--ink-l)' }}>Loading preview...</div>}>
+    <Suspense
+      fallback={
+        <div
+          style={{ padding: 100, textAlign: "center", color: "var(--ink-l)" }}
+        >
+          Loading preview...
+        </div>
+      }
+    >
       <ReceiptView />
     </Suspense>
   );
@@ -40,9 +48,9 @@ export default function WrappedReceiptView() {
 function ReceiptView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
   const { clinic } = useClinic();
-  
+
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +58,7 @@ function ReceiptView() {
 
   useEffect(() => {
     if (!id) {
-      setError('Missing receipt ID.');
+      setError("Missing receipt ID.");
       setLoading(false);
       return;
     }
@@ -59,30 +67,33 @@ function ReceiptView() {
       try {
         const supabase = createClient();
         const { data, error: dbError } = await supabase
-          .from('receipts')
-          .select('*')
-          .eq('id', id)
-          .eq('clinic_id', clinic?.id ?? '')  // ← enforce clinic ownership
+          .from("receipts")
+          .select("*")
+          .eq("id", id)
+          .eq("clinic_id", clinic?.id ?? "") // ← enforce clinic ownership
           .single();
 
         if (dbError) throw dbError;
-        if (!data) throw new Error('Receipt not found.');
+        if (!data) throw new Error("Receipt not found.");
 
         setReceipt(data);
-        
+
         // Parse items_json
         let items: ServiceItem[] = [];
         if (data.items_json) {
           try {
-            items = typeof data.items_json === 'string' ? JSON.parse(data.items_json) : data.items_json;
+            items =
+              typeof data.items_json === "string"
+                ? JSON.parse(data.items_json)
+                : data.items_json;
           } catch (e) {
-            console.error('Failed to parse items_json', e);
+            console.error("Failed to parse items_json", e);
           }
         }
         setParsedItems(items);
       } catch (err: any) {
-        console.error('Error fetching receipt:', err);
-        setError(err.message || 'Failed to load receipt.');
+        console.error("Error fetching receipt:", err);
+        setError(err.message || "Failed to load receipt.");
       } finally {
         setLoading(false);
       }
@@ -112,10 +123,13 @@ function ReceiptView() {
       <div className={styles.page}>
         <TopBar title="View Receipt" backHref="/portal/record-search" />
         <div className={styles.errorArea}>
-          <div className={styles.errorIcon}>⚠️</div>
+          <div className={styles.errorIcon}>️</div>
           <h3>Failed to load receipt</h3>
-          <p>{error || 'An unexpected error occurred.'}</p>
-          <button className="btn-primary" onClick={() => router.push('/portal/record-search')}>
+          <p>{error || "An unexpected error occurred."}</p>
+          <button
+            className="btn-primary"
+            onClick={() => router.push("/portal/record-search")}
+          >
             Back to Search
           </button>
         </div>
@@ -123,22 +137,28 @@ function ReceiptView() {
     );
   }
 
-  const subtotal = parsedItems.reduce((sum, item) => sum + (item.qty * item.amt), 0);
+  const subtotal = parsedItems.reduce(
+    (sum, item) => sum + item.qty * item.amt,
+    0,
+  );
   const discount = subtotal - receipt.total_amount;
 
   return (
     <div className={styles.page}>
-      <TopBar title={`Receipt ${receipt.receipt_number}`} backHref="/portal/record-search" />
-      
+      <TopBar
+        title={`Receipt ${receipt.receipt_number}`}
+        backHref="/portal/record-search"
+      />
+
       <main className={styles.main}>
         <div className={styles.container}>
           <div className={styles.receiptCard} id="receipt-print-area">
             <div className={styles.rcptHeader}>
-              <h2>{clinic?.name || 'MediNest Clinic'}</h2>
-              <p>{clinic?.address || 'Location Details'}</p>
-              {clinic?.phone && <p>📞 {clinic.phone}</p>}
+              <h2>{clinic?.name || "MediNest Clinic"}</h2>
+              <p>{clinic?.address || "Location Details"}</p>
+              {clinic?.phone && <p>{clinic.phone}</p>}
             </div>
-            
+
             <div className={styles.rcptTitle}>CASH RECEIPT</div>
 
             <div className={styles.rcptInfo}>
@@ -146,16 +166,28 @@ function ReceiptView() {
                 <span>Patient:</span> <b>{receipt.patient_name}</b>
               </div>
               <div className={styles.rcptRow}>
-                <span>Age/Sex:</span> <b>{receipt.patient_age ? `${receipt.patient_age}Y` : '-'} / {receipt.patient_gender ? receipt.patient_gender[0] : '-'}</b>
+                <span>Age/Sex:</span>{" "}
+                <b>
+                  {receipt.patient_age ? `${receipt.patient_age}Y` : "-"} /{" "}
+                  {receipt.patient_gender ? receipt.patient_gender[0] : "-"}
+                </b>
               </div>
               <div className={styles.rcptRow}>
                 <span>Receipt No:</span> <b>{receipt.receipt_number}</b>
               </div>
               <div className={styles.rcptRow}>
-                <span>Date:</span> <b>{new Date(receipt.printed_at || receipt.created_at || '').toLocaleDateString('en-IN')}</b>
+                <span>Date:</span>{" "}
+                <b>
+                  {new Date(
+                    receipt.printed_at || receipt.created_at || "",
+                  ).toLocaleDateString("en-IN")}
+                </b>
               </div>
               {receipt.doctor_name && (
-                <div className={styles.rcptRow} style={{ gridColumn: 'span 2' }}>
+                <div
+                  className={styles.rcptRow}
+                  style={{ gridColumn: "span 2" }}
+                >
                   <span>Consultant:</span> <b>{receipt.doctor_name}</b>
                 </div>
               )}
@@ -164,19 +196,21 @@ function ReceiptView() {
             <table className={styles.rcptTable}>
               <thead>
                 <tr>
-                  <th style={{ width: 40, textAlign: 'center' }}>#</th>
+                  <th style={{ width: 40, textAlign: "center" }}>#</th>
                   <th>Description</th>
-                  <th style={{ width: 60, textAlign: 'center' }}>Qty</th>
-                  <th style={{ width: 100, textAlign: 'right' }}>Amount</th>
+                  <th style={{ width: 60, textAlign: "center" }}>Qty</th>
+                  <th style={{ width: 100, textAlign: "right" }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {parsedItems.map((item, idx) => (
                   <tr key={idx}>
-                    <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                    <td style={{ textAlign: "center" }}>{idx + 1}</td>
                     <td>{item.desc}</td>
-                    <td style={{ textAlign: 'center' }}>{item.qty}</td>
-                    <td style={{ textAlign: 'right' }}>₹{item.amt * item.qty}</td>
+                    <td style={{ textAlign: "center" }}>{item.qty}</td>
+                    <td style={{ textAlign: "right" }}>
+                      ₹{item.amt * item.qty}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -188,7 +222,10 @@ function ReceiptView() {
                 <span>₹{subtotal}</span>
               </div>
               {discount > 0 && (
-                <div className={styles.rcptTotRow} style={{ color: 'var(--danger)' }}>
+                <div
+                  className={styles.rcptTotRow}
+                  style={{ color: "var(--danger)" }}
+                >
                   <span>Discount:</span>
                   <span>-₹{discount}</span>
                 </div>
@@ -205,10 +242,17 @@ function ReceiptView() {
           </div>
 
           <div className={styles.actions}>
-            <button className="btn-primary" onClick={handlePrint} style={{ flex: 1 }}>
-              🖨️ Print Receipt
+            <button
+              className="btn-primary"
+              onClick={handlePrint}
+              style={{ flex: 1 }}
+            >
+              ️ Print Receipt
             </button>
-            <button className="btn-secondary" onClick={() => router.push('/portal/record-search')}>
+            <button
+              className="btn-secondary"
+              onClick={() => router.push("/portal/record-search")}
+            >
               Back to Records
             </button>
           </div>

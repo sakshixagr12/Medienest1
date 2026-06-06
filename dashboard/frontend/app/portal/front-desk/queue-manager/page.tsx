@@ -1,9 +1,11 @@
-'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function QueueManagerRedirect() {
   const router = useRouter();
-  useEffect(() => { router.replace('/portal/front-desk'); }, [router]);
+  useEffect(() => {
+    router.replace("/portal/front-desk");
+  }, [router]);
   return null;
 }

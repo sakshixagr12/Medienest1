@@ -1,68 +1,72 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { 
-  User, 
-  Briefcase, 
-  Calendar, 
-  Phone, 
-  Award, 
-  Stethoscope, 
-  Clock, 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  User,
+  Briefcase,
+  Calendar,
+  Phone,
+  Award,
+  Stethoscope,
+  Clock,
   BadgeCheck,
   Building,
-  Home
-} from 'lucide-react';
-import TopBar from '@/components/TopBar';
-import { useClinic } from '@/context/ClinicContext';
-import { createClient } from '@/lib/supabase/client';
-import { normalizeDoctorName } from '@/lib/utils';
-import styles from './page.module.css';
+  Home,
+} from "lucide-react";
+import TopBar from "@/components/TopBar";
+import { useClinic } from "@/context/ClinicContext";
+import { createClient } from "@/lib/supabase/client";
+import { normalizeDoctorName } from "@/lib/utils";
+import styles from "./page.module.css";
 
 export default function DoctorProfilePage() {
   const { doctors, clinic, refresh } = useClinic();
   const supabase = createClient();
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<'general' | 'professional' | 'clinic'>('general');
-  const [name, setName] = useState('');
-  const [qualification, setQualification] = useState('');
-  const [specialty, setSpecialty] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('');
-  const [regNumber, setRegNumber] = useState('');
-  const [experience, setExperience] = useState('');
-  const [timings, setTimings] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [clinicName, setClinicName] = useState('');
-  const [clinicAddress, setClinicAddress] = useState('');
+  const [activeTab, setActiveTab] = useState<
+    "general" | "professional" | "clinic"
+  >("general");
+  const [name, setName] = useState("");
+  const [qualification, setQualification] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [regNumber, setRegNumber] = useState("");
+  const [experience, setExperience] = useState("");
+  const [timings, setTimings] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [clinicName, setClinicName] = useState("");
+  const [clinicAddress, setClinicAddress] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (clinic) {
-      setClinicName(clinic.name || '');
-      setClinicAddress(clinic.address || '');
+      setClinicName(clinic.name || "");
+      setClinicAddress(clinic.address || "");
     }
-    const doctorIdParam = searchParams?.get('doctorId');
+    const doctorIdParam = searchParams?.get("doctorId");
     if (doctors && doctors.length > 0) {
-      const doc = doctorIdParam ? doctors.find(d => d.id === doctorIdParam) || doctors[0] : doctors[0];
-      setName(doc.name || '');
-      setQualification(doc.qualification || '');
-      setSpecialty(doc.specialty || '');
-      setPhone(doc.phone || doc.contact || '');
-      setEmail(doc.contact_email || '');
-      setDob(doc.dob || '');
-      setGender(doc.gender || '');
-      setRegNumber(doc.registration_number || '');
-      setExperience(doc.experience_years?.toString() || '');
-      setTimings(doc.timings || '');
-      setExpiry(doc.license_expiry_date || '');
-      setPhotoUrl(doc.profile_photo_url || '');
+      const doc = doctorIdParam
+        ? doctors.find((d) => d.id === doctorIdParam) || doctors[0]
+        : doctors[0];
+      setName(doc.name || "");
+      setQualification(doc.qualification || "");
+      setSpecialty(doc.specialty || "");
+      setPhone(doc.phone || doc.contact || "");
+      setEmail(doc.contact_email || "");
+      setDob(doc.dob || "");
+      setGender(doc.gender || "");
+      setRegNumber(doc.registration_number || "");
+      setExperience(doc.experience_years?.toString() || "");
+      setTimings(doc.timings || "");
+      setExpiry(doc.license_expiry_date || "");
+      setPhotoUrl(doc.profile_photo_url || "");
     }
   }, [doctors, clinic]);
 
@@ -70,81 +74,100 @@ export default function DoctorProfilePage() {
     if (!doctors || doctors.length === 0) return;
     setIsSaving(true);
     try {
-      const doctorIdParam = searchParams?.get('doctorId');
-      const activeDoc = doctorIdParam ? doctors.find(d => d.id === doctorIdParam) || doctors[0] : doctors[0];
-      
+      const doctorIdParam = searchParams?.get("doctorId");
+      const activeDoc = doctorIdParam
+        ? doctors.find((d) => d.id === doctorIdParam) || doctors[0]
+        : doctors[0];
+
       const normalizedName = normalizeDoctorName(name);
 
-      console.log('💾 Starting refined profile save for doctor:', activeDoc.doctor_id);
+      console.log(
+        "Starting refined profile save for doctor:",
+        activeDoc.doctor_id,
+      );
 
       // 1. Update Global Registry (doctors table) - verified columns
       const { error: globalErr } = await supabase
-        .from('doctors')
-        .update({ 
-          name: normalizedName, 
-          qualification, 
-          specialty, 
-          contact: phone || null, 
+        .from("doctors")
+        .update({
+          name: normalizedName,
+          qualification,
+          specialty,
+          contact: phone || null,
           registration_number: regNumber || null,
           experience_years: parseInt(experience) || 0,
           license_expiry_date: expiry || null,
-          profile_photo_url: photoUrl || null
+          profile_photo_url: photoUrl || null,
         })
-        .eq('id', activeDoc.doctor_id);
+        .eq("id", activeDoc.doctor_id);
 
       if (globalErr) {
-        console.error('❌ doctors table error:', JSON.stringify(globalErr, null, 2));
+        console.error(
+          "doctors table error:",
+          JSON.stringify(globalErr, null, 2),
+        );
         throw new Error(`Global profile update failed: ${globalErr.message}`);
       }
 
       // 2. Update Clinic Context (clinic_doctors table)
       // dob, gender, and email are removed as they are missing in the schema
       const { error: clinicErr } = await supabase
-        .from('clinic_doctors')
-        .update({ 
-          timings
+        .from("clinic_doctors")
+        .update({
+          timings,
         })
-        .eq('id', activeDoc.id);
+        .eq("id", activeDoc.id);
 
       if (clinicErr) {
         // Log but don't throw - allow general info to save even if timings fail
-        console.error('⚠️ clinic_doctors timings error:', JSON.stringify(clinicErr, null, 2));
+        console.error(
+          "️ clinic_doctors timings error:",
+          JSON.stringify(clinicErr, null, 2),
+        );
       }
 
       // 3. Update Clinic Profile
       if (clinic) {
         const { error: clinicUpdErr } = await supabase
-          .from('clinics')
-          .update({ 
+          .from("clinics")
+          .update({
             name: clinicName,
-            address: clinicAddress
+            address: clinicAddress,
           })
-          .eq('id', clinic.id);
+          .eq("id", clinic.id);
         if (clinicUpdErr) {
-          console.error('❌ clinics table error:', JSON.stringify(clinicUpdErr, null, 2));
+          console.error(
+            "clinics table error:",
+            JSON.stringify(clinicUpdErr, null, 2),
+          );
           throw new Error(`Clinic info update failed: ${clinicUpdErr.message}`);
         }
       }
 
-      console.log('✅ Profile blocks successfully synchronized');
+      console.log("Profile blocks successfully synchronized");
       refresh();
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e: any) {
-      console.error('🔥 Save cycle failed:', e);
-      alert('Error: ' + (e.message || 'Check browser console for details.'));
+      console.error("Save cycle failed:", e);
+      alert("Error: " + (e.message || "Check browser console for details."));
     } finally {
       setIsSaving(false);
     }
   };
 
   const initials = name
-    ? name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : 'DR';
+    ? name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "DR";
 
-  const doctorIdParam = searchParams?.get('doctorId');
-  const doctorNameParam = searchParams?.get('doctorName');
-  let dynamicBackHref = '/portal/doctor-dashboard';
+  const doctorIdParam = searchParams?.get("doctorId");
+  const doctorNameParam = searchParams?.get("doctorName");
+  let dynamicBackHref = "/portal/doctor-dashboard";
   if (doctorIdParam) {
     dynamicBackHref += `?doctorId=${doctorIdParam}`;
     if (doctorNameParam) {
@@ -161,37 +184,44 @@ export default function DoctorProfilePage() {
         <div className={styles.headerCard}>
           <div className={styles.avatarSection}>
             {photoUrl ? (
-              <img src={photoUrl} alt={name} className={styles.avatar} style={{ objectFit: 'cover' }} />
+              <img
+                src={photoUrl}
+                alt={name}
+                className={styles.avatar}
+                style={{ objectFit: "cover" }}
+              />
             ) : (
               <div className={styles.avatar}>{initials}</div>
             )}
             <div className={styles.headerText}>
               <div className={styles.nameRow}>
-                <h2 className={styles.doctorName}>{name || 'Your Name'}</h2>
+                <h2 className={styles.doctorName}>{name || "Your Name"}</h2>
                 <BadgeCheck size={20} className={styles.verifiedIcon} />
               </div>
-              <p className={styles.doctorRole}>{specialty || 'Specialty not set'}</p>
+              <p className={styles.doctorRole}>
+                {specialty || "Specialty not set"}
+              </p>
             </div>
           </div>
-          
+
           <div className={styles.tabNav}>
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'general' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('general')}
+            <button
+              className={`${styles.tabBtn} ${activeTab === "general" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("general")}
             >
               <User size={18} />
               <span>General Info</span>
             </button>
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'professional' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('professional')}
+            <button
+              className={`${styles.tabBtn} ${activeTab === "professional" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("professional")}
             >
               <Briefcase size={18} />
               <span>Professional Details</span>
             </button>
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'clinic' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('clinic')}
+            <button
+              className={`${styles.tabBtn} ${activeTab === "clinic" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("clinic")}
             >
               <Building size={18} />
               <span>Clinic Settings</span>
@@ -201,12 +231,14 @@ export default function DoctorProfilePage() {
 
         {/* Tab Content */}
         <div className={styles.contentArea}>
-          {activeTab === 'general' ? (
+          {activeTab === "general" ? (
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Basic Information</h3>
-              
+
               <div className={styles.field}>
-                <label><User size={14} /> Full Name (without Dr. prefix)</label>
+                <label>
+                  <User size={14} /> Full Name (without Dr. prefix)
+                </label>
                 <input
                   type="text"
                   value={name}
@@ -215,56 +247,66 @@ export default function DoctorProfilePage() {
                 />
               </div>
 
+              <div className={styles.field}>
+                <label>
+                  <Briefcase size={14} /> Contact Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. doctor@medinest.ai"
+                />
+              </div>
+
+              <div className={styles.twoCol}>
                 <div className={styles.field}>
-                  <label><Briefcase size={14} /> Contact Email</label>
+                  <label>
+                    <Calendar size={14} /> Date of Birth
+                  </label>
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. doctor@medinest.ai"
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
                   />
                 </div>
-
-                <div className={styles.twoCol}>
-                  <div className={styles.field}>
-                    <label><Calendar size={14} /> Date of Birth</label>
-                    <input
-                      type="date"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                    />
-                  </div>
-                  <div className={styles.field}>
-                    <label><User size={14} /> Gender</label>
-                    <select 
-                      value={gender} 
-                      onChange={(e) => setGender(e.target.value)}
-                      className={styles.select}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
                 <div className={styles.field}>
-                  <label><Phone size={14} /> Contact Phone</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. 9876543210"
-                  />
+                  <label>
+                    <User size={14} /> Gender
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className={styles.select}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>
+                  <Phone size={14} /> Contact Phone
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. 9876543210"
+                />
+              </div>
             </div>
-          ) : activeTab === 'professional' ? (
+          ) : activeTab === "professional" ? (
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Professional Details</h3>
 
               <div className={styles.field}>
-                <label><Award size={14} /> Qualification</label>
+                <label>
+                  <Award size={14} /> Qualification
+                </label>
                 <input
                   type="text"
                   value={qualification}
@@ -275,7 +317,9 @@ export default function DoctorProfilePage() {
 
               <div className={styles.twoCol}>
                 <div className={styles.field}>
-                  <label><Stethoscope size={14} /> Specialty</label>
+                  <label>
+                    <Stethoscope size={14} /> Specialty
+                  </label>
                   <input
                     type="text"
                     value={specialty}
@@ -284,7 +328,9 @@ export default function DoctorProfilePage() {
                   />
                 </div>
                 <div className={styles.field}>
-                  <label><BadgeCheck size={14} /> Medical Reg. Number</label>
+                  <label>
+                    <BadgeCheck size={14} /> Medical Reg. Number
+                  </label>
                   <input
                     type="text"
                     value={regNumber}
@@ -296,7 +342,9 @@ export default function DoctorProfilePage() {
 
               <div className={styles.twoCol}>
                 <div className={styles.field}>
-                  <label><Award size={14} /> Experience (Years)</label>
+                  <label>
+                    <Award size={14} /> Experience (Years)
+                  </label>
                   <input
                     type="number"
                     value={experience}
@@ -307,7 +355,9 @@ export default function DoctorProfilePage() {
               </div>
 
               <div className={styles.field}>
-                <label><Clock size={14} /> Consultation Timings</label>
+                <label>
+                  <Clock size={14} /> Consultation Timings
+                </label>
                 <input
                   type="text"
                   value={timings}
@@ -318,7 +368,9 @@ export default function DoctorProfilePage() {
 
               <div className={styles.twoCol}>
                 <div className={styles.field}>
-                  <label><Calendar size={14} /> License Expiry Date</label>
+                  <label>
+                    <Calendar size={14} /> License Expiry Date
+                  </label>
                   <input
                     type="date"
                     value={expiry}
@@ -326,7 +378,9 @@ export default function DoctorProfilePage() {
                   />
                 </div>
                 <div className={styles.field}>
-                  <label><User size={14} /> Profile Photo URL</label>
+                  <label>
+                    <User size={14} /> Profile Photo URL
+                  </label>
                   <input
                     type="text"
                     value={photoUrl}
@@ -339,10 +393,14 @@ export default function DoctorProfilePage() {
           ) : (
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Clinic Details</h3>
-              <p className={styles.cardSubtitle}>Update your hospital or clinic branding information.</p>
-              
+              <p className={styles.cardSubtitle}>
+                Update your hospital or clinic branding information.
+              </p>
+
               <div className={styles.field}>
-                <label><Building size={14} /> Hospital / Clinic Name</label>
+                <label>
+                  <Building size={14} /> Hospital / Clinic Name
+                </label>
                 <input
                   type="text"
                   value={clinicName}
@@ -352,7 +410,9 @@ export default function DoctorProfilePage() {
               </div>
 
               <div className={styles.field}>
-                <label><Home size={14} /> Clinic Address</label>
+                <label>
+                  <Home size={14} /> Clinic Address
+                </label>
                 <textarea
                   value={clinicAddress}
                   onChange={(e) => setClinicAddress(e.target.value)}
@@ -367,11 +427,15 @@ export default function DoctorProfilePage() {
 
         <div className={styles.footer}>
           <button
-            className={`${styles.saveBtn} ${saved ? styles.saveBtnSuccess : ''}`}
+            className={`${styles.saveBtn} ${saved ? styles.saveBtnSuccess : ""}`}
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Saving…' : saved ? '✓ Profile Saved' : 'Save Profile Changes'}
+            {isSaving
+              ? "Saving…"
+              : saved
+                ? "Profile Saved"
+                : "Save Profile Changes"}
           </button>
         </div>
       </main>

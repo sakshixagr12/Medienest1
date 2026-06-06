@@ -55,14 +55,14 @@
   border: 2px solid transparent;
   border-radius: 12px;
   font-size: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
 }
 
 .searchInput:focus {
   outline: none;
   border-color: var(--sanctuary-primary);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .patientGrid {
@@ -75,8 +75,8 @@
   background: white;
   border-radius: 20px;
   padding: 24px;
-  border: 1px solid rgba(0,0,0,0.04);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@
 
 .patientCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
   border-color: var(--sanctuary-primary-light, #eaddf9);
 }
 
@@ -128,7 +128,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom:auto;
+  margin-bottom: auto;
   padding-bottom: 20px;
 }
 
@@ -222,19 +222,25 @@
   border-radius: 24px;
   width: 100%;
   max-width: 450px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modalHeader {
   padding: 24px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;

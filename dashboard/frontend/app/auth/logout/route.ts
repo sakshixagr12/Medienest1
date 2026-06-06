@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { NextResponse } from "next/server";
+import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabase();
-  
+
   // Sign out from Supabase (clears session on server & sends clear cookie headers)
   await supabase.auth.signOut();
 
@@ -15,5 +15,5 @@ export async function POST(request: Request) {
 
 // Support GET for simple links if needed
 export async function GET(request: Request) {
-    return POST(request);
+  return POST(request);
 }

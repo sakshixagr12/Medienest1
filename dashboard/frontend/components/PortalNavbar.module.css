@@ -90,21 +90,21 @@
   .navbar {
     height: 64px;
   }
-  
+
   .brandName {
     font-size: 18px;
   }
-  
+
   .logoWrapper {
     width: 32px;
     height: 32px;
   }
-  
+
   .signOutBtn {
     padding: 8px 14px;
     font-size: 13px;
   }
-  
+
   .signOutBtn span {
     display: none;
   }

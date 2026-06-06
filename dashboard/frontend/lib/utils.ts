@@ -6,8 +6,8 @@
 export function getLocalTodayStr(): string {
   const d = new Date();
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -18,8 +18,8 @@ export function getLocalWeekStartStr(): string {
   const d = new Date();
   d.setDate(d.getDate() - d.getDay()); // Go back to Sunday
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -29,7 +29,7 @@ export function getLocalWeekStartStr(): string {
 export function getLocalMonthStartStr(): string {
   const d = new Date();
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
   return `${year}-${month}-01`;
 }
 
@@ -37,16 +37,17 @@ export function getLocalMonthStartStr(): string {
  * Strips "Dr." or "Dr " prefix from a name to keep database entries clean.
  */
 export function normalizeDoctorName(name: string): string {
-  if (!name) return '';
-  return name.replace(/^(Dr\.\s*|Dr\s+)/i, '').trim();
+  if (!name) return "";
+  return name.replace(/^(Dr\.\s*|Dr\s+)/i, "").trim();
 }
 
 /**
  * Safely adds "Dr. " prefix to a name only if it's missing.
  */
 export function displayDoctorName(name: string): string {
-  if (!name) return 'Consultant';
-  if (name.toLowerCase().startsWith('dr.')) return name;
-  if (name.toLowerCase().startsWith('dr ')) return `Dr. ${name.substring(3).trim()}`;
+  if (!name) return "Consultant";
+  if (name.toLowerCase().startsWith("dr.")) return name;
+  if (name.toLowerCase().startsWith("dr "))
+    return `Dr. ${name.substring(3).trim()}`;
   return `Dr. ${name.trim()}`;
 }

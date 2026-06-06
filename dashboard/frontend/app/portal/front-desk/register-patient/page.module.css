@@ -38,7 +38,7 @@
 
 /* Sparkle/Accent decoration */
 .card::before {
-  content: "✨";
+  content: "";
   position: absolute;
   top: 24px;
   right: 24px;
@@ -110,7 +110,9 @@
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   box-shadow: 0 10px 20px rgba(23, 3, 55, 0.15);
   display: flex;
   align-items: center;
@@ -152,8 +154,14 @@
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 640px) {

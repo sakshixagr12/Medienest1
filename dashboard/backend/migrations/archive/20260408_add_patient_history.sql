@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS patients (
 -- One‑row AI‑generated snapshot per patient
 CREATE TABLE IF NOT EXISTS patient_histories (
     patient_id   UUID PRIMARY KEY REFERENCES patients(id) ON DELETE CASCADE,
-    summary_text TEXT NOT NULL,               -- 🧾 snapshot string
+    summary_text TEXT NOT NULL,               -- snapshot string
     updated_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 

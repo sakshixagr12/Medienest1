@@ -14,7 +14,7 @@
 
 body {
   background: var(--bg-main);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 /* --- OVERALL LAYOUT --- */
@@ -64,7 +64,9 @@ body {
 
 .navCenterCentered {
   justify-content: center;
-  margin-right: calc(var(--sidebar-width) / 4); /* Offset for sidebar if needed, or just center in window */
+  margin-right: calc(
+    var(--sidebar-width) / 4
+  ); /* Offset for sidebar if needed, or just center in window */
 }
 
 .breadcrumb {
@@ -258,7 +260,7 @@ body {
   margin-bottom: 12px;
   overflow: hidden;
   border: 3px solid #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .drAvatar img {
@@ -395,7 +397,7 @@ body {
   background: white;
   padding: 32px;
   border-radius: 32px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
   margin-bottom: 8px;
 }
 
@@ -449,7 +451,7 @@ body {
   background: var(--white);
   border-radius: 32px;
   padding: 40px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .vitalHeader {
@@ -579,7 +581,7 @@ body {
   color: var(--text-soft);
   font-style: italic;
   padding: 24px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 20px;
   border-left: 4px solid var(--border-soft);
 }
@@ -595,13 +597,13 @@ body {
 }
 
 .intelCard::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -20px;
   right: -20px;
   width: 100px;
   height: 100px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 50%;
 }
 
@@ -615,7 +617,7 @@ body {
 }
 
 .intelContent {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   padding: 24px;
   border-radius: 20px;
@@ -623,7 +625,7 @@ body {
   line-height: 1.7;
   font-weight: 500;
   margin-bottom: 24px;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .intelMeta {
@@ -652,7 +654,7 @@ body {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .demoLabel {
@@ -673,7 +675,7 @@ body {
   background: var(--white);
   padding: 40px;
   border-radius: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .medsHeader {
@@ -713,7 +715,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .medInfo h4 {
@@ -758,7 +760,7 @@ body {
   max-width: 800px;
   min-height: 1000px;
   background: white;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
   padding: 60px;
   display: flex;
   flex-direction: column;
@@ -996,7 +998,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- AI SUMMARY (PATIENT RADIANCE) --- */
@@ -1008,8 +1012,14 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .aiHero {
@@ -1023,13 +1033,13 @@ body {
 }
 
 .aiHero::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   right: -10%;
   width: 300px;
   height: 300px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 50%;
 }
 
@@ -1055,7 +1065,7 @@ body {
 
 .langToggle {
   display: flex;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   padding: 4px;
   border-radius: 12px;
   width: fit-content;
@@ -1083,7 +1093,7 @@ body {
   background: white;
   border-radius: 32px;
   padding: 40px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(30, 11, 62, 0.05);
 }
 
@@ -1119,7 +1129,8 @@ body {
   gap: 32px;
 }
 
-.gridLeft, .gridRight {
+.gridLeft,
+.gridRight {
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -1142,11 +1153,14 @@ body {
   margin: 0;
 }
 
-.medsCard, .careCard, .expectCard, .warningCard {
+.medsCard,
+.careCard,
+.expectCard,
+.warningCard {
   background: white;
   border-radius: 32px;
   padding: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(30, 11, 62, 0.05);
 }
 
@@ -1207,7 +1221,9 @@ body {
   margin: 0;
 }
 
-.careContent p, .timelineContent p, .warningContent p {
+.careContent p,
+.timelineContent p,
+.warningContent p {
   font-size: 14px;
   line-height: 1.7;
   color: var(--text-main);
@@ -1237,7 +1253,7 @@ body {
   text-align: center;
   background: white;
   border-radius: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .aiLoadingPulse {
@@ -1253,7 +1269,7 @@ body {
 }
 
 .aiLoadingPulse::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1264,8 +1280,14 @@ body {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); opacity: 0.3; }
-  100% { transform: scale(2.5); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
 
 .aiBadge {
@@ -1307,7 +1329,7 @@ body {
 }
 
 .timeline::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 200px;
   top: 0;
@@ -1350,7 +1372,7 @@ body {
   padding: 32px;
   margin-left: 40px;
   border: 1px solid var(--border-soft);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: 0.2s;
 }
 
@@ -1437,12 +1459,13 @@ body {
   text-decoration: underline;
 }
 
-.historyLoading, .emptyHistory {
+.historyLoading,
+.emptyHistory {
   text-align: center;
   padding: 100px 40px;
   background: white;
   border-radius: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .emptyIconHistory {
@@ -1467,15 +1490,20 @@ body {
   @page {
     margin: 15mm;
   }
-  
-  .topNav, .sidebar, .headerActions, .navCenter, .navRight, .sidebarFooter {
+
+  .topNav,
+  .sidebar,
+  .headerActions,
+  .navCenter,
+  .navRight,
+  .sidebarFooter {
     display: none !important;
   }
-  
+
   .layoutWrapper {
     padding-top: 0 !important;
   }
-  
+
   .mainScroll {
     margin-left: 0 !important;
     padding: 0 !important;
@@ -1490,7 +1518,7 @@ body {
   /* Force the 'Current Script' view to be visible if that's what we usually print, 
      but here we'll just ensure whatever is visible looks good.
      Ideally, we want to print the paper prescription. */
-  
+
   .paperWrapper {
     padding: 0 !important;
     background: white !important;
@@ -1610,18 +1638,30 @@ body {
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(30, 11, 62, 0.4); }
-  70% { box-shadow: 0 0 0 20px rgba(30, 11, 62, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(30, 11, 62, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 11, 62, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(30, 11, 62, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 11, 62, 0);
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .closePopup {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
   width: 20px;
@@ -1729,13 +1769,23 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modalScale {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1769,7 +1819,11 @@ body {
   font-size: 48px !important;
   font-weight: 1000 !important;
   color: var(--text-main);
-  background: linear-gradient(135deg, var(--text-main) 30%, var(--primary-accent));
+  background: linear-gradient(
+    135deg,
+    var(--text-main) 30%,
+    var(--primary-accent)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -2.5px !important;

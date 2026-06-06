@@ -5,7 +5,7 @@
 .page {
   min-height: 100vh;
   background: #f0f4f8;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 /* --- Top Action Bar --- */
@@ -17,7 +17,7 @@
   align-items: center;
   gap: 16px;
   padding: 12px 40px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid #e2e8f0;
 }
@@ -50,9 +50,12 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-.btnBack:hover { background: #e2e8f0; }
+.btnBack:hover {
+  background: #e2e8f0;
+}
 
-.btnPrint, .btnCopy {
+.btnPrint,
+.btnCopy {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -69,14 +72,19 @@
   color: #fff;
   border: none;
 }
-.btnPrint:hover { background: #2d0466; box-shadow: 0 4px 12px rgba(23,3,55,0.2); }
+.btnPrint:hover {
+  background: #2d0466;
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.2);
+}
 
 .btnCopy {
   background: #f8fafc;
   color: #170337;
   border: 1.5px solid #e2e8f0;
 }
-.btnCopy:hover { background: #f1f5f9; }
+.btnCopy:hover {
+  background: #f1f5f9;
+}
 
 /* --- Document Wrapper --- */
 .document {
@@ -85,7 +93,7 @@
   background: #fff;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
   border: 1.5px solid #e8edf3;
 }
 
@@ -122,7 +130,9 @@
   opacity: 0.7;
 }
 
-.metaSep { opacity: 0.4; }
+.metaSep {
+  opacity: 0.4;
+}
 
 .docHeaderRight {
   text-align: right;
@@ -180,7 +190,9 @@
   padding: 32px 48px;
   border-right: 1px solid #f1f5f9;
 }
-.infoCard:last-child { border-right: none; }
+.infoCard:last-child {
+  border-right: none;
+}
 
 .infoCardTitle {
   display: flex;
@@ -194,7 +206,11 @@
   margin-bottom: 20px;
 }
 
-.infoRows { display: flex; flex-direction: column; gap: 12px; }
+.infoRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .infoRow {
   display: flex;
@@ -202,8 +218,14 @@
   align-items: center;
   font-size: 13px;
 }
-.infoRow span:first-child { color: #94a3b8; font-weight: 600; }
-.infoRow strong { color: #1e293b; font-weight: 700; }
+.infoRow span:first-child {
+  color: #94a3b8;
+  font-weight: 600;
+}
+.infoRow strong {
+  color: #1e293b;
+  font-weight: 700;
+}
 
 /* Vitals */
 .vitalsGrid {
@@ -300,7 +322,9 @@
   padding: 28px 48px;
   border-right: 1px solid #f1f5f9;
 }
-.diagnosisCard:last-child { border-right: none; }
+.diagnosisCard:last-child {
+  border-right: none;
+}
 
 .finalDxCard {
   background: #f5f3ff;
@@ -343,7 +367,9 @@
   padding: 28px 48px;
   border-right: 1px solid #f1f5f9;
 }
-.clinicalBlock:last-child { border-right: none; }
+.clinicalBlock:last-child {
+  border-right: none;
+}
 
 .clinicalBlockTitle {
   font-size: 11px;
@@ -372,7 +398,7 @@
   line-height: 1.5;
 }
 .bulletList li::before {
-  content: '•';
+  content: "•";
   position: absolute;
   left: 0;
   color: #170337;
@@ -380,7 +406,11 @@
 }
 
 /* Investigations */
-.investigationTable { border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+.investigationTable {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+}
 
 .investHeader {
   display: flex;
@@ -405,7 +435,9 @@
   font-weight: 500;
   color: #334155;
 }
-.investRow:last-child { border-bottom: none; }
+.investRow:last-child {
+  border-bottom: none;
+}
 
 .investStatus {
   font-size: 11px;
@@ -414,8 +446,14 @@
   border-radius: 999px;
 }
 
-.statusDone { background: #f0fdf4; color: #15803d; }
-.statusPending { background: #fffbeb; color: #b45309; }
+.statusDone {
+  background: #f0fdf4;
+  color: #15803d;
+}
+.statusPending {
+  background: #fffbeb;
+  color: #b45309;
+}
 
 /* Observations */
 .observationsText {
@@ -451,12 +489,30 @@
   color: #94a3b8;
   text-align: center;
 }
-.emptyState h2 { font-size: 22px; font-weight: 800; color: #334155; margin: 0; }
-.emptyState p { font-size: 14px; margin: 0; }
+.emptyState h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #334155;
+  margin: 0;
+}
+.emptyState p {
+  font-size: 14px;
+  margin: 0;
+}
 
 /* Print styles */
 @media print {
-  .topBar { display: none; }
-  .page { background: #fff; }
-  .document { box-shadow: none; border-radius: 0; border: none; max-width: 100%; margin: 0; }
+  .topBar {
+    display: none;
+  }
+  .page {
+    background: #fff;
+  }
+  .document {
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+    max-width: 100%;
+    margin: 0;
+  }
 }

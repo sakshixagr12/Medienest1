@@ -60,10 +60,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
 
 .statsGrid {
   display: grid;
@@ -139,7 +142,7 @@
 }
 
 .sectionTitle::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;

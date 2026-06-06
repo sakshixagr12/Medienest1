@@ -32,7 +32,11 @@
   width: 80px;
   height: 80px;
   border-radius: 24px;
-  background: linear-gradient(135deg, var(--sanctuary-lavender, #ebdcff) 0%, #d8c4fa 100%);
+  background: linear-gradient(
+    135deg,
+    var(--sanctuary-lavender, #ebdcff) 0%,
+    #d8c4fa 100%
+  );
   color: var(--sanctuary-primary, #170337);
   display: flex;
   align-items: center;
@@ -102,7 +106,7 @@
 }
 
 .tabActive::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -234,11 +238,29 @@
 }
 
 @media (max-width: 640px) {
-  .twoCol { grid-template-columns: 1fr; }
-  .avatarSection { padding: 24px; gap: 16px; }
-  .avatar { width: 64px; height: 64px; font-size: 22px; }
-  .doctorName { font-size: 20px; }
-  .tabNav { gap: 16px; padding: 0 24px; }
-  .tabBtn span { display: none; }
-  .card { padding: 24px; }
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+  .avatarSection {
+    padding: 24px;
+    gap: 16px;
+  }
+  .avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+  .doctorName {
+    font-size: 20px;
+  }
+  .tabNav {
+    gap: 16px;
+    padding: 0 24px;
+  }
+  .tabBtn span {
+    display: none;
+  }
+  .card {
+    padding: 24px;
+  }
 }

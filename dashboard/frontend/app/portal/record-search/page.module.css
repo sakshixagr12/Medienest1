@@ -38,7 +38,7 @@
 .searchInput:focus {
   border-color: var(--teal);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(10,124,110,0.1);
+  box-shadow: 0 0 0 3px rgba(10, 124, 110, 0.1);
 }
 
 .sectionTitle {
@@ -97,7 +97,7 @@
 
 .resultCard:hover {
   border-color: var(--teal-mid);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transform: translateY(-2px);
 }
 

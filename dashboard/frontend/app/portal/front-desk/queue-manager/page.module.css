@@ -35,7 +35,9 @@
   flex-wrap: wrap;
 }
 
-.statPill, .statPillGreen, .statPillBlue {
+.statPill,
+.statPillGreen,
+.statPillBlue {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -68,7 +70,8 @@
   align-items: start;
 }
 
-.queueCol, .formCol {
+.queueCol,
+.formCol {
   background: #fff;
   border-radius: 20px;
   padding: 28px;
@@ -112,7 +115,9 @@
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-.tokenCol { flex-shrink: 0; }
+.tokenCol {
+  flex-shrink: 0;
+}
 
 .tokenBadge {
   width: 36px;
@@ -126,10 +131,25 @@
   color: #fff;
 }
 
-.rowInfo { flex: 1; min-width: 120px; }
-.rowName { font-weight: 700; font-size: 14px; color: var(--sanctuary-primary); margin-bottom: 3px; }
-.rowMeta { font-size: 11px; color: var(--sanctuary-ink-l); }
-.rowNote { font-size: 11px; color: #92400e; margin-top: 4px; }
+.rowInfo {
+  flex: 1;
+  min-width: 120px;
+}
+.rowName {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--sanctuary-primary);
+  margin-bottom: 3px;
+}
+.rowMeta {
+  font-size: 11px;
+  color: var(--sanctuary-ink-l);
+}
+.rowNote {
+  font-size: 11px;
+  color: #92400e;
+  margin-top: 4px;
+}
 
 .rowActions {
   display: flex;
@@ -181,8 +201,13 @@
   cursor: pointer;
   transition: opacity 0.2s;
 }
-.btnDone:hover:not(:disabled) { opacity: 0.85; }
-.btnDone:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnDone:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.btnDone:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnSkip {
   padding: 5px 12px;
@@ -195,8 +220,13 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.btnSkip:hover:not(:disabled) { background: #fef3c7; }
-.btnSkip:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnSkip:hover:not(:disabled) {
+  background: #fef3c7;
+}
+.btnSkip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnRemove {
   padding: 5px 10px;
@@ -209,8 +239,13 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.btnRemove:hover:not(:disabled) { background: #fee2e2; }
-.btnRemove:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnRemove:hover:not(:disabled) {
+  background: #fee2e2;
+}
+.btnRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ── Done section ──────────────────────────────────── */
 .doneSection {
@@ -288,7 +323,11 @@
   color: var(--sanctuary-ink-l);
 }
 
-.optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
 
 /* Patient search */
 .searchWrapper {
@@ -345,8 +384,12 @@
   border-bottom: 1px solid rgba(23, 3, 55, 0.04);
 }
 
-.searchItem:last-child { border-bottom: none; }
-.searchItem:hover { background: var(--sanctuary-gray-low); }
+.searchItem:last-child {
+  border-bottom: none;
+}
+.searchItem:hover {
+  background: var(--sanctuary-gray-low);
+}
 
 .siAvatar {
   width: 32px;
@@ -362,9 +405,19 @@
   flex-shrink: 0;
 }
 
-.siInfo { flex: 1; min-width: 0; }
-.siName { font-weight: 700; font-size: 13px; color: var(--sanctuary-primary); }
-.siMeta { font-size: 11px; color: var(--sanctuary-ink-l); }
+.siInfo {
+  flex: 1;
+  min-width: 0;
+}
+.siName {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--sanctuary-primary);
+}
+.siMeta {
+  font-size: 11px;
+  color: var(--sanctuary-ink-l);
+}
 
 /* ── New Patient Row (pinned at top of dropdown) ── */
 .newPatientRow {
@@ -377,7 +430,9 @@
   border-bottom: 1.5px solid rgba(23, 3, 55, 0.07);
   transition: background 0.15s;
 }
-.newPatientRow:hover { background: #ede9fe; }
+.newPatientRow:hover {
+  background: #ede9fe;
+}
 .newPatientRow span:first-child {
   font-weight: 800;
   font-size: 13px;
@@ -431,7 +486,6 @@
   gap: 6px;
 }
 
-
 /* Selected patient display */
 .selectedPatient {
   display: flex;
@@ -457,9 +511,18 @@
   flex-shrink: 0;
 }
 
-.selInfo { flex: 1; }
-.selName { font-weight: 700; font-size: 14px; color: #065f46; }
-.selMeta { font-size: 11px; color: #6ee7b7; }
+.selInfo {
+  flex: 1;
+}
+.selName {
+  font-weight: 700;
+  font-size: 14px;
+  color: #065f46;
+}
+.selMeta {
+  font-size: 11px;
+  color: #6ee7b7;
+}
 
 .clearBtn {
   background: none;
@@ -625,7 +688,11 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ── Responsive ────────────────────────────────────── */
 @media (max-width: 1024px) {
@@ -635,8 +702,18 @@
 }
 
 @media (max-width: 640px) {
-  .pageTitle { font-size: 26px; }
-  .queueCol, .formCol { padding: 16px; }
-  .priorityButtons { flex-direction: column; }
-  .rowActions { width: 100%; justify-content: flex-start; }
+  .pageTitle {
+    font-size: 26px;
+  }
+  .queueCol,
+  .formCol {
+    padding: 16px;
+  }
+  .priorityButtons {
+    flex-direction: column;
+  }
+  .rowActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

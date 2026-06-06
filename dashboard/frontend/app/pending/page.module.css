@@ -1,32 +1,119 @@
 .bg {
   min-height: 100vh;
   background-color: #faf9f6;
-  display: flex; align-items: center; justify-content: center; padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 .card {
-  background: #fff; border-radius: 24px; max-width: 440px; width: 100%;
-  padding: 40px 36px; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,.3);
+  background: #fff;
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  padding: 40px 36px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
 }
-.icon { font-size: 64px; margin-bottom: 16px; animation: bob 3s ease-in-out infinite; }
-@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-.card h2 { font-size: 24px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-.sub { font-size: 14px; color: var(--ink-l); line-height: 1.7; margin-bottom: 24px; }
+.icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: bob 3s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.card h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.sub {
+  font-size: 14px;
+  color: var(--ink-l);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
 .badge {
-  display: inline-block; padding: 8px 20px;
-  background: #fefce8; color: #854d0e;
-  border: 1.5px solid #fde68a; border-radius: 30px;
-  font-size: 13px; font-weight: 700; margin-bottom: 28px;
+  display: inline-block;
+  padding: 8px 20px;
+  background: #fefce8;
+  color: #854d0e;
+  border: 1.5px solid #fde68a;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 28px;
 }
-.divider { border: none; border-top: 1px solid #f1f5f9; margin: 0 0 20px; }
-.clinicName { font-size: 18px; font-weight: 800; color: var(--teal); margin-bottom: 4px; }
-.clinicEmail { font-size: 13px; color: #94a3b8; }
-.actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
-.btn { padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: .2s; font-family: 'Inter', sans-serif; }
-.btnCheck { background: linear-gradient(135deg, var(--teal), var(--teal-mid)); color: #fff; }
-.btnCheck:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(10,124,110,.3); }
-.btnCheck:disabled { opacity: .7; cursor: not-allowed; transform: none; }
-.btnOut { background: #f1f5f9; color: var(--ink-l); }
-.btnOut:hover { background: #e2e8f0; }
-.statusMsg { font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px; }
-.statusApproved { background: #f0fdf4; color: var(--success); }
-.statusPending { background: #fef9c3; color: #92400e; }
+.divider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 0 0 20px;
+}
+.clinicName {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--teal);
+  margin-bottom: 4px;
+}
+.clinicEmail {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+.btn {
+  padding: 13px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+  font-family: "Inter", sans-serif;
+}
+.btnCheck {
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  color: #fff;
+}
+.btnCheck:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(10, 124, 110, 0.3);
+}
+.btnCheck:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.btnOut {
+  background: #f1f5f9;
+  color: var(--ink-l);
+}
+.btnOut:hover {
+  background: #e2e8f0;
+}
+.statusMsg {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+}
+.statusApproved {
+  background: #f0fdf4;
+  color: var(--success);
+}
+.statusPending {
+  background: #fef9c3;
+  color: #92400e;
+}

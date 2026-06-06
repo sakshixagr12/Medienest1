@@ -16,7 +16,8 @@
   gap: 24px;
 }
 
-.loaderArea, .errorArea {
+.loaderArea,
+.errorArea {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,7 +43,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .errorIcon {
@@ -69,8 +72,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  font-family: "DM Sans", sans-serif;
   color: #000;
   width: 100%;
   max-width: 480px;
@@ -178,7 +181,8 @@
   body * {
     visibility: hidden;
   }
-  #receipt-print-area, #receipt-print-area * {
+  #receipt-print-area,
+  #receipt-print-area * {
     visibility: visible;
   }
   #receipt-print-area {

@@ -1,6 +1,8 @@
 .page {
   min-height: 100vh;
-  background: var(--sanctuary-gray-low); /* Soft background for dashboard-view consistency */
+  background: var(
+    --sanctuary-gray-low
+  ); /* Soft background for dashboard-view consistency */
   color: var(--sanctuary-ink);
   padding-bottom: 60px;
 }
@@ -35,10 +37,16 @@
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(23, 3, 55, 0.15);
-  transition: .2s;
+  transition: 0.2s;
 }
-.btnSave:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(23, 3, 55, 0.25); }
-.btnSave:disabled { opacity: 0.7; cursor: not-allowed; }
+.btnSave:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(23, 3, 55, 0.25);
+}
+.btnSave:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 .btnPrint {
   background: transparent;
@@ -49,13 +57,19 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: .2s;
+  transition: 0.2s;
 }
-.btnPrint:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
-.btnPrint:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnPrint:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.btnPrint:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btnWhatsapp {
-  background: #25D366;
+  background: #25d366;
   color: #fff;
   border: none;
   padding: 8px 20px;
@@ -64,13 +78,19 @@
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
-  transition: .2s;
+  transition: 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.btnWhatsapp:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3); }
-.btnWhatsapp:disabled { opacity: 0.7; cursor: not-allowed; }
+.btnWhatsapp:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3);
+}
+.btnWhatsapp:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 .toast {
   position: fixed;
@@ -84,13 +104,19 @@
   font-size: 13px;
   font-weight: 600;
   z-index: 9999;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideUpFade {
-  0% { transform: translate(-50%, 20px); opacity: 0; }
-  100% { transform: translate(-50%, 0); opacity: 1; }
+  0% {
+    transform: translate(-50%, 20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 .btnBack {
   display: flex;
@@ -104,9 +130,12 @@
   font-weight: 700;
   cursor: pointer;
   font-size: 13px;
-  transition: .2s;
+  transition: 0.2s;
 }
-.btnBack:hover { background: #fff; transform: translateX(-4px); }
+.btnBack:hover {
+  background: #fff;
+  transform: translateX(-4px);
+}
 
 .btnPrint {
   background: var(--sanctuary-primary);
@@ -118,9 +147,12 @@
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(23, 3, 55, 0.15);
-  transition: .2s;
+  transition: 0.2s;
 }
-.btnPrint:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(23, 3, 55, 0.25); }
+.btnPrint:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(23, 3, 55, 0.25);
+}
 
 .viewport {
   max-width: 900px;
@@ -133,9 +165,9 @@
 .previewDoc {
   background: #fff;
   padding: 60px; /* Expansive A4-style margins */
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   min-height: 1100px; /* Roughly A4 height */
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #000;
   line-height: 1.6;
   border: 1px solid #eee;
@@ -153,8 +185,15 @@
   margin-bottom: 32px;
 }
 
-.previewHeader h2 { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
-.previewHeader p { font-size: 13px; color: #444; }
+.previewHeader h2 {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+.previewHeader p {
+  font-size: 13px;
+  color: #444;
+}
 
 .previewInfoGrid {
   display: grid;
@@ -225,17 +264,30 @@
 }
 
 @media print {
-  .header { display: none !important; }
-  .page { background: #fff !important; padding: 0 !important; min-height: auto !important; }
-  .viewport { margin: 0 !important; max-width: 100% !important; }
+  .header {
+    display: none !important;
+  }
+  .page {
+    background: #fff !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+  .viewport {
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
   .previewDoc {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
     min-height: auto !important;
   }
-  .printableTable thead { display: table-header-group; }
-  .printableTable tfoot { display: table-footer-group; }
+  .printableTable thead {
+    display: table-header-group;
+  }
+  .printableTable tfoot {
+    display: table-footer-group;
+  }
 }
 /* --- Success Modal Styles --- */
 .modalOverlay {
@@ -259,7 +311,9 @@
   max-width: 440px;
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0,0,0,0.1);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.2),
+    0 0 1px rgba(0, 0, 0, 0.1);
   text-align: center;
   animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -306,7 +360,7 @@
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
-  transition: .2s;
+  transition: 0.2s;
 }
 
 .btnGotIt:hover {
@@ -323,7 +377,7 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: .2s;
+  transition: 0.2s;
 }
 
 .btnViewHub:hover {
@@ -332,16 +386,32 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modalSlideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes iconBounce {
-  from { transform: scale(0.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

@@ -206,7 +206,8 @@
   flex-shrink: 0;
 }
 
-.nsInfo {}
+.nsInfo {
+}
 
 .nsName {
   font-weight: 800;
@@ -298,7 +299,10 @@
   background: #d1fae5;
 }
 
-.btnDone:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnDone:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ── Waiting Cards ────────────────────────────────────────── */
 .waitList {
@@ -343,14 +347,18 @@
   flex-shrink: 0;
 }
 
-.waitInfo {}
+.waitInfo {
+}
 .waitName {
   font-weight: 700;
   font-size: 14px;
   color: var(--sanctuary-primary);
   margin-bottom: 2px;
 }
-.waitMeta { font-size: 11px; color: var(--sanctuary-ink-l); }
+.waitMeta {
+  font-size: 11px;
+  color: var(--sanctuary-ink-l);
+}
 
 .waitActions {
   display: flex;
@@ -368,8 +376,13 @@
   color: var(--sanctuary-ink-l);
   transition: background 0.2s;
 }
-.btnSmallOutline:hover { background: var(--sanctuary-gray-low); }
-.btnSmallOutline:disabled { opacity: 0.4; cursor: not-allowed; }
+.btnSmallOutline:hover {
+  background: var(--sanctuary-gray-low);
+}
+.btnSmallOutline:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .btnSmallPrimary {
   padding: 6px 14px;
@@ -382,11 +395,18 @@
   color: #fff;
   transition: opacity 0.2s;
 }
-.btnSmallPrimary:hover:not(:disabled) { opacity: 0.85; }
-.btnSmallPrimary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btnSmallPrimary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.btnSmallPrimary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 /* Priority tag inline */
-.priorityTag { font-weight: 700; }
+.priorityTag {
+  font-weight: 700;
+}
 
 /* ── Remaining List ───────────────────────────────────────── */
 .remainingList {
@@ -404,8 +424,13 @@
   transition: background 0.15s;
 }
 
-.remainingRow:last-child { border-bottom: none; }
-.remainingRow:hover { background: #f8fafc; border-radius: 8px; }
+.remainingRow:last-child {
+  border-bottom: none;
+}
+.remainingRow:hover {
+  background: #f8fafc;
+  border-radius: 8px;
+}
 
 .remainingToken {
   font-size: 11px;
@@ -422,7 +447,10 @@
   color: var(--sanctuary-primary);
 }
 
-.remainingPriority { font-size: 11px; font-weight: 700; }
+.remainingPriority {
+  font-size: 11px;
+  font-weight: 700;
+}
 
 .remainingTime {
   font-size: 11px;
@@ -465,7 +493,10 @@
   border: 1px dashed rgba(23, 3, 55, 0.1);
 }
 
-.emptyIcon { font-size: 48px; margin-bottom: 16px; }
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
 
 .emptyQueue h3 {
   font-family: var(--font-headline);
@@ -484,7 +515,8 @@
   top: 24px;
 }
 
-.statsCard, .quickLinksCard {
+.statsCard,
+.quickLinksCard {
   background: #fff;
   border-radius: 18px;
   padding: 22px;
@@ -509,10 +541,18 @@
   border-bottom: 1px solid rgba(23, 3, 55, 0.04);
 }
 
-.statRow:last-child { border-bottom: none; }
-.statRowBorder { border-top: 1px solid rgba(23, 3, 55, 0.06); margin-top: 4px; }
+.statRow:last-child {
+  border-bottom: none;
+}
+.statRowBorder {
+  border-top: 1px solid rgba(23, 3, 55, 0.06);
+  margin-top: 4px;
+}
 
-.statRowLabel { font-size: 13px; color: var(--sanctuary-ink-l); }
+.statRowLabel {
+  font-size: 13px;
+  color: var(--sanctuary-ink-l);
+}
 .statRowVal {
   font-weight: 800;
   font-size: 15px;
@@ -561,7 +601,9 @@
   transition: all 0.2s;
 }
 
-.qlLink:last-child { margin-bottom: 0; }
+.qlLink:last-child {
+  margin-bottom: 0;
+}
 
 .qlLink:hover {
   background: var(--sanctuary-primary);
@@ -569,7 +611,9 @@
   border-color: transparent;
 }
 
-.qlLink svg { flex-shrink: 0; }
+.qlLink svg {
+  flex-shrink: 0;
+}
 
 /* ── Error / Loading ──────────────────────────────────────── */
 .errorBanner {
@@ -609,7 +653,11 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1024px) {
@@ -621,14 +669,32 @@
     flex-direction: row;
     flex-wrap: wrap;
   }
-  .statsCard, .quickLinksCard { flex: 1; min-width: 220px; }
+  .statsCard,
+  .quickLinksCard {
+    flex: 1;
+    min-width: 220px;
+  }
 }
 
 @media (max-width: 640px) {
-  .pageTitle { font-size: 26px; }
-  .pageHeader { flex-direction: column; }
-  .tierSection { padding: 16px; }
-  .nowServingCard { flex-direction: column; align-items: flex-start; }
-  .nsActions { width: 100%; justify-content: flex-start; }
-  .sideCol { flex-direction: column; }
+  .pageTitle {
+    font-size: 26px;
+  }
+  .pageHeader {
+    flex-direction: column;
+  }
+  .tierSection {
+    padding: 16px;
+  }
+  .nowServingCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nsActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .sideCol {
+    flex-direction: column;
+  }
 }

@@ -82,9 +82,9 @@
 
 .activeNavLink {
   background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   color: var(--sanctuary-primary);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* --- Main Content Styles --- */
@@ -159,7 +159,7 @@
 }
 
 .snapshotCard::before {
-  content: '✦ PATIENT SNAPSHOT';
+  content: "PATIENT SNAPSHOT";
   position: absolute;
   top: 24px;
   left: 24px;
@@ -197,7 +197,7 @@
 }
 
 .conditionList li::before {
-  content: '•';
+  content: "•";
   color: #f59e0b;
 }
 
@@ -243,13 +243,13 @@
   border-radius: 24px;
   padding: 32px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   transition: all 0.3s;
 }
 
 .timelineCard:hover {
   transform: translateX(8px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 
 .timelineHeader {
@@ -454,11 +454,19 @@
 }
 
 @media (max-width: 1200px) {
-  .snapshotCard { grid-template-columns: 1fr 1fr; }
-  .visitDetails { grid-template-columns: 1fr; }
+  .snapshotCard {
+    grid-template-columns: 1fr 1fr;
+  }
+  .visitDetails {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
-  .sidebar { display: none; }
-  .container { flex-direction: column; }
+  .sidebar {
+    display: none;
+  }
+  .container {
+    flex-direction: column;
+  }
 }

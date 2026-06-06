@@ -26,7 +26,7 @@
   top: 86px;
   background: #fff;
   border-radius: var(--radius);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 }
 
 .tabs {
@@ -98,7 +98,10 @@
   cursor: pointer;
   transition: 0.2s;
 }
-.btnEx:hover { transform: translateY(-2px); opacity: 0.9; }
+.btnEx:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
 
 /* ─── Rx Card Design (Strict 1-Page A4) ─── */
 .rxCard {
@@ -109,7 +112,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #1e293b;
   box-sizing: border-box;
 }
@@ -121,16 +124,54 @@
   padding: 30px 48px 20px;
 }
 
-.headerColumn { flex: 1; }
-.drName { font-size: 26px; font-weight: 900; color: #0d6e56; }
-.drQual { font-size: 13px; font-weight: 800; color: #475569; margin: 4px 0; }
-.drSmall { font-size: 10px; color: #64748b; line-height: 1.4; }
+.headerColumn {
+  flex: 1;
+}
+.drName {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0d6e56;
+}
+.drQual {
+  font-size: 13px;
+  font-weight: 800;
+  color: #475569;
+  margin: 4px 0;
+}
+.drSmall {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.4;
+}
 
-.headerLogo { width: 80px; display: flex; justify-content: center; }
-.logoCircle { width: 62px; height: 62px; border: 3px solid #0d6e56; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0d6e56; }
+.headerLogo {
+  width: 80px;
+  display: flex;
+  justify-content: center;
+}
+.logoCircle {
+  width: 62px;
+  height: 62px;
+  border: 3px solid #0d6e56;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d6e56;
+}
 
-.hospName { font-size: 22px; font-weight: 900; color: #0d6e56; }
-.hospSlogan { font-size: 13.5px; font-weight: 700; color: #1e293b; letter-spacing: 0.5px; opacity: 0.85; }
+.hospName {
+  font-size: 22px;
+  font-weight: 900;
+  color: #0d6e56;
+}
+.hospSlogan {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
+}
 
 /* Condensed Info Bar */
 .rxInfoBar {
@@ -144,7 +185,10 @@
   font-size: 12px;
   border-left: 5px solid #0d6e56;
 }
-.infoGroup b { color: #334155; margin-right: 6px; }
+.infoGroup b {
+  color: #334155;
+  margin-right: 6px;
+}
 
 /* Main Content */
 .rxMainBody {
@@ -166,7 +210,11 @@
   opacity: 0.04;
 }
 
-.bodySplit { display: flex; width: 100%; height: 100%; }
+.bodySplit {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
 
 .bodyLeftColumn {
   width: 240px;
@@ -182,12 +230,33 @@
   padding: 0 48px;
 }
 
-.rxBigLogo { font-size: 52px; font-weight: 900; color: #0d6e56; font-family: 'Georgia', serif; margin-bottom: 20px; }
+.rxBigLogo {
+  font-size: 52px;
+  font-weight: 900;
+  color: #0d6e56;
+  font-family: "Georgia", serif;
+  margin-bottom: 20px;
+}
 
-.previewMedItem { margin-bottom: 18px; }
-.pmHeadline { font-size: 18px; font-weight: 700; color: #0f172a; }
-.pmDetails { font-size: 13px; color: #475569; margin-top: 4px; }
-.pmNote { font-size: 11px; color: #0891b2; font-style: italic; margin-top: 2px; }
+.previewMedItem {
+  margin-bottom: 18px;
+}
+.pmHeadline {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.pmDetails {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 4px;
+}
+.pmNote {
+  font-size: 11px;
+  color: #0891b2;
+  font-style: italic;
+  margin-top: 2px;
+}
 
 /* ─── Aesthetic Footer & Revamped Sections ─── */
 .rxFooterSection {
@@ -247,17 +316,22 @@
   height: 40px;
 }
 
-.geoRight { 
-  position: absolute; right: 0; bottom: 0; 
-  width: 100%; height: 40px; 
-  background: #0d6e56; 
-  clip-path: polygon(5% 0, 100% 0, 100% 100%, 0 100%); 
+.geoRight {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  background: #0d6e56;
+  clip-path: polygon(5% 0, 100% 0, 100% 100%, 0 100%);
 }
 
 .bottomBar {
   position: absolute;
-  bottom: 0; left: 0;
-  width: 100%; height: 40px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
   background: transparent;
   display: flex;
   align-items: center;
@@ -269,33 +343,64 @@
   z-index: 2;
 }
 
-.footerLegal { opacity: 0.9; letter-spacing: 0.5px; }
+.footerLegal {
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+}
 
-.quickTags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 16px; }
-.tag { padding: 6px 14px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; transition: 0.2s; }
-.tag:hover { background: #0d6e56; color: #fff; }
+.quickTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+.tag {
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.tag:hover {
+  background: #0d6e56;
+  color: #fff;
+}
 
 @media screen {
   .rxCard {
     transform: scale(0.8); /* Scale down for better UI preview */
     transform-origin: top center;
-    margin-bottom: -150px; 
+    margin-bottom: -150px;
   }
 }
 
 @media print {
-  @page { size: A4; margin: 0; }
-  :global(body) { background: #fff; margin: 0; padding: 0; }
-  .grid { display: block; }
-  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  :global(body) {
+    background: #fff;
+    margin: 0;
+    padding: 0;
+  }
+  .grid {
+    display: block;
+  }
+
   /* FIX: Explicitly hide the navigation and form panel */
   .formPanel, 
   :global(.ssk-topbar), 
   :global(.TopBar),
   :global(.TopBar_container__2x7_T), /* Potential class name variation */
   :global([class*="TopBar"]),
-  :global(nav) { 
-    display: none !important; 
+  :global(nav) {
+    display: none !important;
     visibility: hidden !important;
     height: 0 !important;
     width: 0 !important;
@@ -303,20 +408,30 @@
     position: absolute !important;
     top: -9999px !important;
   }
-  
-  .previewPanel { width: 100%; box-shadow: none; position: static; background: none; padding: 0; margin: 0; }
-  .rxCard { 
-    width: 210mm; 
-    height: 297mm; 
-    transform: scale(1) !important; 
+
+  .previewPanel {
+    width: 100%;
+    box-shadow: none;
+    position: static;
+    background: none;
+    padding: 0;
+    margin: 0;
+  }
+  .rxCard {
+    width: 210mm;
+    height: 297mm;
+    transform: scale(1) !important;
     margin: 0 !important;
-    box-shadow: none; 
+    box-shadow: none;
     border: none;
     page-break-after: avoid;
     overflow: hidden;
   }
 }
-.notesBlock { margin-bottom: 24px; line-height: 1.6; }
+.notesBlock {
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
 
 /* ─── Medicine Suggestions Dropdown ─── */
 .suggestionsDropdown {
@@ -327,7 +442,7 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   max-height: 300px;
   overflow-y: auto;
@@ -474,7 +589,7 @@
   padding: 24px;
   margin-bottom: 24px;
   border: 1px solid #334155;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .auditHeader {
@@ -552,21 +667,26 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #cbd5e1;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 20px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 14px; width: 14px;
-  left: 3px; bottom: 3px;
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .switch input:checked + .slider {
@@ -582,15 +702,27 @@
 }
 
 @keyframes borderGlow {
-  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 
 .auditSection {

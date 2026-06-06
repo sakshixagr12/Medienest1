@@ -22,8 +22,12 @@
 }
 
 @media (max-width: 1024px) {
-  .contentArea { margin-left: 0; }
-  .canvas { padding: 24px 20px 40px; }
+  .contentArea {
+    margin-left: 0;
+  }
+  .canvas {
+    padding: 24px 20px 40px;
+  }
 }
 
 @media (max-width: 640px) {
