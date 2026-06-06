@@ -86,14 +86,17 @@ export function ClinicProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('👤 ClinicContext: User found, fetching clinic data...', currentUser.id);
-      const { data: clinicData, error: clinicError } = await supabase
+      const { data: clinics, error: clinicError } = await supabase
         .from('clinics')
         .select('*')
-        .eq('owner_user_id', currentUser.id)
-        .single();
+        .eq('owner_user_id', currentUser.id);
 
-      if (clinicError) {
-        if (clinicError.code !== 'PGRST116') {
+      const clinicData = clinics && clinics.length > 0
+        ? (clinics.find(c => c.status === 'active') || clinics.find(c => c.status === 'pending') || clinics[0])
+        : null;
+
+      if (clinicError || !clinicData) {
+        if (clinicError && clinicError.code !== 'PGRST116') {
           console.error('❌ ClinicContext: Clinic fetch error:', {
             code: clinicError.code,
             message: clinicError.message,

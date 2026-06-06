@@ -565,7 +565,8 @@ export default function PrescriptionPage() {
         date: date,
         weight: ptWeight,
         clinic_id: clinic?.id,
-        doctor_name: selectedDoctorObj?.name || 'Dr. Consultant'
+        doctor_name: selectedDoctorObj?.name || 'Dr. Consultant',
+        valid_till: followUp || null
       }]).select('id').single();
 
       if (error) throw error;

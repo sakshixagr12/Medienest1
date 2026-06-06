@@ -274,12 +274,14 @@ router.post('/receipts', async (req, res) => {
         // Mark the patient as 'done' in the queue for today
         // We match by phone or name if patient_id is not explicitly provided
         const today = new Date().toISOString().split('T')[0];
+        const safeName = (receiptData.patient_name || '').replace(/"/g, '\\"');
+        const safePhone = (receiptData.patient_phone || '').replace(/"/g, '\\"');
         await supabase
             .from('doctor_queue')
             .update({ status: 'done', completed_at: new Date().toISOString() })
             .eq('clinic_id', receiptData.clinic_id)
             .eq('queue_date', today)
-            .or(`patient_name.eq."${receiptData.patient_name}",notes.ilike."%${receiptData.patient_phone}%"`);
+            .or(`patient_name.eq."${safeName}",notes.ilike."%${safePhone}%"`);
 
         res.json({ success: true, data });
     } catch (err) {

@@ -15,7 +15,16 @@ export default function PendingPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      let user = session?.user || null;
+      if (!user) {
+        try {
+          const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+          user = verifiedUser;
+        } catch (e) {
+          console.warn('⚠️ Pending auth fetch error, using session cache:', e);
+        }
+      }
       if (!user) { router.replace('/auth'); return; }
       const { data: clinic } = await supabase.from('clinics').select('*').eq('owner_user_id', user.id).single();
       if (!clinic) { router.replace('/onboarding'); return; }
@@ -27,13 +36,24 @@ export default function PendingPage() {
 
   const checkStatus = async () => {
     setChecking(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: clinic } = await supabase.from('clinics').select('status').eq('owner_user_id', user!.id).single();
-    if (clinic?.status === 'active') {
-      setStatusMsg({ type: 'approved', text: '✅ Approved! Redirecting…' });
-      setTimeout(() => router.replace('/portal'), 1500);
-    } else {
-      setStatusMsg({ type: 'pending', text: '⏳ Still under review. Check back later.' });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      let user = session?.user || null;
+      if (!user) {
+        const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+        user = verifiedUser;
+      }
+      if (!user) { router.replace('/auth'); return; }
+      const { data: clinic } = await supabase.from('clinics').select('status').eq('owner_user_id', user.id).single();
+      if (clinic?.status === 'active') {
+        setStatusMsg({ type: 'approved', text: '✅ Approved! Redirecting…' });
+        setTimeout(() => { window.location.href = '/portal'; }, 1500);
+      } else {
+        setStatusMsg({ type: 'pending', text: '⏳ Still under review. Check back later.' });
+      }
+    } catch (e: any) {
+      console.error('Error checking status:', e);
+      setStatusMsg({ type: 'pending', text: '❌ Error: ' + (e.message || 'Verification failed') });
     }
     setChecking(false);
   };

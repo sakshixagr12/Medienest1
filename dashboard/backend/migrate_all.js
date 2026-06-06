@@ -9,7 +9,8 @@ const migrationFiles = [
   'v2_clean/6_clinical_records.sql',
   'v2_clean/11_security_hardening.sql',
   'v2_clean/7_link_discharge_to_patients.sql',
-  'v2_clean/29_rebuild_admission_records.sql'
+  'v2_clean/29_rebuild_admission_records.sql',
+  'v2_clean/30_schema_patch.sql'
 ];
 
 const run = async () => {

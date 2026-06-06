@@ -8,9 +8,15 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const { clinic, user, loading } = useClinic();
   const router = useRouter();
 
-  // This layout is now protected by middleware and server-side checks.
-  // We keep the useEffect empty or remove it if not needed for other things.
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/auth');
+    } else if (!loading && user && clinic && clinic.status === 'pending') {
+      router.replace('/pending');
+    } else if (!loading && user && !clinic) {
+      router.replace('/onboarding');
+    }
+  }, [loading, user, clinic]);
 
   if (loading) {
     return (

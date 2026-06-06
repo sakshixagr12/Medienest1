@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import TopBar from '@/components/TopBar';
 import { useClinic } from '@/context/ClinicContext';
 import { createClient } from '@/lib/supabase/client';
@@ -8,6 +9,7 @@ import styles from './page.module.css';
 
 interface BillRecord {
   id: string;
+  receipt_number: string;
   patient_name: string;
   phone: string;
   amount: number;
@@ -15,6 +17,7 @@ interface BillRecord {
 }
 
 export default function SearchPage() {
+  const router = useRouter();
   const { clinic } = useClinic();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<BillRecord[]>([]);
@@ -41,7 +44,8 @@ export default function SearchPage() {
 
       if (data) {
         setResults(data.map(r => ({
-          id: r.receipt_number,
+          id: r.id,
+          receipt_number: r.receipt_number,
           patient_name: r.patient_name,
           phone: r.patient_phone,
           amount: r.total_amount,
@@ -104,10 +108,16 @@ export default function SearchPage() {
                     </div>
                     <div className={styles.resAmount}>
                        ₹{record.amount}
-                       <div className={styles.resId}>{record.id}</div>
+                       <div className={styles.resId}>{record.receipt_number}</div>
                     </div>
                     <div className={styles.resActions}>
-                       <button className="btn-secondary" style={{ padding: '8px 12px', fontSize: 13 }}>View/Print</button>
+                       <button 
+                         className="btn-secondary" 
+                         style={{ padding: '8px 12px', fontSize: 13 }}
+                         onClick={() => router.push(`/portal/billing-receipts/view?id=${record.id}`)}
+                       >
+                         View/Print
+                       </button>
                     </div>
                  </div>
                ))}

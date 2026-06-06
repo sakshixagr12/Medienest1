@@ -37,13 +37,21 @@ export async function middleware(request: NextRequest) {
   // We only fetch this if they are hitting /auth or / or a protected route
   // to minimize DB load on every static asset request (handled by matcher though)
   
-  const { data: clinic } = await supabase
+  const { data: clinics } = await supabase
     .from('clinics')
     .select('status')
-    .eq('owner_user_id', user.id)
-    .single();
+    .eq('owner_user_id', user.id);
 
-  const clinicStatus = clinic?.status || null;
+  let clinicStatus: string | null = null;
+  if (clinics && clinics.length > 0) {
+    if (clinics.some(c => c.status === 'active')) {
+      clinicStatus = 'active';
+    } else if (clinics.some(c => c.status === 'pending')) {
+      clinicStatus = 'pending';
+    } else {
+      clinicStatus = clinics[0].status || null;
+    }
+  }
 
   // Case A: Trying to hit Login or Landing while already logged in
   if (isAuthRoute || isLandingRoute) {

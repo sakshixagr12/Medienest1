@@ -128,7 +128,16 @@ export default function OnboardingPage() {
     if (doctors.length === 0 && !confirm('You have not added any doctors. Continue without adding?')) return;
     setSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      let user = session?.user || null;
+      if (!user) {
+        try {
+          const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+          user = verifiedUser;
+        } catch (authErr) {
+          console.warn('⚠️ Onboarding auth fetch error, using session cache:', authErr);
+        }
+      }
       if (!user) { router.replace('/auth'); return; }
 
       const fullAddress = [address, city].filter(Boolean).join(', ');

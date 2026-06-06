@@ -363,7 +363,16 @@ export default function ViewPrescription({ params }: { params: Promise<{ id: str
       console.log('🔄 Fetching/Refreshing RX data...');
       
       // Fetch session for conditional UI
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      let authUser = session?.user || null;
+      if (!authUser) {
+        try {
+          const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+          authUser = verifiedUser;
+        } catch (e) {
+          // Silent catch for guest / public viewers
+        }
+      }
       setUser(authUser);
 
       const { data: rxData, error: rxError } = await supabase

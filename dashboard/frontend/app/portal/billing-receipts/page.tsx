@@ -30,6 +30,28 @@ export default function BillingPage() {
   const [paymentMode, setPaymentMode] = useState('Cash');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Autocomplete patient search state
+  const [ptSuggestions, setPtSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const fetchPatientSuggestions = async (search: string, searchType: 'phone' | 'name') => {
+    if (!clinic?.id || search.length < 2) {
+      setPtSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const supabase = createClient();
+    let queryBuilder = supabase.from('patients').select('*').eq('clinic_id', clinic.id);
+    if (searchType === 'phone') {
+      queryBuilder = queryBuilder.ilike('contact', `%${search}%`);
+    } else {
+      queryBuilder = queryBuilder.ilike('name', `%${search}%`);
+    }
+    const { data } = await queryBuilder.limit(5);
+    setPtSuggestions(data || []);
+    setShowSuggestions((data && data.length > 0) || false);
+  };
+
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), name: '', qty: 1, price: 0 }]);
   };
@@ -104,7 +126,7 @@ export default function BillingPage() {
           <div className={styles.formPanel}>
             <div className={styles.panelBlock}>
               <h3 className={styles.blockTitle}>Patient Details</h3>
-              <div className="field">
+              <div className="field" style={{ position: 'relative' }}>
                 <label>Phone Number (10-digits)</label>
                 <input 
                   type="tel" 
@@ -112,19 +134,47 @@ export default function BillingPage() {
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                     setPhone(val);
+                    fetchPatientSuggestions(val, 'phone');
                   }} 
                   placeholder="e.g. 9876543210" 
                   maxLength={10}
                 />
               </div>
-              <div className="field">
+              <div className="field" style={{ position: 'relative' }}>
                 <label>Patient Name</label>
                 <input 
                   type="text" 
                   value={name} 
-                  onChange={(e) => setName(e.target.value.toUpperCase())} 
+                  onChange={(e) => {
+                    const val = e.target.value.toUpperCase();
+                    setName(val);
+                    fetchPatientSuggestions(val, 'name');
+                  }} 
                   placeholder="e.g. RAHUL KUMAR" 
                 />
+                
+                {showSuggestions && ptSuggestions.length > 0 && (
+                  <div className={styles.suggestionsDropdown}>
+                    {ptSuggestions.map((pt) => (
+                      <div 
+                        key={pt.id} 
+                        className={styles.suggestionItem}
+                        onClick={() => {
+                          setName(pt.name || '');
+                          setPhone(pt.contact || '');
+                          setAge(pt.age?.toString() || '');
+                          setGender(pt.gender || 'Male');
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        <div className={styles.suggestionName}>{pt.name}</div>
+                        <div className={styles.suggestionMeta}>
+                          📞 {pt.contact} &middot; {pt.age ? `${pt.age}Y` : ''} &middot; {pt.gender}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className={styles.row2}>
                 <div className="field">
