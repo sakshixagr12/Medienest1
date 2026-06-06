@@ -150,15 +150,15 @@ export default function SettingsPage() {
         <div className={styles.box}>
           <div className={styles.row}>
             <span className={styles.rlabel}>Name</span>
-            <input type="text" value={clinicName} onChange={e => setClinicName(e.target.value)} />
+            <input type="text" value={clinicName} onChange={e => setClinicName(e.target.value)} maxLength={100} />
           </div>
           <div className={styles.row}>
             <span className={styles.rlabel}>Address</span>
-            <input type="text" value={address} onChange={e => setAddress(e.target.value)} />
+            <input type="text" value={address} onChange={e => setAddress(e.target.value)} maxLength={250} />
           </div>
           <div className={styles.row}>
             <span className={styles.rlabel}>Tagline</span>
-            <input type="text" value={tagline} onChange={e => setTagline(e.target.value)} />
+            <input type="text" value={tagline} onChange={e => setTagline(e.target.value)} maxLength={150} />
           </div>
         </div>
         <button className={styles.saveBtn} onClick={saveClinicProfile}>Save Hospital Details</button>

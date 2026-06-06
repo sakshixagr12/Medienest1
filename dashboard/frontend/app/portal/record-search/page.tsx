@@ -33,11 +33,15 @@ export default function SearchPage() {
     setHasSearched(true);
     
     try {
+      // Sanitize: strip characters that could break PostgREST .or() filter syntax
+      const safeQuery = query.replace(/[^a-zA-Z0-9\s\-\/]/g, '').trim();
+      if (!safeQuery) { setResults([]); setIsSearching(false); return; }
+
       const { data, error } = await supabase
         .from('receipts')
         .select('*')
         .eq('clinic_id', clinic.id)
-        .or(`patient_name.ilike.%${query}%,patient_phone.ilike.%${query}%,receipt_number.ilike.%${query}%`)
+        .or(`patient_name.ilike.%${safeQuery}%,patient_phone.ilike.%${safeQuery}%,receipt_number.ilike.%${safeQuery}%`)
         .order('printed_at', { ascending: false });
 
       if (error) throw error;

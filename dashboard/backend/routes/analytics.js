@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
+const { requireAuth, requireClinicAccess } = require('../middleware/authMiddleware');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseServiceRole);
+
+// ─── Validation Helpers ───────────────────────────────────────────────────
+const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+const isSafeDate = (str) => str && /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/.test(str);
+const sanitizeSearch = (str) => (str || '').replace(/[^a-zA-Z0-9\s\-\/]/g, '').slice(0, 100);
 
 const calcTrend = (curr, prev) => {
     if (prev === 0 && curr > 0) return 100;
@@ -223,16 +229,20 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
-router.get('/patients', async (req, res) => {
+// ─── Analytics: Patients by Diagnosis (Owned Clinics Only) ───
+router.get('/patients', requireAuth, requireClinicAccess, async (req, res) => {
    const { clinic_id, diagnosis, baseStart, baseEnd } = req.query;
    if (!clinic_id || !diagnosis) return res.status(400).json({ success: false, error: 'Missing params' });
+   if (!isUUID(clinic_id)) return res.status(400).json({ success: false, error: 'Invalid clinic_id format' });
+   if (baseStart && !isSafeDate(baseStart)) return res.status(400).json({ success: false, error: 'Invalid baseStart date' });
+   if (baseEnd && !isSafeDate(baseEnd)) return res.status(400).json({ success: false, error: 'Invalid baseEnd date' });
 
    try {
        const hasBase = baseStart && baseEnd;
        let query = supabase.from('prescriptions')
           .select('*, patients(*)')
           .eq('clinic_id', clinic_id)
-          .ilike('diagnosis', `%${diagnosis}%`);
+          .ilike('diagnosis', `%${sanitizeSearch(diagnosis)}%`);
        
        if (hasBase) query = query.gte('created_at', baseStart).lte('created_at', baseEnd);
 
@@ -254,13 +264,20 @@ router.get('/patients', async (req, res) => {
    }
 });
 
-// ─── Post New Receipt (RLS Bypass) ───
-router.post('/receipts', async (req, res) => {
+// ─── Post New Receipt (clinic-scoped, owner-verified) ───
+router.post('/receipts', requireAuth, requireClinicAccess, async (req, res) => {
     const { receiptData } = req.body;
     
     if (!receiptData || !receiptData.clinic_id) {
         return res.status(400).json({ success: false, error: 'Missing receipt data or clinic_id' });
     }
+    if (!isUUID(receiptData.clinic_id)) {
+        return res.status(400).json({ success: false, error: 'Invalid clinic_id format' });
+    }
+    // Enforce: receipt must be saved to the user's own clinic
+    // requireClinicAccess already verified req.body.clinic_id matches the user's clinic.
+    // We re-extract from the body to be explicit.
+    receiptData.clinic_id = req.body.clinic_id; // already validated by requireClinicAccess
 
     try {
         const { data, error } = await supabase
@@ -271,8 +288,6 @@ router.post('/receipts', async (req, res) => {
         if (error) throw error;
         
         // --- QUEUE SYNC ---
-        // Mark the patient as 'done' in the queue for today
-        // We match by phone or name if patient_id is not explicitly provided
         const today = new Date().toISOString().split('T')[0];
         const safeName = (receiptData.patient_name || '').replace(/"/g, '\\"');
         const safePhone = (receiptData.patient_phone || '').replace(/"/g, '\\"');

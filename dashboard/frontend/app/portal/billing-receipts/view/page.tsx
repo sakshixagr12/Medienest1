@@ -62,6 +62,7 @@ function ReceiptView() {
           .from('receipts')
           .select('*')
           .eq('id', id)
+          .eq('clinic_id', clinic?.id ?? '')  // ← enforce clinic ownership
           .single();
 
         if (dbError) throw dbError;

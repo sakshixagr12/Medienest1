@@ -30,13 +30,14 @@ export default function PortalPage() {
         // 1. Fetch Metrics (Total Clinic)
         const { count: pCount } = await supabase.from('prescriptions').select('*', { count: 'exact', head: true }).eq('date', today).eq('clinic_id', clinic.id);
         const { data: receipts } = await supabase.from('receipts').select('total_amount').gte('printed_at', today).eq('clinic_id', clinic.id);
+        const { count: followupCount } = await supabase.from('prescriptions').select('*', { count: 'exact', head: true }).eq('clinic_id', clinic.id).not('valid_till', 'is', null).gte('valid_till', today);
         
         const rev = receipts?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
         
         setMetrics({
           patients: pCount || 0,
           prescriptions: pCount || 0,
-          followups: Math.floor((pCount || 0) * 0.1),
+          followups: followupCount || 0,
           revenue: rev
         });
 

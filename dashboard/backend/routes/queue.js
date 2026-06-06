@@ -4,6 +4,9 @@ const express = require('express');
 const router  = express.Router();
 const { supabase } = require('../supabaseClient');
 
+// ── Validation Helpers ───────────────────────────────────────────────
+const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
 // ── Helper ────────────────────────────────────────────────────────────────
 const today = () => new Date().toISOString().split('T')[0];
 
@@ -125,6 +128,7 @@ router.post('/add', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 router.put('/:id/status', async (req, res) => {
   const { id } = req.params;
+  if (!isUUID(id)) return res.status(400).json({ success: false, error: 'Invalid queue entry ID' });
   const { status } = req.body;
 
   const validStatuses = ['waiting', 'serving', 'done', 'skipped'];
@@ -160,6 +164,7 @@ router.put('/:id/status', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 router.put('/:id/priority', async (req, res) => {
   const { id } = req.params;
+  if (!isUUID(id)) return res.status(400).json({ success: false, error: 'Invalid queue entry ID' });
   const { priority } = req.body;
 
   const validPriorities = ['normal', 'urgent', 'elderly'];
@@ -189,6 +194,7 @@ router.put('/:id/priority', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
+  if (!isUUID(id)) return res.status(400).json({ success: false, error: 'Invalid queue entry ID' });
   try {
     const { error } = await supabase
       .from('doctor_queue')

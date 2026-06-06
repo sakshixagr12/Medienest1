@@ -30,7 +30,6 @@ export default function GoogleOneTap() {
   const handleCredentialResponse = async (response: any) => {
     try {
       console.log('🌐 GoogleOneTap: Credential received from Google');
-      console.log('📦 Google Token Length:', response.credential?.length);
       
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',

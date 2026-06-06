@@ -68,7 +68,9 @@ export default function PrescriptionPage() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const skipSearchRef = useRef(false);
   const skipPtSearchRef = useRef(false);
-  const supabase = createClient();
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+  if (!supabaseRef.current) supabaseRef.current = createClient();
+  const supabase = supabaseRef.current;
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [pendingAiMeds, setPendingAiMeds] = useState<any[]>([]);
   const [aiValidationFlags, setAiValidationFlags] = useState<string[]>([]);

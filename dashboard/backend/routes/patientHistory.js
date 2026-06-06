@@ -113,7 +113,7 @@ router.get('/:patientId', async (req, res) => {
   try {
     const { data: patient, error: patErr } = await supabase
       .from('patients')
-      .select('*')
+      .select('id, name, age, gender, contact, blood_group, address, created_at')
       .eq('id', patientId)
       .single();
 
