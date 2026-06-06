@@ -94,7 +94,13 @@ export function ClinicProvider({ children }: { children: ReactNode }) {
 
       if (clinicError) {
         if (clinicError.code !== 'PGRST116') {
-          console.error('❌ ClinicContext: Clinic fetch error:', clinicError);
+          console.error('❌ ClinicContext: Clinic fetch error:', {
+            code: clinicError.code,
+            message: clinicError.message,
+            details: clinicError.details,
+            hint: clinicError.hint,
+            error: clinicError
+          });
         }
         setClinic(null);
       } else {
