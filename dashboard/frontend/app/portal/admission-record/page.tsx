@@ -346,12 +346,10 @@ export default function AdmissionRecordRedesign() {
           vitals_bp_dia: draft.vitals_bp_dia || '',
           vitals_pulse: draft.vitals_pulse || '',
           vitals_temp: draft.vitals_temp || '',
-          diagnosis: draft.diagnosis || '',
           final_diagnosis: draft.final_diagnosis || '',
           investigations: Array.isArray(draft.investigations) 
             ? draft.investigations.map((inv: any) => typeof inv === 'string' ? { name: inv, status: 'Pending' } : inv)
-            : [],
-          hpi: draft.hpi || ''
+            : []
         }));
       } catch (e) {
         console.error('Failed to parse draft', e);

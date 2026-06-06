@@ -70,7 +70,7 @@ export default function PrescriptionPage() {
   const skipPtSearchRef = useRef(false);
   const supabase = createClient();
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [pendingAiMeds, setPendingAiMeds] = useState<Medicine[]>([]);
+  const [pendingAiMeds, setPendingAiMeds] = useState<any[]>([]);
   const [aiValidationFlags, setAiValidationFlags] = useState<string[]>([]);
   const [aiDiagnosis, setAiDiagnosis] = useState('');
   const [aiDifferentials, setAiDifferentials] = useState<string[]>([]);
@@ -548,7 +548,7 @@ export default function PrescriptionPage() {
       // Insert prescription and return share_id
       const { data: pData, error } = await supabase.from('prescriptions').insert([{
         patient_id: patientId,
-        doctor_id: selectedDoctorObj.doctor_id || selectedDoctorObj.id,
+        doctor_id: selectedDoctorObj?.id || null,
         complaints: cc,
         findings: findings,
         diagnosis: diagnosis,

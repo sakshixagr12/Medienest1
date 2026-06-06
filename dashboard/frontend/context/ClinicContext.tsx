@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/client';
 
 interface Doctor {
   id: string;
+  doctor_id?: string;
   name: string;
   qualification?: string;
   specialty?: string;
   contact?: string;
   phone?: string;
   email?: string;
+  contact_email?: string;
   gender?: string;
   dob?: string;
   registration_number?: string;

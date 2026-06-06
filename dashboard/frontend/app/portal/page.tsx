@@ -52,7 +52,7 @@ export default function PortalPage() {
           const acts = recentRx.map(rx => ({
             id: rx.id,
             type: 'prescription',
-            text: `Prescription created for ${rx.patients?.name || 'Patient'}`,
+            text: `Prescription created for ${(Array.isArray(rx.patients) ? rx.patients[0]?.name : (rx.patients as any)?.name) || 'Patient'}`,
             time: new Date(rx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }));
           setActivities(acts);

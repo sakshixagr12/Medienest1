@@ -49,9 +49,10 @@ function FullResultPreview() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const recordId = searchParams.get('id');
+
     const fetchData = async () => {
       // 1. Identify Target (ID from URL vs. Local Draft)
-      const recordId = searchParams.get('id');
       
       if (recordId) {
         setIsFetching(true);
@@ -153,7 +154,6 @@ function FullResultPreview() {
     };
     
     if (clinic?.id || !recordId) { // Only fetch if clinic is ready OR we are in local craft mode
-       const recordId = searchParams.get('id');
        fetchData();
     }
   }, [supabase, searchParams, clinic?.id]);
@@ -327,7 +327,7 @@ function FullResultPreview() {
 
     setTimeout(() => {
       // Strip all non-numeric characters for the WhatsApp DeepLink
-      const cleanPhone = summary.phone ? summary.phone.replace(/\D/g, '') : '';
+      const cleanPhone = summary?.phone ? summary.phone.replace(/\D/g, '') : '';
       const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
     }, 150);

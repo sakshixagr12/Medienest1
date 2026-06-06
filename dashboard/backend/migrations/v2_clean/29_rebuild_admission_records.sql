@@ -7,7 +7,7 @@
 DROP TABLE IF EXISTS admission_records CASCADE;
 
 CREATE TABLE admission_records (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Relations
     clinic_id  UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
