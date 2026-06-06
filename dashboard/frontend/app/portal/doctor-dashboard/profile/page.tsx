@@ -255,7 +255,7 @@ export default function DoctorProfilePage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. doctor@medinest.ai"
+                  placeholder="e.g. doctor@jirova care.ai"
                 />
               </div>
 

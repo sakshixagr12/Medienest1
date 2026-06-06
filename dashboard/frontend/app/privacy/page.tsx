@@ -8,12 +8,12 @@ export default function PrivacyPolicy() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
           <Image
-            src="/assets/medinest_logo.png"
-            alt="MediNest"
+            src="/assets/jirova_care_logo.png"
+            alt="Jirova Care"
             width={32}
             height={32}
           />
-          <span>MediNest</span>
+          <span>Jirova Care</span>
         </Link>
         <Link href="/" className={styles.btnSolidNav}>
           Back to Home
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
         <div className={styles.content}>
           <h2>1. Introduction</h2>
           <p>
-            Welcome to MediNest ("we," "our," or "us"). We are committed to
+            Welcome to Jirova Care ("we," "our," or "us"). We are committed to
             protecting your privacy and ensuring that your personal and clinical
             data is handled securely and responsibly. This Privacy Policy
             explains how we collect, use, and protect information when you use
@@ -58,7 +58,7 @@ export default function PrivacyPolicy() {
           <p>We strictly use the collected data for the following purposes:</p>
           <ul>
             <li>
-              To provide and maintain the MediNest platform functionality.
+              To provide and maintain the Jirova Care platform functionality.
             </li>
             <li>
               To accurately generate and deliver AI-assisted clinical summaries
@@ -97,7 +97,7 @@ export default function PrivacyPolicy() {
             or your data, please contact our support concierge team at:
           </p>
           <p>
-            <strong>Email:</strong> support@medinest.com
+            <strong>Email:</strong> support@jirovacare.com
           </p>
         </div>
       </div>

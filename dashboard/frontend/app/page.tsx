@@ -40,12 +40,12 @@ export default function LandingPage() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
           <Image
-            src="/assets/medinest_logo.png"
-            alt="MediNest"
+            src="/assets/jirova_care_logo.png"
+            alt="Jirova Care"
             width={32}
             height={32}
           />
-          <span>MediNest</span>
+          <span>Jirova Care</span>
         </Link>
         <div className={styles.navLinks}>
           <a href="#features">Features</a>
@@ -219,7 +219,7 @@ export default function LandingPage() {
         className={`${styles.section} ${styles.greySection}`}
       >
         <div className={styles.sectionCenter}>
-          <span className={styles.sectionLabel}>Why MediNest?</span>
+          <span className={styles.sectionLabel}>Why Jirova Care?</span>
           <h2 className={styles.sectionTitle}>
             Built for the modern clinic hub.
           </h2>
@@ -375,7 +375,7 @@ export default function LandingPage() {
             <div className={styles.waAvatar}>M</div>
             <div>
               <p style={{ fontWeight: 800, margin: 0, fontSize: 16 }}>
-                MediNest Assistant
+                Jirova Care Assistant
               </p>
               <p style={{ margin: 0, fontSize: 12, color: "#10b981" }}>
                 Active Online
@@ -396,7 +396,7 @@ export default function LandingPage() {
         </div>
         <div style={{ padding: "0 20px" }}>
           <h2 className={styles.sectionTitle}>
-            Let MediNest
+            Let Jirova Care
             <br />
             do the work.
           </h2>
@@ -455,7 +455,7 @@ export default function LandingPage() {
 
       {/* ── VIDEO DEMO ── */}
       <section id="demo" className={styles.videoSection}>
-        <h2 className={styles.videoTitle}>See MediNest in action</h2>
+        <h2 className={styles.videoTitle}>See Jirova Care in action</h2>
         <div className={styles.videoWrapper}>
           <div className={styles.playBtn}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
@@ -597,7 +597,7 @@ export default function LandingPage() {
             },
             {
               q: "How does Auto WhatsApp sharing work?",
-              a: "After you finish a consultation, MediNest can automatically trigger a professional PDF prescription to the patient's WhatsApp number.",
+              a: "After you finish a consultation, Jirova Care can automatically trigger a professional PDF prescription to the patient's WhatsApp number.",
             },
           ].map((faq, i) => (
             <div key={i} className={styles.faqItem}>
@@ -618,12 +618,12 @@ export default function LandingPage() {
               style={{ marginBottom: 20 }}
             >
               <Image
-                src="/assets/medinest_logo.png"
-                alt="MediNest"
+                src="/assets/jirova_care_logo.png"
+                alt="Jirova Care"
                 width={32}
                 height={32}
               />
-              <span>MediNest</span>
+              <span>Jirova Care</span>
             </Link>
             <p
               style={{
@@ -665,7 +665,7 @@ export default function LandingPage() {
               fontSize: 13,
             }}
           >
-            © 2026 MediNest Intelligent Healthcare. All rights reserved.
+            © 2026 Jirova Care Intelligent Healthcare. All rights reserved.
           </div>
         </div>
       </footer>

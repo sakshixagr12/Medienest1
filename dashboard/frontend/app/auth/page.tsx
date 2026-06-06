@@ -75,14 +75,14 @@ function AuthPageContent() {
             <header className={styles.brandHeader}>
               <div className={styles.logoCircle}>
                 <Image
-                  src="/assets/medinest_logo.png"
-                  alt="MediNest Logo"
+                  src="/assets/jirova_care_logo.png"
+                  alt="Jirova Care Logo"
                   width={48}
                   height={48}
                   style={{ objectFit: "contain" }}
                 />
               </div>
-              <h1>MediNest</h1>
+              <h1>Jirova Care</h1>
               <p>Advanced Clinic Management Platform</p>
             </header>
 

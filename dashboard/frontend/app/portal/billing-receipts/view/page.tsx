@@ -154,7 +154,7 @@ function ReceiptView() {
         <div className={styles.container}>
           <div className={styles.receiptCard} id="receipt-print-area">
             <div className={styles.rcptHeader}>
-              <h2>{clinic?.name || "MediNest Clinic"}</h2>
+              <h2>{clinic?.name || "Jirova Care Clinic"}</h2>
               <p>{clinic?.address || "Location Details"}</p>
               {clinic?.phone && <p>{clinic.phone}</p>}
             </div>

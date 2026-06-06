@@ -364,7 +364,7 @@ function FullResultPreview() {
     const shareLink = `${window.location.origin}/view-summary/${activeId}`;
 
     const message =
-      `🏥 *${clinic?.name || "MediNest Clinic"}*\n` +
+      `🏥 *${clinic?.name || "Jirova Care Clinic"}*\n` +
       `━━━━━━━━━━━━━━━\n` +
       `Hello *${summary?.patientName || "Patient"}*,\n\n` +
       `Your Discharge Summary from *${docName}* is ready. You can view, download, or print your official clinical record securely here:\n` +
@@ -770,7 +770,7 @@ function FullResultPreview() {
                       <div
                         style={{ fontSize: 10, color: "#999", marginTop: 8 }}
                       >
-                        Generated via MediNest EMR Platform
+                        Generated via Jirova Care EMR Platform
                       </div>
                     </div>
                   </td>

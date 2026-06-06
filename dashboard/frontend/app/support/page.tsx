@@ -10,12 +10,12 @@ export default function ContactSupport() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
           <Image
-            src="/assets/medinest_logo.png"
-            alt="MediNest"
+            src="/assets/jirova_care_logo.png"
+            alt="Jirova Care"
             width={32}
             height={32}
           />
-          <span>MediNest</span>
+          <span>Jirova Care</span>
         </Link>
         <Link href="/" className={styles.btnSolidNav}>
           Back to Home
@@ -57,7 +57,7 @@ export default function ContactSupport() {
               within 2-4 hours during business days.
             </p>
             <a
-              href="mailto:support@medinest.com"
+              href="mailto:support@jirovacare.com"
               style={{
                 display: "inline-block",
                 background: "#1e1b4b",
@@ -68,7 +68,7 @@ export default function ContactSupport() {
                 fontWeight: "bold",
               }}
             >
-              Email support@medinest.com
+              Email support@jirovacare.com
             </a>
           </div>
 

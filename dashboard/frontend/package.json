@@ -11,9 +11,9 @@
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.102.1",
     "html2canvas": "^1.4.1",
+    "jirova-care-root": "file:../..",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.8.0",
-    "medinest-root": "file:../..",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"

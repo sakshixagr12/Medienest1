@@ -24,5 +24,5 @@ function scanDir(dir) {
     }
 }
 
-scanDir('c:/Users/ASUS/Desktop/MediNest/MediNestV1');
+scanDir('c:/Users/ASUS/Desktop/Jirova Care/Jirova CareV1');
 console.log('Done scanning and replacing.');

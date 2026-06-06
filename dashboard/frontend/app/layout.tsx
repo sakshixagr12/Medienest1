@@ -12,19 +12,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "MediNest — Clinic Management Platform",
+  title: "Jirova Care — Clinic Management Platform",
   description:
-    "MediNest: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
+    "Jirova Care: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
   openGraph: {
-    title: "MediNest — Digital Clinic Platform",
+    title: "Jirova Care — Digital Clinic Platform",
     description: "Modern healthcare management with AI patient summaries.",
     type: "website",
-    url: "https://medinestv1.vercel.app",
-    siteName: "MediNest",
+    url: "https://jirovacarev1.vercel.app",
+    siteName: "Jirova Care",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MediNest — AI Clinic Hub",
+    title: "Jirova Care — AI Clinic Hub",
     description: "Transforming healthcare with digital clinic solutions.",
   },
   icons: {

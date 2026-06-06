@@ -8,12 +8,12 @@ export default function TermsOfService() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
           <Image
-            src="/assets/medinest_logo.png"
-            alt="MediNest"
+            src="/assets/jirova_care_logo.png"
+            alt="Jirova Care"
             width={32}
             height={32}
           />
-          <span>MediNest</span>
+          <span>Jirova Care</span>
         </Link>
         <Link href="/" className={styles.btnSolidNav}>
           Back to Home
@@ -29,22 +29,22 @@ export default function TermsOfService() {
         <div className={styles.content}>
           <h2>1. Agreement to Terms</h2>
           <p>
-            By accessing or using the MediNest platform, you agree to be bound
+            By accessing or using the Jirova Care platform, you agree to be bound
             by these Terms of Service. If you disagree with any part of the
             terms, you do not have permission to access the Service.
           </p>
 
           <h2>2. License and Access</h2>
           <p>
-            Subject to your compliance with these Terms, MediNest grants you a
+            Subject to your compliance with these Terms, Jirova Care grants you a
             limited, non-exclusive, non-transferable, non-sublicensable license
             to access and make personal, professional, and commercial use of the
-            MediNest application for your medical clinic.
+            Jirova Care application for your medical clinic.
           </p>
 
           <h2>3. Clinical Disclaimer</h2>
           <p>
-            MediNest is an AI-assisted documentation and administrative tool
+            Jirova Care is an AI-assisted documentation and administrative tool
             built to aid healthcare practitioners. The AI-generated insights,
             summaries, and treatment paths are strictly supplementary and{" "}
             <strong>do not substitute professional medical judgment</strong>.

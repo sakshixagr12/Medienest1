@@ -21,7 +21,7 @@ export default function PortalPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const hospitalName = clinic?.name || "MediNest Partner Clinic";
+  const hospitalName = clinic?.name || "Jirova Care Partner Clinic";
   const hospitalLocation = clinic?.address || "Location not set";
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function PortalPage() {
         <header className={styles.identityHeader}>
           <div className={styles.logoBox}>
             <Image
-              src="/assets/medinest_logo.png"
+              src="/assets/jirova_care_logo.png"
               alt="Logo"
               width={48}
               height={48}
