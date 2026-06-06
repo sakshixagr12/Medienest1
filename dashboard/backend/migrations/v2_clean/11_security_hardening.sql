@@ -48,4 +48,4 @@ DROP POLICY IF EXISTS "Owner Isolation Policy" ON public.clinics;
 CREATE POLICY "Owner Isolation Policy" ON public.clinics
     FOR ALL
     TO authenticated
-    USING (owner_user_id = auth.uid() OR id IN (SELECT public.clinic_doctors.clinic_id FROM public.clinic_doctors WHERE doctor_id = auth.uid()));
+    USING (owner_user_id = auth.uid() OR id IN (SELECT public.get_my_clinic_ids()));

@@ -30,12 +30,13 @@ GRANT ALL ON TABLE clinic_doctors TO service_role;
 
 -- 3. Verify RLS for clinic_doctors
 -- Ensuring the owner can link their doctors during onboarding
+ALTER TABLE clinic_doctors ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Clinic owners can manage members" ON clinic_doctors;
 CREATE POLICY "Clinic owners can manage members" 
 ON clinic_doctors FOR ALL 
 TO authenticated 
 USING (
-    EXISTS (SELECT 1 FROM clinics WHERE id = clinic_doctors.clinic_id AND owner_user_id = auth.uid())
+    clinic_id IN (SELECT public.get_my_clinic_ids())
 );
 
 COMMENT ON POLICY "Users can insert their own clinic" ON clinics IS 'Enables the onboarding flow for new users.';
