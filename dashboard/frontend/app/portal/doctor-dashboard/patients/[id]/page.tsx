@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, use, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import styles from "./page.module.css";
@@ -40,13 +40,24 @@ interface Snapshot {
   recentVisitsSummary: string;
 }
 
-export default function PatientHub({
+function PatientHubContent({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id: patientId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const doctorId = searchParams?.get("doctorId");
+  const doctorNameParam = searchParams?.get("doctorName");
+
+  const getDoctorParams = () => {
+    const params = new URLSearchParams();
+    if (doctorId) params.set("doctorId", doctorId);
+    if (doctorNameParam) params.set("doctorName", doctorNameParam);
+    const qs = params.toString();
+    return qs ? `&${qs}` : "";
+  };
   const [patient, setPatient] = useState<Patient | null>(null);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [summaries, setSummaries] = useState<any[]>([]); // New state for Discharge Summaries
@@ -871,7 +882,7 @@ export default function PatientHub({
               <td>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <Link
-                    href={`/portal/discharge-summary/view?id=${s.id}`}
+                    href={`/portal/discharge-summary/view?id=${s.id}${getDoctorParams()}`}
                     className={styles.tableAction}
                   >
                     <svg
@@ -958,7 +969,7 @@ export default function PatientHub({
               <td>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <Link
-                    href={`/portal/admission-record/view?id=${a.id}`}
+                    href={`/portal/admission-record/view?id=${a.id}${getDoctorParams()}`}
                     className={styles.tableAction}
                   >
                     <svg
@@ -1105,11 +1116,14 @@ export default function PatientHub({
             <div className={styles.actionGroup}>
               <button
                 className={`${styles.actionBtn} ${styles.btnPrimary}`}
-                onClick={() =>
-                  router.push(
-                    `/portal/digital-prescription?patientId=${patientId}`,
-                  )
-                }
+                onClick={() => {
+                  const p = new URLSearchParams();
+                  if (patientId) p.set("patientId", patientId);
+                  if (doctorId) p.set("doctorId", doctorId);
+                  if (doctorNameParam) p.set("doctorName", doctorNameParam);
+                  const qs = p.toString();
+                  router.push(`/portal/digital-prescription${qs ? `?${qs}` : ""}`);
+                }}
               >
                 <svg
                   width="18"
@@ -1140,5 +1154,13 @@ export default function PatientHub({
         </main>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function PatientHub(props: any) {
+  return (
+    <Suspense fallback={<div className={styles.loading}>Initializing Clinical Hub...</div>}>
+      <PatientHubContent {...props} />
+    </Suspense>
   );
 }

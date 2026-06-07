@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -207,8 +207,9 @@ const BulletListEditor = ({
   );
 };
 
-export default function DischargeSummaryRedesign() {
+function DischargeSummaryRedesign() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { clinic, doctors, loading: clinicLoading } = useClinic();
   const supabase = createClient();
 
@@ -989,7 +990,16 @@ export default function DischargeSummaryRedesign() {
         className={styles.page}
         style={{ display: activeSection || isMedEditorOpen ? "none" : "block" }}
       >
-        <TopBar title="Discharge Summary" backHref="/portal/doctor-dashboard" />
+        <TopBar
+          title="Discharge Summary"
+          backHref={`/portal/doctor-dashboard${
+            searchParams.get("doctorId")
+              ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
+                  searchParams.get("doctorName") || ""
+                )}`
+              : ""
+          }`}
+        />
         <main className={styles.main}>
           <div className={styles.layout}>
             <section className={styles.leftColumn}>
@@ -1470,5 +1480,13 @@ export default function DischargeSummaryRedesign() {
         </main>
       </div>
     </>
+  );
+}
+
+export default function DischargeSummaryPage() {
+  return (
+    <Suspense fallback={<div>Loading Discharge Summary...</div>}>
+      <DischargeSummaryRedesign />
+    </Suspense>
   );
 }

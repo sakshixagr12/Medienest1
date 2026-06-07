@@ -73,6 +73,14 @@ export default function DoctorPage() {
     doctorDisplayName.split(" ")[1] ||
     doctorDisplayName;
 
+  const getDoctorUrl = (baseHref: string) => {
+    if (!doctorId) return baseHref;
+    const url = new URL(baseHref, "http://localhost");
+    url.searchParams.set("doctorId", doctorId);
+    url.searchParams.set("doctorName", activeDoctorName);
+    return `${url.pathname}${url.search}`;
+  };
+
   // ── Fetch live queue from doctor_queue ──────────────────────────────
   const fetchQueue = useCallback(async () => {
     if (!clinic?.id) return;
@@ -517,7 +525,7 @@ export default function DoctorPage() {
                       {/* View prescription */}
                       {p.patient_id && (
                         <a
-                          href={`/portal/doctor-dashboard/patients/${p.patient_id}`}
+                          href={getDoctorUrl(`/portal/doctor-dashboard/patients/${p.patient_id}`)}
                           style={{
                             fontSize: 12,
                             fontWeight: 700,
@@ -601,7 +609,7 @@ export default function DoctorPage() {
                     >
                       {/* Clickable patient info → prescription */}
                       <Link
-                        href={`/portal/digital-prescription?patientId=${nowServing.patient_id}&doctorName=${activeDoctorName}&ptName=${encodeURIComponent(nowServing.patients?.name || "")}&ptPhone=${nowServing.patients?.contact || ""}&ptAge=${nowServing.patients?.age || ""}&ptSex=${nowServing.patients?.gender || "Male"}&ptBloodGroup=${nowServing.patients?.blood_group || ""}`}
+                        href={`/portal/digital-prescription?patientId=${nowServing.patient_id}&doctorName=${activeDoctorName}&ptName=${encodeURIComponent(nowServing.patients?.name || "")}&ptPhone=${nowServing.patients?.contact || ""}&ptAge=${nowServing.patients?.age || ""}&ptSex=${nowServing.patients?.gender || "Male"}&ptBloodGroup=${nowServing.patients?.blood_group || ""}${doctorId ? `&doctorId=${doctorId}` : ""}`}
                         style={{
                           textDecoration: "none",
                           display: "flex",
@@ -651,7 +659,7 @@ export default function DoctorPage() {
                         }}
                       >
                         <Link
-                          href={`/portal/doctor-dashboard/patients/${nowServing.patient_id}`}
+                          href={getDoctorUrl(`/portal/doctor-dashboard/patients/${nowServing.patient_id}`)}
                           title="View full patient profile"
                           style={{
                             background: "var(--sanctuary-gray-low)",
@@ -763,7 +771,7 @@ export default function DoctorPage() {
                           </div>
                           <div style={{ display: "flex", gap: "8px" }}>
                             <Link
-                              href={`/portal/doctor-dashboard/patients/${p.patient_id}`}
+                              href={getDoctorUrl(`/portal/doctor-dashboard/patients/${p.patient_id}`)}
                               className={styles.waitingViewBtn}
                               title="View Profile"
                             >
@@ -780,7 +788,7 @@ export default function DoctorPage() {
                               </svg>
                             </Link>
                             <Link
-                              href={`/portal/digital-prescription?patientId=${p.patient_id}&doctorName=${activeDoctorName}&ptName=${encodeURIComponent(p.patients?.name || "")}&ptPhone=${p.patients?.contact || ""}&ptAge=${p.patients?.age || ""}&ptSex=${p.patients?.gender || "Male"}&ptBloodGroup=${p.patients?.blood_group || ""}`}
+                              href={`/portal/digital-prescription?patientId=${p.patient_id}&doctorName=${activeDoctorName}&ptName=${encodeURIComponent(p.patients?.name || "")}&ptPhone=${p.patients?.contact || ""}&ptAge=${p.patients?.age || ""}&ptSex=${p.patients?.gender || "Male"}&ptBloodGroup=${p.patients?.blood_group || ""}${doctorId ? `&doctorId=${doctorId}` : ""}`}
                               className={styles.waitingViewBtn}
                               style={{ color: "var(--sanctuary-primary)" }}
                               title="Write Prescription"

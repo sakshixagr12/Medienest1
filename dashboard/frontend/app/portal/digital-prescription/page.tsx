@@ -273,7 +273,8 @@ export default function PrescriptionPage() {
   const selectedDoctorObj =
     doctors.length === 1
       ? doctors[0]
-      : doctors.find((d) => d.name === searchParams.get("doctorName"));
+      : doctors.find((d) => d.id === searchParams.get("doctorId")) ||
+        doctors.find((d) => d.name === searchParams.get("doctorName"));
 
   const handleNewRecord = () => {
     if (window.confirm("Clear current draft and start a new record?")) {
@@ -804,7 +805,13 @@ export default function PrescriptionPage() {
     <div className={styles.page}>
       <TopBar
         title="Digital Prescription"
-        backHref="/portal/doctor-dashboard"
+        backHref={`/portal/doctor-dashboard${
+          searchParams.get("doctorId")
+            ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
+                searchParams.get("doctorName") || selectedDoctorObj?.name || ""
+              )}`
+            : ""
+        }`}
       />
 
       <main className={styles.main}>

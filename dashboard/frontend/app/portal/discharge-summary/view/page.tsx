@@ -502,9 +502,13 @@ function FullResultPreview() {
                 <button
                   className={styles.btnViewHub}
                   onClick={() => {
-                    // Handle patient ID safely
-                    const pid = summary.phone || summary.patientName; // Fallback for route if needed, but we usually have the UUID
-                    router.push(`/portal/doctor-dashboard`); // Redirect to dashboard or specific patient if we have UUID
+                    const params = new URLSearchParams();
+                    const dId = searchParams.get("doctorId");
+                    const dName = searchParams.get("doctorName");
+                    if (dId) params.set("doctorId", dId);
+                    if (dName) params.set("doctorName", dName);
+                    const qs = params.toString();
+                    router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`); // Redirect to dashboard or specific patient if we have UUID
                   }}
                 >
                   Go to Dashboard

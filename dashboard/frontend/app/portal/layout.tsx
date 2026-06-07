@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useClinic } from "@/context/ClinicContext";
 
@@ -53,5 +53,36 @@ export default function PortalLayout({
 
   if (!clinic || clinic.status !== "active") return null;
 
-  return <>{children}</>;
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--bg)",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              className="spinner"
+              style={{
+                border: "3px solid #e2e8f0",
+                borderTopColor: "var(--teal)",
+                width: 40,
+                height: 40,
+              }}
+            />
+            <p style={{ marginTop: 16, color: "var(--ink-l)", fontSize: 14 }}>
+              Loading portal view...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      {children}
+    </Suspense>
+  );
 }

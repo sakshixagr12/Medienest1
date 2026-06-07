@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   User,
@@ -20,7 +20,7 @@ import { createClient } from "@/lib/supabase/client";
 import { normalizeDoctorName } from "@/lib/utils";
 import styles from "./page.module.css";
 
-export default function DoctorProfilePage() {
+function DoctorProfilePage() {
   const { doctors, clinic, refresh } = useClinic();
   const supabase = createClient();
   const searchParams = useSearchParams();
@@ -440,5 +440,13 @@ export default function DoctorProfilePage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DoctorProfile() {
+  return (
+    <Suspense fallback={<div>Loading Doctor Profile...</div>}>
+      <DoctorProfilePage />
+    </Suspense>
   );
 }

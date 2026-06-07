@@ -45,10 +45,11 @@ export default function DashboardSidebar({
   const supabase = createClient();
 
   const isReceptionist = pathname
-    ? pathname.includes("/portal/front-desk") ||
-      pathname.includes("/portal/billing-receipts") ||
-      pathname.includes("/portal/day-summary") ||
-      pathname.includes("/portal/record-search")
+    ? (pathname.includes("/portal/front-desk") ||
+       pathname.includes("/portal/billing-receipts") ||
+       pathname.includes("/portal/day-summary") ||
+       pathname.includes("/portal/record-search")) &&
+      !searchParams?.get("doctorId")
     : false;
 
   const isDoctor = pathname
@@ -91,7 +92,7 @@ export default function DashboardSidebar({
           <line x1="23" y1="11" x2="17" y2="11"></line>
         </svg>
       ),
-      href: "/portal/front-desk/register-patient",
+      href: buildDoctorUrl("/portal/front-desk/register-patient"),
     },
     {
       label: "Live Queue",

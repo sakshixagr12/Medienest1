@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useClinic } from "@/context/ClinicContext";
@@ -77,7 +77,7 @@ function ConsultTimer({ startedAt }: { startedAt: string | null }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────
-export default function DoctorQueuePage() {
+function DoctorQueueContent() {
   const searchParams = useSearchParams();
   const doctorIdParam = searchParams?.get("doctorId");
   const { clinic, doctors } = useClinic();
@@ -92,6 +92,14 @@ export default function DoctorQueuePage() {
     doctors?.find((d) => d.id === activeDoctorId)?.name ??
     doctors?.[0]?.name ??
     "Doctor";
+
+  const getDoctorUrl = (baseHref: string) => {
+    if (!activeDoctorId) return baseHref;
+    const url = new URL(baseHref, "http://localhost");
+    url.searchParams.set("doctorId", activeDoctorId);
+    url.searchParams.set("doctorName", activeDoctorName);
+    return `${url.pathname}${url.search}`;
+  };
 
   // Stable Supabase client — never recreated between renders
   const supabaseRef = useRef(createClient());
@@ -285,13 +293,13 @@ export default function DoctorQueuePage() {
                     </div>
                     <div className={styles.nsActions}>
                       <Link
-                        href={`/portal/doctor-dashboard/patients/${serving.patient_id}`}
+                        href={getDoctorUrl(`/portal/doctor-dashboard/patients/${serving.patient_id}`)}
                         className={styles.btnOutline}
                       >
                         View Record
                       </Link>
                       <Link
-                        href={`/portal/digital-prescription?patientId=${serving.patient_id}&doctorName=${encodeURIComponent(activeDoctorName)}`}
+                        href={getDoctorUrl(`/portal/digital-prescription?patientId=${serving.patient_id}`)}
                         className={styles.btnPrimary}
                       >
                         ️ Prescribe
@@ -452,8 +460,8 @@ export default function DoctorQueuePage() {
                     No patients have been added to the queue today. The front
                     desk can add patients from the Queue Manager.
                   </p>
-                  <Link
-                    href="/portal/front-desk/queue-manager"
+                   <Link
+                    href={getDoctorUrl("/portal/front-desk/queue-manager")}
                     className={styles.btnPrimary}
                     style={{ marginTop: 16 }}
                   >
@@ -506,7 +514,7 @@ export default function DoctorQueuePage() {
               <div className={styles.quickLinksCard}>
                 <h4 className={styles.statsTitle}>Quick Actions</h4>
                 <Link
-                  href={`/portal/digital-prescription?doctorName=${encodeURIComponent(activeDoctorName)}`}
+                  href={getDoctorUrl("/portal/digital-prescription")}
                   className={styles.qlLink}
                 >
                   <svg
@@ -523,7 +531,7 @@ export default function DoctorQueuePage() {
                   New Prescription
                 </Link>
                 <Link
-                  href="/portal/doctor-dashboard/patients"
+                  href={getDoctorUrl("/portal/doctor-dashboard/patients")}
                   className={styles.qlLink}
                 >
                   <svg
@@ -542,7 +550,7 @@ export default function DoctorQueuePage() {
                   Patient Directory
                 </Link>
                 <Link
-                  href="/portal/front-desk/queue-manager"
+                  href={getDoctorUrl("/portal/front-desk/queue-manager")}
                   className={styles.qlLink}
                 >
                   <svg
@@ -568,5 +576,13 @@ export default function DoctorQueuePage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function DoctorQueuePage() {
+  return (
+    <Suspense fallback={<div className={styles.loading}>Loading Queue...</div>}>
+      <DoctorQueueContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
@@ -440,7 +440,7 @@ const BulletListEditor = ({
   );
 };
 
-export default function AdmissionRecordRedesign() {
+function AdmissionRecordRedesign() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const docNameParam = searchParams.get("docName");
@@ -927,10 +927,16 @@ export default function AdmissionRecordRedesign() {
       if (error) throw error;
       localStorage.removeItem("admission_draft");
       alert("Admission Record finalized and linked to patient!");
+      const params = new URLSearchParams();
+      const dId = searchParams.get("doctorId");
+      const dName = searchParams.get("doctorName") || searchParams.get("docName");
+      if (dId) params.set("doctorId", dId);
+      if (dName) params.set("doctorName", dName);
+      const qs = params.toString();
       if (patientId) {
-        router.push(`/portal/doctor-dashboard/patients/${patientId}`);
+        router.push(`/portal/doctor-dashboard/patients/${patientId}${qs ? `?${qs}` : ""}`);
       } else {
-        router.push("/portal/doctor-dashboard");
+        router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
       }
     } catch (e: any) {
       alert("Error saving: " + e.message);
@@ -1237,7 +1243,16 @@ export default function AdmissionRecordRedesign() {
         </div>
       )}
       <div className={styles.page}>
-        <TopBar title="Admission Record" backHref="/portal/doctor-dashboard" />
+        <TopBar
+          title="Admission Record"
+          backHref={`/portal/doctor-dashboard${
+            searchParams.get("doctorId")
+              ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
+                  searchParams.get("doctorName") || searchParams.get("docName") || ""
+                )}`
+              : ""
+          }`}
+        />
 
         {/* --- Sticky Patient Context Header --- */}
         {(summary.patientName ||
@@ -1384,7 +1399,13 @@ export default function AdmissionRecordRedesign() {
                       "admission_summary_preview",
                       JSON.stringify(summary),
                     );
-                    router.push("/portal/admission-record/summary");
+                    const params = new URLSearchParams();
+                    const dId = searchParams.get("doctorId");
+                    const dName = searchParams.get("doctorName") || searchParams.get("docName");
+                    if (dId) params.set("doctorId", dId);
+                    if (dName) params.set("doctorName", dName);
+                    const qs = params.toString();
+                    router.push(`/portal/admission-record/summary${qs ? `?${qs}` : ""}`);
                   }}
                   title="View formatted clinical summary"
                 >
@@ -2474,5 +2495,13 @@ export default function AdmissionRecordRedesign() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function AdmissionRecordPage() {
+  return (
+    <Suspense fallback={<div>Loading Admission Record...</div>}>
+      <AdmissionRecordRedesign />
+    </Suspense>
   );
 }

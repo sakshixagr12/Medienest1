@@ -28,6 +28,16 @@ interface Patient {
 function PatientHistoryContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const doctorId = searchParams?.get("doctorId");
+  const doctorNameParam = searchParams?.get("doctorName");
+
+  const getDoctorParams = () => {
+    const params = new URLSearchParams();
+    if (doctorId) params.set("doctorId", doctorId);
+    if (doctorNameParam) params.set("doctorName", doctorNameParam);
+    const qs = params.toString();
+    return qs ? `?${qs}` : "";
+  };
   const patientId = searchParams?.get("patientId");
   const { clinic } = useClinic();
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -121,7 +131,7 @@ function PatientHistoryContent() {
           <div className={styles.headerActions}>
             <button
               className={styles.registerBtn}
-              onClick={() => router.push("/portal/front-desk/register-patient")}
+              onClick={() => router.push(`/portal/front-desk/register-patient${getDoctorParams()}`)}
             >
               Register New Patient
             </button>
@@ -189,7 +199,7 @@ function PatientHistoryContent() {
                 <button
                   className={styles.viewBtn}
                   onClick={() =>
-                    router.push(`/portal/doctor-dashboard/patients/${p.id}`)
+                    router.push(`/portal/doctor-dashboard/patients/${p.id}${getDoctorParams()}`)
                   }
                 >
                   Patient Record

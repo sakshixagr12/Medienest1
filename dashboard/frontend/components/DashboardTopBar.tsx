@@ -173,7 +173,11 @@ export default function DashboardTopBar({
               results.map((patient) => (
                 <a
                   key={patient.id}
-                  href={`/portal/doctor/patients/${patient.id}`}
+                  href={`/portal/doctor-dashboard/patients/${patient.id}${
+                    currentDoctor
+                      ? `?doctorId=${currentDoctor.id}&doctorName=${encodeURIComponent(currentDoctor.name)}`
+                      : ""
+                  }`}
                   className={styles.resultItem}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setShowResults(false)}
@@ -329,7 +333,15 @@ export default function DashboardTopBar({
           <button
             className={styles.iconBtn}
             title="Prescriptions"
-            onClick={() => router.push("/portal/digital-prescription")}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (currentDoctor) {
+                params.set("doctorId", currentDoctor.id);
+                params.set("doctorName", currentDoctor.name);
+              }
+              const qs = params.toString();
+              router.push(`/portal/digital-prescription${qs ? `?${qs}` : ""}`);
+            }}
           >
             <svg
               width="20"
