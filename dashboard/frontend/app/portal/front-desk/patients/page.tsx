@@ -73,7 +73,7 @@ function PatientLobbyContent() {
     try {
       const { error: qErr } = await supabase.rpc("add_patient_to_queue", {
         p_clinic_id: clinic.id,
-        p_doctor_id: selectedDoctorId,
+        p_doctor_id: selectedDoctorId || null,
         p_patient_id: selectedPatient.id,
         p_patient_name: selectedPatient.name,
         p_priority: priority,

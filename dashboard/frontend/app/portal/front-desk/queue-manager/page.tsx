@@ -259,7 +259,7 @@ export default function QueueManagerPage() {
 
       const { error: qErr } = await supabase.rpc("add_patient_to_queue", {
         p_clinic_id: clinic.id,
-        p_doctor_id: checkInDoctorId,
+        p_doctor_id: checkInDoctorId || null,
         p_patient_id: patientId,
         p_patient_name: normalizedName,
         p_priority: checkInPriority,
