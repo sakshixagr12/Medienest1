@@ -290,6 +290,14 @@
   margin-bottom: 32px;
 }
 
+.toggleTextRow {
+  font-size: 13.5px;
+  color: #6B7280;
+  margin-bottom: 24px;
+  text-align: center;
+  z-index: 2;
+}
+
 .mobileLogoRow {
   display: none;
 }

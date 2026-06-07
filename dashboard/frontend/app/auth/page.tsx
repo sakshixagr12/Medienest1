@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -113,6 +113,8 @@ function LeavesBranch({ className }: { className?: string }) {
 
 function AuthPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "login";
   const supabase = createClient();
   const { user, loading: checkingAuth } = useClinic();
   const [authError, setAuthError] = useState("");
@@ -224,9 +226,13 @@ function AuthPageContent() {
                 <Hospital size={28} className={styles.hospitalIcon} />
               </div>
 
-              <h2 className={styles.cardHeading}>Welcome back, Doctor!</h2>
+              <h2 className={styles.cardHeading}>
+                {tab === "register" ? "Create your Account" : "Welcome back, Doctor!"}
+              </h2>
               <p className={styles.cardSubtext}>
-                Sign in or create a new account using your Google account.
+                {tab === "register"
+                  ? "Register a new account using your Google account."
+                  : "Sign in or create a new account using your Google account."}
               </p>
 
               {authError && <div className={styles.errorBox}>{authError}</div>}
@@ -254,7 +260,7 @@ function AuthPageContent() {
                       <path fill="#34A853" d="M24 38.5c-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48c6.47 0 11.93-2.13 15.89-5.81l-7.9-6.12C29.93 37.56 27.15 38.5 24 38.5z"/>
                       <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.98-6.19z"/>
                     </svg>
-                    Continue with Google
+                    {tab === "register" ? "Sign up with Google" : "Continue with Google"}
                   </>
                 )}
               </button>
@@ -271,6 +277,24 @@ function AuthPageContent() {
                     I agree to the <Link href="/terms" className={styles.blueLink}>Terms of Service</Link> and <Link href="/privacy" className={styles.blueLink}>Privacy Policy</Link>
                   </span>
                 </label>
+              </div>
+
+              <div className={styles.toggleTextRow}>
+                {tab === "register" ? (
+                  <span>
+                    Already have an account?{" "}
+                    <Link href="/auth?tab=login" className={styles.blueLink}>
+                      Sign in
+                    </Link>
+                  </span>
+                ) : (
+                  <span>
+                    New to Jirova Care?{" "}
+                    <Link href="/auth?tab=register" className={styles.blueLink}>
+                      Create an account
+                    </Link>
+                  </span>
+                )}
               </div>
 
               <footer className={styles.footerLinks}>
