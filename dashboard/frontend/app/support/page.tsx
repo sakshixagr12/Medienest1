@@ -25,7 +25,7 @@ export default function ContactSupport() {
             <p style={{ margin: "0 0 12px 0", fontSize: "14px", color: "#64748b" }}>
               Please drop us an email describing your issue or request.
             </p>
-            <a href="mailto:support@jirovacare.com" style={{ fontWeight: "bold", color: "#3b82f6" }}>support@jirovacare.com</a>
+            <a href="mailto:utkarsh.shukla.ind@gmail.com" style={{ fontWeight: "bold", color: "#3b82f6" }}>utkarsh.shukla.ind@gmail.com</a>
           </div>
 
           <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "24px", borderRadius: "12px", marginBottom: "24px" }}>

@@ -40,7 +40,7 @@ export default function PublicFooter() {
           <div className="footer-links-column">
             <h4>Connect &amp; Support</h4>
             <Link href="/support">Support Center</Link>
-            <a href="mailto:support@jirovacare.com">support@jirovacare.com</a>
+            <a href="mailto:utkarsh.shukla.ind@gmail.com">utkarsh.shukla.ind@gmail.com</a>
           </div>
         </div>
 

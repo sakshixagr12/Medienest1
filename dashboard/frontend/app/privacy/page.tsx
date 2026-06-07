@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
             For any queries or requests concerning your data privacy, please contact us at:
           </p>
           <p>
-            <strong>Email:</strong> support@jirovacare.com
+            <strong>Email:</strong> utkarsh.shukla.ind@gmail.com
           </p>
         </div>
       </div>

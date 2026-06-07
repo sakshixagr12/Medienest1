@@ -32,7 +32,7 @@ export default function AboutUs() {
           <ul>
             <li><strong>Company Name:</strong> Jirova Care Technologies</li>
             <li><strong>Country:</strong> India</li>
-            <li><strong>Contact Email:</strong> support@jirovacare.com</li>
+            <li><strong>Contact Email:</strong> utkarsh.shukla.ind@gmail.com</li>
           </ul>
         </div>
       </div>
