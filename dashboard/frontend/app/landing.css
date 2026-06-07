@@ -981,17 +981,50 @@
 }
 
 .final-cta-v5 {
-  padding: 8rem 0;
+  padding: 5rem 0;
   background: radial-gradient(circle at 50% 50%, rgba(13, 148, 136, 0.04) 0%, transparent 60%);
 }
 
-.final-cta-v5 h2 {
-  font-size: 4rem;
+.final-cta-box {
+  background: #ffffff;
+  border: 1.5px solid rgba(15, 23, 42, 0.07);
+  border-radius: 28px;
+  padding: 4.5rem 3rem;
+  max-width: 950px;
+  margin: 0 auto;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.final-cta-box::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.final-cta-box h2 {
+  font-size: 3.5rem;
   font-weight: 900;
   letter-spacing: -0.04em;
-  line-height: 1;
-  margin-bottom: 2rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
   color: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .final-cta-box {
+    padding: 3rem 1.5rem;
+    border-radius: 20px;
+  }
+  .final-cta-box h2 {
+    font-size: 2.25rem;
+  }
 }
 
 @keyframes pulse {

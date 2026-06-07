@@ -904,9 +904,11 @@ export default function LandingPage() {
       {/* ── FINAL CTA ── */}
       <section className="final-cta-v5">
         <div className="container center">
-          <h2>Ready to upgrade your <br/><span className="wa-green-text">Clinical Workflows?</span></h2>
-          <p style={{ margin: '1rem 0 2rem 0', opacity: 0.8, color: '#475569' }}>Setup takes less than 5 minutes. Start your 14-day free trial now.</p>
-          <Link href="/auth?tab=register" className="btn-premium pulse-premium shadow-wa" style={{ padding: "1.25rem 3rem", fontSize: "1.25rem" }}>Get Started Now</Link>
+          <div className="final-cta-box">
+            <h2>Ready to upgrade your <br/><span className="wa-green-text">Clinical Workflows?</span></h2>
+            <p style={{ margin: '1rem 0 2rem 0', opacity: 0.8, color: '#475569' }}>Setup takes less than 5 minutes. Start your 14-day free trial now.</p>
+            <Link href="/auth?tab=register" className="btn-premium pulse-premium shadow-wa" style={{ padding: "1.25rem 3rem", fontSize: "1.25rem" }}>Get Started Now</Link>
+          </div>
         </div>
       </section>
 
