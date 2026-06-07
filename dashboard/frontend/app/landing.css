@@ -555,6 +555,26 @@
   color: #0f172a;
 }
 
+@media (min-width: 768px) {
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .section-title::before,
+  .section-title::after {
+    content: '';
+    flex: 1;
+    border-bottom: 0.15px solid #000000;
+  }
+  .section-title::before {
+    margin-right: 2rem;
+  }
+  .section-title::after {
+    margin-left: 2rem;
+  }
+}
+
 .section-subtitle {
   color: #64748b;
   font-size: 1.2rem;
