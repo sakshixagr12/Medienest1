@@ -14,6 +14,7 @@ function AuthPageContent() {
   const { user, loading: checkingAuth } = useClinic();
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [agreeChecked, setAgreeChecked] = useState(false);
 
   // ── GOOGLE LOGIN ──
   const handleGoogleLogin = async () => {
@@ -96,11 +97,25 @@ function AuthPageContent() {
 
             {authError && <div className={styles.errorBox}>{authError}</div>}
 
+            <div className={styles.consentTermsCheckbox}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={agreeChecked}
+                  onChange={(e) => setAgreeChecked(e.target.checked)}
+                  className={styles.checkboxInput}
+                />
+                <span className={styles.checkboxText}>
+                  I agree to the <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Policy</Link>
+                </span>
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={handleGoogleLogin}
               className={styles.googleBtn}
-              disabled={authLoading}
+              disabled={authLoading || !agreeChecked}
             >
               {authLoading ? (
                 <span
@@ -135,12 +150,6 @@ function AuthPageContent() {
                 </>
               )}
             </button>
-
-            <div className={styles.consentTerms}>
-              By continuing, you agree to our{" "}
-              <Link href="#">Terms of Service</Link> and{" "}
-              <Link href="#">Privacy Policy</Link>.
-            </div>
           </div>
         </main>
 

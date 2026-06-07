@@ -261,3 +261,50 @@
     height: 280px;
   }
 }
+
+.consentTermsCheckbox {
+  margin-top: 12px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.checkboxInput {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(15, 23, 42, 0.2);
+  accent-color: #0d9488;
+  cursor: pointer;
+  margin-top: 1px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checkboxInput:hover {
+  border-color: #0d9488;
+}
+
+.checkboxText {
+  font-size: 13px;
+  color: var(--sanctuary-ink-l);
+  line-height: 1.4;
+  user-select: none;
+}
+
+.checkboxText a {
+  color: var(--sanctuary-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.checkboxText a:hover {
+  text-decoration: underline;
+}
