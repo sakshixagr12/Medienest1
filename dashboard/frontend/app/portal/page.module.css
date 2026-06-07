@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 110px 24px 60px;
+  padding: 120px 24px 60px;
   font-family: var(--font-body);
   position: relative;
 }
@@ -13,12 +13,11 @@
 /* --- Leaves Decoration --- */
 .leavesCornerWrapper {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -20px;
+  right: -35px;
   pointer-events: none;
   z-index: 0;
   opacity: 0.95;
-  overflow: hidden;
 }
 
 .leavesCorner {
@@ -27,9 +26,11 @@
 }
 
 .identityHeader {
-  text-align: center;
-  margin-bottom: 48px;
-  max-width: 1000px;
+  width: 90%;
+  max-width: 1800px;
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 40px;
   position: relative;
   z-index: 1;
 }
@@ -63,7 +64,7 @@
 .location {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   color: var(--sanctuary-ink-l);
   font-weight: 600;
@@ -80,11 +81,11 @@
 .metricsGrid {
   width: 90%;
   max-width: 1800px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #fff;
-  padding: 24px;
+  padding: 28px 24px;
   border-radius: var(--radius-xl);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   margin-bottom: 40px;
@@ -97,12 +98,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 16px;
-  border-right: 1px solid rgba(23, 3, 55, 0.08);
+  flex: 1;
+  padding: 0 24px;
 }
 
-.metricCard:last-child {
-  border-right: none;
+.metricDivider {
+  width: 1px;
+  height: 48px;
+  background-color: rgba(23, 3, 55, 0.08);
+  align-self: center;
+  flex-shrink: 0;
 }
 
 .metricIcon {
@@ -112,6 +117,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .metricInfo p {
@@ -126,6 +132,7 @@
   font-size: 24px;
   font-weight: 800;
   color: var(--sanctuary-primary);
+  line-height: 1.1;
 }
 
 .trendText {
@@ -152,23 +159,15 @@
 .portalCardSecondary {
   text-decoration: none;
   border-radius: var(--radius-xl);
-  padding: 48px;
+  padding: 36px 40px;
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
   flex-direction: column;
-}
-
-.portalCardLarge {
   background: #fff;
   border: 1px solid rgba(23, 3, 55, 0.05);
   box-shadow: 0 4px 20px rgba(23, 3, 55, 0.02);
-}
-
-.portalCardSecondary {
-  background: #fbfbf7;
-  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .portalCardLarge:hover,
@@ -180,12 +179,13 @@
 .cardContent {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   gap: 24px;
+  height: 100%;
 }
 
-.cardLeftContent {
+.cardBody {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -196,61 +196,64 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: -10px;
 }
 
 .illustration3d {
-  width: 140px;
-  height: 140px;
+  width: 130px;
+  height: 130px;
   object-fit: contain;
-  transform: translateY(-5px);
+  transform: translateY(10px);
   transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.portalCardLarge:hover .illustration3d,
-.portalCardSecondary:hover .illustration3d {
-  transform: translateY(-15px) scale(1.05);
+.portalCardLarge:hover .illustration3d {
+  transform: translateY(0px) scale(1.05);
 }
 
 .iconBoxPrimary,
 .iconBoxSecondary {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
+  flex-shrink: 0;
 }
 
 .cardBody h2 {
   font-family: var(--font-headline);
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--sanctuary-primary);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .cardBody p {
   color: var(--sanctuary-ink-l);
-  font-size: 18px;
-  line-height: 1.6;
-  margin-bottom: 32px;
-  max-width: 400px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  max-width: 320px;
 }
 
 .ctaAction {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-weight: 700;
   transition: gap 0.3s;
 }
 
-.portalCardLarge:hover .ctaAction,
-.portalCardSecondary:hover .ctaAction {
-  gap: 16px;
+.ctaAction svg {
+  transition: transform 0.2s ease;
+}
+
+.portalCardLarge:hover .ctaAction svg {
+  transform: translateX(4px);
 }
 
 /* --- Activity Feed --- */
@@ -517,15 +520,23 @@
 /* --- Responsive Layouts --- */
 @media (max-width: 900px) {
   .page {
-    padding: 96px 16px 48px;
+    padding: 110px 16px 48px;
+  }
+  .identityHeader {
+    width: 100%;
+    margin-bottom: 32px;
   }
   .metricsGrid {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
     width: 100%;
-    padding: 16px;
+    padding: 20px;
+  }
+  .metricDivider {
+    display: none;
   }
   .metricCard {
-    border-right: none;
     padding: 8px;
   }
   .selectionShell {
@@ -540,11 +551,15 @@
     width: 100%;
     padding: 24px;
   }
+  .leavesCorner {
+    width: 380px !important;
+    height: auto !important;
+  }
 }
 
 @media (max-width: 600px) {
   .page {
-    padding: 88px 12px 40px;
+    padding: 100px 12px 40px;
   }
   .metricsGrid {
     grid-template-columns: 1fr;
@@ -576,5 +591,9 @@
   }
   .leavesCornerWrapper {
     opacity: 0.4;
+  }
+  .leavesCorner {
+    width: 260px !important;
+    height: auto !important;
   }
 }

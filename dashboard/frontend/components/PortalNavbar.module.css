@@ -1,24 +1,26 @@
 .navbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1800px;
   height: 72px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid rgba(23, 3, 55, 0.05);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 100px;
+  box-shadow: 0 10px 30px rgba(30, 27, 75, 0.05);
   display: flex;
   align-items: center;
   z-index: 1000;
   transition: all 0.3s ease;
+  padding: 0 2rem;
 }
 
 .container {
-  width: 90%;
-  max-width: 1800px;
-  margin: 0 auto;
-  padding: 0 24px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,8 +34,8 @@
 }
 
 .logoWrapper {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: transparent;
   display: flex;
   align-items: center;
@@ -42,10 +44,10 @@
 
 .brandName {
   font-family: var(--font-headline);
-  font-size: 20px;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: var(--sanctuary-primary);
-  letter-spacing: -0.5px;
+  color: #0f172a;
+  letter-spacing: -0.03em;
 }
 
 .profileArea {
@@ -78,7 +80,7 @@
 }
 
 .roleLabel {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--sanctuary-primary);
   line-height: 1.2;
@@ -113,23 +115,27 @@
 @media (max-width: 640px) {
   .navbar {
     height: 64px;
+    width: 95%;
+    top: 0.5rem;
+    padding: 0 1.2rem;
   }
 
   .brandName {
-    font-size: 18px;
+    font-size: 1.15rem;
   }
 
   .logoWrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .avatarCircle {
     width: 32px;
     height: 32px;
+    font-size: 14px;
   }
 
-  .signOutBtn {
-    padding: 8px 14px;
-    font-size: 13px;
-  }
-
-  .signOutBtn span {
-    display: none;
+  .roleLabel {
+    font-size: 12px;
   }
 }
