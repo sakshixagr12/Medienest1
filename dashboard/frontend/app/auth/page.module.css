@@ -401,7 +401,6 @@
 /* Decorative mobile SVGs (hidden on desktop) */
 .leavesTopLeftMobile,
 .leavesBottomRightMobile,
-.infoButtonMobile,
 .mobileLogoContainer {
   display: none;
 }
@@ -536,29 +535,6 @@
     height: 140px;
     pointer-events: none;
     z-index: 2;
-  }
-  .infoButtonMobile {
-    display: flex;
-    position: absolute;
-    bottom: 24px;
-    left: 24px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #1F2937;
-    color: #ffffff;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.2s ease;
-  }
-  .infoButtonMobile:hover {
-    transform: scale(1.05);
   }
 }
 

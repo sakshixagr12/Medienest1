@@ -248,7 +248,6 @@ function AuthPageContent() {
       {/* Decorative Mobile Viewport SVGs */}
       <LeavesTopLeftMobile className={styles.leavesTopLeftMobile} />
       <LeavesBottomRightMobile className={styles.leavesBottomRightMobile} />
-      <div className={styles.infoButtonMobile}>N</div>
 
       <div className={styles.container}>
         {/* Left Side Content */}
