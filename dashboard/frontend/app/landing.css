@@ -300,8 +300,8 @@
 
 /* ── HERO ── */
 .hero-section {
-  padding: 6rem 0 3rem;
-  min-height: 100vh;
+  padding: 6rem 0 1.5rem;
+  min-height: 85vh;
   display: flex;
   align-items: center;
 }
@@ -544,7 +544,7 @@
 
 /* ── PROBLEM SECTION ── */
 .section-v3 {
-  padding: 5rem 0;
+  padding: 3.5rem 0 5rem 0;
 }
 
 .section-title {
@@ -1485,8 +1485,8 @@
   display: flex;
   align-items: stretch;
   gap: 0;
-  margin-top: 4rem;
-  padding: 3rem 0;
+  margin-top: 2rem;
+  padding: 2.5rem 0 1rem 0;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
   width: 100%;
 }
@@ -1542,7 +1542,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 2rem auto;
+  margin: 1rem auto;
   padding: 0.75rem 1.5rem;
   color: #475569;
   font-size: 0.85rem;
