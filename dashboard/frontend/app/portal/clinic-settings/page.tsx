@@ -152,10 +152,6 @@ export default function ClinicSettingsPage() {
   return (
     <DashboardLayout hideSidebar>
       <div className={styles.header}>
-        <Link href="/portal/front-desk" className={styles.backBtn}>
-          <ChevronLeft size={18} />
-          <span>Back to Front Desk</span>
-        </Link>
         <div className={styles.headerText}>
           <h1>Clinic Management</h1>
           <p>Update branding and manage your medical staff (Max 2 Doctors)</p>
@@ -274,7 +270,9 @@ export default function ClinicSettingsPage() {
               <button
                 className={styles.closeBtn}
                 onClick={() => setIsAddModalOpen(false)}
-              ></button>
+              >
+                ✕
+              </button>
             </div>
             <form onSubmit={handleAddDoctor} className={styles.modalBody}>
               <div className={styles.field}>

@@ -80,16 +80,29 @@ function ConsultTimer({ startedAt }: { startedAt: string | null }) {
 function DoctorQueueContent() {
   const searchParams = useSearchParams();
   const doctorIdParam = searchParams?.get("doctorId");
-  const { clinic, doctors } = useClinic();
+  const { clinic, doctors, user } = useClinic();
   const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [doneCount, setDoneCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const activeDoctorId = doctorIdParam || (doctors?.[0]?.id ?? null);
+  const currentUserDoctor = doctors?.find(
+    (d) =>
+      (d.user_id && user?.id && d.user_id === user.id) ||
+      (d.email && user?.email && d.email.toLowerCase() === user.email.toLowerCase()) ||
+      (d.contact_email && user?.email && d.contact_email.toLowerCase() === user.email.toLowerCase())
+  );
+
+  const activeDoctorId =
+    doctorIdParam ||
+    currentUserDoctor?.doctor_id ||
+    currentUserDoctor?.id ||
+    (doctors?.[0]?.doctor_id ?? doctors?.[0]?.id ?? null);
+
   const activeDoctorName =
-    doctors?.find((d) => d.id === activeDoctorId)?.name ??
+    doctors?.find((d) => d.doctor_id === activeDoctorId || d.id === activeDoctorId)?.name ??
+    currentUserDoctor?.name ??
     doctors?.[0]?.name ??
     "Doctor";
 
@@ -107,12 +120,12 @@ function DoctorQueueContent() {
 
   // ── Fetch queue ──────────────────────────────────────────────────────
   const fetchQueue = useCallback(async () => {
-    if (!clinic?.id) return;
+    if (!clinic?.id || !activeDoctorId) return;
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ clinic_id: clinic.id });
-      if (activeDoctorId) params.set("doctor_id", activeDoctorId);
+      params.set("doctor_id", activeDoctorId);
       const res = await authenticatedFetch(`${API}/api/queue?${params}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error);

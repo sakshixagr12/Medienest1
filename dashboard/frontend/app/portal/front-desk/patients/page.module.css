@@ -340,3 +340,26 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .container {
+    width: 100% !important;
+    padding: 16px !important;
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .headerTitle h1 {
+    font-size: 26px;
+  }
+  .searchSection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .searchWrapper {
+    min-width: 100%;
+  }
+}

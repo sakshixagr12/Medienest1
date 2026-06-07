@@ -464,3 +464,49 @@
   align-items: center;
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  .main {
+    padding: 16px 12px;
+  }
+  .dashboardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .dashboardHeader h2 {
+    font-size: 28px;
+  }
+  .checkInBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .vitalsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nowServingCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+  .queueCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+  .cardActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cardActions button, .cardActions select {
+    flex: 1;
+    text-align: center;
+  }
+}

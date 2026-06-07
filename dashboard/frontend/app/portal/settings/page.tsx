@@ -129,7 +129,7 @@ export default function SettingsPage() {
   };
 
   const deleteService = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!(await confirm("Are you sure?"))) return;
     try {
       const { error } = await supabase
         .from("clinic_services")

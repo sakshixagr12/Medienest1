@@ -78,58 +78,29 @@ router.post("/add", async (req, res) => {
   const queueDate = today();
 
   try {
-    // Check if patient already in today's active queue
-    const { data: existing } = await supabase
-      .from("doctor_queue")
-      .select("id, token_number, status")
-      .eq("clinic_id", clinic_id)
-      .eq("patient_id", patient_id)
-      .eq("queue_date", queueDate)
-      .not("status", "in", '("done","skipped")')
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("add_patient_to_queue", {
+      p_clinic_id: clinic_id,
+      p_doctor_id: doctor_id || null,
+      p_patient_id: patient_id,
+      p_patient_name: patient_name,
+      p_priority: priority,
+      p_notes: notes || null,
+    });
 
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        error: "Patient is already in the queue",
-        existing,
-      });
+    if (error) {
+      if (error.message.includes("already in the queue today")) {
+        return res.status(409).json({
+          success: false,
+          error: "Patient is already in the queue today",
+        });
+      }
+      throw error;
     }
 
-    // Get next token number for today
-    const { data: lastToken } = await supabase
-      .from("doctor_queue")
-      .select("token_number")
-      .eq("clinic_id", clinic_id)
-      .eq("queue_date", queueDate)
-      .order("token_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const nextToken = (lastToken?.token_number || 0) + 1;
-
-    const { data, error } = await supabase
-      .from("doctor_queue")
-      .insert({
-        clinic_id,
-        doctor_id: doctor_id || null,
-        patient_id,
-        patient_name,
-        token_number: nextToken,
-        priority,
-        notes: notes || null,
-        queue_date: queueDate,
-        check_in_time: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
     console.log(
-      `[Queue] Added: ${patient_name} (#${nextToken}) → ${clinic_id}`,
+      `[Queue] Added: ${patient_name} (#${data.token_number}) → ${clinic_id}`,
     );
-    res.json({ success: true, entry: data, token: nextToken });
+    res.json({ success: true, entry: data, token: data.token_number });
   } catch (err) {
     console.error("[Queue ADD]", err.message);
     res.status(500).json({ success: false, error: err.message });

@@ -1,249 +1,374 @@
-/* Onboarding Page UI Revamp */
+/* Premium Onboarding Page CSS */
 
 .page {
-  display: flex;
   min-height: 100vh;
-  background-color: #faf9f6; /* Soft cream background */
-  font-family: "Inter", system-ui, sans-serif;
-  color: #111827;
-}
-
-/* ----------------------------------
-   SIDEBAR
----------------------------------- */
-.sidebar {
-  width: 260px;
-  background-color: #f3f1e9;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 40px 0;
-  border-right: 1px solid #e7e5de;
-}
-
-.brandBlock {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 32px;
-  margin-bottom: 48px;
-}
-
-.brandLogo {
-  width: 32px;
-  height: 32px;
-  background-color: #1e1b4b;
-  border-radius: 8px;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background: #F8F9F5; /* Matches mockup off-white base */
 }
 
-.brandText h1 {
-  font-size: 16px;
-  font-weight: 800;
-  color: #1e1b4b;
-  margin: 0;
+.overlay {
+  display: none; /* Only active on mobile viewport to dim wood bg */
 }
-.brandText p {
-  font-size: 11px;
-  color: #6b7280;
-  margin: 2px 0 0;
+
+.container {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 0;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+/* ── LEFT PANEL (38%) ── */
+.leftPanel {
+  flex: 0 0 38%;
+  width: 38%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 80px 48px 60px 48px;
+  background: #F8F9F5; /* Solid warm off-white */
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.leavesLeftBottom {
+  position: absolute;
+  bottom: -10px;
+  left: -10px;
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1;
+}
+
+.logoText {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #1F2937; /* Dark Text */
+}
+
+.leftMainContent {
+  z-index: 1;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.leftMainContent h1 {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  margin: 0 0 12px 0;
+  color: #1F2937;
+}
+
+.leftMainContent p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.horizontalLine {
+  width: 40px;
+  height: 3px;
+  background: #2E7D32; /* Medical Green */
+  margin: 16px 0;
+  border-radius: 2px;
+}
+
+/* Vertical Stepper Navigation Menu */
+.leftPanelTopGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  z-index: 1;
+  width: 100%;
 }
 
 .navMenu {
+  position: relative;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  gap: 20px;
+  z-index: 1;
+  width: 100%;
+}
+
+.navMenu::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 44px; /* padding 24px + icon 40px/2 = 44px */
+  bottom: 24px;
+  width: 2px;
+  background: #E5E7EB;
+  z-index: 0;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 32px;
-  color: #6b7280;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  border-left: 3px solid transparent;
+  gap: 16px;
+  padding: 12px 24px;
+  color: #6B7280;
+  border-radius: 16px;
+  transition: all 0.25s ease;
+  user-select: none;
+  border: 1px solid transparent;
+  z-index: 2;
+  background: transparent;
 }
 
 .navItemActive {
-  color: #1e1b4b;
-  font-weight: 700;
-  background-color: #fff;
-  border-left-color: #1e1b4b;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  border-radius: 0 20px 20px 0;
-  margin-right: 20px;
+  color: #2E7D32;
+  background-color: #ffffff;
+  border: 1px solid rgba(46, 125, 50, 0.15);
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.05);
 }
 
-.sidebarFooter {
-  padding: 0 32px;
+.navItemCompleted {
+  color: #1F2937;
 }
 
-.btnSaveProgress {
-  width: 100%;
-  background-color: #1e1b4b;
-  color: #fff;
-  font-weight: 600;
-  font-size: 13px;
-  padding: 14px;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.btnSaveProgress:hover {
-  background-color: #2e2870;
-  transform: translateY(-1px);
+.navIconCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  color: #9CA3AF;
+  flex-shrink: 0;
+  z-index: 2;
 }
 
-/* ----------------------------------
-   MAIN CONTENT AREA
----------------------------------- */
-.mainArea {
-  flex: 1;
+.navItemActive .navIconCircle {
+  background: #2E7D32;
+  border-color: #2E7D32;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.15);
+}
+
+.navItemCompleted .navIconCircle {
+  background: #EAF3EA;
+  border-color: #2E7D32;
+  color: #2E7D32;
+}
+
+.navTextWrapper {
   display: flex;
   flex-direction: column;
-  padding: 40px 60px;
-  overflow-y: auto;
-  align-items: center;
+  text-align: left;
 }
 
-.topHeader {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 60px;
-}
-
-.logoTitle {
-  font-size: 20px;
-  font-weight: 800;
-  color: #1e1b4b;
-}
-
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.stepIndicator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.navStepNumber {
   font-size: 11px;
   font-weight: 700;
+  text-transform: uppercase;
   letter-spacing: 1px;
-  color: #4b5563;
+  color: #9CA3AF;
+  margin-bottom: 2px;
 }
 
-.stepBar {
-  width: 80px;
-  height: 4px;
-  background: #e2e8f0;
-  border-radius: 2px;
-  overflow: hidden;
+.navItemActive .navStepNumber {
+  color: #81C784;
 }
 
-.stepFill {
-  height: 100%;
-  background: #1e1b4b;
-  border-radius: 2px;
-  transition: width 0.4s ease;
+.navStepTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: inherit;
 }
 
-.iconCircle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #e5e7eb;
-  color: #4b5563;
+.leftPanelFooter {
+  z-index: 1;
+  font-size: 13px;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.leftPanelFooterLink {
+  color: #2E7D32;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.leftPanelFooterLink:hover {
+  text-decoration: underline;
+}
+
+/* ── RIGHT PANEL (62%) ── */
+.rightPanel {
+  flex: 0 0 62%;
+  width: 62%;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: pointer;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 60px 40px;
+  position: relative;
+  overflow-y: auto;
 }
 
-/* ----------------------------------
-   FORM CENTER
----------------------------------- */
-.formContainer {
+.rightPanel::before {
+  content: "";
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
+  filter: blur(6px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.onboardingCard {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 44px;
+  width: 620px; /* Wider to support forms comfortably */
+  max-width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.leavesCardCorner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cardHeaderArea {
   width: 100%;
-  max-width: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
 }
 
-.heroImage {
-  width: 80px;
-  height: 80px;
+.logoCircle {
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: #e2d9cd;
-  margin-bottom: 24px;
+  background: #EAF3EA;
+  color: #2E7D32;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  border: 1.5px dashed rgba(46, 125, 50, 0.4);
+  padding: 4px;
 }
 
-.pageTitle {
-  font-size: 36px;
+.hospitalIcon {
+  color: #2E7D32;
+}
+
+.cardHeading {
+  font-size: 24px;
   font-weight: 800;
-  color: #1e1b4b;
-  margin-bottom: 12px;
-  letter-spacing: -0.5px;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
 }
 
-.pageSubtitle {
-  font-size: 15px;
-  color: #4b5563;
-  text-align: center;
-  margin-bottom: 40px;
-  max-width: 480px;
+.cardSubtext {
+  font-size: 14px;
+  color: #6B7280;
   line-height: 1.5;
+  margin: 0;
+  max-width: 440px;
 }
 
-/* Form Card */
-.formCard {
+.heartSeparator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   width: 100%;
-  background: #fff;
-  border-radius: 36px;
-  padding: 40px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.02),
-    0 4px 10px rgba(0, 0, 0, 0.01);
+  margin: 12px 0 20px 0;
+}
+
+.separatorLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.heartIcon {
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(46, 125, 50, 0.2));
+}
+
+/* Form Styling */
+.formContainer {
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .errMsg {
-  background: #fef2f2;
-  color: #ef4444;
+  background: #FEF2F2;
+  color: #EF4444;
   padding: 12px 16px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   margin-bottom: 24px;
+  border: 1px solid rgba(239, 68, 68, 0.15);
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px 24px;
+  gap: 20px;
 }
 
 .formField {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
+
 .formField.fullWidth {
   grid-column: span 2;
 }
@@ -251,137 +376,294 @@
 .formField label {
   font-size: 12px;
   font-weight: 700;
-  color: #111827;
+  color: #374151;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .formField label span {
-  color: #9ca3af;
+  color: #9CA3AF;
   font-weight: 500;
-  margin-left: 4px;
+  text-transform: none;
 }
 
 .inputBox {
   width: 100%;
-  background: #f4f3ed;
-  border: 1px solid transparent;
-  padding: 16px 20px;
-  border-radius: 16px;
-  font-size: 15px;
-  color: #111827;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  color: #1F2937;
+  font-family: inherit;
   transition: all 0.2s ease;
   outline: none;
+  box-sizing: border-box;
 }
+
 .inputBox:focus {
-  border-color: #1e1b4b;
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(30, 27, 75, 0.05);
+  border-color: #2E7D32;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08);
 }
+
 .inputBox::placeholder {
-  color: #9ca3af;
+  color: #9CA3AF;
 }
 
 textarea.inputBox {
   resize: vertical;
-  min-height: 100px;
+  min-height: 90px;
 }
 
 .inputWithIcon {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
+
 .inputWithIcon input {
   padding-left: 56px;
 }
+
 .prefixIcon {
   position: absolute;
-  left: 20px;
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 15px;
+  left: 18px;
+  font-weight: 700;
+  color: #4B5563;
+  font-size: 14.5px;
 }
+
 .suffixIcon {
   position: absolute;
-  right: 20px;
-  color: #4b5563;
+  right: 18px;
+  color: #9CA3AF;
+  pointer-events: none;
 }
 
 .formFooter {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 24px;
-  margin-top: 40px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 36px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 28px;
 }
 
-.btnNext {
-  background-color: #1e1b4b;
-  color: #fff;
+/* Premium Buttons */
+.btnNext,
+.btnSolid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
-  padding: 16px 32px;
-  border-radius: 30px;
-  border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.15);
 }
-.btnNext:hover {
-  background-color: #2e2870;
-  transform: translateY(-2px);
+
+.btnNext:hover:not(:disabled),
+.btnSolid:hover:not(:disabled) {
+  background: linear-gradient(135deg, #256328 0%, #154718 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.25);
 }
-.btnNext:disabled {
-  opacity: 0.6;
+
+.btnNext:disabled,
+.btnSolid:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #4B5563;
+  border: 1.5px solid #D1D5DB;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+  color: #1F2937;
+}
+
+.btnGray {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #E5E7EB;
+  color: #374151;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnGray:hover {
+  background: #D1D5DB;
 }
 
 .footerHelp {
-  font-size: 11px;
-  color: #6b7280;
+  font-size: 11.5px;
+  color: #6B7280;
   line-height: 1.4;
-  max-width: 200px;
+  max-width: 240px;
+  text-align: right;
 }
+
 .footerHelp strong {
-  color: #1e1b4b;
+  color: #2E7D32;
   font-weight: 700;
 }
 
 .pageBottomBadge {
-  margin-top: auto;
-  padding-top: 40px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #9ca3af;
-  letter-spacing: 0.5px;
-}
-
-/* ----------------------------------
-   WAITLIST SCREEN
----------------------------------- */
-.waitlistIconBox {
-  width: 120px;
-  height: 120px;
-  background: #fff;
-  border-radius: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #9CA3AF;
+  letter-spacing: 0.8px;
+  margin-top: 24px;
+}
+
+/* Step 2 additions: Doctor forms */
+.doctorsList {
+  width: 100%;
   margin-bottom: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
-  color: #1e1b4b;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doctorListItem {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.doctorInfoText {
+  flex: 1;
+  text-align: left;
+}
+
+.doctorInfoText strong {
+  font-size: 15px;
+  color: #1F2937;
+}
+
+.doctorSubText {
+  font-size: 12.5px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+.doctorActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnEditDoc {
+  border: none;
+  background: #EAF3EA;
+  color: #2E7D32;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12.5px;
+  transition: all 0.2s;
+}
+
+.btnEditDoc:hover {
+  background: #2E7D32;
+  color: #ffffff;
+}
+
+.btnDeleteDoc {
+  border: none;
+  background: #FEE2E2;
+  color: #EF4444;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btnDeleteDoc:hover {
+  background: #EF4444;
+  color: #ffffff;
+}
+
+.addDoctorForm {
+  background: #F8F9F5;
+  border: 1px solid rgba(46, 125, 50, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.addDoctorFormTitle {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2E7D32;
+}
+
+/* Step 3: Waitlist styles */
+.waitlistIconBox {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: #EAF3EA;
+  color: #2E7D32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(46, 125, 50, 0.1);
+  border: 1.5px dashed rgba(46, 125, 50, 0.3);
 }
 
 .statusPill {
-  background: #f3e8ff;
-  color: #7e22ce;
+  background: #EAF3EA;
+  color: #2E7D32;
   font-size: 11px;
   font-weight: 800;
   padding: 6px 16px;
@@ -391,119 +673,246 @@ textarea.inputBox {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  border: 1px solid rgba(46, 125, 50, 0.15);
 }
+
 .statusPill::before {
   content: "";
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #7e22ce;
+  background: #2E7D32;
 }
 
 .waitlistGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 40px;
+  gap: 16px;
+  margin: 24px 0 32px 0;
   width: 100%;
 }
 
 .waitCard {
-  background: #f4f3ed;
-  border-radius: 24px;
-  padding: 24px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 20px;
   text-align: left;
+  box-sizing: border-box;
 }
+
 .waitCardIcon {
   width: 32px;
   height: 32px;
-  background: #eae8df;
+  background: #EAF3EA;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #7e22ce;
-  margin-bottom: 16px;
+  color: #2E7D32;
+  margin-bottom: 12px;
 }
+
 .waitCard h4 {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 8px;
+  color: #1F2937;
+  margin: 0 0 6px 0;
 }
+
 .waitCard p {
-  font-size: 12px;
-  color: #4b5563;
+  font-size: 11.5px;
+  color: #6B7280;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .waitActions {
   display: flex;
+  justify-content: center;
   gap: 16px;
-  margin-bottom: 40px;
-}
-
-.btnSolid {
-  background-color: #1e1b4b;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
-}
-.btnGray {
-  background-color: #e5e7eb;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
+  margin-bottom: 32px;
 }
 
 .contactInfo {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 12.5px;
+  color: #6B7280;
+  text-align: center;
 }
+
 .contactInfo strong {
-  color: #1e1b4b;
+  color: #2E7D32;
   font-weight: 600;
 }
 
-/* ----------------------------------
-   STEP 2 (Doctors Form adapt)
----------------------------------- */
-.addDoctorForm {
-  background: #f4f3ed;
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 30px;
+/* Mobile responsive (hidden elements) */
+.leavesTopLeftMobile,
+.leavesBottomRightMobile,
+.mobileLogoContainer {
+  display: none;
 }
-.btnSecondary {
-  background-color: transparent;
-  color: #1e1b4b;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 16px 32px;
-  border-radius: 30px;
-  border: 1px solid #1e1b4b;
-  cursor: pointer;
+
+/* Mobile Stepper Indicator */
+.mobileStepIndicator {
+  display: none;
 }
-.doctorsList {
-  width: 100%;
-  margin-bottom: 24px;
+
+/* ── RESPONSIVE MEDIA QUERIES ── */
+@media (max-width: 900px) {
+  .page {
+    background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
+    position: relative;
+    padding: 40px 16px;
+  }
+
+  .overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(248, 249, 245, 0.4); /* Soft tint */
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .container {
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+    height: auto;
+    min-height: auto;
+    z-index: 2;
+  }
+
+  .leftPanel {
+    display: none;
+  }
+
+  .rightPanel {
+    width: 100%;
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    min-height: auto;
+    padding: 0;
+    background: transparent;
+  }
+
+  .rightPanel::before {
+    display: none;
+  }
+
+  .mobileLogoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+    z-index: 10;
+  }
+
+  .mobileLogoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobileLogoText {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #1F2937;
+  }
+
+  .mobileLogoTagline {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2E7D32;
+    margin: 4px 0 0 0;
+    letter-spacing: 0.5px;
+  }
+
+  .onboardingCard {
+    width: 100%;
+    max-width: 600px;
+    padding: 32px 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+  }
+
+  .leavesTopLeftMobile {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 140px;
+    height: 140px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .leavesBottomRightMobile {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 140px;
+    height: 140px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .waitlistGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .mobileStepIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #2E7D32;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 }
-.doctorListItem {
-  background: #fff;
-  border: 1px solid #e7e5de;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+
+@media (max-width: 480px) {
+  .onboardingCard {
+    padding: 24px 16px;
+    border-radius: 20px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formField.fullWidth {
+    grid-column: span 1;
+  }
+
+  .formFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .footerHelp {
+    text-align: center;
+    max-width: none;
+  }
+
+  .waitActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 }

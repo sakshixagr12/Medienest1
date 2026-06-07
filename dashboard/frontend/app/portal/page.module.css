@@ -383,33 +383,42 @@
   z-index: 1;
 }
 
-/* --- Modal Styles --- */
+/* --- Modal Styles (Medical Green Theme) --- */
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(23, 3, 55, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .doctorModal {
-  background: #fff;
+  background: #ffffff;
   width: 100%;
-  max-width: 500px;
-  border-radius: 32px;
-  padding: 40px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2);
-  animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 440px;
+  border-radius: 28px;
+  padding: 40px 36px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  position: relative;
+  animation: modalPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-@keyframes modalIn {
+@keyframes modalPopIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(20px);
+    transform: scale(0.95) translateY(16px);
   }
   to {
     opacity: 1;
@@ -417,104 +426,228 @@
   }
 }
 
-.modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.modalHeader h3 {
-  font-family: var(--font-headline);
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--sanctuary-primary);
-}
-
+/* Close Button */
 .closeBtn {
-  background: var(--sanctuary-gray-low);
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #F1F1EC;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  color: #6B7280;
+  transition: all 0.2s ease;
+  z-index: 2;
 }
 
 .closeBtn:hover {
-  background: #eee;
+  background: #E5E5DF;
+  color: #1F2937;
   transform: rotate(90deg);
 }
 
+/* Modal Top / Header */
+.modalTop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.modalLogoCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #EAF3EA;
+  color: #2E7D32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  border: 1.5px dashed rgba(46, 125, 50, 0.4);
+  padding: 4px;
+}
+
+.modalTitle {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+/* Shared heart separators */
+.heartSeparator,
+.heartSeparatorGrey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin: 4px 0 12px 0;
+}
+
+.separatorLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.heartIcon {
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(46, 125, 50, 0.2));
+}
+
+.heartIconGrey {
+  font-size: 13px;
+  line-height: 1;
+  color: #CCC;
+}
+
+.modalSubtext {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
+  line-height: 1.5;
+}
+
+/* Doctor List */
 .doctorList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.doctorList::-webkit-scrollbar {
+  width: 3px;
+}
+
+.doctorList::-webkit-scrollbar-thumb {
+  background: rgba(46, 125, 50, 0.15);
+  border-radius: 3px;
 }
 
 .doctorItem {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: #fbfbf7;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  border-radius: 20px;
+  gap: 16px;
+  padding: 16px 18px;
+  background: #F8F9F5;
+  border: 1px solid rgba(46, 125, 50, 0.08);
+  border-radius: 16px;
   text-decoration: none;
-  transition: all 0.3s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: itemSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .doctorItem:hover {
-  background: #fff;
-  box-shadow: 0 12px 24px rgba(23, 3, 55, 0.06);
-  border-color: rgba(23, 3, 55, 0.1);
-  transform: translateX(8px);
+  background: #ffffff;
+  border-color: rgba(46, 125, 50, 0.2);
+  box-shadow: 0 8px 24px rgba(46, 125, 50, 0.08);
+  transform: translateY(-2px);
 }
 
 .doctorAvatar {
-  width: 56px;
-  height: 56px;
-  background: var(--sanctuary-primary);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
   color: #fff;
-  border-radius: 16px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 22px;
   font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.doctorItem:hover .doctorAvatar {
+  transform: scale(1.05);
 }
 
 .doctorInfo {
   flex: 1;
+  min-width: 0;
 }
 
 .doctorInfo h4 {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--sanctuary-primary);
-  margin-bottom: 4px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 5px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.doctorInfo p {
-  font-size: 13px;
+.specialtyBadge {
+  display: inline-block;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--sanctuary-ink-l);
+  color: #2E7D32;
+  background: #EAF3EA;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(46, 125, 50, 0.12);
 }
 
-.doctorItem svg {
-  color: var(--sanctuary-ink-l);
-  opacity: 0.3;
-  transition: all 0.3s;
+.doctorArrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #EAF3EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2E7D32;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.2s ease;
 }
 
-.doctorItem:hover svg {
+.doctorItem:hover .doctorArrow {
   opacity: 1;
-  color: var(--sanctuary-primary);
-  transform: translateX(4px);
+}
+
+/* Modal Footer */
+.modalFooter {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.modalFooterText {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  margin: 0;
+  letter-spacing: 0.3px;
 }
 
 /* --- Responsive Layouts --- */

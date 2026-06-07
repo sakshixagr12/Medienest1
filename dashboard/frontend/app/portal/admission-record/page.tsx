@@ -728,7 +728,7 @@ function AdmissionRecordRedesign() {
   };
 
   const handleDeleteAttachment = async (index: number) => {
-    if (!confirm("Remove this attachment?")) return;
+    if (!(await confirm("Remove this attachment?"))) return;
     const item = summary.attachments[index];
 
     // Attempt to extract path from URL
@@ -794,9 +794,9 @@ function AdmissionRecordRedesign() {
     const { percentage } = calculateProgress();
     if (percentage < 100) {
       if (
-        !confirm(
+        !(await confirm(
           `This record is only ${percentage}% clinically complete. Are you sure you want to submit?`,
-        )
+        ))
       ) {
         return;
       }
@@ -945,9 +945,9 @@ function AdmissionRecordRedesign() {
     }
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (
-      confirm(
+      await confirm(
         "Are you sure you want to clear all records? This will delete the current draft.",
       )
     ) {

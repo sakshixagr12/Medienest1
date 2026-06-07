@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeDoctorName } from "@/lib/utils";
+import { Hospital, Users, Clock, ShieldCheck, Mail, ArrowRight, Check } from "lucide-react";
 import styles from "./page.module.css";
 
 interface Doctor {
@@ -19,11 +21,196 @@ interface Doctor {
   display_order: number;
 }
 
+// ── CUSTOM SVG LEAVES FOR BOTTOM LEFT CORNER ──
+function LeavesLeftBottom({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M0 160 C 25 135, 55 115, 95 105"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 (Low) */}
+      <path
+        d="M15 155 C 28 128, 48 123, 52 143 C 37 148, 22 153, 15 155 Z"
+        fill="url(#leftLeafGrad1)"
+      />
+      {/* Leaf 2 (Mid) */}
+      <path
+        d="M45 125 C 65 102, 80 107, 75 128 C 58 128, 48 128, 45 125 Z"
+        fill="url(#leftLeafGrad2)"
+      />
+      {/* Leaf 3 (High) */}
+      <path
+        d="M75 110 C 100 88, 118 98, 108 120 C 90 120, 80 115, 75 110 Z"
+        fill="url(#leftLeafGrad1)"
+      />
+      <defs>
+        <linearGradient id="leftLeafGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#81C784" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+        <linearGradient id="leftLeafGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#1B5E20" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── CUSTOM SVG LEAVES FOR CARD TOP RIGHT CORNER ──
+function LeavesBranch({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M92 8 C 77 23, 58 32, 32 38"
+        stroke="#2E7D32"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        opacity="0.45"
+      />
+      {/* Leaf 1 (Top Right) */}
+      <path
+        d="M87 13 C 90 26, 82 37, 72 39 C 70 27, 77 15, 87 13 Z"
+        fill="url(#leafGrad1)"
+      />
+      {/* Leaf 2 (Middle Right) */}
+      <path
+        d="M67 23 C 70 33, 62 43, 54 43 C 52 33, 57 23, 67 23 Z"
+        fill="url(#leafGrad2)"
+      />
+      {/* Leaf 3 (Middle Left) */}
+      <path
+        d="M52 30 C 54 38, 48 46, 42 46 C 40 38, 44 30, 52 30 Z"
+        fill="url(#leafGrad1)"
+      />
+      {/* Leaf 4 (Bottom Left) */}
+      <path
+        d="M37 35 C 39 41, 35 47, 30 46 C 28 40, 31 34, 37 35 Z"
+        fill="url(#leafGrad2)"
+      />
+      {/* Leaf 5 (Offshoot Top) */}
+      <path
+        d="M79 8 C 71 10, 66 6, 63 0 C 71 0, 76 4, 79 8 Z"
+        fill="url(#leafGrad1)"
+      />
+      <defs>
+        <linearGradient id="leafGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#81C784" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+        <linearGradient id="leafGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#1B5E20" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── CUSTOM SVG LEAVES FOR MOBILE TOP LEFT ──
+function LeavesTopLeftMobile({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M10 0 C 20 40, 40 70, 80 90"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 */}
+      <path
+        d="M20 15 C 32 30, 25 45, 10 35 C 5 25, 12 10, 20 15 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      {/* Leaf 2 */}
+      <path
+        d="M38 35 C 50 50, 43 65, 28 55 C 23 45, 30 30, 38 35 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      {/* Leaf 3 */}
+      <path
+        d="M55 55 C 68 70, 60 85, 45 75 C 40 65, 48 50, 55 55 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      <defs>
+        <linearGradient id="mobileTopLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── CUSTOM SVG LEAVES FOR MOBILE BOTTOM RIGHT ──
+function LeavesBottomRightMobile({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M150 160 C 140 120, 120 90, 80 70"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 */}
+      <path
+        d="M140 145 C 128 130, 135 115, 150 125 C 155 135, 148 150, 140 145 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      {/* Leaf 2 */}
+      <path
+        d="M122 125 C 110 110, 117 95, 132 105 C 137 115, 130 130, 122 125 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      {/* Leaf 3 */}
+      <path
+        d="M105 105 C 92 90, 100 75, 115 85 C 120 95, 112 110, 105 105 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      <defs>
+        <linearGradient id="mobileBottomLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const supabase = createClient();
   const [step, setStep] = useState(1);
-  const progress = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   // Step 1 state
   const [clinicName, setClinicName] = useState("");
@@ -146,7 +333,7 @@ export default function OnboardingPage() {
   const handleSubmit = async () => {
     if (
       doctors.length === 0 &&
-      !confirm("You have not added any doctors. Continue without adding?")
+      !(await confirm("You have not added any doctors. Continue without adding?"))
     )
       return;
     setSubmitting(true);
@@ -163,7 +350,7 @@ export default function OnboardingPage() {
           user = verifiedUser;
         } catch (authErr) {
           console.warn(
-            "️ Onboarding auth fetch error, using session cache:",
+            "⚠️ Onboarding auth fetch error, using session cache:",
             authErr,
           );
         }
@@ -235,602 +422,448 @@ export default function OnboardingPage() {
 
   return (
     <div className={styles.page}>
-      {/* ---------------- SIDEBAR ---------------- */}
-      <aside className={styles.sidebar}>
-        <div className={styles.brandBlock}>
-          <div className={styles.brandLogo}>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 3v18" />
-              <path d="M15 3v18" />
-              <path d="M3 9h18" />
-              <path d="M3 15h18" />
-            </svg>
-          </div>
-          <div className={styles.brandText}>
-            <h1>
-              Jivora Care
-              <br />
-              Onboarding
-            </h1>
-            <p>Setting up your sanctuary</p>
-          </div>
-        </div>
+      <div className={styles.overlay} />
 
-        <nav className={styles.navMenu}>
-          <div
-            className={`${styles.navItem} ${step === 1 ? styles.navItemActive : ""}`}
-            onClick={() => step !== 3 && setStep(1)}
-            style={{ cursor: step !== 3 ? "pointer" : "default" }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            Clinic Setup
-          </div>
-          <div
-            className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""}`}
-            onClick={() => (step === 1 ? goStep2() : undefined)}
-            style={{ cursor: step === 1 ? "pointer" : "default" }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-            Team Members
-          </div>
-          <div
-            className={`${styles.navItem} ${step === 3 ? styles.navItemActive : ""}`}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            Status
-          </div>
-        </nav>
+      {/* Decorative Mobile Viewport SVGs */}
+      <LeavesTopLeftMobile className={styles.leavesTopLeftMobile} />
+      <LeavesBottomRightMobile className={styles.leavesBottomRightMobile} />
 
-        <div className={styles.sidebarFooter}>
-          <button className={styles.btnSaveProgress}>Save Progress</button>
-        </div>
-      </aside>
-
-      {/* ---------------- MAIN CONTENT ---------------- */}
-      <main className={styles.mainArea}>
-        {/* Top Header */}
-        <header className={styles.topHeader}>
-          <Link href="/" className={styles.logoTitle}>
-            Jivora Care
-          </Link>
-          <div className={styles.headerRight}>
-            <div className={styles.stepIndicator}>
-              STEP 0{Math.min(step, 3)} / 03
-              <div className={styles.stepBar}>
-                <div
-                  className={styles.stepFill}
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
-            <Link
-              href="/support"
-              className={styles.iconCircle}
-              title="Help & Support"
-            >
-              ?
-            </Link>
-            <Link
-              href="/auth?tab=login"
-              className={styles.iconCircle}
-              title="Clinic Login"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-            </Link>
-          </div>
-        </header>
-
-        {/* ---------------- STEP 1: CLINIC SETUP ---------------- */}
-        {step === 1 && (
-          <div className={styles.formContainer}>
-            <div className={styles.heroImage}></div>
-            <h2 className={styles.pageTitle}>Tell us about your clinic</h2>
-            <p className={styles.pageSubtitle}>
-              Establish your clinic's digital presence. This information will be
-              visible to patients and used for billing.
-            </p>
-
-            <div className={styles.formCard}>
-              {step1Error && <div className={styles.errMsg}>{step1Error}</div>}
-
-              <div className={styles.formGrid}>
-                <div className={styles.formField}>
-                  <label>
-                    Clinic/Hospital Name{" "}
-                    <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <input
-                    className={styles.inputBox}
-                    value={clinicName}
-                    onChange={(e) => setClinicName(e.target.value)}
-                    placeholder="e.g. Serenity Wellness Center"
-                    autoFocus
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label>
-                    Clinic Name in Hindi <span>(Optional)</span>
-                  </label>
-                  <input
-                    className={styles.inputBox}
-                    value={clinicNameHindi}
-                    onChange={(e) => setClinicNameHindi(e.target.value)}
-                    placeholder="e.g. सेरेनिटी वेलनेस सेंटर"
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label>
-                    Phone Number <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <div className={styles.inputWithIcon}>
-                    <span className={styles.prefixIcon}>+91</span>
-                    <input
-                      className={styles.inputBox}
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="98765 43210"
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formField}>
-                  <label>
-                    City/Location <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <div className={styles.inputWithIcon}>
-                    <input
-                      className={styles.inputBox}
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="e.g. South Delhi"
-                    />
-                    <svg
-                      className={styles.suffixIcon}
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className={`${styles.formField} ${styles.fullWidth}`}>
-                  <label>
-                    Full Address <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
-                  <textarea
-                    className={styles.inputBox}
-                    rows={2}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Street name, landmark, and postal code"
-                  ></textarea>
-                </div>
-
-                <div className={`${styles.formField} ${styles.fullWidth}`}>
-                  <label>
-                    Clinic Tagline <span>(Optional)</span>
-                  </label>
-                  <input
-                    className={styles.inputBox}
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
-                    placeholder="e.g. Compassionate Care for Every Soul"
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formFooter}>
-                <button className={styles.btnNext} onClick={goStep2}>
-                  Next: Add Doctors
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </button>
-                <div className={styles.footerHelp}>
-                  <strong>Need help?</strong> Contact our support team for
-                  assistance with clinic registration.
-                </div>
-              </div>
+      <div className={styles.container}>
+        {/* Left Panel: Desktop Stepper */}
+        <aside className={styles.leftPanel}>
+          <LeavesLeftBottom className={styles.leavesLeftBottom} />
+          
+          <div className={styles.leftPanelTopGroup}>
+            <div className={styles.logoRow}>
+              <Image
+                src="/assets/jivora_care_logo.png"
+                alt="Jivora Care Logo"
+                width={64}
+                height={64}
+                style={{ objectFit: "contain" }}
+              />
+              <span className={styles.logoText}>Jivora Care</span>
             </div>
 
-            <div className={styles.pageBottomBadge}>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
-              </svg>
-              SECURE HIPAA COMPLIANT CLOUD
+            <div className={styles.leftMainContent}>
+              <h1>Onboarding Process</h1>
+              <div className={styles.horizontalLine} />
+              <p>Setup your clinic details and configure practitioner profiles to get started with Jivora Care.</p>
             </div>
-          </div>
-        )}
 
-        {/* ---------------- STEP 2: DOCTORS SUMMARY ---------------- */}
-        {step === 2 && (
-          <div className={styles.formContainer}>
-            <div className={styles.heroImage}>‍️</div>
-            <h2 className={styles.pageTitle}>Add your doctors</h2>
-            <p className={styles.pageSubtitle}>
-              List the practitioners who will be using this sanctuary. You can
-              update this later from your settings page.
-            </p>
-
-            <div className={styles.formCard}>
-              {step2Error && <div className={styles.errMsg}>{step2Error}</div>}
-
-              <div className={styles.doctorsList}>
-                {doctors.map((d, i) => (
-                  <div key={i} className={styles.doctorListItem}>
-                    <div style={{ flex: 1 }}>
-                      <strong>Dr. {d.name}</strong> • {d.specialty}
-                      <div
-                        style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}
-                      >
-                        {d.qualification} | {d.contact} | Reg:{" "}
-                        {d.registration_number}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        onClick={() => prepareEdit(i)}
-                        style={{
-                          border: "none",
-                          background: "#e0f2fe",
-                          color: "#0284c7",
-                          borderRadius: 8,
-                          padding: "4px 12px",
-                          cursor: "pointer",
-                          fontWeight: 600,
-                          fontSize: 13,
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => removeDoctor(i)}
-                        style={{
-                          border: "none",
-                          background: "#fee2e2",
-                          color: "#ef4444",
-                          borderRadius: 8,
-                          width: 32,
-                          height: 32,
-                          cursor: "pointer",
-                          fontWeight: 600,
-                        }}
-                      >
-                        X
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
+            <nav className={styles.navMenu}>
+              {/* Clinic Setup */}
               <div
-                className={styles.addDoctorForm}
-                style={{
-                  border: editingIndex !== null ? "2px solid #0284c7" : "none",
-                  background: editingIndex !== null ? "#f0f9ff" : "transparent",
-                }}
+                className={`${styles.navItem} ${step === 1 ? styles.navItemActive : ""} ${step > 1 ? styles.navItemCompleted : ""}`}
+                onClick={() => step !== 3 && setStep(1)}
+                style={{ cursor: step !== 3 ? "pointer" : "default" }}
               >
-                <h3 style={{ margin: "0 0 16px", fontSize: 14 }}>
-                  {editingIndex !== null
-                    ? "Edit Doctor Details"
-                    : "+ Add New Doctor"}
-                </h3>
+                <div className={styles.navIconCircle}>
+                  {step > 1 ? <Check size={18} /> : <Hospital size={20} />}
+                </div>
+                <div className={styles.navTextWrapper}>
+                  <span className={styles.navStepNumber}>Step 01</span>
+                  <span className={styles.navStepTitle}>Clinic Setup</span>
+                </div>
+              </div>
+              
+              {/* Team Members */}
+              <div
+                className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""} ${step > 2 ? styles.navItemCompleted : ""}`}
+                onClick={() => (step === 1 ? goStep2() : undefined)}
+                style={{ cursor: step === 1 ? "pointer" : "default" }}
+              >
+                <div className={styles.navIconCircle}>
+                  {step > 2 ? <Check size={18} /> : <Users size={20} />}
+                </div>
+                <div className={styles.navTextWrapper}>
+                  <span className={styles.navStepNumber}>Step 02</span>
+                  <span className={styles.navStepTitle}>Team Members</span>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div
+                className={`${styles.navItem} ${step === 3 ? styles.navItemActive : ""}`}
+              >
+                <div className={styles.navIconCircle}>
+                  <Clock size={20} />
+                </div>
+                <div className={styles.navTextWrapper}>
+                  <span className={styles.navStepNumber}>Step 03</span>
+                  <span className={styles.navStepTitle}>Review Status</span>
+                </div>
+              </div>
+            </nav>
+          </div>
+
+          <div className={styles.leftPanelFooter}>
+            Need help?{" "}
+            <Link href="mailto:concierge@jivoracare.com" className={styles.leftPanelFooterLink}>
+              Contact support
+            </Link>
+          </div>
+        </aside>
+
+        {/* Right Panel: Scrollable Area with the premium onboardingCard */}
+        <div className={styles.rightPanel}>
+          <div className={styles.mobileLogoContainer}>
+            <div className={styles.mobileLogoRow}>
+              <Image
+                src="/assets/jivora_care_logo.png"
+                alt="Jivora Care Logo"
+                width={42}
+                height={42}
+                style={{ objectFit: "contain" }}
+              />
+              <span className={styles.mobileLogoText}>Jivora Care</span>
+            </div>
+            <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
+          </div>
+
+          <main className={styles.onboardingCard}>
+            <LeavesBranch className={styles.leavesCardCorner} />
+
+            <div className={styles.cardHeaderArea}>
+              <div className={styles.logoCircle}>
+                <Hospital size={28} className={styles.hospitalIcon} />
+              </div>
+
+              <h2 className={styles.cardHeading}>
+                {step === 1 && "Clinic Setup"}
+                {step === 2 && "Team Members"}
+                {step === 3 && "Registration Status"}
+              </h2>
+
+              <div className={styles.heartSeparator}>
+                <span className={styles.separatorLine} />
+                <span className={styles.heartIcon}>💚</span>
+                <span className={styles.separatorLine} />
+              </div>
+
+              {/* Mobile Stepper Progress bar (hidden on desktop) */}
+              <div className={styles.mobileStepIndicator}>
+                Step {step} of 3 • {step === 1 ? "Clinic Setup" : step === 2 ? "Team Members" : "Status"}
+              </div>
+
+              <p className={styles.cardSubtext}>
+                {step === 1 && "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing."}
+                {step === 2 && "List the practitioners who will be using Jivora Care. You can update this later from settings."}
+                {step === 3 && "Thank you for choosing Jivora Care. We are currently auditing your credentials."}
+              </p>
+            </div>
+
+            {/* STEP 1: CLINIC SETUP FORM */}
+            {step === 1 && (
+              <div className={styles.formContainer}>
+                {step1Error && <div className={styles.errMsg}>{step1Error}</div>}
+
                 <div className={styles.formGrid}>
                   <div className={styles.formField}>
-                    <label>Doctor's Name</label>
-                    <input
-                      className={styles.inputBox}
-                      value={docName}
-                      onChange={(e) => setDocName(e.target.value)}
-                      placeholder="e.g. Pradeep Kumar"
-                    />
-                  </div>
-                  <div className={styles.formField}>
-                    <label>Specialty</label>
-                    <input
-                      className={styles.inputBox}
-                      value={docSpecialty}
-                      onChange={(e) => setDocSpecialty(e.target.value)}
-                      placeholder="e.g. Pediatrics"
-                    />
-                  </div>
-                  <div className={styles.formField}>
-                    <label>Qualification</label>
-                    <input
-                      className={styles.inputBox}
-                      value={docQual}
-                      onChange={(e) => setDocQual(e.target.value)}
-                      placeholder="e.g. MBBS, MD"
-                    />
-                  </div>
-                  <div className={styles.formField}>
-                    <label>Contact Number</label>
-                    <input
-                      className={styles.inputBox}
-                      value={docContact}
-                      onChange={(e) => setDocContact(e.target.value)}
-                      placeholder="98XXXXXXXX"
-                    />
-                  </div>
-                  <div className={styles.formField}>
                     <label>
-                      Medical License No.{" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
+                      Clinic/Hospital Name <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <input
                       className={styles.inputBox}
-                      value={docRegNumber}
-                      onChange={(e) => setDocRegNumber(e.target.value)}
-                      placeholder="e.g. MCI-12345"
+                      value={clinicName}
+                      onChange={(e) => setClinicName(e.target.value)}
+                      placeholder="e.g. Serenity Wellness Center"
+                      autoFocus
                     />
                   </div>
+
                   <div className={styles.formField}>
-                    <label>License Expiry Date</label>
+                    <label>
+                      Clinic Name in Hindi <span>(Optional)</span>
+                    </label>
                     <input
                       className={styles.inputBox}
-                      type="date"
-                      value={docExpiry}
-                      onChange={(e) => setDocExpiry(e.target.value)}
+                      value={clinicNameHindi}
+                      onChange={(e) => setClinicNameHindi(e.target.value)}
+                      placeholder="e.g. सेरेनिटी वेलनेस सेंटर"
                     />
                   </div>
+
+                  <div className={styles.formField}>
+                    <label>
+                      Phone Number <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <div className={styles.inputWithIcon}>
+                      <span className={styles.prefixIcon}>+91</span>
+                      <input
+                        className={styles.inputBox}
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="98765 43210"
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formField}>
+                    <label>
+                      City/Location <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <div className={styles.inputWithIcon}>
+                      <input
+                        className={styles.inputBox}
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="e.g. South Delhi"
+                      />
+                      <svg
+                        className={styles.suffixIcon}
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </div>
+                  </div>
+
                   <div className={`${styles.formField} ${styles.fullWidth}`}>
                     <label>
-                      Profile Photo URL <span>(Optional)</span>
+                      Full Address <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <textarea
+                      className={styles.inputBox}
+                      rows={2}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Street name, landmark, and postal code"
+                    />
+                  </div>
+
+                  <div className={`${styles.formField} ${styles.fullWidth}`}>
+                    <label>
+                      Clinic Tagline <span>(Optional)</span>
                     </label>
                     <input
                       className={styles.inputBox}
-                      value={docPhoto}
-                      onChange={(e) => setDocPhoto(e.target.value)}
-                      placeholder="https://example.com/photo.jpg"
+                      value={tagline}
+                      onChange={(e) => setTagline(e.target.value)}
+                      placeholder="e.g. Compassionate Care for Every Soul"
                     />
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-                  <button
-                    onClick={addDoctor}
-                    style={{
-                      background: editingIndex !== null ? "#0284c7" : "#e5e7eb",
-                      color: editingIndex !== null ? "#ffffff" : "#1f2937",
-                      padding: "12px 24px",
-                      borderRadius: 20,
-                      border: "none",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {editingIndex !== null ? "Update Detail" : "+ Add to List"}
+
+                <div className={styles.formFooter}>
+                  <div className={styles.pageBottomBadge}>
+                    <ShieldCheck size={14} style={{ color: "#2E7D32", marginRight: "4px" }} />
+                    HIPAA SECURE
+                  </div>
+                  
+                  <button className={styles.btnNext} onClick={goStep2}>
+                    Next: Add Doctors
+                    <ArrowRight size={18} />
                   </button>
-                  {editingIndex !== null && (
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: TEAM MEMBERS FORM */}
+            {step === 2 && (
+              <div className={styles.formContainer}>
+                {step2Error && <div className={styles.errMsg}>{step2Error}</div>}
+
+                <div className={styles.doctorsList}>
+                  {doctors.map((d, i) => (
+                    <div key={i} className={styles.doctorListItem}>
+                      <div className={styles.doctorInfoText}>
+                        <strong>Dr. {d.name}</strong> • {d.specialty}
+                        <div className={styles.doctorSubText}>
+                          {d.qualification} | {d.contact} | Reg: {d.registration_number}
+                        </div>
+                      </div>
+                      <div className={styles.doctorActions}>
+                        <button className={styles.btnEditDoc} onClick={() => prepareEdit(i)}>
+                          Edit
+                        </button>
+                        <button className={styles.btnDeleteDoc} onClick={() => removeDoctor(i)}>
+                          X
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.addDoctorForm}>
+                  <h3 className={styles.addDoctorFormTitle}>
+                    {editingIndex !== null ? "Edit Doctor Details" : "Add New Doctor"}
+                  </h3>
+                  
+                  <div className={styles.formGrid}>
+                    <div className={styles.formField}>
+                      <label>Doctor's Name</label>
+                      <input
+                        className={styles.inputBox}
+                        value={docName}
+                        onChange={(e) => setDocName(e.target.value)}
+                        placeholder="e.g. Pradeep Kumar"
+                      />
+                    </div>
+                    
+                    <div className={styles.formField}>
+                      <label>Specialty</label>
+                      <input
+                        className={styles.inputBox}
+                        value={docSpecialty}
+                        onChange={(e) => setDocSpecialty(e.target.value)}
+                        placeholder="e.g. Pediatrics"
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label>Qualification</label>
+                      <input
+                        className={styles.inputBox}
+                        value={docQual}
+                        onChange={(e) => setDocQual(e.target.value)}
+                        placeholder="e.g. MBBS, MD"
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label>Contact Number</label>
+                      <input
+                        className={styles.inputBox}
+                        value={docContact}
+                        onChange={(e) => setDocContact(e.target.value)}
+                        placeholder="98XXXXXXXX"
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label>
+                        Medical License No. <span style={{ color: "#ef4444" }}>*</span>
+                      </label>
+                      <input
+                        className={styles.inputBox}
+                        value={docRegNumber}
+                        onChange={(e) => setDocRegNumber(e.target.value)}
+                        placeholder="e.g. MCI-12345"
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <label>License Expiry Date</label>
+                      <input
+                        className={styles.inputBox}
+                        type="date"
+                        value={docExpiry}
+                        onChange={(e) => setDocExpiry(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={`${styles.formField} ${styles.fullWidth}`}>
+                      <label>
+                        Profile Photo URL <span>(Optional)</span>
+                      </label>
+                      <input
+                        className={styles.inputBox}
+                        value={docPhoto}
+                        onChange={(e) => setDocPhoto(e.target.value)}
+                        placeholder="https://example.com/photo.jpg"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
                     <button
-                      onClick={cancelEdit}
-                      style={{
-                        background: "transparent",
-                        color: "#6b7280",
-                        padding: "12px 24px",
-                        borderRadius: 20,
-                        border: "1px solid #e5e7eb",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                      }}
+                      onClick={addDoctor}
+                      className={styles.btnSolid}
+                      style={{ padding: "10px 20px", borderRadius: "8px" }}
                     >
-                      Cancel
+                      {editingIndex !== null ? "Update Detail" : "Add to List"}
                     </button>
-                  )}
+                    {editingIndex !== null && (
+                      <button
+                        onClick={cancelEdit}
+                        className={styles.btnSecondary}
+                        style={{ padding: "9px 20px", borderRadius: "8px" }}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div
-                className={styles.formFooter}
-                style={{ justifyContent: "flex-start" }}
-              >
-                <button
-                  className={styles.btnSecondary}
-                  onClick={() => setStep(1)}
-                >
-                  ← Back
-                </button>
-                <button
-                  className={styles.btnNext}
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                >
-                  {submitting ? "Submitting..." : "Submit for Approval"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ---------------- STEP 3: WAITLIST STATUS ---------------- */}
-        {step === 3 && (
-          <div className={styles.formContainer}>
-            <br />
-            <br />
-            <div className={styles.waitlistIconBox}>
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 2v20" />
-                <path d="M5 2h14" />
-                <path d="M5 22h14" />
-                <path d="M5 6l7 7-7 7" />
-                <path d="M19 6l-7 7 7 7" />
-              </svg>
-            </div>
-
-            <div className={styles.statusPill}>STATUS: PENDING APPROVAL</div>
-
-            <h2
-              className={styles.pageTitle}
-              style={{ fontSize: 40, marginBottom: 16 }}
-            >
-              You're on the waitlist!
-            </h2>
-            <p className={styles.pageSubtitle}>
-              Thank you for choosing Jivora Care. Our clinical excellence team is
-              currently reviewing your registration to ensure your sanctuary
-              meets our high-trust standards.
-            </p>
-
-            <div className={styles.waitlistGrid}>
-              <div className={styles.waitCard}>
-                <div className={styles.waitCardIcon}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                <div className={styles.formFooter}>
+                  <button className={styles.btnSecondary} onClick={() => setStep(1)}>
+                    Back to Setup
+                  </button>
+                  
+                  <button
+                    className={styles.btnNext}
+                    onClick={handleSubmit}
+                    disabled={submitting}
                   >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <polyline points="9 12 11 14 15 10" />
-                  </svg>
+                    {submitting ? "Submitting..." : "Submit for Approval"}
+                  </button>
                 </div>
-                <h4>Quality Audit</h4>
-                <p>
-                  We verify all credentials to maintain a secure environment for
-                  every patient.
-                </p>
               </div>
+            )}
 
-              <div className={styles.waitCard}>
-                <div className={styles.waitCardIcon}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+            {/* STEP 3: WAITLIST STATUS */}
+            {step === 3 && (
+              <div className={styles.formContainer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div className={styles.waitlistIconBox}>
+                  <Clock size={36} />
+                </div>
+
+                <div className={styles.statusPill}>STATUS: PENDING APPROVAL</div>
+
+                <div className={styles.waitlistGrid}>
+                  <div className={styles.waitCard}>
+                    <div className={styles.waitCardIcon}>
+                      <ShieldCheck size={16} />
+                    </div>
+                    <h4>Quality Audit</h4>
+                    <p>We verify all credentials to maintain a secure environment.</p>
+                  </div>
+
+                  <div className={styles.waitCard}>
+                    <div className={styles.waitCardIcon}>
+                      <Clock size={16} />
+                    </div>
+                    <h4>24h Response</h4>
+                    <p>Most approvals are processed within one business day.</p>
+                  </div>
+
+                  <div className={styles.waitCard}>
+                    <div className={styles.waitCardIcon}>
+                      <Mail size={16} />
+                    </div>
+                    <h4>Next Steps</h4>
+                    <p>Check your inbox for a confirmation link once approved.</p>
+                  </div>
+                </div>
+
+                <div className={styles.waitActions}>
+                  <button
+                    className={styles.btnSolid}
+                    onClick={() => (window.location.href = "mailto:concierge@jivoracare.com")}
                   >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
+                    Visit Support Center
+                  </button>
+                  <button className={styles.btnGray} onClick={() => setStep(1)}>
+                    View Info
+                  </button>
                 </div>
-                <h4>24h Response</h4>
-                <p>
-                  Most clinic approvals are processed within one business day.
-                </p>
-              </div>
 
-              <div className={styles.waitCard}>
-                <div className={styles.waitCardIcon}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
+                <div className={styles.contactInfo}>
+                  Questions? Contact onboarding concierge at <strong>concierge@jivoracare.com</strong>
                 </div>
-                <h4>Next Steps</h4>
-                <p>
-                  Check your inbox for a confirmation link once approval is
-                  complete.
-                </p>
               </div>
-            </div>
-
-            <div className={styles.waitActions}>
-              <button
-                className={styles.btnSolid}
-                onClick={() =>
-                  (window.location.href = "mailto:concierge@jivoracare.com")
-                }
-              >
-                Visit Support Center
-              </button>
-              <button className={styles.btnGray} onClick={() => setStep(1)}>
-                View Registration Info
-              </button>
-            </div>
-
-            <div className={styles.contactInfo} style={{ marginTop: 60 }}>
-              Questions about your application? Contact our onboarding concierge
-              at <strong>concierge@jivoracare.com</strong>
-            </div>
-          </div>
-        )}
-      </main>
+            )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

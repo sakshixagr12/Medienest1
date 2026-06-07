@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import { displayDoctorName } from "@/lib/utils";
@@ -7,8 +8,10 @@ import styles from "./DashboardTopBar.module.css";
 
 export default function DashboardTopBar({
   onMenuOpen,
+  showBackToPortal = false,
 }: {
   onMenuOpen?: () => void;
+  showBackToPortal?: boolean;
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -113,36 +116,59 @@ export default function DashboardTopBar({
   // Find doctor object by ID or name from param, or fallback to first doctor
   const doctorIdParam = searchParams.get("doctorId");
   const currentDoctor =
-    (doctorIdParam && doctors.find((d) => d.id === doctorIdParam)) ||
+    (doctorIdParam && doctors.find((d) => d.doctor_id === doctorIdParam || d.id === doctorIdParam)) ||
     (doctorNameParam && doctors.find((d) => d.name === doctorNameParam)) ||
     (doctors && doctors.length > 0 ? doctors[0] : null);
 
-  const displayName = currentDoctor
-    ? displayDoctorName(currentDoctor.name)
-    : "Dr. Consultant";
-  const displayQual = currentDoctor?.qualification || "Medical Professional";
+  const displayName = showBackToPortal && clinic?.name
+    ? clinic.name
+    : currentDoctor
+      ? displayDoctorName(currentDoctor.name)
+      : "Dr. Consultant";
+  const displayQual = showBackToPortal && clinic
+    ? "Clinic Administrator"
+    : (currentDoctor?.qualification || "Medical Professional");
 
   return (
     <header className={styles.topBar}>
+      {/* Back to Portal button when sidebar is hidden */}
+      {showBackToPortal && (
+        <Link href="/portal" className={styles.backToPortalBtn}>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          <span>Back to Portal</span>
+        </Link>
+      )}
+
       {/* Hamburger button - mobile only */}
-      <button
-        className={styles.menuBtn}
-        onClick={onMenuOpen}
-        aria-label="Open menu"
-      >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
+      {onMenuOpen && (
+        <button
+          className={styles.menuBtn}
+          onClick={onMenuOpen}
+          aria-label="Open menu"
         >
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      )}
 
       <div className={styles.searchWrapper}>
         <svg
@@ -177,7 +203,7 @@ export default function DashboardTopBar({
                   key={patient.id}
                   href={`/portal/doctor-dashboard/patients/${patient.id}${
                     currentDoctor
-                      ? `?doctorId=${currentDoctor.id}&doctorName=${encodeURIComponent(currentDoctor.name)}`
+                      ? `?doctorId=${currentDoctor.doctor_id || currentDoctor.id}&doctorName=${encodeURIComponent(currentDoctor.name)}`
                       : ""
                   }`}
                   className={styles.resultItem}
@@ -338,7 +364,7 @@ export default function DashboardTopBar({
             onClick={() => {
               const params = new URLSearchParams();
               if (currentDoctor) {
-                params.set("doctorId", currentDoctor.id);
+                params.set("doctorId", currentDoctor.doctor_id || currentDoctor.id);
                 params.set("doctorName", currentDoctor.name);
               }
               const qs = params.toString();
@@ -364,23 +390,29 @@ export default function DashboardTopBar({
 
         <div className={styles.divider} />
 
-        <div className={styles.profile} title="Doctor Profile">
+        <div className={styles.profile} title={showBackToPortal ? "Clinic Profile" : "Doctor Profile"}>
           <div className={styles.profileInfo}>
             <p className={styles.userName}>{displayName}</p>
             <p className={styles.userRole}>{displayQual}</p>
           </div>
           <div className={styles.avatarPlaceholder}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            {showBackToPortal && clinic?.name ? (
+              <span style={{ fontWeight: 800, fontSize: "14px", color: "var(--sanctuary-primary)" }}>
+                {clinic.name.charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            )}
           </div>
         </div>
       </div>

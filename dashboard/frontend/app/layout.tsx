@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ClinicProvider } from "@/context/ClinicContext";
 import ServiceWorkerKiller from "@/components/ServiceWorkerKiller";
+import GlobalModal from "@/components/GlobalModal";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -51,7 +52,10 @@ export default function RootLayout({
       </head>
       <body>
         <ServiceWorkerKiller />
-        <ClinicProvider>{children}</ClinicProvider>
+        <ClinicProvider>
+          <GlobalModal />
+          {children}
+        </ClinicProvider>
       </body>
     </html>
   );

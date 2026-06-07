@@ -15,6 +15,10 @@
   max-width: 100%;
 }
 
+.noSidebar {
+  margin-left: 0;
+}
+
 .canvas {
   padding: 32px 48px 48px;
   max-width: 1800px;

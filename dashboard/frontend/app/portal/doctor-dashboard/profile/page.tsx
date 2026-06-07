@@ -94,6 +94,7 @@ function DoctorProfilePage() {
           qualification,
           specialty,
           contact: phone || null,
+          contact_email: email || null,
           registration_number: regNumber || null,
           experience_years: parseInt(experience) || 0,
           license_expiry_date: expiry || null,

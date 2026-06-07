@@ -43,7 +43,7 @@ export default function DoctorPage() {
   const doctorId = searchParams.get("doctorId");
   const doctorNameParam = searchParams.get("doctorName");
 
-  const { doctors, clinic } = useClinic();
+  const { doctors, clinic, user } = useClinic();
   const [metricsData, setMetricsData] = useState({ todayCount: 0, revenue: 0 });
   const [liveQueue, setLiveQueue] = useState<any[]>([]);
   const [todayPatients, setTodayPatients] = useState<any[]>([]);
@@ -64,9 +64,52 @@ export default function DoctorPage() {
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
 
-  const activeDoctorName =
-    doctorNameParam ||
-    (doctors && doctors.length > 0 ? doctors[0].name : "Doctor");
+  const [activeDoctorId, setActiveDoctorId] = useState<string | null>(null);
+  const [activeDoctorName, setActiveDoctorName] = useState<string>("Doctor");
+
+  const currentUserDoctor = doctors?.find(
+    (d) =>
+      (d.user_id && user?.id && d.user_id === user.id) ||
+      (d.email && user?.email && d.email.toLowerCase() === user.email.toLowerCase()) ||
+      (d.contact_email && user?.email && d.contact_email.toLowerCase() === user.email.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const paramId = searchParams.get("doctorId");
+    const paramName = searchParams.get("doctorName");
+
+    if (paramId) {
+      sessionStorage.setItem("dash_doctorId", paramId);
+    }
+    if (paramName) {
+      sessionStorage.setItem("dash_doctorName", paramName);
+    }
+
+    if (paramId || paramName) {
+      // Clean query parameters from address bar to hide the long IDs
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    const savedId = sessionStorage.getItem("dash_doctorId") || paramId;
+    const savedName = sessionStorage.getItem("dash_doctorName") || paramName;
+
+    const finalId =
+      savedId ||
+      currentUserDoctor?.doctor_id ||
+      currentUserDoctor?.id ||
+      (doctors && doctors.length > 0 ? doctors[0].doctor_id || doctors[0].id : null);
+
+    const finalName =
+      savedName ||
+      currentUserDoctor?.name ||
+      (doctors && doctors.length > 0 ? doctors[0].name : "Doctor");
+
+    setActiveDoctorId(finalId);
+    setActiveDoctorName(finalName);
+  }, [searchParams, doctors, user, currentUserDoctor]);
+
   const doctorDisplayName = displayDoctorName(activeDoctorName);
   const doctorFirstName =
     doctorDisplayName.split(" ").slice(1, 2).join("") ||
@@ -82,23 +125,43 @@ export default function DoctorPage() {
   };
 
   // ── Fetch live queue from doctor_queue ──────────────────────────────
+
   const fetchQueue = useCallback(async () => {
-    if (!clinic?.id) return;
+    if (!clinic?.id || !activeDoctorId) return;
     const todayStr = getLocalTodayStr();
 
-    // Step 1: Get all active queue rows for today scoped to clinic
-    const { data: qRows, error: qErr } = await supabase
+    // Step 1: Get all active queue rows for today scoped to clinic & doctor
+    let query = supabase
       .from("doctor_queue")
       .select("*")
       .eq("clinic_id", clinic.id)
       .eq("queue_date", todayStr)
-      .in("status", ["waiting", "serving"])
-      .order("token_number", { ascending: true });
+      .in("status", ["waiting", "serving"]);
+
+    if (activeDoctorId) {
+      query = query.eq("doctor_id", activeDoctorId);
+    }
+
+    const { data: qRows, error: qErr } = await query.order("token_number", { ascending: true });
 
     if (qErr || !qRows || qRows.length === 0) {
       setLiveQueue(qRows ?? []);
       return;
     }
+
+    // Auto-call logic: if no patient is currently being served, automatically call the first waiting patient
+    const hasServing = qRows.some((r: any) => r.status === "serving");
+    const firstWaiting = qRows.find((r: any) => r.status === "waiting");
+
+    if (!hasServing && firstWaiting) {
+      await supabase
+        .from("doctor_queue")
+        .update({ status: "serving" })
+        .eq("id", firstWaiting.id);
+      fetchQueue();
+      return;
+    }
+
 
     // Step 2: Fetch patient details separately (avoids silent join failures)
     const patientIds = [
@@ -125,22 +188,23 @@ export default function DoctorPage() {
     }));
 
     setLiveQueue(merged);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clinic?.id]); // re-run when clinic loads
+  }, [clinic?.id, activeDoctorId, supabase]);
 
   // ── Fetch stats ──────────────────────────────────────────────────────
   useEffect(() => {
     const fetchStats = async () => {
-      if (!clinic?.id) return;
+      if (!clinic?.id || !activeDoctorId) return;
       const todayStr = getLocalTodayStr();
 
-      let patientQuery = supabase
-        .from("prescriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("date", todayStr)
-        .eq("clinic_id", clinic.id);
-      if (doctorId) patientQuery = patientQuery.eq("doctor_id", doctorId);
-      const { count: tCount } = await patientQuery;
+      // Count completed patients in doctor_queue for this doctor today
+      let queueQuery = supabase
+        .from("doctor_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("queue_date", todayStr)
+        .eq("clinic_id", clinic.id)
+        .eq("status", "done");
+      if (activeDoctorId) queueQuery = queueQuery.eq("doctor_id", activeDoctorId);
+      const { count: qCount } = await queueQuery;
 
       let revenueQuery = supabase
         .from("receipts")
@@ -154,29 +218,31 @@ export default function DoctorPage() {
         receipts?.reduce((s: number, r: any) => s + (r.total_amount || 0), 0) ||
         0;
 
-      setMetricsData({ todayCount: tCount || 0, revenue: rev });
+      setMetricsData({ todayCount: qCount || 0, revenue: rev });
     };
     fetchStats();
-  }, [clinic, doctorId, activeDoctorName, supabase]);
+  }, [clinic, activeDoctorId, activeDoctorName, supabase]);
 
   // ── Fetch today's completed patients ──────────────────────────────
   const fetchTodayPatients = useCallback(async () => {
-    if (!clinic?.id) return;
+    if (!clinic?.id || !activeDoctorId) return;
     const todayStr = getLocalTodayStr();
-    const { data } = await supabase
+    let query = supabase
       .from("doctor_queue")
       .select("*")
       .eq("clinic_id", clinic.id)
       .eq("queue_date", todayStr)
-      .in("status", ["done", "skipped"])
-      .order("completed_at", { ascending: false });
+      .in("status", ["done", "skipped"]);
+    if (activeDoctorId) {
+      query = query.eq("doctor_id", activeDoctorId);
+    }
+    const { data } = await query.order("completed_at", { ascending: false });
     if (data) setTodayPatients(data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clinic?.id]);
+  }, [clinic?.id, activeDoctorId, supabase]);
 
   // ── Fetch clinical analytics ─────────────────────────────────────────
   const fetchAnalytics = useCallback(async () => {
-    if (!clinic?.id) return;
+    if (!clinic?.id || !activeDoctorId) return;
     const today = new Date();
     const todayStr = getLocalTodayStr();
     const startOfWeek = new Date();
@@ -185,36 +251,45 @@ export default function DoctorPage() {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthStr = startOfMonth.toISOString().split("T")[0];
 
-    const [{ count: cToday }, { count: cWeek }, { count: cMonth }] =
-      await Promise.all([
-        supabase
-          .from("prescriptions")
-          .select("id", { count: "exact", head: true })
-          .eq("date", todayStr),
-        supabase
-          .from("prescriptions")
-          .select("id", { count: "exact", head: true })
-          .gte("date", weekStr),
-        supabase
-          .from("prescriptions")
-          .select("id", { count: "exact", head: true })
-          .gte("date", monthStr),
-      ]);
+    let rxTodayQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).eq("date", todayStr).eq("clinic_id", clinic.id);
+    let rxWeekQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("date", weekStr).eq("clinic_id", clinic.id);
+    let rxMonthQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("date", monthStr).eq("clinic_id", clinic.id);
 
-    const { data: qData } = await supabase
+    if (activeDoctorId) {
+      rxTodayQuery = rxTodayQuery.eq("doctor_id", activeDoctorId);
+      rxWeekQuery = rxWeekQuery.eq("doctor_id", activeDoctorId);
+      rxMonthQuery = rxMonthQuery.eq("doctor_id", activeDoctorId);
+    }
+
+    const [{ count: cToday }, { count: cWeek }, { count: cMonth }] =
+      await Promise.all([rxTodayQuery, rxWeekQuery, rxMonthQuery]);
+
+    let queueQuery = supabase
       .from("doctor_queue")
       .select("priority")
       .eq("queue_date", todayStr)
+      .eq("clinic_id", clinic.id)
       .eq("status", "waiting");
+    if (activeDoctorId) {
+      queueQuery = queueQuery.eq("doctor_id", activeDoctorId);
+    }
+    const { data: qData } = await queueQuery;
+
     const emergency =
       qData?.filter((q: any) => q.priority === "urgent").length || 0;
     const general = (qData?.length || 0) - emergency;
 
-    const { data: tData } = await supabase
+    let avgQuery = supabase
       .from("prescriptions")
       .select("created_at")
       .eq("date", todayStr)
+      .eq("clinic_id", clinic.id)
       .order("created_at", { ascending: true });
+    if (activeDoctorId) {
+      avgQuery = avgQuery.eq("doctor_id", activeDoctorId);
+    }
+    const { data: tData } = await avgQuery;
+
     let avgTime = 0;
     if (tData && tData.length > 1) {
       let total = 0,
@@ -240,8 +315,8 @@ export default function DoctorPage() {
       waitingGeneral: general,
       avgTime,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clinic?.id]);
+  }, [clinic?.id, activeDoctorId, supabase]);
+
 
   useEffect(() => {
     if (!clinic?.id) return;
@@ -275,8 +350,7 @@ export default function DoctorPage() {
       supabase.removeChannel(channel);
       clearInterval(poll);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clinic?.id]);
+  }, [clinic?.id, activeDoctorId, fetchQueue, fetchTodayPatients, fetchAnalytics]);
 
   // ── Elapsed timer for current patient ───────────────────────────────
   useEffect(() => {
@@ -350,19 +424,55 @@ export default function DoctorPage() {
       bg: "#ffdeaa",
       onClick: undefined,
     },
+    {
+      label: "Patient Census",
+      value: `${analytics.today} Today`,
+      trend: `${analytics.week} Week · ${analytics.month} Month`,
+      trendColor: "#0ea5e9",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M18 20V10" />
+          <path d="M12 20V4" />
+          <path d="M6 20v-6" />
+        </svg>
+      ),
+      bg: "#dbeafe",
+      onClick: undefined,
+    },
   ];
 
   return (
     <DashboardLayout>
-      <div className={styles.dashboardHeader}>
+      {/* Desktop Welcoming Header */}
+      <div className={`${styles.dashboardHeader} ${styles.desktopOnly}`}>
         <h2>Welcome back, {doctorDisplayName}.</h2>
         <p>You've seen {metricsData.todayCount} patients today.</p>
       </div>
 
+      {/* Mobile Welcoming Header */}
+      <div className={`${styles.dashboardHeader} ${styles.mobileOnly}`}>
+        <h2>
+          Welcome back,
+          <br />
+          <span className={styles.doctorNameHighlight}>{doctorDisplayName}</span>
+          <span className={styles.wavingHand}>👋</span>
+        </h2>
+        <p>
+          You've seen <span className={styles.purpleHighlight}>{metricsData.todayCount}</span> patient{metricsData.todayCount !== 1 ? "s" : ""} today.
+        </p>
+      </div>
+
       <div className={styles.fullWidthLayout}>
         <div className={styles.mainCol}>
-          {/* Metrics */}
-          <div className={styles.metricsRow}>
+          {/* Desktop-only Metrics Grid */}
+          <div className={`${styles.metricsRow} ${styles.desktopOnly}`}>
             {metrics.map((m) => (
               <div
                 key={m.label}
@@ -383,17 +493,122 @@ export default function DoctorPage() {
                 </div>
                 <div>
                   <p className={styles.metricLabel}>{m.label}</p>
-                  <h3 className={styles.metricValue}>{m.value}</h3>
-                  <p
-                    className={styles.metricTrend}
-                    style={{ color: m.trendColor }}
-                  >
-                    {m.trend}
-                  </p>
+                  {m.label === "Patient Census" ? (
+                    <div className={styles.censusRow}>
+                      <div className={styles.censusItem}>
+                        <h3 className={styles.metricValue}>{analytics.today}</h3>
+                        <span className={styles.censusLabel}>Today</span>
+                      </div>
+                      <div className={styles.censusItem}>
+                        <h3 className={styles.metricValue}>{analytics.week}</h3>
+                        <span className={styles.censusLabel}>Week</span>
+                      </div>
+                      <div className={styles.censusItem}>
+                        <h3 className={styles.metricValue}>{analytics.month}</h3>
+                        <span className={styles.censusLabel}>Month</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className={styles.metricValue}>{m.value}</h3>
+                      <p
+                        className={styles.metricTrend}
+                        style={{ color: m.trendColor }}
+                      >
+                        {m.trend}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Mobile-only Metrics Row */}
+          <div className={`${styles.topMetricsGrid} ${styles.mobileOnly}`}>
+            {/* Card 1: Patients Seen */}
+            <div
+              className={styles.metricCardBig}
+              onClick={() => setShowHistoryPanel((p) => !p)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className={styles.metricCardHeader}>
+                <div className={styles.metricIconBox} style={{ backgroundColor: "#f3e8ff" }}>
+                  <div style={{ color: "#8b5cf6" }}>
+                    {IconPatientHistory}
+                  </div>
+                </div>
+                <div className={styles.metricTextGroup}>
+                  <span className={styles.metricMiniLabel}>PATIENTS SEEN</span>
+                  <h3 className={styles.metricBigValue}>{todayPatients.length}</h3>
+                  <span className={styles.metricSubLabel}>Today</span>
+                </div>
+              </div>
+              <div className={styles.metricActionLink} style={{ color: "#8b5cf6" }}>
+                View completed sessions &rarr;
+              </div>
+              <div className={styles.cardWavyBg} />
+            </div>
+
+            {/* Card 2: Waiting */}
+            <div className={styles.metricCardBig}>
+              <div className={styles.metricCardHeader}>
+                <div className={styles.metricIconBox} style={{ backgroundColor: "#ffedd5" }}>
+                  <div style={{ color: "#f97316" }}>
+                    {IconWait}
+                  </div>
+                </div>
+                <div className={styles.metricTextGroup}>
+                  <span className={styles.metricMiniLabel}>WAITING</span>
+                  <h3 className={styles.metricBigValue}>{waitingList.length}</h3>
+                  <span className={styles.metricSubLabel}>Patients</span>
+                </div>
+              </div>
+              <div className={styles.metricActionLink} style={{ color: "#10b981" }}>
+                Queue Status
+              </div>
+              <div className={styles.cardWavyBgOrange} />
+            </div>
+          </div>
+
+          {/* Mobile-only Card 3: Patient Census (Full Width) */}
+          <div className={`${styles.censusFullWidthCard} ${styles.mobileOnly}`}>
+            <div className={styles.censusLeft}>
+              <div className={styles.censusIconBox}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path d="M18 20V10" />
+                  <path d="M12 20V4" />
+                  <path d="M6 20v-6" />
+                </svg>
+              </div>
+              <span className={styles.censusLabelText}>PATIENT CENSUS</span>
+            </div>
+            <div className={styles.censusRight}>
+              <div className={styles.censusBlock}>
+                <span className={styles.censusNum}>{analytics.today}</span>
+                <span className={styles.censusSub}>Today</span>
+              </div>
+              <div className={styles.censusDivider} />
+              <div className={styles.censusBlock}>
+                <span className={styles.censusNum}>{analytics.week}</span>
+                <span className={styles.censusSub}>Week</span>
+              </div>
+              <div className={styles.censusDivider} />
+              <div className={styles.censusBlock}>
+                <span className={styles.censusNum}>{analytics.month}</span>
+                <span className={styles.censusSub}>Month</span>
+              </div>
+            </div>
+          </div>
+
+
 
           {/* Today's Patient History Panel */}
           {showHistoryPanel && (
@@ -737,8 +952,26 @@ export default function DoctorPage() {
                             cursor: "pointer",
                             opacity: actionLoading === nowServing.id ? 0.5 : 1,
                             transition: "all 0.2s",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            flexShrink: 0,
+                            whiteSpace: "nowrap",
                           }}
-                        ></button>
+                        >
+                          <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                          Remove
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -874,187 +1107,60 @@ export default function DoctorPage() {
 
         {/* ── Clinical Analytics ── */}
         <div style={{ marginTop: 4 }}>
-          <h4
-            style={{
-              fontWeight: 800,
-              fontSize: 15,
-              color: "var(--sanctuary-primary)",
-              marginBottom: 14,
-              letterSpacing: "-0.3px",
-            }}
-          >
-            Clinical Intelligence
-          </h4>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: 14,
-            }}
-          >
-            {/* Active Queue Breakdown */}
-            <div
+          {/* Desktop-only Clinical Intelligence */}
+          <div className={styles.desktopOnly}>
+            <h4
               style={{
-                background: "#fff",
-                borderRadius: 18,
-                padding: "18px 20px",
-                border: "1px solid rgba(23,3,55,0.05)",
-                boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
+                fontWeight: 800,
+                fontSize: 15,
+                color: "var(--sanctuary-primary)",
+                marginBottom: 14,
+                letterSpacing: "-0.3px",
               }}
             >
-              <p
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  color: "var(--sanctuary-ink-l)",
-                  marginBottom: 10,
-                }}
-              >
-                Active Queue
-              </p>
-              <div style={{ display: "flex", gap: 16, marginBottom: 6 }}>
-                <div>
-                  <p
-                    style={{
-                      fontSize: 24,
-                      fontWeight: 900,
-                      color: "#ef4444",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {analytics.waitingEmergency}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 11,
-                      color: "var(--sanctuary-ink-l)",
-                      marginTop: 2,
-                    }}
-                  >
-                    Emergency
-                  </p>
-                </div>
-                <div style={{ width: 1, background: "rgba(23,3,55,0.07)" }} />
-                <div>
-                  <p
-                    style={{
-                      fontSize: 24,
-                      fontWeight: 900,
-                      color: "var(--sanctuary-primary)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {analytics.waitingGeneral}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 11,
-                      color: "var(--sanctuary-ink-l)",
-                      marginTop: 2,
-                    }}
-                  >
-                    General
-                  </p>
-                </div>
-              </div>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--sanctuary-ink-l)",
-                  fontWeight: 600,
-                }}
-              >
-                {analytics.waitingTotal} Pending
-              </p>
-            </div>
-
-            {/* Avg Consult Time */}
+              Clinical Intelligence
+            </h4>
             <div
               style={{
-                background: "#fff",
-                borderRadius: 18,
-                padding: "18px 20px",
-                border: "1px solid rgba(23,3,55,0.05)",
-                boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 14,
+                marginBottom: 24,
               }}
             >
-              <p
+              {/* Active Queue Breakdown */}
+              <div
                 style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  color: "var(--sanctuary-ink-l)",
-                  marginBottom: 10,
+                  background: "#fff",
+                  borderRadius: 18,
+                  padding: "18px 20px",
+                  border: "1px solid rgba(23,3,55,0.05)",
+                  boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
                 }}
               >
-                Avg Consult
-              </p>
-              <p
-                style={{
-                  fontSize: 36,
-                  fontWeight: 900,
-                  color: "var(--sanctuary-primary)",
-                  lineHeight: 1,
-                }}
-              >
-                {analytics.avgTime}
-                <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 2 }}>
-                  m
-                </span>
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--sanctuary-ink-l)",
-                  marginTop: 6,
-                  fontWeight: 600,
-                }}
-              >
-                Minutes per Patient
-              </p>
-            </div>
-
-            {/* Patient Census */}
-            <div
-              style={{
-                background: "#fff",
-                borderRadius: 18,
-                padding: "18px 20px",
-                border: "1px solid rgba(23,3,55,0.05)",
-                boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  color: "var(--sanctuary-ink-l)",
-                  marginBottom: 10,
-                }}
-              >
-                Patient Census
-              </p>
-              <div style={{ display: "flex", gap: 14 }}>
-                {[
-                  ["Today", analytics.today],
-                  ["Week", analytics.week],
-                  ["Month", analytics.month],
-                ].map(([label, val]) => (
-                  <div key={label as string}>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    color: "var(--sanctuary-ink-l)",
+                    marginBottom: 10,
+                  }}
+                >
+                  Active Queue
+                </p>
+                <div style={{ display: "flex", gap: 16, marginBottom: 6 }}>
+                  <div>
                     <p
                       style={{
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: 900,
-                        color: "var(--sanctuary-primary)",
+                        color: "#ef4444",
                         lineHeight: 1,
                       }}
                     >
-                      {val}
+                      {analytics.waitingEmergency}
                     </p>
                     <p
                       style={{
@@ -1063,10 +1169,204 @@ export default function DoctorPage() {
                         marginTop: 2,
                       }}
                     >
-                      {label}
+                      Emergency
                     </p>
                   </div>
-                ))}
+                  <div style={{ width: 1, background: "rgba(23,3,55,0.07)" }} />
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 24,
+                        fontWeight: 900,
+                        color: "var(--sanctuary-primary)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {analytics.waitingGeneral}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: "var(--sanctuary-ink-l)",
+                        marginTop: 2,
+                      }}
+                    >
+                      General
+                    </p>
+                  </div>
+                </div>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--sanctuary-ink-l)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {analytics.waitingTotal} Pending
+                </p>
+              </div>
+
+              {/* Avg Consult Time */}
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 18,
+                  padding: "18px 20px",
+                  border: "1px solid rgba(23,3,55,0.05)",
+                  boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    color: "var(--sanctuary-ink-l)",
+                    marginBottom: 10,
+                  }}
+                >
+                  Avg Consult
+                </p>
+                <p
+                  style={{
+                    fontSize: 36,
+                    fontWeight: 900,
+                    color: "var(--sanctuary-primary)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {analytics.avgTime}
+                  <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 2 }}>
+                    m
+                  </span>
+                </p>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--sanctuary-ink-l)",
+                    marginTop: 6,
+                    fontWeight: 600,
+                  }}
+                >
+                  Minutes per Patient
+                </p>
+              </div>
+
+              {/* Patient Census */}
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 18,
+                  padding: "18px 20px",
+                  border: "1px solid rgba(23,3,55,0.05)",
+                  boxShadow: "0 2px 10px rgba(23,3,55,0.04)",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    color: "var(--sanctuary-ink-l)",
+                    marginBottom: 10,
+                  }}
+                >
+                  Patient Census
+                </p>
+                <div style={{ display: "flex", gap: 14 }}>
+                  {[
+                    ["Today", analytics.today],
+                    ["Week", analytics.week],
+                    ["Month", analytics.month],
+                  ].map(([label, val]) => (
+                    <div key={label as string}>
+                      <p
+                        style={{
+                          fontSize: 22,
+                          fontWeight: 900,
+                          color: "var(--sanctuary-primary)",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {val}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: "var(--sanctuary-ink-l)",
+                          marginTop: 2,
+                        }}
+                      >
+                        {label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile-only Clinical Intelligence */}
+          <div className={styles.mobileOnly}>
+            <h4
+              style={{
+                fontWeight: 800,
+                fontSize: 15,
+                color: "var(--sanctuary-primary)",
+                marginBottom: 14,
+                letterSpacing: "-0.3px",
+              }}
+            >
+              Clinical Intelligence
+            </h4>
+            <div className={styles.intelligenceGrid}>
+              {/* Card 1: Active Queue */}
+              <div className={styles.intelligenceCard}>
+                <div className={styles.intelligenceIcon}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                  </svg>
+                </div>
+                <div className={styles.intelligenceInfo}>
+                  <span className={styles.intelligenceLabel}>ACTIVE QUEUE</span>
+                  <span className={styles.intelligenceValue}>{analytics.waitingTotal}</span>
+                </div>
+              </div>
+
+              {/* Card 2: Avg Consult */}
+              <div className={styles.intelligenceCard}>
+                <div className={styles.intelligenceIcon}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M4.8 2.3A.3.3 0 1 0 4.8 2.9a2 2 0 0 1 2 2v6.6a5.2 5.2 0 0 0 10.4 0V4.9a2 2 0 0 1 2-2 .3.3 0 1 0 0-.6" />
+                    <circle cx="12" cy="18" r="4" />
+                    <path d="M12 14v4" />
+                  </svg>
+                </div>
+                <div className={styles.intelligenceInfo}>
+                  <span className={styles.intelligenceLabel}>AVG CONSULT</span>
+                  <span className={styles.intelligenceValue}>{analytics.avgTime}</span>
+                  <span className={styles.intelligenceSub}>Minutes</span>
+                </div>
+              </div>
+
+              {/* Card 3: Patients Seen */}
+              <div className={styles.intelligenceCard}>
+                <div className={styles.intelligenceIcon}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                </div>
+                <div className={styles.intelligenceInfo}>
+                  <span className={styles.intelligenceLabel}>PATIENTS SEEN</span>
+                  <span className={styles.intelligenceValue}>{todayPatients.length}</span>
+                  <span className={styles.intelligenceSub}>Today</span>
+                </div>
               </div>
             </div>
           </div>

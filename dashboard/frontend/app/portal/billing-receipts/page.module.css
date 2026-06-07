@@ -218,33 +218,29 @@
 }
 
 @media print {
-  /* Hide everything by default */
-  .page > :not(.main) {
-    display: none !important;
-  }
-  .main > :not(.grid) {
-    display: none !important;
-  }
-  .grid > :not(.previewPanel) {
-    display: none !important;
-  }
-  .previewPanel > :not(.receiptCard) {
+  /* Hide everything else */
+  :global(header),
+  :global(aside),
+  :global(nav),
+  :global(footer),
+  .actionBtns,
+  .formPanel,
+  .header {
     display: none !important;
   }
 
   /* Reset layout for print */
-  .page,
-  .main,
-  .grid,
-  .previewPanel {
+  .grid {
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  .previewPanel {
     width: 100% !important;
-    max-width: none !important;
-    background: #fff !important;
-    height: auto !important;
-    display: block !important;
     position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .receiptCard {
@@ -255,14 +251,24 @@
     padding: 0 !important;
     page-break-inside: avoid;
   }
+}
 
-  /* Global hidden elements */
-  :global(nav),
-  :global(footer),
-  :global(.ssk-topbar),
-  .actionBtns {
-    display: none !important;
-  }
+.header {
+  margin-bottom: 32px;
+}
+
+.headerText h1 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #0d6e56;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.headerText p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0;
 }
 
 .suggestionsDropdown {
@@ -306,4 +312,37 @@
   font-size: 11px;
   color: var(--ink-l);
   margin-top: 2px;
+}
+
+.btnSavePrint {
+  flex: 1;
+  padding: 14px 28px;
+  background: #0d6e56;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btnSavePrint:hover:not(:disabled) {
+  background: #0a5643;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(13, 110, 86, 0.25);
+}
+
+.btnSavePrint:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btnSavePrint:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

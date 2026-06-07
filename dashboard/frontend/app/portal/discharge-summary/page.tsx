@@ -612,9 +612,9 @@ function DischargeSummaryRedesign() {
     }
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (
-      confirm(
+      await confirm(
         "Are you sure you want to clear all records? This will delete the current draft.",
       )
     ) {

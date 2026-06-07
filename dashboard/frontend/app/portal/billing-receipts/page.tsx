@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import TopBar from "@/components/TopBar";
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import { API_BASE_URL, authenticatedFetch } from "@/lib/api";
@@ -33,6 +33,23 @@ export default function BillingPage() {
   // Autocomplete patient search state
   const [ptSuggestions, setPtSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Autocomplete service search state
+  const [allServices, setAllServices] = useState<any[]>([]);
+  const [activeItemSuggestions, setActiveItemSuggestions] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!clinic?.id) return;
+    const fetchAllServices = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("clinic_services")
+        .select("*")
+        .eq("clinic_id", clinic.id);
+      setAllServices(data || []);
+    };
+    fetchAllServices();
+  }, [clinic]);
 
   const fetchPatientSuggestions = async (
     search: string,
@@ -126,6 +143,28 @@ export default function BillingPage() {
       const result = await response.json();
       if (!result.success) throw new Error(result.error);
 
+      // Save/Upsert new services to clinic_services table
+      for (const item of items) {
+        if (!item.name.trim()) continue;
+        await supabase
+          .from("clinic_services")
+          .upsert({
+            clinic_id: clinic.id,
+            name: item.name.trim(),
+            fee: item.price,
+            category: "OPD",
+          }, {
+            onConflict: "clinic_id,name"
+          });
+      }
+
+      // Refresh local services list
+      const { data: updatedServices } = await supabase
+        .from("clinic_services")
+        .select("*")
+        .eq("clinic_id", clinic.id);
+      setAllServices(updatedServices || []);
+
       alert(`Receipt ${receiptNo} saved successfully!`);
       window.print();
     } catch (err: any) {
@@ -140,10 +179,13 @@ export default function BillingPage() {
   };
 
   return (
-    <div className={styles.page}>
-      <TopBar title="New Bill & Receipt" backHref="/portal/front-desk" />
-
-      <main className={styles.main}>
+    <DashboardLayout hideSidebar>
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <h1>New Bill & Receipt</h1>
+          <p>Create invoices, print receipts, and manage billing</p>
+        </div>
+      </div>
         <div className={styles.grid}>
           {/* Form Side */}
           <div className={styles.formPanel}>
@@ -244,15 +286,43 @@ export default function BillingPage() {
               {items.map((item, index) => (
                 <div key={item.id} className={styles.itemRow}>
                   <div className={styles.itemIndex}>{index + 1}</div>
-                  <div className="field" style={{ flex: 2, marginBottom: 0 }}>
+                  <div className="field" style={{ flex: 2, marginBottom: 0, position: "relative" }}>
                     <input
                       type="text"
                       value={item.name}
-                      onChange={(e) =>
-                        updateItem(item.id, "name", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updateItem(item.id, "name", e.target.value);
+                        setActiveItemSuggestions(item.id);
+                      }}
+                      onFocus={() => setActiveItemSuggestions(item.id)}
+                      onBlur={() => setTimeout(() => setActiveItemSuggestions(null), 200)}
                       placeholder="Service name (e.g. Consultation)"
                     />
+
+                    {activeItemSuggestions === item.id && (
+                      <div className={styles.suggestionsDropdown}>
+                        {allServices
+                          .filter((srv) =>
+                            srv.name.toLowerCase().includes(item.name.toLowerCase())
+                          )
+                          .slice(0, 5)
+                          .map((srv) => (
+                            <div
+                              key={srv.id}
+                              className={styles.suggestionItem}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                updateItem(item.id, "name", srv.name);
+                                updateItem(item.id, "price", srv.fee);
+                                setActiveItemSuggestions(null);
+                              }}
+                            >
+                              <div className={styles.suggestionName}>{srv.name}</div>
+                              <div className={styles.suggestionMeta}>₹{srv.fee} &middot; {srv.category}</div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                   <div className="field" style={{ flex: 1, marginBottom: 0 }}>
                     <input
@@ -402,16 +472,15 @@ export default function BillingPage() {
 
             <div className={styles.actionBtns}>
               <button
-                className="btn-primary"
+                className={styles.btnSavePrint}
                 onClick={handleSave}
-                style={{ flex: 1 }}
+                disabled={isSaving}
               >
-                Save & Print
+                {isSaving ? "Saving..." : "Save & Print"}
               </button>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

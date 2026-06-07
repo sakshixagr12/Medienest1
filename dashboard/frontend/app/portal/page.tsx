@@ -373,7 +373,7 @@ export default function PortalPage() {
             </div>
           </Link>
 
-          <Link href="/portal/front-desk/clinic-settings" className={styles.portalCardLarge}>
+          <Link href="/portal/clinic-settings" className={styles.portalCardLarge}>
             <div className={styles.cardContent}>
               <div className={styles.iconBoxSecondary} style={{ background: '#eef2ff', color: '#4f46e5' }}>
                 <svg
@@ -430,41 +430,75 @@ export default function PortalPage() {
               className={styles.doctorModal}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles.modalHeader}>
-                <h3>Select Consulting Doctor</h3>
-                <button
-                  className={styles.closeBtn}
-                  onClick={() => setShowDoctorSelect(false)}
-                >
-                  ×
-                </button>
+              {/* Close Button */}
+              <button
+                className={styles.closeBtn}
+                onClick={() => setShowDoctorSelect(false)}
+                aria-label="Close"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                </svg>
+              </button>
+
+              {/* Header */}
+              <div className={styles.modalTop}>
+                <div className={styles.modalLogoCircle}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <h3 className={styles.modalTitle}>Select Consulting Doctor</h3>
+
+                <div className={styles.heartSeparator}>
+                  <span className={styles.separatorLine} />
+                  <span className={styles.heartIcon}>💚</span>
+                  <span className={styles.separatorLine} />
+                </div>
+
+                <p className={styles.modalSubtext}>
+                  {doctors.length} doctor{doctors.length !== 1 ? "s" : ""} available at {hospitalName}
+                </p>
               </div>
+
+              {/* Doctor List */}
               <div className={styles.doctorList}>
-                {doctors.map((doc) => (
+                {doctors.map((doc, idx) => (
                   <Link
                     key={doc.id}
-                    href={`/portal/doctor-dashboard?doctorId=${doc.id}&doctorName=${encodeURIComponent(doc.name)}`}
+                    href={`/portal/doctor-dashboard?doctorId=${doc.doctor_id || doc.id}&doctorName=${encodeURIComponent(doc.name)}`}
                     className={styles.doctorItem}
+                    style={{ animationDelay: `${idx * 80}ms` }}
                   >
                     <div className={styles.doctorAvatar}>
-                      {doc.name.charAt(0)}
+                      {doc.name.charAt(0).toUpperCase()}
                     </div>
                     <div className={styles.doctorInfo}>
                       <h4>{displayDoctorName(doc.name)}</h4>
-                      <p>{doc.specialty || "Medical Officer"}</p>
+                      <span className={styles.specialtyBadge}>
+                        {doc.specialty || "Medical Officer"}
+                      </span>
                     </div>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                    <div className={styles.doctorArrow}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </div>
                   </Link>
                 ))}
+              </div>
+
+              {/* Footer */}
+              <div className={styles.modalFooter}>
+                <div className={styles.heartSeparatorGrey}>
+                  <span className={styles.separatorLine} />
+                  <span className={styles.heartIconGrey}>❤</span>
+                  <span className={styles.separatorLine} />
+                </div>
+                <p className={styles.modalFooterText}>Jivora Care · Compassion. Care. Connected.</p>
               </div>
             </div>
           </div>
@@ -540,9 +574,7 @@ export default function PortalPage() {
         </section>
 
         <footer className={styles.portalFooter}>
-          Authorized personnel only. Clinic Operating System v2.4.{" "}
-          {hospitalName} ensures data privacy and end-to-end encryption for all
-          clinic records.
+          Authorized personnel only. Clinic Operating System v2.4. Jivora Care ensures data privacy for all clinic records.
         </footer>
       </div>
     </>

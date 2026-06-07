@@ -61,7 +61,7 @@ function PatientLobbyContent() {
   // Handle Add to Queue
   const handleAddToQueue = (p: Patient) => {
     setSelectedPatient(p);
-    setSelectedDoctorId(doctors?.[0]?.id || "");
+    setSelectedDoctorId(doctors?.[0]?.doctor_id || "");
     setPriority("normal");
     setIsCheckInModalOpen(true);
   };
@@ -71,27 +71,13 @@ function PatientLobbyContent() {
 
     setIsSubmitting(true);
     try {
-      // Get next token number
-      const todayStr = getLocalTodayStr();
-      const { data: maxTok } = await supabase
-        .from("doctor_queue")
-        .select("token_number")
-        .eq("queue_date", todayStr)
-        .eq("clinic_id", clinic.id)
-        .order("token_number", { ascending: false })
-        .limit(1);
-
-      const nextToken = (maxTok?.[0]?.token_number ?? 0) + 1;
-
-      const { error: qErr } = await supabase.from("doctor_queue").insert({
-        clinic_id: clinic.id,
-        doctor_id: selectedDoctorId || null,
-        patient_id: selectedPatient.id,
-        patient_name: selectedPatient.name,
-        token_number: nextToken,
-        status: "waiting",
-        priority: priority,
-        queue_date: todayStr,
+      const { error: qErr } = await supabase.rpc("add_patient_to_queue", {
+        p_clinic_id: clinic.id,
+        p_doctor_id: selectedDoctorId,
+        p_patient_id: selectedPatient.id,
+        p_patient_name: selectedPatient.name,
+        p_priority: priority,
+        p_notes: null,
       });
 
       if (qErr) throw qErr;
@@ -294,10 +280,11 @@ function PatientLobbyContent() {
                   className={styles.selectInput}
                   value={selectedDoctorId}
                   onChange={(e) => setSelectedDoctorId(e.target.value)}
+                  required
                 >
-                  <option value="">General Queue (No Doctor)</option>
+                  <option value="" disabled>Select a Doctor</option>
                   {doctors?.map((d: any) => (
-                    <option key={d.id} value={d.id}>
+                    <option key={d.doctor_id} value={d.doctor_id}>
                       {d.name} ({d.specialty || "General"})
                     </option>
                   ))}

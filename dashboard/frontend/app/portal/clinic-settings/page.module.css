@@ -4,7 +4,7 @@
 
 .backBtn {
   display: flex;
-  items-center: center;
+  align-items: center;
   gap: 6px;
   color: #64748b;
   text-decoration: none;
@@ -60,6 +60,7 @@
   color: #0d6e56;
   padding: 10px;
   border-radius: 12px;
+  display: flex;
 }
 
 .cardHeader h3 {

@@ -5,8 +5,9 @@
 -- ============================================================
 
 -- ── 1. HARD RESET ───────────────────────────────────────────
-DROP SCHEMA IF EXISTS public CASCADE;
-CREATE SCHEMA public;
+-- Commented out to prevent accidental database data loss
+-- DROP SCHEMA IF EXISTS public CASCADE;
+-- CREATE SCHEMA public;
 
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO anon;

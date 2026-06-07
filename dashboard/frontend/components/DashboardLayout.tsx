@@ -8,19 +8,25 @@ import styles from "./DashboardLayout.module.css";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  hideSidebar?: boolean;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, hideSidebar = false }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className={styles.layout}>
-      <DashboardSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-      <div className={styles.contentArea}>
-        <DashboardTopBar onMenuOpen={() => setSidebarOpen(true)} />
+      {!hideSidebar && (
+        <DashboardSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      )}
+      <div className={`${styles.contentArea} ${hideSidebar ? styles.noSidebar : ""}`}>
+        <DashboardTopBar
+          onMenuOpen={hideSidebar ? undefined : () => setSidebarOpen(true)}
+          showBackToPortal={hideSidebar}
+        />
         <main className={styles.canvas}>{children}</main>
       </div>
       <MobileBottomNav />

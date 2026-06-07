@@ -45,6 +45,7 @@ export default function FrontDeskPage() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeDoctorId, setActiveDoctorId] = useState<string>("all");
 
   // ── Drag-and-drop state ──────────────────────────────────────────────
   const dragItem = useRef<number | null>(null);
@@ -75,7 +76,7 @@ export default function FrontDeskPage() {
     const todayStr = getLocalTodayStr();
     try {
       // Active
-      const { data: active } = await supabase
+      let activeQuery = supabase
         .from("doctor_queue")
         .select("*")
         .eq("clinic_id", clinic.id)
@@ -83,8 +84,13 @@ export default function FrontDeskPage() {
         .in("status", ["waiting", "serving"])
         .order("token_number", { ascending: true });
 
+      if (activeDoctorId !== "all") {
+        activeQuery = activeQuery.eq("doctor_id", activeDoctorId);
+      }
+      const { data: active } = await activeQuery;
+
       // Done
-      const { data: done } = await supabase
+      let doneQuery = supabase
         .from("doctor_queue")
         .select("*")
         .eq("clinic_id", clinic.id)
@@ -92,6 +98,11 @@ export default function FrontDeskPage() {
         .in("status", ["done", "skipped"])
         .order("completed_at", { ascending: false })
         .limit(30);
+
+      if (activeDoctorId !== "all") {
+        doneQuery = doneQuery.eq("doctor_id", activeDoctorId);
+      }
+      const { data: done } = await doneQuery;
 
       // Fetch patient details separately
       const allRows = [...(active || []), ...(done || [])];
@@ -124,7 +135,7 @@ export default function FrontDeskPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, clinic?.id]);
+  }, [supabase, clinic?.id, activeDoctorId]);
 
   // ── Realtime + polling ───────────────────────────────────────────────
   useEffect(() => {
@@ -148,8 +159,7 @@ export default function FrontDeskPage() {
       supabase.removeChannel(channel);
       clearInterval(poll);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clinic?.id]);
+  }, [clinic?.id, fetchQueue]);
 
   // ── Phone search for check-in ───────────────────────────────────────
   useEffect(() => {
@@ -171,6 +181,14 @@ export default function FrontDeskPage() {
     return () => clearTimeout(timer);
   }, [ptPhone, supabase, clinic?.id]);
 
+  const [checkInDoctorId, setCheckInDoctorId] = useState<string>("");
+
+  useEffect(() => {
+    if (doctors && doctors.length > 0 && !checkInDoctorId) {
+      setCheckInDoctorId(doctors[0].doctor_id || doctors[0].id);
+    }
+  }, [doctors, checkInDoctorId]);
+
   const resetCheckIn = () => {
     setPtPhone("");
     setPtName("");
@@ -180,6 +198,7 @@ export default function FrontDeskPage() {
     setPtBloodGroup("");
     setPtAddress("");
     setCheckInPriority("normal");
+    setCheckInDoctorId(doctors && doctors.length > 0 ? (doctors[0].doctor_id || doctors[0].id) : "");
     setSearchResults([]);
     setShowDropdown(false);
   };
@@ -245,25 +264,13 @@ export default function FrontDeskPage() {
         patientId = neu.id;
       }
 
-      // Get next token number for today
-      const todayStr = getLocalTodayStr();
-      const { data: maxTok } = await supabase
-        .from("doctor_queue")
-        .select("token_number")
-        .eq("queue_date", todayStr)
-        .eq("clinic_id", clinic.id)
-        .order("token_number", { ascending: false })
-        .limit(1);
-      const nextToken = (maxTok?.[0]?.token_number ?? 0) + 1;
-
-      const { error: qErr } = await supabase.from("doctor_queue").insert({
-        patient_id: patientId,
-        patient_name: normalizedName,
-        token_number: nextToken,
-        priority: checkInPriority,
-        status: "waiting",
-        queue_date: todayStr,
-        clinic_id: clinic.id,
+      const { error: qErr } = await supabase.rpc("add_patient_to_queue", {
+        p_clinic_id: clinic.id,
+        p_doctor_id: checkInDoctorId,
+        p_patient_id: patientId,
+        p_patient_name: normalizedName,
+        p_priority: checkInPriority,
+        p_notes: null,
       });
       if (qErr) throw qErr;
 
@@ -321,10 +328,12 @@ export default function FrontDeskPage() {
   const serving = queue.find((q) => q.status === "serving");
 
   const handleDragStart = (idx: number, id: string) => {
+    if (activeDoctorId === "all") return;
     dragItem.current = idx;
     setDragging(id);
   };
   const handleDragEnter = (idx: number, id: string) => {
+    if (activeDoctorId === "all") return;
     dragOverItem.current = idx;
     setDragOver(id);
   };
@@ -334,6 +343,7 @@ export default function FrontDeskPage() {
   };
 
   const handleDrop = async () => {
+    if (activeDoctorId === "all") return;
     const from = dragItem.current,
       to = dragOverItem.current;
     if (from === null || to === null || from === to) {
@@ -406,6 +416,44 @@ export default function FrontDeskPage() {
           </svg>
           Check-in Patient
         </button>
+      </div>
+
+      <div style={{ display: "flex", gap: "8px", marginBottom: "20px", overflowX: "auto", paddingBottom: "4px" }}>
+        <button
+          onClick={() => setActiveDoctorId("all")}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "20px",
+            border: activeDoctorId === "all" ? "none" : "1px solid rgba(23,3,55,0.1)",
+            background: activeDoctorId === "all" ? "var(--sanctuary-primary)" : "#fff",
+            color: activeDoctorId === "all" ? "#fff" : "var(--sanctuary-ink-l)",
+            fontWeight: 700,
+            fontSize: "13px",
+            cursor: "pointer",
+            whiteSpace: "nowrap"
+          }}
+        >
+          All Doctors
+        </button>
+        {doctors?.map((doc: any) => (
+          <button
+            key={doc.doctor_id || doc.id}
+            onClick={() => setActiveDoctorId(doc.doctor_id || doc.id)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "20px",
+              border: activeDoctorId === (doc.doctor_id || doc.id) ? "none" : "1px solid rgba(23,3,55,0.1)",
+              background: activeDoctorId === (doc.doctor_id || doc.id) ? "var(--sanctuary-primary)" : "#fff",
+              color: activeDoctorId === (doc.doctor_id || doc.id) ? "#fff" : "var(--sanctuary-ink-l)",
+              fontWeight: 700,
+              fontSize: "13px",
+              cursor: "pointer",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {doc.name}
+          </button>
+        ))}
       </div>
 
       <div
@@ -633,7 +681,7 @@ export default function FrontDeskPage() {
         {waiting.map((entry, idx) => (
           <div
             key={entry.id}
-            draggable
+            draggable={activeDoctorId !== "all"}
             onDragStart={() => handleDragStart(idx, entry.id)}
             onDragEnter={() => handleDragEnter(idx, entry.id)}
             onDragOver={(e) => e.preventDefault()}
@@ -1155,6 +1203,22 @@ export default function FrontDeskPage() {
                   value={ptAddress}
                   onChange={(e) => setPtAddress(e.target.value)}
                 />
+              </div>
+              <div className={styles.formSection}>
+                <label className={styles.formLabel}>Assign Doctor</label>
+                <select
+                  className={styles.formInput}
+                  value={checkInDoctorId}
+                  onChange={(e) => setCheckInDoctorId(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select Doctor</option>
+                  {doctors && doctors.map((doc: any) => (
+                    <option key={doc.id || doc.doctor_id} value={doc.doctor_id || doc.id}>
+                      {doc.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.formSection}>
                 <label className={styles.formLabel}>Priority Level</label>

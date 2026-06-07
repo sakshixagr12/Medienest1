@@ -276,8 +276,8 @@ export default function PrescriptionPage() {
       : doctors.find((d) => d.id === searchParams.get("doctorId")) ||
         doctors.find((d) => d.name === searchParams.get("doctorName"));
 
-  const handleNewRecord = () => {
-    if (window.confirm("Clear current draft and start a new record?")) {
+  const handleNewRecord = async () => {
+    if (await window.confirm("Clear current draft and start a new record?")) {
       const pId = searchParams.get("patientId") || "unlinked";
       localStorage.removeItem(`jivora care_rx_draft_${pId}`);
       setPtName("");
@@ -587,10 +587,10 @@ export default function PrescriptionPage() {
   const handleSave = async () => {
     // Safety check for unapproved AI suggestions
     if (!adviceApproved) {
-      const confirm = window.confirm(
+      const confirmResult = await window.confirm(
         "The Clinical Advice box contains AI-generated content that hasn't been approved. Proceed and Save anyway?",
       );
-      if (!confirm) return;
+      if (!confirmResult) return;
     }
 
     if (!ptName || !ptPhone) {

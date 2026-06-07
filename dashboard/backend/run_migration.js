@@ -1,29 +1,29 @@
-const fs = require("fs");
-const { Client } = require("pg");
-require("dotenv").config();
+const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-const run = async () => {
+async function runMigration() {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
   });
 
   try {
     await client.connect();
-    console.log("Connected to target DB.");
-    const sql = fs.readFileSync(
-      "migrations/v2_clean/7_link_discharge_to_patients.sql",
-      "utf8",
-    );
-    await client.query(sql);
-    console.log("Migration 7 applied successfully.");
+    console.log("Connected to PostgreSQL DB");
 
-    await client.query(`NOTIFY pgrst, 'reload schema';`);
-    console.log("PostgREST schema reloaded.");
-  } catch (err) {
-    console.error("Error:", err);
+    const sqlFile = path.join(__dirname, 'migrations', 'v2_clean', '35_queue_optimizations.sql');
+    const sql = fs.readFileSync(sqlFile, 'utf8');
+
+    console.log("Running migration...");
+    await client.query(sql);
+    console.log("Migration executed successfully!");
+  } catch (error) {
+    console.error("Migration failed:", error);
   } finally {
     await client.end();
   }
-};
+}
 
-run();
+runMigration();

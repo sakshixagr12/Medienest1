@@ -6,7 +6,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useClinic } from "@/context/ClinicContext";
 import styles from "./DashboardSidebar.module.css";
-import SidebarAnalytics from "./SidebarAnalytics";
 
 const navItems = [
   {
@@ -61,10 +60,10 @@ export default function DashboardSidebar({
   const doctorIdParam = searchParams?.get("doctorId");
   const activeDoctor =
     doctorIdParam && doctors
-      ? doctors.find((d) => d.id === doctorIdParam)
+      ? doctors.find((d) => d.doctor_id === doctorIdParam || d.id === doctorIdParam)
       : doctors?.[0];
   const activeDoctorName = activeDoctor?.name || "Doctor";
-  const activeDoctorId = activeDoctor?.id || "";
+  const activeDoctorId = activeDoctor?.doctor_id || activeDoctor?.id || "";
 
   const buildDoctorUrl = (baseHref: string) => {
     if (!activeDoctorId) return baseHref;
@@ -359,10 +358,9 @@ export default function DashboardSidebar({
 
             {/* Dashboard Link directly under header */}
             {navItems.map((item) => {
-              let dynamicHref =
-                isReceptionist && item.label === "Dashboard"
-                  ? "/portal/front-desk"
-                  : item.href;
+              if (isReceptionist && item.label === "Dashboard") return null;
+
+              let dynamicHref = item.href;
 
               if (!isReceptionist && item.label === "Dashboard") {
                 dynamicHref = buildDoctorUrl(item.href);
@@ -413,34 +411,26 @@ export default function DashboardSidebar({
                 ))}
               </div>
             )}
-
-            {!isReceptionist && (
-              <SidebarAnalytics
-                doctorId={activeDoctor?.id || null}
-                doctorName={activeDoctorName}
-                clinicId={clinic?.id || null}
-              />
-            )}
-
-            <Link
-              href="/portal"
-              onClick={handleNavClick}
-              className={styles.portalButton}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              <span>Back to Portal</span>
-            </Link>
           </div>
+
+          <Link
+            href="/portal"
+            onClick={handleNavClick}
+            className={styles.portalButton}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Back to Portal</span>
+          </Link>
         </nav>
 
         <div className={styles.sidebarFooter}>
