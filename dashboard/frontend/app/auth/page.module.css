@@ -10,10 +10,7 @@
 }
 
 .overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(250, 248, 242, 0.88); /* light creme wash over the background image */
-  z-index: 1;
+  display: none;
 }
 
 .container {
