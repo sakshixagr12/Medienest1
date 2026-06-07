@@ -17,8 +17,9 @@
 
 .canvas {
   padding: 32px 48px 48px;
-  max-width: 1400px;
-  width: 100%;
+  max-width: 1800px;
+  width: 90%;
+  margin: 0 auto;
 }
 
 @media (max-width: 1024px) {

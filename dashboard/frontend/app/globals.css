@@ -98,7 +98,8 @@ body {
 
 /* ── Shared Utilities ── */
 .container {
-  max-width: 1200px;
+  max-width: 1800px;
+  width: 90%;
   margin: 0 auto;
   padding: 0 24px;
 }

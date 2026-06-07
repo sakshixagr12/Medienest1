@@ -51,3 +51,17 @@ export function displayDoctorName(name: string): string {
     return `Dr. ${name.substring(3).trim()}`;
   return `Dr. ${name.trim()}`;
 }
+
+export function cn(...inputs: any[]): string {
+  return inputs
+    .flat(Infinity)
+    .filter((val) => typeof val === "string" || (val && typeof val === "object"))
+    .map((val) => {
+      if (typeof val === "string") return val;
+      return Object.keys(val)
+        .filter((key) => val[key])
+        .join(" ");
+    })
+    .filter(Boolean)
+    .join(" ");
+}

@@ -12,7 +12,7 @@
 .identityHeader {
   text-align: center;
   margin-bottom: 48px;
-  max-width: 800px;
+  max-width: 1000px;
 }
 
 .logoBox {
@@ -47,8 +47,8 @@
 
 /* --- Metrics Grid --- */
 .metricsGrid {
-  width: 100%;
-  max-width: 1000px;
+  width: 90%;
+  max-width: 1800px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
@@ -99,8 +99,8 @@
 
 /* --- Selection Cards --- */
 .selectionShell {
-  width: 100%;
-  max-width: 1000px;
+  width: 90%;
+  max-width: 1800px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
@@ -190,8 +190,8 @@
 
 /* --- Activity Feed --- */
 .activityFeed {
-  width: 100%;
-  max-width: 1000px;
+  width: 90%;
+  max-width: 1800px;
   background: #f4f4ef;
   border-radius: 24px;
   padding: 32px;
