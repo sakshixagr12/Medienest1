@@ -1822,7 +1822,10 @@
     font-size: 1.75rem;
   }
   .dash-stats-row {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .dash-bottom-row {
+    display: none !important;
   }
   .pain-card, .feat-card-v5 {
     padding: 1.25rem;
