@@ -165,8 +165,9 @@ export default function BillingPage() {
         .eq("clinic_id", clinic.id);
       setAllServices(updatedServices || []);
 
-      alert(`Receipt ${receiptNo} saved successfully!`);
+      await alert(`Receipt ${receiptNo} saved successfully!`);
       window.print();
+
     } catch (err: any) {
       console.error("Secure Save Failure:", err);
       alert(

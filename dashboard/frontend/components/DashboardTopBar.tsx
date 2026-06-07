@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import { displayDoctorName } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api";
 import styles from "./DashboardTopBar.module.css";
+
 
 export default function DashboardTopBar({
   onMenuOpen,
@@ -50,8 +52,9 @@ export default function DashboardTopBar({
     setNotifError(false);
     try {
       const response = await fetch(
-        `http://localhost:4001/api/notifications?clinic_id=${clinic.id}`,
+        `${API_BASE_URL}/api/notifications?clinic_id=${clinic.id}`,
       );
+
       const result = await response.json();
       if (result.success) {
         setNotifications(result.data);

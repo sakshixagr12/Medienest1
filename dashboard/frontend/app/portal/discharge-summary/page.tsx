@@ -603,8 +603,9 @@ function DischargeSummaryRedesign() {
       ]);
       if (error) throw error;
       localStorage.removeItem("discharge_summary_draft");
-      alert("Discharge Summary finalized and linked to patient record!");
+      await alert("Discharge Summary finalized and linked to patient record!");
       window.print();
+
     } catch (e: any) {
       alert("Error saving: " + e.message);
     } finally {

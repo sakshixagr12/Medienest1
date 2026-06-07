@@ -28,7 +28,8 @@ interface Clinic {
   clinic_doctors?: ClinicDoctor[];
 }
 
-const API_URL = "http://localhost:4002/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4002/api";
+
 
 export default function App() {
   const [clinics, setClinics] = useState<Clinic[]>([]);

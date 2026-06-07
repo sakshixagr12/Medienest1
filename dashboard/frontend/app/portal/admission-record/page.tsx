@@ -926,8 +926,9 @@ function AdmissionRecordRedesign() {
       ]);
       if (error) throw error;
       localStorage.removeItem("admission_draft");
-      alert("Admission Record finalized and linked to patient!");
+      await alert("Admission Record finalized and linked to patient!");
       const params = new URLSearchParams();
+
       const dId = searchParams.get("doctorId");
       const dName = searchParams.get("doctorName") || searchParams.get("docName");
       if (dId) params.set("doctorId", dId);

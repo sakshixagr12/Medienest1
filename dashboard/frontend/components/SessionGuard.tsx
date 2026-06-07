@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useRouter } from "next/router";
-import { createClient } from "../supabase/client";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
 
 /**
  * SessionGuard – protects client‑side routes.
