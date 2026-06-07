@@ -544,7 +544,7 @@
 
 /* ── PROBLEM SECTION ── */
 .section-v3 {
-  padding: 3.5rem 0 5rem 0;
+  padding: 7.5rem 0;
 }
 
 .section-title {
@@ -579,7 +579,7 @@
   color: #64748b;
   font-size: 1.2rem;
   max-width: 700px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 3.5rem;
 }
 
 .pain-grid {
@@ -641,7 +641,7 @@
 .feature-grid-v5 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .feat-card-v5 {
@@ -981,7 +981,7 @@
 }
 
 .final-cta-v5 {
-  padding: 5rem 0;
+  padding: 7rem 0;
   background: radial-gradient(circle at 50% 50%, rgba(13, 148, 136, 0.04) 0%, transparent 60%);
 }
 
