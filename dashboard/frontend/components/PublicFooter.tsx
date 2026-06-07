@@ -9,13 +9,13 @@ export default function PublicFooter() {
           <div className="footer-info">
             <Link href="/" className="logo">
               <Image
-                src="/assets/jirova_care_logo.png"
-                alt="Jirova Care"
+                src="/assets/jivora_care_logo.png"
+                alt="Jivora Care"
                 width={32}
                 height={32}
                 className="footer-logo-img"
               />
-              <span className="footer-logo-text">Jirova Care</span>
+              <span className="footer-logo-text">Jivora Care</span>
             </Link>
             <p>
               Automating clinical workflows and digital prescriptions with the power of advanced AI. Built to streamline operations for modern practitioners.
@@ -46,9 +46,9 @@ export default function PublicFooter() {
 
         <div className="footer-bottom" style={{ flexDirection: 'column', gap: '1rem', textAlign: 'center' }}>
           <p className="disclaimer-text" style={{ fontSize: '13px', color: '#64748b', textTransform: 'none', fontWeight: 'normal', margin: '0 0 10px 0', lineHeight: 1.5, letterSpacing: 'normal' }}>
-            Jirova Care provides healthcare workflow software. Clinical decisions remain the responsibility of licensed healthcare professionals.
+            Jivora Care provides healthcare workflow software. Clinical decisions remain the responsibility of licensed healthcare professionals.
           </p>
-          <p style={{ margin: 0 }}>© 2026 JIROVA CARE • INTELLIGENT CLINIC SOLUTIONS</p>
+          <p style={{ margin: 0 }}>© 2026 JIVORA CARE • INTELLIGENT CLINIC SOLUTIONS</p>
         </div>
       </div>
     </footer>

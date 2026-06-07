@@ -13,7 +13,7 @@ const getApiBaseUrl = () => {
     } else if (!process.env.NEXT_PUBLIC_API_URL) {
       // Production Self-Healing: Warn if migration is incomplete
       console.warn(
-        "%c⚠️ Jirova Care Deployment Alert:",
+        "%c⚠️ Jivora Care Deployment Alert:",
         "color: #ff9800; font-weight: bold; font-size: 14px;",
         "\nMissing NEXT_PUBLIC_API_URL on this live domain. Using localhost fallback (which will likely fail). \nEnsure you have added your Render URL to your Vercel Dashboard.",
       );

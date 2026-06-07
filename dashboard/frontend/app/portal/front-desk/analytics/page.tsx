@@ -180,7 +180,7 @@ export default function AnalyticsDashboardPage() {
       }
     } catch (err: any) {
       console.error("Analytics fetch error:", err);
-      setError("Network error. Ensure the Jirova Care backend is running.");
+      setError("Network error. Ensure the Jivora Care backend is running.");
     } finally {
       setIsLoading(false);
     }

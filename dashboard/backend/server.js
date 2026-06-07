@@ -100,7 +100,7 @@ app.use(
 
 // ─── Basic Health Check ───
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "Jirova Care API is running" });
+  res.json({ status: "ok", message: "Jivora Care API is running" });
 });
 
 app.get("/api/ping", async (req, res) => {
@@ -459,7 +459,7 @@ app.use((err, req, res, next) => {
 const startServer = (port) => {
   app
     .listen(port, () => {
-      console.log(`[AI 4/4] Jirova Care API is LIVE on port ${port}`);
+      console.log(`[AI 4/4] Jivora Care API is LIVE on port ${port}`);
     })
     .on("error", (err) => {
       if (err.code === "EADDRINUSE") {

@@ -21,7 +21,7 @@ export default function PortalPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const hospitalName = clinic?.name || "Jirova Care Partner Clinic";
+  const hospitalName = clinic?.name || "Jivora Care Partner Clinic";
   const hospitalLocation = clinic?.address || "Location not set";
 
   useEffect(() => {

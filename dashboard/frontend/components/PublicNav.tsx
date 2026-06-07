@@ -7,12 +7,12 @@ export default function PublicNav() {
     <nav className={styles.nav}>
       <Link href="/" className={styles.navLogo}>
         <Image
-          src="/assets/jirova_care_logo.png"
-          alt="Jirova Care"
+          src="/assets/jivora_care_logo.png"
+          alt="Jivora Care"
           width={32}
           height={32}
         />
-        <span>Jirova Care</span>
+        <span>Jivora Care</span>
       </Link>
       <Link href="/" className={styles.btnSolidNav}>
         Back to Home

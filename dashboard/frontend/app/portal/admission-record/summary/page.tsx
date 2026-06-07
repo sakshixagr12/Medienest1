@@ -429,7 +429,7 @@ export default function AdmissionSummaryPage() {
         {/* Footer */}
         <div className={styles.docFooter}>
           <div>
-            Jirova Care Clinical Record &nbsp;•&nbsp; Generated{" "}
+            Jivora Care Clinical Record &nbsp;•&nbsp; Generated{" "}
             {new Date().toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",

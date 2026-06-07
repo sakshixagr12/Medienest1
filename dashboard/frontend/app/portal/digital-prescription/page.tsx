@@ -98,7 +98,7 @@ export default function PrescriptionPage() {
   // Draft Persistence (Cache) Logic
   useEffect(() => {
     const pId = searchParams.get("patientId") || "unlinked";
-    const draftKey = `jirova care_rx_draft_${pId}`;
+    const draftKey = `jivora care_rx_draft_${pId}`;
     const savedDraft = localStorage.getItem(draftKey);
     if (savedDraft) {
       try {
@@ -133,12 +133,12 @@ export default function PrescriptionPage() {
   }, []);
 
   useEffect(() => {
-    const autoAi = localStorage.getItem("jirova care_auto_ai");
+    const autoAi = localStorage.getItem("jivora care_auto_ai");
     if (autoAi !== null) setIsAutoAiEnabled(JSON.parse(autoAi));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("jirova care_auto_ai", JSON.stringify(isAutoAiEnabled));
+    localStorage.setItem("jivora care_auto_ai", JSON.stringify(isAutoAiEnabled));
   }, [isAutoAiEnabled]);
 
   // 'Zero Latency' Auto-Fill from Deep-Link Params
@@ -241,7 +241,7 @@ export default function PrescriptionPage() {
       adviceApproved,
     };
     const pId = searchParams.get("patientId") || "unlinked";
-    const draftKey = `jirova care_rx_draft_${pId}`;
+    const draftKey = `jivora care_rx_draft_${pId}`;
     localStorage.setItem(draftKey, JSON.stringify(draft));
   }, [
     ptName,
@@ -279,7 +279,7 @@ export default function PrescriptionPage() {
   const handleNewRecord = () => {
     if (window.confirm("Clear current draft and start a new record?")) {
       const pId = searchParams.get("patientId") || "unlinked";
-      localStorage.removeItem(`jirova care_rx_draft_${pId}`);
+      localStorage.removeItem(`jivora care_rx_draft_${pId}`);
       setPtName("");
       setPtPhone("");
       setPtAge("");
@@ -721,7 +721,7 @@ export default function PrescriptionPage() {
 
       // 3. RESET DRAFT (Clear the auto-save cache for this patient so it starts fresh next time)
       const thisPatientId = searchParams.get("patientId") || "unlinked";
-      localStorage.removeItem(`jirova care_rx_draft_${thisPatientId}`);
+      localStorage.removeItem(`jivora care_rx_draft_${thisPatientId}`);
 
       alert(
         "Prescription saved successfully! Patient marked as completed.\n\nYou can now Download PDF or share via WhatsApp.",
@@ -759,7 +759,7 @@ export default function PrescriptionPage() {
         : "As advised";
 
     const msg =
-      `*${clinic?.name || "Jirova Care Clinic"}*\n` +
+      `*${clinic?.name || "Jivora Care Clinic"}*\n` +
       `━━━━━━━━━━━━━━━\n` +
       `Hello *${ptName}*,\n\n` +
       `Your digital prescription from *Dr. ${selectedDoctorObj?.name || "Medical Officer"}* is ready. You can view it here:\n` +

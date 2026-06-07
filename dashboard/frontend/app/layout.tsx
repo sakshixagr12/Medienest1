@@ -12,19 +12,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Jirova Care — Clinic Management Platform",
+  title: "Jivora Care — Clinic Management Platform",
   description:
-    "Jirova Care: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
+    "Jivora Care: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
   openGraph: {
-    title: "Jirova Care — Digital Clinic Platform",
+    title: "Jivora Care — Digital Clinic Platform",
     description: "Modern healthcare management with AI patient summaries.",
     type: "website",
-    url: "https://jirovacarev1.vercel.app",
-    siteName: "Jirova Care",
+    url: "https://jivoracarev1.vercel.app",
+    siteName: "Jivora Care",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jirova Care — AI Clinic Hub",
+    title: "Jivora Care — AI Clinic Hub",
     description: "Transforming healthcare with digital clinic solutions.",
   },
   icons: {

@@ -256,7 +256,7 @@ export default function OnboardingPage() {
           </div>
           <div className={styles.brandText}>
             <h1>
-              Jirova Care
+              Jivora Care
               <br />
               Onboarding
             </h1>
@@ -331,7 +331,7 @@ export default function OnboardingPage() {
         {/* Top Header */}
         <header className={styles.topHeader}>
           <Link href="/" className={styles.logoTitle}>
-            Jirova Care
+            Jivora Care
           </Link>
           <div className={styles.headerRight}>
             <div className={styles.stepIndicator}>
@@ -741,7 +741,7 @@ export default function OnboardingPage() {
               You're on the waitlist!
             </h2>
             <p className={styles.pageSubtitle}>
-              Thank you for choosing Jirova Care. Our clinical excellence team is
+              Thank you for choosing Jivora Care. Our clinical excellence team is
               currently reviewing your registration to ensure your sanctuary
               meets our high-trust standards.
             </p>
@@ -814,7 +814,7 @@ export default function OnboardingPage() {
               <button
                 className={styles.btnSolid}
                 onClick={() =>
-                  (window.location.href = "mailto:concierge@jirovacare.com")
+                  (window.location.href = "mailto:concierge@jivoracare.com")
                 }
               >
                 Visit Support Center
@@ -826,7 +826,7 @@ export default function OnboardingPage() {
 
             <div className={styles.contactInfo} style={{ marginTop: 60 }}>
               Questions about your application? Contact our onboarding concierge
-              at <strong>concierge@jirovacare.com</strong>
+              at <strong>concierge@jivoracare.com</strong>
             </div>
           </div>
         )}

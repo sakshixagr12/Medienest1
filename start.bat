@@ -1,6 +1,6 @@
 @echo off
 echo =======================================================
-echo          Starting Jirova Care Development Servers
+echo          Starting Jivora Care Development Servers
 echo =======================================================
 
 echo Installing missing dependencies if any...

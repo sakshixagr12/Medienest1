@@ -36,7 +36,7 @@ import TiltWrapper from "@/components/TiltWrapper";
 import CountUp from "@/components/CountUp";
 
 const preloaderImages = [
-  "/assets/jirova_care_logo.png",
+  "/assets/jivora_care_logo.png",
   "/assets/showcase_queue.png",
   "/assets/showcase_prescription.png",
   "/assets/showcase_billing.png",
@@ -144,7 +144,7 @@ export default function LandingPage() {
             userSelect: "none",
           }}>
             <Image
-              src="/assets/jirova_care_logo.png"
+              src="/assets/jivora_care_logo.png"
               alt="Jivora Care"
               width={52}
               height={52}
@@ -205,13 +205,13 @@ export default function LandingPage() {
         <div className="container nav-container">
           <Link href="/" className="logo">
             <Image
-              src="/assets/jirova_care_logo.png"
-              alt="Jirova Care"
+              src="/assets/jivora_care_logo.png"
+              alt="Jivora Care"
               width={36}
               height={36}
               className="logo-img"
             />
-            <span className="logo-text">Jirova Care</span>
+            <span className="logo-text">Jivora Care</span>
           </Link>
 
           <div className="nav-links">
@@ -620,7 +620,7 @@ export default function LandingPage() {
       <section className="section-v3" style={{ background: "rgba(13, 148, 136, 0.02)" }} id="showcase">
         <div className="container center">
           <h2 className="section-title">See It In Action</h2>
-          <p className="section-subtitle">Watch how Jirova Care handles real clinical workflows in under 2 minutes.</p>
+          <p className="section-subtitle">Watch how Jivora Care handles real clinical workflows in under 2 minutes.</p>
 
           {/* YouTube video placeholder */}
           <div className="yt-placeholder">
@@ -690,7 +690,7 @@ export default function LandingPage() {
       <section className="section-v3 wa-dark-bg" id="use-cases">
         <div className="container center">
           <h2 className="section-title">Powerful Use Cases</h2>
-          <p className="section-subtitle">Real-world examples of how Jirova Care transforms clinic workflows.</p>
+          <p className="section-subtitle">Real-world examples of how Jivora Care transforms clinic workflows.</p>
           
           <div className="showcase-grid">
             <div className="showcase-card">
@@ -773,7 +773,7 @@ export default function LandingPage() {
             <div className="simple-card">
               <div className="pain-card" style={{ padding: '2rem' }}>
                 <p style={{ fontStyle: 'italic', color: '#475569', fontSize: '15px', lineHeight: 1.7, marginBottom: '20px' }}>
-                  "Jirova Care has cut our patient intake documentation time in half. The queue management between our front desk and consultation room is completely seamless."
+                  "Jivora Care has cut our patient intake documentation time in half. The queue management between our front desk and consultation room is completely seamless."
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Image

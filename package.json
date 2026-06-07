@@ -1,7 +1,7 @@
 {
-  "name": "jirova-care-root",
+  "name": "jivora-care-root",
   "version": "1.0.0",
-  "description": "Jirova Care SaaS Platform - Root workspace",
+  "description": "Jivora Care SaaS Platform - Root workspace",
   "scripts": {
     "install-all": "npm install --prefix dashboard/backend && npm install --prefix dashboard/frontend && npm install --prefix admin/backend",
     "dev": "concurrently \"npm run dev --prefix dashboard/backend\" \"npm run dev --prefix dashboard/frontend\" \"npm run dev --prefix admin/backend\" \"npm run dev --prefix admin/frontend\"",
