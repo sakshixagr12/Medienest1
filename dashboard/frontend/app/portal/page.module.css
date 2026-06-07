@@ -559,38 +559,154 @@
 
 @media (max-width: 600px) {
   .page {
-    padding: 100px 12px 40px;
+    padding: 96px 16px 40px;
+  }
+  .identityHeader {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 24px;
+    padding: 0 4px;
+  }
+  .welcomeLabel {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .hospitalName {
+    font-size: 28px;
+  }
+  .location {
+    font-size: 13px;
+    margin-top: 8px;
   }
   .metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .metricCard {
+    padding: 0;
+    gap: 10px;
+  }
+  .metricIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .metricInfo p {
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
+  .metricInfo h3 {
+    font-size: 18px;
+  }
+  .trendText {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .selectionShell {
     grid-template-columns: 1fr;
     gap: 16px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .portalCardLarge,
+  .portalCardSecondary {
+    padding: 20px;
+    border-radius: 16px;
   }
   .cardContent {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-  .cardLeftContent {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
     width: 100%;
   }
+  .iconBoxPrimary,
+  .iconBoxSecondary {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .iconBoxPrimary svg,
+  .iconBoxSecondary svg {
+    width: 18px;
+    height: 18px;
+  }
+  .cardBody h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .cardBody p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    max-width: 100%;
+  }
+  .ctaAction {
+    font-size: 12px;
+    gap: 6px;
+  }
   .cardRightImage {
-    justify-content: flex-end;
-    margin-bottom: -10px;
+    align-self: center;
+    margin-bottom: 0;
   }
   .illustration3d {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
+    transform: none !important;
+  }
+  .activityFeed {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
+  .activityHeader {
+    margin-bottom: 16px;
+  }
+  .activityLabel {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .viewAllLink {
+    font-size: 12px;
+    gap: 4px;
   }
   .activityRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 16px;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: 12px;
+  }
+  .activityRowLeft {
+    gap: 12px;
+  }
+  .actIconBox {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .actIconBox svg {
+    width: 12px;
+    height: 12px;
+  }
+  .activityRowLeft p {
+    font-size: 12px;
   }
   .actTime {
-    align-self: flex-end;
+    font-size: 10px;
+    align-self: center;
   }
   .leavesCornerWrapper {
-    opacity: 0.4;
+    opacity: 0.3;
+    top: -30px;
+    right: -60px;
   }
   .leavesCorner {
     width: 260px !important;
