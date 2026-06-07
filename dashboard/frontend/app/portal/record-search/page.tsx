@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -17,7 +17,36 @@ interface BillRecord {
 }
 
 export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{ padding: 100, textAlign: "center", color: "var(--ink-l)" }}
+        >
+          Loading search...
+        </div>
+      }
+    >
+      <RecordSearch />
+    </Suspense>
+  );
+}
+
+function RecordSearch() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const doctorId = searchParams.get("doctorId");
+  const doctorName = searchParams.get("doctorName");
+
+  const getDoctorParams = () => {
+    if (!doctorId) return "";
+    return `&doctorId=${doctorId}&doctorName=${encodeURIComponent(doctorName || "")}`;
+  };
+
+  const backHref = doctorId
+    ? `/portal/doctor-dashboard?doctorId=${doctorId}&doctorName=${encodeURIComponent(doctorName || "")}`
+    : "/portal/front-desk";
+
   const { clinic } = useClinic();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BillRecord[]>([]);
@@ -77,7 +106,7 @@ export default function SearchPage() {
 
   return (
     <div className={styles.page}>
-      <TopBar title="Search Medical Records" backHref="/portal/front-desk" />
+      <TopBar title="Search Medical Records" backHref={backHref} />
 
       <main className={styles.main}>
         <div className={styles.searchBox}>
@@ -131,7 +160,7 @@ export default function SearchPage() {
                       style={{ padding: "8px 12px", fontSize: 13 }}
                       onClick={() =>
                         router.push(
-                          `/portal/billing-receipts/view?id=${record.id}`,
+                          `/portal/billing-receipts/view?id=${record.id}${getDoctorParams()}`,
                         )
                       }
                     >

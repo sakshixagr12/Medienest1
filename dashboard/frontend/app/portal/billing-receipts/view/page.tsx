@@ -49,7 +49,14 @@ function ReceiptView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const doctorId = searchParams.get("doctorId");
+  const doctorName = searchParams.get("doctorName");
   const { clinic } = useClinic();
+
+  const getDoctorParamsForSearch = () => {
+    if (!doctorId) return "";
+    return `?doctorId=${doctorId}&doctorName=${encodeURIComponent(doctorName || "")}`;
+  };
 
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -109,7 +116,7 @@ function ReceiptView() {
   if (loading) {
     return (
       <div className={styles.page}>
-        <TopBar title="View Receipt" backHref="/portal/record-search" />
+        <TopBar title="View Receipt" backHref={`/portal/record-search${getDoctorParamsForSearch()}`} />
         <div className={styles.loaderArea}>
           <div className={styles.spinner}></div>
           <p>Retrieving secure receipt details...</p>
@@ -121,14 +128,14 @@ function ReceiptView() {
   if (error || !receipt) {
     return (
       <div className={styles.page}>
-        <TopBar title="View Receipt" backHref="/portal/record-search" />
+        <TopBar title="View Receipt" backHref={`/portal/record-search${getDoctorParamsForSearch()}`} />
         <div className={styles.errorArea}>
           <div className={styles.errorIcon}>️</div>
           <h3>Failed to load receipt</h3>
           <p>{error || "An unexpected error occurred."}</p>
           <button
             className="btn-primary"
-            onClick={() => router.push("/portal/record-search")}
+            onClick={() => router.push(`/portal/record-search${getDoctorParamsForSearch()}`)}
           >
             Back to Search
           </button>
@@ -147,7 +154,7 @@ function ReceiptView() {
     <div className={styles.page}>
       <TopBar
         title={`Receipt ${receipt.receipt_number}`}
-        backHref="/portal/record-search"
+        backHref={`/portal/record-search${getDoctorParamsForSearch()}`}
       />
 
       <main className={styles.main}>
@@ -251,7 +258,7 @@ function ReceiptView() {
             </button>
             <button
               className="btn-secondary"
-              onClick={() => router.push("/portal/record-search")}
+              onClick={() => router.push(`/portal/record-search${getDoctorParamsForSearch()}`)}
             >
               Back to Records
             </button>

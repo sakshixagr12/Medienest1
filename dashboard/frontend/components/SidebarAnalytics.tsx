@@ -155,6 +155,11 @@ export default function SidebarAnalytics({
     };
   }, [clinicId, doctorId, fetchAnalytics]);
 
+  const getDashboardUrl = () => {
+    if (!doctorId) return "/portal/doctor-dashboard";
+    return `/portal/doctor-dashboard?doctorId=${doctorId}&doctorName=${encodeURIComponent(doctorName)}`;
+  };
+
   if (loading && !stats.today)
     return (
       <div className={styles.analyticsSkeleton}>Loading intelligence...</div>
@@ -167,7 +172,7 @@ export default function SidebarAnalytics({
       <div className={styles.statsGrid}>
         {/* 1. Active Queue Card (Priority) */}
         <Link
-          href="/portal/doctor-dashboard"
+          href={getDashboardUrl()}
           className={styles.analyticsCard}
           style={{
             textDecoration: "none",

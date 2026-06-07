@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +17,30 @@ interface DailyStats {
 }
 
 export default function DaySummaryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{ padding: 100, textAlign: "center", color: "var(--ink-l)" }}
+        >
+          Loading report...
+        </div>
+      }
+    >
+      <DaySummary />
+    </Suspense>
+  );
+}
+
+function DaySummary() {
+  const searchParams = useSearchParams();
+  const doctorId = searchParams.get("doctorId");
+  const doctorName = searchParams.get("doctorName");
+
+  const backHref = doctorId
+    ? `/portal/doctor-dashboard?doctorId=${doctorId}&doctorName=${encodeURIComponent(doctorName || "")}`
+    : "/portal/front-desk";
+
   const { clinic } = useClinic();
   const [stats, setStats] = useState<DailyStats>({
     totalPatients: 0,
@@ -96,7 +121,7 @@ export default function DaySummaryPage() {
 
   return (
     <div className={styles.page}>
-      <TopBar title="Clinic Day Summary" backHref="/portal/doctor-dashboard" />
+      <TopBar title="Clinic Day Summary" backHref={backHref} />
 
       <main className={styles.main}>
         <header className={styles.header}>

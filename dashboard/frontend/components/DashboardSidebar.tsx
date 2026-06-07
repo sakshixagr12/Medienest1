@@ -416,7 +416,7 @@ export default function DashboardSidebar({
 
             {!isReceptionist && (
               <SidebarAnalytics
-                doctorId={doctors && doctors.length > 0 ? doctors[0].id : null}
+                doctorId={activeDoctor?.id || null}
                 doctorName={activeDoctorName}
                 clinicId={clinic?.id || null}
               />

@@ -111,6 +111,90 @@ function LeavesBranch({ className }: { className?: string }) {
   );
 }
 
+// ── CUSTOM SVG LEAVES FOR MOBILE TOP LEFT ──
+function LeavesTopLeftMobile({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M10 0 C 20 40, 40 70, 80 90"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 */}
+      <path
+        d="M20 15 C 32 30, 25 45, 10 35 C 5 25, 12 10, 20 15 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      {/* Leaf 2 */}
+      <path
+        d="M38 35 C 50 50, 43 65, 28 55 C 23 45, 30 30, 38 35 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      {/* Leaf 3 */}
+      <path
+        d="M55 55 C 68 70, 60 85, 45 75 C 40 65, 48 50, 55 55 Z"
+        fill="url(#mobileTopLeafGrad)"
+      />
+      <defs>
+        <linearGradient id="mobileTopLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── CUSTOM SVG LEAVES FOR MOBILE BOTTOM RIGHT ──
+function LeavesBottomRightMobile({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M150 160 C 140 120, 120 90, 80 70"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 */}
+      <path
+        d="M140 145 C 128 130, 135 115, 150 125 C 155 135, 148 150, 140 145 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      {/* Leaf 2 */}
+      <path
+        d="M122 125 C 110 110, 117 95, 132 105 C 137 115, 130 130, 122 125 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      {/* Leaf 3 */}
+      <path
+        d="M105 105 C 92 90, 100 75, 115 85 C 120 95, 112 110, 105 105 Z"
+        fill="url(#mobileBottomLeafGrad)"
+      />
+      <defs>
+        <linearGradient id="mobileBottomLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -161,6 +245,11 @@ function AuthPageContent() {
     <div className={styles.page}>
       <div className={styles.overlay} />
 
+      {/* Decorative Mobile Viewport SVGs */}
+      <LeavesTopLeftMobile className={styles.leavesTopLeftMobile} />
+      <LeavesBottomRightMobile className={styles.leavesBottomRightMobile} />
+      <div className={styles.infoButtonMobile}>N</div>
+
       <div className={styles.container}>
         {/* Left Side Content */}
         <div className={styles.leftPanel}>
@@ -207,15 +296,18 @@ function AuthPageContent() {
 
         {/* Right Side Auth Card */}
         <div className={styles.rightPanel}>
-          <div className={styles.mobileLogoRow}>
-            <Image
-              src="/assets/jirova_care_logo.png"
-              alt="Jirova Care Logo"
-              width={48}
-              height={48}
-              style={{ objectFit: "contain" }}
-            />
-            <span className={styles.logoText}>Jirova Care</span>
+          <div className={styles.mobileLogoContainer}>
+            <div className={styles.mobileLogoRow}>
+              <Image
+                src="/assets/jirova_care_logo.png"
+                alt="Jirova Care Logo"
+                width={42}
+                height={42}
+                style={{ objectFit: "contain" }}
+              />
+              <span className={styles.mobileLogoText}>Jirova Care</span>
+            </div>
+            <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
           </div>
 
           <main className={styles.authCard}>
@@ -229,6 +321,13 @@ function AuthPageContent() {
               <h2 className={styles.cardHeading}>
                 {tab === "register" ? "Create your Account" : "Welcome back, Doctor!"}
               </h2>
+
+              <div className={styles.heartSeparator}>
+                <span className={styles.separatorLine} />
+                <span className={styles.heartIcon}>💚</span>
+                <span className={styles.separatorLine} />
+              </div>
+
               <p className={styles.cardSubtext}>
                 {tab === "register"
                   ? "Register a new account using your Google account."
@@ -284,22 +383,30 @@ function AuthPageContent() {
                   <span>
                     Already have an account?{" "}
                     <Link href="/auth?tab=login" className={styles.blueLink}>
-                      Sign in
+                      Sign in &gt;
                     </Link>
                   </span>
                 ) : (
                   <span>
                     New to Jirova Care?{" "}
                     <Link href="/auth?tab=register" className={styles.blueLink}>
-                      Create an account
+                      Create an account &gt;
                     </Link>
                   </span>
                 )}
               </div>
 
+              <div className={styles.heartSeparatorGrey}>
+                <span className={styles.separatorLine} />
+                <span className={styles.heartIconGrey}>❤</span>
+                <span className={styles.separatorLine} />
+              </div>
+
               <footer className={styles.footerLinks}>
                 <Link href="/privacy">Privacy Policy</Link>
+                <span className={styles.dotSeparator}>•</span>
                 <Link href="/terms">Terms of Service</Link>
+                <span className={styles.dotSeparator}>•</span>
                 <Link href="/support">Contact Support</Link>
               </footer>
             </div>

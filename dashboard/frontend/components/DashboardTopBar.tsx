@@ -110,8 +110,10 @@ export default function DashboardTopBar({
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Find doctor object by name from param, or fallback to first doctor
+  // Find doctor object by ID or name from param, or fallback to first doctor
+  const doctorIdParam = searchParams.get("doctorId");
   const currentDoctor =
+    (doctorIdParam && doctors.find((d) => d.id === doctorIdParam)) ||
     (doctorNameParam && doctors.find((d) => d.name === doctorNameParam)) ||
     (doctors && doctors.length > 0 ? doctors[0] : null);
 
