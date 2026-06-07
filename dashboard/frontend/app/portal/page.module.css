@@ -5,14 +5,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80px 24px 60px;
+  padding: 120px 24px 60px;
   font-family: var(--font-body);
+  position: relative;
+}
+
+/* --- Leaves Decoration --- */
+.leavesCornerWrapper {
+  position: absolute;
+  top: -60px;
+  right: -150px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.95;
+}
+
+.leavesCorner {
+  display: block;
+  object-fit: contain;
 }
 
 .identityHeader {
-  text-align: center;
-  margin-bottom: 48px;
-  max-width: 1000px;
+  width: 90%;
+  max-width: 1800px;
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.welcomeLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #2e7d32;
+  margin-bottom: 8px;
 }
 
 .logoBox {
@@ -36,7 +64,7 @@
 .location {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   color: var(--sanctuary-ink-l);
   font-weight: 600;
@@ -45,42 +73,51 @@
   letter-spacing: 0.5px;
 }
 
+.locationPin {
+  color: #2e7d32;
+}
+
 /* --- Metrics Grid --- */
 .metricsGrid {
   width: 90%;
   max-width: 1800px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #fff;
-  padding: 24px;
+  padding: 28px 24px;
   border-radius: var(--radius-xl);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   margin-bottom: 40px;
   border: 1px solid rgba(23, 3, 55, 0.05);
+  position: relative;
+  z-index: 1;
 }
 
 .metricCard {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 16px;
-  border-right: 1px solid rgba(23, 3, 55, 0.08);
+  flex: 1;
+  padding: 0 24px;
 }
 
-.metricCard:last-child {
-  border-right: none;
+.metricDivider {
+  width: 1px;
+  height: 48px;
+  background-color: rgba(23, 3, 55, 0.08);
+  align-self: center;
+  flex-shrink: 0;
 }
 
 .metricIcon {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: var(--sanctuary-gray-low);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sanctuary-primary);
+  flex-shrink: 0;
 }
 
 .metricInfo p {
@@ -95,6 +132,15 @@
   font-size: 24px;
   font-weight: 800;
   color: var(--sanctuary-primary);
+  line-height: 1.1;
+}
+
+.trendText {
+  display: inline-block;
+  font-size: 11px;
+  color: #2e7d32;
+  font-weight: 600;
+  margin-top: 6px;
 }
 
 /* --- Selection Cards --- */
@@ -105,29 +151,23 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
 }
 
 .portalCardLarge,
 .portalCardSecondary {
   text-decoration: none;
   border-radius: var(--radius-xl);
-  padding: 48px;
+  padding: 36px 40px;
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
   flex-direction: column;
-}
-
-.portalCardLarge {
   background: #fff;
   border: 1px solid rgba(23, 3, 55, 0.05);
   box-shadow: 0 4px 20px rgba(23, 3, 55, 0.02);
-}
-
-.portalCardSecondary {
-  background: #fbfbf7;
-  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .portalCardLarge:hover,
@@ -136,56 +176,84 @@
   box-shadow: 0 40px 80px rgba(23, 3, 55, 0.08);
 }
 
-.iconBoxPrimary,
-.iconBoxSecondary {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
+.cardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 24px;
+  height: 100%;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cardRightImage {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: -10px;
 }
 
-.iconBoxPrimary {
-  background: #ebdcff;
-  color: #170337;
+.illustration3d {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  transform: translateY(10px);
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
+
+.portalCardLarge:hover .illustration3d {
+  transform: translateY(0px) scale(1.05);
+}
+
+.iconBoxPrimary,
 .iconBoxSecondary {
-  background: #eeeaf1;
-  color: #635a71;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .cardBody h2 {
   font-family: var(--font-headline);
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--sanctuary-primary);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .cardBody p {
   color: var(--sanctuary-ink-l);
-  font-size: 18px;
-  line-height: 1.6;
-  margin-bottom: 32px;
-  max-width: 400px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  max-width: 320px;
 }
 
 .ctaAction {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 14px;
-  font-weight: 800;
-  color: var(--sanctuary-primary);
-  letter-spacing: 1px;
+  font-weight: 700;
   transition: gap 0.3s;
 }
 
-.portalCardLarge:hover .ctaAction,
-.portalCardSecondary:hover .ctaAction {
-  gap: 16px;
+.ctaAction svg {
+  transition: transform 0.2s ease;
+}
+
+.portalCardLarge:hover .ctaAction svg {
+  transform: translateX(4px);
 }
 
 /* --- Activity Feed --- */
@@ -196,6 +264,16 @@
   border-radius: 24px;
   padding: 32px;
   margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.activityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
 }
 
 .activityLabel {
@@ -206,7 +284,29 @@
   font-weight: 900;
   letter-spacing: 2px;
   color: var(--sanctuary-ink-l);
-  margin-bottom: 24px;
+}
+
+.viewAllLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.viewAllLink:hover {
+  opacity: 0.85;
+}
+
+.viewAllArrow {
+  transition: transform 0.2s ease;
+}
+
+.viewAllLink:hover .viewAllArrow {
+  transform: translateX(3px);
 }
 
 .dot {
@@ -218,35 +318,57 @@
 
 .activityList {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
+  width: 100%;
 }
 
-.activityItem {
+.activityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #fff;
-  padding: 12px 24px;
-  border-radius: 30px;
+  border: 1px solid rgba(23, 3, 55, 0.04);
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.01);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.activityRow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(23, 3, 55, 0.03);
+}
+
+.activityRowLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  gap: 16px;
 }
 
-.activityItem p {
-  font-size: 13px;
+.actIconBox {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activityRowLeft p {
+  font-size: 14px;
   font-weight: 600;
-  margin: 0;
   color: var(--sanctuary-ink);
+  margin: 0;
 }
 
-.actIcon {
-  color: #10b981;
-}
 .actTime {
-  font-size: 11px;
-  opacity: 0.5;
+  font-size: 12px;
   font-weight: 700;
-  margin-left: 8px;
+  color: var(--sanctuary-ink-l);
+  opacity: 0.6;
 }
 
 .portalFooter {
@@ -257,6 +379,8 @@
   font-weight: 600;
   opacity: 0.5;
   line-height: 1.6;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- Modal Styles --- */
@@ -393,28 +517,199 @@
   transform: translateX(4px);
 }
 
+/* --- Responsive Layouts --- */
 @media (max-width: 900px) {
+  .page {
+    padding: 110px 16px 48px;
+  }
+  .identityHeader {
+    width: 100%;
+    margin-bottom: 32px;
+  }
   .metricsGrid {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    padding: 20px;
+  }
+  .metricDivider {
+    display: none;
   }
   .metricCard {
-    border-right: none;
-    padding: 12px;
+    padding: 8px;
   }
   .selectionShell {
     grid-template-columns: 1fr;
+    width: 100%;
   }
   .portalCardLarge,
   .portalCardSecondary {
     padding: 32px;
   }
+  .activityFeed {
+    width: 100%;
+    padding: 24px;
+  }
+  .leavesCorner {
+    width: 380px !important;
+    height: auto !important;
+  }
 }
 
 @media (max-width: 600px) {
-  .metricsGrid {
-    grid-template-columns: 1fr;
+  .page {
+    padding: 96px 16px 40px;
   }
-  .activityList {
-    flex-direction: column;
+  .identityHeader {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 24px;
+    padding: 0 4px;
+  }
+  .welcomeLabel {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .hospitalName {
+    font-size: 28px;
+  }
+  .location {
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .metricCard {
+    padding: 0;
+    gap: 10px;
+  }
+  .metricIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .metricInfo p {
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
+  .metricInfo h3 {
+    font-size: 18px;
+  }
+  .trendText {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .selectionShell {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .portalCardLarge,
+  .portalCardSecondary {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  .cardContent {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+  .iconBoxPrimary,
+  .iconBoxSecondary {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .iconBoxPrimary svg,
+  .iconBoxSecondary svg {
+    width: 18px;
+    height: 18px;
+  }
+  .cardBody h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .cardBody p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    max-width: 100%;
+  }
+  .ctaAction {
+    font-size: 12px;
+    gap: 6px;
+  }
+  .cardRightImage {
+    align-self: center;
+    margin-bottom: 0;
+  }
+  .illustration3d {
+    width: 64px;
+    height: 64px;
+    transform: none !important;
+  }
+  .activityFeed {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
+  .activityHeader {
+    margin-bottom: 16px;
+  }
+  .activityLabel {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .viewAllLink {
+    font-size: 12px;
+    gap: 4px;
+  }
+  .activityRow {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: 12px;
+  }
+  .activityRowLeft {
+    gap: 12px;
+  }
+  .actIconBox {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .actIconBox svg {
+    width: 12px;
+    height: 12px;
+  }
+  .activityRowLeft p {
+    font-size: 12px;
+  }
+  .actTime {
+    font-size: 10px;
+    align-self: center;
+  }
+  .leavesCornerWrapper {
+    opacity: 0.3;
+    top: -30px;
+    right: -60px;
+  }
+  .leavesCorner {
+    width: 260px !important;
+    height: auto !important;
   }
 }

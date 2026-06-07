@@ -96,6 +96,12 @@ body {
   touch-action: manipulation;
 }
 
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 /* ── Shared Utilities ── */
 .container {
   max-width: 1800px;
