@@ -487,16 +487,20 @@ export default function LandingPage() {
           <div className="hero-grid-features">
             <div className="feature-item-mini">
               <div className="mini-icon-circle"><FileText size={18} /></div>
-              <h5>Digital Prescriptions</h5>
-              <p>Create, sign &amp; share prescriptions instantly</p>
+              <div className="mini-feat-content">
+                <h5>Digital Prescriptions</h5>
+                <p>Create, sign &amp; share prescriptions instantly</p>
+              </div>
             </div>
 
             <div className="feature-divider" />
 
             <div className="feature-item-mini">
               <div className="mini-icon-circle"><Users size={18} /></div>
-              <h5>Patient Records</h5>
-              <p>Complete medical history in one place</p>
+              <div className="mini-feat-content">
+                <h5>Patient Records</h5>
+                <p>Complete medical history in one place</p>
+              </div>
             </div>
 
             <div className="feature-divider" />
@@ -507,24 +511,30 @@ export default function LandingPage() {
                   <path d="M16 0C7.163 0 0 7.163 0 16c0 2.82.737 5.47 2.027 7.773L0 32l8.469-2.001A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 01-6.791-1.867l-.487-.29-5.028 1.188 1.262-4.896-.318-.503A13.29 13.29 0 012.667 16c0-7.353 5.98-13.333 13.333-13.333S29.333 8.647 29.333 16 23.353 29.333 16 29.333zm7.316-9.98c-.4-.2-2.368-1.168-2.735-1.302-.367-.133-.634-.2-.9.2-.267.4-1.034 1.302-1.268 1.569-.233.267-.467.3-.867.1-.4-.2-1.688-.622-3.214-1.983-1.188-1.06-1.99-2.368-2.223-2.768-.233-.4-.025-.617.175-.816.18-.18.4-.467.6-.7.2-.233.267-.4.4-.667.133-.267.067-.5-.033-.7-.1-.2-.9-2.168-1.234-2.968-.325-.777-.655-.672-.9-.684l-.768-.013c-.267 0-.7.1-1.067.5-.367.4-1.4 1.368-1.4 3.335 0 1.967 1.433 3.868 1.633 4.135.2.267 2.82 4.303 6.835 6.034.955.412 1.7.658 2.282.843.959.305 1.832.262 2.522.159.769-.115 2.368-.968 2.702-1.902.333-.933.333-1.733.233-1.902-.1-.167-.367-.267-.767-.467z" fill="#0d9488"/>
                 </svg>
               </div>
-              <h5>WhatsApp Integration</h5>
-              <p>Send prescriptions, reminders &amp; follow-ups</p>
+              <div className="mini-feat-content">
+                <h5>WhatsApp Integration</h5>
+                <p>Send prescriptions, reminders &amp; follow-ups</p>
+              </div>
             </div>
 
             <div className="feature-divider" />
 
             <div className="feature-item-mini">
               <div className="mini-icon-circle"><Calendar size={18} /></div>
-              <h5>Smart Follow-Ups</h5>
-              <p>Reduce missed revisits and improve retention</p>
+              <div className="mini-feat-content">
+                <h5>Smart Follow-Ups</h5>
+                <p>Reduce missed revisits and improve retention</p>
+              </div>
             </div>
 
             <div className="feature-divider" />
 
             <div className="feature-item-mini">
               <div className="mini-icon-circle"><Monitor size={18} /></div>
-              <h5>Multi-Device Access</h5>
-              <p>Manage your clinic from anywhere</p>
+              <div className="mini-feat-content">
+                <h5>Multi-Device Access</h5>
+                <p>Manage your clinic from anywhere</p>
+              </div>
             </div>
           </div>
 
