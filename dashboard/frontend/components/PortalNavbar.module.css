@@ -48,41 +48,65 @@
   letter-spacing: -0.5px;
 }
 
-.actions {
+.profileArea {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
-.signOutBtn {
+.avatarCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EAF3EA; /* Light green background */
+  color: #2E7D32; /* Deep green */
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--sanctuary-gray-low);
-  color: var(--sanctuary-primary);
-  border: 1px solid rgba(23, 3, 55, 0.08);
-  padding: 10px 18px;
-  border-radius: var(--radius-full);
-  font-size: 14px;
+  justify-content: center;
   font-weight: 700;
+  font-size: 16px;
+  border: 1px solid rgba(46, 125, 50, 0.12);
+  user-select: none;
+  font-family: var(--font-headline);
+}
+
+.profileText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.roleLabel {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--sanctuary-primary);
+  line-height: 1.2;
+}
+
+.signOutLink {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #6B7280; /* Gray text */
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: color 0.2s ease;
+  line-height: 1.2;
   font-family: var(--font-body);
 }
 
-.signOutBtn span {
-  opacity: 0.9;
+.signOutLink:hover {
+  color: #2E7D32;
 }
 
-.signOutBtn:hover {
-  background: var(--sanctuary-primary);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(23, 3, 55, 0.12);
-  border-color: var(--sanctuary-primary);
-}
-
-.signOutBtn:active {
-  transform: translateY(0);
+.signOutIcon {
+  margin-left: 2px;
+  opacity: 0.8;
 }
 
 /* Mobile Adjustments */

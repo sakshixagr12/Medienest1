@@ -96,16 +96,20 @@ export default function PortalPage() {
     <>
       <PortalNavbar />
       <div className={styles.page}>
+        {/* Top Right Mockup Leaves Branch */}
+        <div className={styles.leavesCornerWrapper}>
+          <Image
+            src="/assets/leaves_branch_corner.png"
+            alt="Foliage branch decoration"
+            width={320}
+            height={200}
+            className={styles.leavesCorner}
+            priority
+          />
+        </div>
+
         <header className={styles.identityHeader}>
-          <div className={styles.logoBox}>
-            <Image
-              src="/assets/jirova_care_logo.png"
-              alt="Logo"
-              width={48}
-              height={48}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+          <p className={styles.welcomeLabel}>WELCOME BACK,</p>
           <h1 className={styles.hospitalName}>{hospitalName}</h1>
           <div className={styles.location}>
             <svg
@@ -115,6 +119,7 @@ export default function PortalPage() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
+              className={styles.locationPin}
             >
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
               <circle cx="12" cy="10" r="3" />
@@ -126,7 +131,7 @@ export default function PortalPage() {
         {/* Metrics Overview */}
         <section className={styles.metricsGrid}>
           <div className={styles.metricCard}>
-            <div className={styles.metricIcon}>
+            <div className={styles.metricIcon} style={{ background: '#eaf3ea', color: '#2e7d32' }}>
               <svg
                 width="20"
                 height="20"
@@ -144,10 +149,12 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>PATIENTS TODAY</p>
               <h3>{metrics.patients}</h3>
+              <span className={styles.trendText}>+0% from yesterday</span>
             </div>
           </div>
+
           <div className={styles.metricCard}>
-            <div className={styles.metricIcon}>
+            <div className={styles.metricIcon} style={{ background: '#e0f2fe', color: '#0284c7' }}>
               <svg
                 width="20"
                 height="20"
@@ -166,10 +173,12 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>PRESCRIPTIONS</p>
               <h3>{metrics.prescriptions}</h3>
+              <span className={styles.trendText}>+0% from yesterday</span>
             </div>
           </div>
+
           <div className={styles.metricCard}>
-            <div className={styles.metricIcon}>
+            <div className={styles.metricIcon} style={{ background: '#f3e8ff', color: '#7c3aed' }}>
               <svg
                 width="20"
                 height="20"
@@ -184,10 +193,12 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>FOLLOW-UPS</p>
               <h3>{metrics.followups}</h3>
+              <span className={styles.trendText}>+0% from yesterday</span>
             </div>
           </div>
+
           <div className={styles.metricCard}>
-            <div className={styles.metricIcon}>
+            <div className={styles.metricIcon} style={{ background: '#fef3c7', color: '#d97706' }}>
               <svg
                 width="20"
                 height="20"
@@ -203,182 +214,218 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>REVENUE</p>
               <h3>₹{metrics.revenue.toLocaleString()}</h3>
+              <span className={styles.trendText}>+0% from yesterday</span>
             </div>
           </div>
         </section>
 
+        {/* Selection Cards Grid with 3D Assets */}
         <main className={styles.selectionShell}>
           <div
             className={styles.portalCardLarge}
             onClick={() => setShowDoctorSelect(true)}
             style={{ cursor: "pointer" }}
           >
-            <div className={styles.cardHeader}>
-              <div className={styles.iconBoxPrimary}>
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                </svg>
+            <div className={styles.cardContent}>
+              <div className={styles.cardLeftContent}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconBoxPrimary} style={{ background: '#eaf3ea', color: '#2e7d32' }}>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className={styles.cardBody}>
+                  <h2>Doctor Dashboard</h2>
+                  <p>
+                    View patients, prescriptions, AI summaries, and insights — all in one place.
+                  </p>
+                  <div className={styles.ctaAction} style={{ color: '#2e7d32' }}>
+                    <span>Open Dashboard</span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className={styles.cardBody}>
-              <h2>Doctor Dashboard</h2>
-              <p>
-                View patients, prescriptions, AI summaries, and insights — all
-                in one place.
-              </p>
-              <div className={styles.ctaAction}>
-                OPEN DASHBOARD{" "}
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
+              <div className={styles.cardRightImage}>
+                <Image
+                  src="/assets/3d_clipboard.png"
+                  alt="Doctor Dashboard Clipboard"
+                  width={140}
+                  height={140}
+                  className={styles.illustration3d}
+                />
               </div>
             </div>
           </div>
 
-          <Link
-            href="/portal/front-desk"
-            className={styles.portalCardSecondary}
-          >
-            <div className={styles.cardHeader}>
-              <div className={styles.iconBoxSecondary}>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+          <Link href="/portal/front-desk" className={styles.portalCardSecondary}>
+            <div className={styles.cardContent}>
+              <div className={styles.cardLeftContent}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconBoxSecondary} style={{ background: '#f3e8ff', color: '#7c3aed' }}>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                  </div>
+                </div>
+                <div className={styles.cardBody}>
+                  <h2>Front Desk</h2>
+                  <p>
+                    Manage appointments, check-ins, and patient flow without chaos.
+                  </p>
+                  <div className={styles.ctaAction} style={{ color: '#7c3aed' }}>
+                    <span>Manage Desk</span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className={styles.cardBody}>
-              <h2>Front Desk</h2>
-              <p>
-                Manage appointments, check-ins, and patient flow without chaos.
-              </p>
-              <div className={styles.ctaAction}>
-                MANAGE DESK{" "}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/portal/billing-receipts"
-            className={styles.portalCardSecondary}
-          >
-            <div className={styles.cardHeader}>
-              <div
-                className={styles.iconBoxSecondary}
-                style={{ background: "#ecfdf5", color: "#10b981" }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <rect x="2" y="5" width="20" height="14" rx="2" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
-                </svg>
-              </div>
-            </div>
-            <div className={styles.cardBody}>
-              <h2>Billing & Payments</h2>
-              <p>
-                Collect payments, print professional receipts, and track clinic
-                revenue.
-              </p>
-              <div className={styles.ctaAction}>
-                OPEN BILLING{" "}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
+              <div className={styles.cardRightImage}>
+                <Image
+                  src="/assets/3d_calendar.png"
+                  alt="Front Desk Calendar"
+                  width={140}
+                  height={140}
+                  className={styles.illustration3d}
+                />
               </div>
             </div>
           </Link>
 
-          <Link
-            href="/portal/front-desk/clinic-settings"
-            className={styles.portalCardSecondary}
-          >
-            <div className={styles.cardHeader}>
-              <div
-                className={styles.iconBoxSecondary}
-                style={{ background: "#f5f3ff", color: "#8b5cf6" }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.80.31l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .31-1.80 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.31-1.8l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.8.31 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.8-.31l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.31 1.80 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
+          <Link href="/portal/billing-receipts" className={styles.portalCardSecondary}>
+            <div className={styles.cardContent}>
+              <div className={styles.cardLeftContent}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconBoxSecondary} style={{ background: '#e6fffa', color: '#0d9488' }}>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <rect x="2" y="5" width="20" height="14" rx="2" />
+                      <line x1="2" y1="10" x2="22" y2="10" />
+                    </svg>
+                  </div>
+                </div>
+                <div className={styles.cardBody}>
+                  <h2>Billing & Payments</h2>
+                  <p>
+                    Collect payments, print professional receipts, and track clinic revenue.
+                  </p>
+                  <div className={styles.ctaAction} style={{ color: '#0d9488' }}>
+                    <span>Open Billing</span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.cardRightImage}>
+                <Image
+                  src="/assets/3d_receipt.png"
+                  alt="Billing Receipt"
+                  width={140}
+                  height={140}
+                  className={styles.illustration3d}
+                />
               </div>
             </div>
-            <div className={styles.cardBody}>
-              <h2>Clinic Settings</h2>
-              <p>
-                Update clinic details, add doctors, and manage system
-                preferences.
-              </p>
-              <div className={styles.ctaAction}>
-                EDIT SETTINGS{" "}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
+          </Link>
+
+          <Link href="/portal/front-desk/clinic-settings" className={styles.portalCardSecondary}>
+            <div className={styles.cardContent}>
+              <div className={styles.cardLeftContent}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconBoxSecondary} style={{ background: '#eef2ff', color: '#4f46e5' }}>
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.80.31l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .31-1.80 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.31-1.8l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.8.31 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.8-.31l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.31 1.80 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className={styles.cardBody}>
+                  <h2>Clinic Settings</h2>
+                  <p>
+                    Update clinic details, add doctors, and manage system preferences.
+                  </p>
+                  <div className={styles.ctaAction} style={{ color: '#4f46e5' }}>
+                    <span>Edit Settings</span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.cardRightImage}>
+                <Image
+                  src="/assets/3d_shield.png"
+                  alt="Settings Shield"
+                  width={140}
+                  height={140}
+                  className={styles.illustration3d}
+                />
               </div>
             </div>
           </Link>
@@ -434,32 +481,69 @@ export default function PortalPage() {
         )}
 
         <section className={styles.activityFeed}>
-          <div className={styles.activityLabel}>
-            <span className={styles.dot} /> RECENT ACTIVITY
+          <div className={styles.activityHeader}>
+            <div className={styles.activityLabel}>
+              <span className={styles.dot} /> RECENT ACTIVITY
+            </div>
+            <Link href="/portal/front-desk/analytics" className={styles.viewAllLink}>
+              <span>View All Activity</span>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                className={styles.viewAllArrow}
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </Link>
           </div>
+
           <div className={styles.activityList}>
             {activities.length > 0 ? (
               activities.map((act) => (
-                <div key={act.id} className={styles.activityItem}>
-                  <div className={styles.actIcon}>
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
+                <div key={act.id} className={styles.activityRow}>
+                  <div className={styles.activityRowLeft}>
+                    <div className={styles.actIconBox} style={{ background: '#eaf3ea', color: '#2e7d32' }}>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    </div>
+                    <p>{act.text}</p>
                   </div>
-                  <p>{act.text}</p>
                   <span className={styles.actTime}>{act.time}</span>
                 </div>
               ))
             ) : (
-              <div className={styles.activityItem}>
-                <p>No recent activity record found for today.</p>
+              <div className={styles.activityRow}>
+                <div className={styles.activityRowLeft}>
+                  <div className={styles.actIconBox} style={{ background: '#f3e8ff', color: '#7c3aed' }}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                  </div>
+                  <p>No recent activity record found for today.</p>
+                </div>
               </div>
             )}
           </div>

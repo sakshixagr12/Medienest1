@@ -5,14 +5,41 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80px 24px 60px;
+  padding: 110px 24px 60px;
   font-family: var(--font-body);
+  position: relative;
+}
+
+/* --- Leaves Decoration --- */
+.leavesCornerWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.95;
+  overflow: hidden;
+}
+
+.leavesCorner {
+  display: block;
+  object-fit: contain;
 }
 
 .identityHeader {
   text-align: center;
   margin-bottom: 48px;
   max-width: 1000px;
+  position: relative;
+  z-index: 1;
+}
+
+.welcomeLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #2e7d32;
+  margin-bottom: 8px;
 }
 
 .logoBox {
@@ -45,6 +72,10 @@
   letter-spacing: 0.5px;
 }
 
+.locationPin {
+  color: #2e7d32;
+}
+
 /* --- Metrics Grid --- */
 .metricsGrid {
   width: 90%;
@@ -58,6 +89,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   margin-bottom: 40px;
   border: 1px solid rgba(23, 3, 55, 0.05);
+  position: relative;
+  z-index: 1;
 }
 
 .metricCard {
@@ -76,11 +109,9 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: var(--sanctuary-gray-low);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sanctuary-primary);
 }
 
 .metricInfo p {
@@ -97,6 +128,14 @@
   color: var(--sanctuary-primary);
 }
 
+.trendText {
+  display: inline-block;
+  font-size: 11px;
+  color: #2e7d32;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
 /* --- Selection Cards --- */
 .selectionShell {
   width: 90%;
@@ -105,6 +144,8 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
 }
 
 .portalCardLarge,
@@ -136,6 +177,40 @@
   box-shadow: 0 40px 80px rgba(23, 3, 55, 0.08);
 }
 
+.cardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 24px;
+}
+
+.cardLeftContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cardRightImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.illustration3d {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  transform: translateY(-5px);
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.portalCardLarge:hover .illustration3d,
+.portalCardSecondary:hover .illustration3d {
+  transform: translateY(-15px) scale(1.05);
+}
+
 .iconBoxPrimary,
 .iconBoxSecondary {
   width: 72px;
@@ -145,15 +220,6 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 32px;
-}
-
-.iconBoxPrimary {
-  background: #ebdcff;
-  color: #170337;
-}
-.iconBoxSecondary {
-  background: #eeeaf1;
-  color: #635a71;
 }
 
 .cardBody h2 {
@@ -178,7 +244,6 @@
   gap: 12px;
   font-size: 14px;
   font-weight: 800;
-  color: var(--sanctuary-primary);
   letter-spacing: 1px;
   transition: gap 0.3s;
 }
@@ -196,6 +261,16 @@
   border-radius: 24px;
   padding: 32px;
   margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.activityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
 }
 
 .activityLabel {
@@ -206,7 +281,29 @@
   font-weight: 900;
   letter-spacing: 2px;
   color: var(--sanctuary-ink-l);
-  margin-bottom: 24px;
+}
+
+.viewAllLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.viewAllLink:hover {
+  opacity: 0.85;
+}
+
+.viewAllArrow {
+  transition: transform 0.2s ease;
+}
+
+.viewAllLink:hover .viewAllArrow {
+  transform: translateX(3px);
 }
 
 .dot {
@@ -218,35 +315,57 @@
 
 .activityList {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
+  width: 100%;
 }
 
-.activityItem {
+.activityRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #fff;
-  padding: 12px 24px;
-  border-radius: 30px;
+  border: 1px solid rgba(23, 3, 55, 0.04);
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.01);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.activityRow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(23, 3, 55, 0.03);
+}
+
+.activityRowLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  gap: 16px;
 }
 
-.activityItem p {
-  font-size: 13px;
+.actIconBox {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activityRowLeft p {
+  font-size: 14px;
   font-weight: 600;
-  margin: 0;
   color: var(--sanctuary-ink);
+  margin: 0;
 }
 
-.actIcon {
-  color: #10b981;
-}
 .actTime {
-  font-size: 11px;
-  opacity: 0.5;
+  font-size: 12px;
   font-weight: 700;
-  margin-left: 8px;
+  color: var(--sanctuary-ink-l);
+  opacity: 0.6;
 }
 
 .portalFooter {
@@ -257,6 +376,8 @@
   font-weight: 600;
   opacity: 0.5;
   line-height: 1.6;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- Modal Styles --- */
@@ -393,28 +514,67 @@
   transform: translateX(4px);
 }
 
+/* --- Responsive Layouts --- */
 @media (max-width: 900px) {
+  .page {
+    padding: 96px 16px 48px;
+  }
   .metricsGrid {
     grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    padding: 16px;
   }
   .metricCard {
     border-right: none;
-    padding: 12px;
+    padding: 8px;
   }
   .selectionShell {
     grid-template-columns: 1fr;
+    width: 100%;
   }
   .portalCardLarge,
   .portalCardSecondary {
     padding: 32px;
   }
+  .activityFeed {
+    width: 100%;
+    padding: 24px;
+  }
 }
 
 @media (max-width: 600px) {
+  .page {
+    padding: 88px 12px 40px;
+  }
   .metricsGrid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
-  .activityList {
+  .cardContent {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .cardLeftContent {
+    width: 100%;
+  }
+  .cardRightImage {
+    justify-content: flex-end;
+    margin-bottom: -10px;
+  }
+  .illustration3d {
+    width: 100px;
+    height: 100px;
+  }
+  .activityRow {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px;
+  }
+  .actTime {
+    align-self: flex-end;
+  }
+  .leavesCornerWrapper {
+    opacity: 0.4;
   }
 }
