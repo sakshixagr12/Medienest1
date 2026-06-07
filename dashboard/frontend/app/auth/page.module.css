@@ -1,75 +1,110 @@
 .page {
   min-height: 100vh;
   position: relative;
-  background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   font-family: 'Outfit', 'Inter', sans-serif;
+  background: #F8F9F5;
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
+  filter: blur(6px); /* Crisp workspace blur on background */
+  z-index: 0;
+  pointer-events: none;
 }
 
 .overlay {
-  display: none;
+  display: none; /* no color overlay to keep green leaves vibrant */
 }
 
 .container {
   display: flex;
   width: 100%;
-  max-width: 1200px;
+  max-width: none;
+  height: 100vh;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
+  padding: 0;
   z-index: 10;
-  height: 100%;
+  box-sizing: border-box;
 }
 
-/* ── LEFT PANEL ── */
+/* ── LEFT PANEL (40%) ── */
 .leftPanel {
-  flex: 1;
-  max-width: 540px;
+  flex: 0 0 40%;
+  width: 40%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  color: #1b4332; /* forest green primary text */
-  padding-right: 40px;
+  justify-content: space-between;
   text-align: left;
+  box-sizing: border-box;
+  padding: 120px 60px 80px 60px;
+  background: linear-gradient(to right, rgba(248, 249, 245, 0.95) 0%, rgba(248, 249, 245, 0.7) 60%, rgba(248, 249, 245, 0) 100%);
+  backdrop-filter: none; /* no separate blur tile */
+  border-right: none; /* no separator border */
+  position: relative;
+  overflow: hidden;
+}
+
+.leavesLeftBottom {
+  position: absolute;
+  bottom: -10px;
+  left: -10px;
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .logoRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 50px;
+  z-index: 1;
 }
 
 .logoText {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #1b4332;
+  color: #111827; /* Near-black Dark Text */
+}
+
+.leftMainContent {
+  z-index: 1;
 }
 
 .leftMainContent h1 {
-  font-size: 44px;
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -1px;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
   margin: 0 0 16px 0;
-  color: #1b4332;
+  color: #111827; /* Near-black Dark Text */
 }
 
 .horizontalLine {
-  width: 48px;
-  height: 3.5px;
-  background: #2d7a54; /* matching green accent line */
-  margin: 24px 0;
+  width: 40px;
+  height: 3px;
+  background: #2E7D32; /* Medical Green */
+  margin: 20px 0;
   border-radius: 2px;
 }
 
 .leftSubtext {
-  font-size: 18px;
-  color: #334155; /* slate-700 subtext */
-  line-height: 1.4;
+  font-size: 16px;
+  color: #374151; /* Darker charcoal subtext */
+  line-height: 1.5;
   margin: 0;
   font-weight: 500;
 }
@@ -77,7 +112,7 @@
 .featuresRow {
   display: flex;
   gap: 36px;
-  margin-top: 60px;
+  z-index: 1;
 }
 
 .featureIconBlock {
@@ -91,60 +126,124 @@
 .iconCircleLeft {
   width: 56px;
   height: 56px;
-  background: rgba(27, 67, 50, 0.06); /* very soft light green rounded square card */
-  color: #1b4332;
+  background: #EAF3EA; /* Soft Sage */
+  color: #2E7D32; /* Medical Green */
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+  border: 1px solid rgba(46, 125, 50, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .iconCircleLeft:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.1);
 }
 
 .featureLabel {
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #475569;
-  max-width: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151; /* Darker charcoal feature labels */
+  max-width: 110px;
   line-height: 1.35;
 }
 
-/* ── RIGHT PANEL & CARD ── */
+/* ── RIGHT PANEL (60%) ── */
 .rightPanel {
-  flex-shrink: 0;
+  flex: 0 0 60%;
+  width: 60%;
+  height: 100vh;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 40px;
 }
 
 .authCard {
-  background: #ffffff;
-  border: 1px solid rgba(27, 67, 50, 0.08);
-  border-radius: 32px;
+  background: radial-gradient(circle at 90% 10%, #B8D8B8 0%, #ffffff 40%, #E0E4CE 100%);
+  border: 1.5px solid rgba(46, 125, 50, 0.22);
+  border-radius: 28px; /* spec: 28px */
   padding: 48px 40px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 25px 60px rgba(27, 67, 50, 0.04), 0 4px 12px rgba(0, 0, 0, 0.01);
+  width: 460px; /* spec: 460px */
+  max-width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); /* spec: 0 20px 60px rgba(0,0,0,0.08) */
   box-sizing: border-box;
   position: relative;
+  overflow: hidden;
 }
 
-/* Faint green leaf design accent in card corner like screenshot */
-.authCard::after {
-  content: "";
+.leavesCardCorner {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 60px;
-  height: 60px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d7a54' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 22c1.25-3.5 3.5-5.75 7-7m-7 7c3.5-1.25 5.75-3.5 7-7m-7 7C5.5 18.5 8 16 12 15M9 15c2.5-3.5 6-4.5 11-4M9 15c3.5-2.5 4.5-6 4-11'/%3E%3C/svg%3E") no-repeat center;
-  background-size: contain;
-  opacity: 0.2;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
   pointer-events: none;
+  z-index: 1;
+}
+
+.cardGlow {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(46, 125, 50, 0.2) 0%, rgba(224, 228, 206, 0.4) 60%, rgba(255, 255, 255, 0) 100%);
+  filter: blur(35px);
+  pointer-events: none;
+  z-index: 1;
+  animation: smokeMoveOne 16s infinite ease-in-out;
+}
+
+.cardGlowSecond {
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(234, 243, 234, 0.45) 0%, rgba(46, 125, 50, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 1;
+  animation: smokeMoveTwo 22s infinite ease-in-out;
+}
+
+@keyframes smokeMoveOne {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(-140px, 60px) scale(1.15) rotate(90deg);
+  }
+  50% {
+    transform: translate(-220px, 160px) scale(0.9) rotate(180deg);
+  }
+  75% {
+    transform: translate(-80px, 220px) scale(1.1) rotate(270deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(360deg);
+  }
+}
+
+@keyframes smokeMoveTwo {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translate(120px, -80px) scale(0.85) rotate(-90deg);
+  }
+  50% {
+    transform: translate(200px, -180px) scale(1.2) rotate(-180deg);
+  }
+  75% {
+    transform: translate(60px, -240px) scale(0.95) rotate(-270deg);
+  }
+  100% {
+    transform: translate(0, 0) scale(1) rotate(-360deg);
+  }
 }
 
 .panelContent {
@@ -153,14 +252,16 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  z-index: 2;
+  position: relative;
 }
 
 .logoCircle {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: #eaf5eb; /* light green bubble */
-  color: #1b4332;
+  background: #EAF3EA; /* Soft Sage */
+  color: #2E7D32; /* Medical Green */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,20 +269,20 @@
 }
 
 .hospitalIcon {
-  color: #1b4332;
+  color: #2E7D32;
 }
 
 .cardHeading {
   font-size: 24px;
   font-weight: 800;
-  color: #1b4332; /* matching dark green */
+  color: #1F2937; /* Dark Text */
   margin: 0 0 10px 0;
   letter-spacing: -0.3px;
 }
 
 .cardSubtext {
   font-size: 14px;
-  color: #64748b;
+  color: #6B7280; /* Muted Text */
   line-height: 1.5;
   margin: 0 0 28px 0;
   max-width: 280px;
@@ -189,25 +290,26 @@
 
 .googleBtn {
   width: 100%;
+  height: 52px; /* spec: 52px */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1b4332; /* forest green button */
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%); /* spec: Rich medical green gradient */
   color: #ffffff;
   border: none;
-  padding: 15px 24px;
-  border-radius: 100px;
+  padding: 0 24px;
+  border-radius: 12px; /* spec: rounded 12px */
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(27, 67, 50, 0.15);
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.15);
 }
 
 .googleBtn:hover:not(:disabled) {
-  background: #143225;
+  background: linear-gradient(135deg, #256328 0%, #154718 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(27, 67, 50, 0.25);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.25);
 }
 
 .googleBtn:active:not(:disabled) {
@@ -215,9 +317,9 @@
 }
 
 .googleBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  background: #64748b;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
   box-shadow: none;
 }
 
@@ -234,18 +336,19 @@
 .dividerLine {
   flex: 1;
   height: 1px;
-  background: rgba(27, 67, 50, 0.08);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .dividerText {
   font-size: 12px;
-  color: #94a3b8;
+  color: #6B7280; /* Muted Text */
   font-weight: 500;
 }
 
 /* Consent Checkbox */
 .consentTermsCheckbox {
   width: 100%;
+  margin-top: 24px;
   margin-bottom: 32px;
 }
 
@@ -258,30 +361,53 @@
 }
 
 .checkboxInput {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 1.5px solid rgba(15, 23, 42, 0.2);
-  accent-color: #1b4332;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #d1d5db; /* Gray border */
+  background-color: #ffffff;
   cursor: pointer;
   margin-top: 2px;
   flex-shrink: 0;
-  transition: border-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .checkboxInput:hover {
-  border-color: #1b4332;
+  border-color: #2E7D32;
+}
+
+.checkboxInput:checked {
+  background-color: #2E7D32;
+  border-color: #2E7D32;
+}
+
+.checkboxInput:checked::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  top: 2px;
+  left: 6px;
 }
 
 .checkboxText {
   font-size: 13.5px;
-  color: #475569;
+  color: #4B5563;
   line-height: 1.4;
   user-select: none;
 }
 
 .blueLink {
-  color: #2d7a54 !important; /* forest green links */
+  color: #2E7D32 !important; /* Medical Green */
   text-decoration: none;
   font-weight: 600;
 }
@@ -296,20 +422,20 @@
   justify-content: center;
   gap: 20px;
   width: 100%;
-  border-top: 1px solid rgba(27, 67, 50, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding-top: 24px;
 }
 
 .footerLinks a {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b !important;
+  color: #6B7280 !important; /* Muted Text */
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .footerLinks a:hover {
-  color: #1b4332 !important;
+  color: #2E7D32 !important; /* Medical Green */
 }
 
 .loadingPage {
@@ -317,24 +443,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #faf8f2;
+  background: #F8F9F5;
 }
 
 /* ── RESPONSIVE MEDIA QUERIES ── */
 @media (max-width: 900px) {
   .container {
+    flex-direction: column;
     justify-content: center;
     padding: 0 20px;
+    height: auto;
+    min-height: 100vh;
   }
   .leftPanel {
     display: none;
   }
   .rightPanel {
-    justify-content: center;
     width: 100%;
+    flex: 0 0 100%;
+    justify-content: center;
+    height: auto;
+    min-height: 100vh;
+    padding: 40px 0;
   }
   .authCard {
-    max-width: 420px;
+    width: 100%;
+    max-width: 440px;
   }
 }
 

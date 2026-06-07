@@ -9,6 +9,108 @@ import { useClinic } from "@/context/ClinicContext";
 import { User, FileText, Users, Hospital } from "lucide-react";
 import styles from "./page.module.css";
 
+// ── CUSTOM SVG LEAVES FOR BOTTOM LEFT CORNER ──
+function LeavesLeftBottom({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 160 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M0 160 C 25 135, 55 115, 95 105"
+        stroke="#2E7D32"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        opacity="0.35"
+      />
+      {/* Leaf 1 (Low) */}
+      <path
+        d="M15 155 C 28 128, 48 123, 52 143 C 37 148, 22 153, 15 155 Z"
+        fill="url(#leftLeafGrad1)"
+      />
+      {/* Leaf 2 (Mid) */}
+      <path
+        d="M45 125 C 65 102, 80 107, 75 128 C 58 128, 48 128, 45 125 Z"
+        fill="url(#leftLeafGrad2)"
+      />
+      {/* Leaf 3 (High) */}
+      <path
+        d="M75 110 C 100 88, 118 98, 108 120 C 90 120, 80 115, 75 110 Z"
+        fill="url(#leftLeafGrad1)"
+      />
+      <defs>
+        <linearGradient id="leftLeafGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#81C784" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+        <linearGradient id="leftLeafGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#1B5E20" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── CUSTOM SVG LEAVES FOR CARD TOP RIGHT CORNER ──
+function LeavesBranch({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Stem */}
+      <path
+        d="M92 8 C 77 23, 58 32, 32 38"
+        stroke="#2E7D32"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        opacity="0.45"
+      />
+      {/* Leaf 1 (Top Right) */}
+      <path
+        d="M87 13 C 90 26, 82 37, 72 39 C 70 27, 77 15, 87 13 Z"
+        fill="url(#leafGrad1)"
+      />
+      {/* Leaf 2 (Middle Right) */}
+      <path
+        d="M67 23 C 70 33, 62 43, 54 43 C 52 33, 57 23, 67 23 Z"
+        fill="url(#leafGrad2)"
+      />
+      {/* Leaf 3 (Middle Left) */}
+      <path
+        d="M52 30 C 54 38, 48 46, 42 46 C 40 38, 44 30, 52 30 Z"
+        fill="url(#leafGrad1)"
+      />
+      {/* Leaf 4 (Bottom Left) */}
+      <path
+        d="M37 35 C 39 41, 35 47, 30 46 C 28 40, 31 34, 37 35 Z"
+        fill="url(#leafGrad2)"
+      />
+      {/* Leaf 5 (Offshoot Top) */}
+      <path
+        d="M79 8 C 71 10, 66 6, 63 0 C 71 0, 76 4, 79 8 Z"
+        fill="url(#leafGrad1)"
+      />
+      <defs>
+        <linearGradient id="leafGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#81C784" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+        <linearGradient id="leafGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A5D6A7" />
+          <stop offset="100%" stopColor="#1B5E20" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 function AuthPageContent() {
   const router = useRouter();
   const supabase = createClient();
@@ -46,7 +148,7 @@ function AuthPageContent() {
           style={{
             width: "40px",
             height: "40px",
-            borderTopColor: "#0d9488",
+            borderTopColor: "#2E7D32",
           }}
         />
       </div>
@@ -60,12 +162,14 @@ function AuthPageContent() {
       <div className={styles.container}>
         {/* Left Side Content */}
         <div className={styles.leftPanel}>
+          <LeavesLeftBottom className={styles.leavesLeftBottom} />
+          
           <div className={styles.logoRow}>
             <Image
               src="/assets/jirova_care_logo.png"
               alt="Jirova Care Logo"
-              width={40}
-              height={40}
+              width={54}
+              height={54}
               style={{ objectFit: "contain" }}
             />
             <span className={styles.logoText}>Jirova Care</span>
@@ -80,19 +184,19 @@ function AuthPageContent() {
           <div className={styles.featuresRow}>
             <div className={styles.featureIconBlock}>
               <div className={styles.iconCircleLeft}>
-                <User size={24} strokeWidth={2} />
+                <User size={22} strokeWidth={1.8} />
               </div>
               <span className={styles.featureLabel}>Patient Records</span>
             </div>
             <div className={styles.featureIconBlock}>
               <div className={styles.iconCircleLeft}>
-                <FileText size={24} strokeWidth={2} />
+                <FileText size={22} strokeWidth={1.8} />
               </div>
               <span className={styles.featureLabel}>Digital Prescriptions</span>
             </div>
             <div className={styles.featureIconBlock}>
               <div className={styles.iconCircleLeft}>
-                <Users size={24} strokeWidth={2} />
+                <Users size={22} strokeWidth={1.8} />
               </div>
               <span className={styles.featureLabel}>Smart Queue</span>
             </div>
@@ -102,6 +206,10 @@ function AuthPageContent() {
         {/* Right Side Auth Card */}
         <div className={styles.rightPanel}>
           <main className={styles.authCard}>
+            <div className={styles.cardGlow} />
+            <div className={styles.cardGlowSecond} />
+            <LeavesBranch className={styles.leavesCardCorner} />
+            
             <div className={styles.panelContent}>
               <div className={styles.logoCircle}>
                 <Hospital size={28} className={styles.hospitalIcon} />
@@ -131,24 +239,17 @@ function AuthPageContent() {
                   />
                 ) : (
                   <>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                      <path d="M12 2a10 10 0 0 1 8 4H12a4 4 0 0 0-4 4 4 4 0 0 0 4 4c2.2 0 4-1.8 4-4H12" fill="none" />
-                      {/* Standard Google G symbol inline paths */}
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor" stroke="none" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor" stroke="none" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="currentColor" stroke="none" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor" stroke="none" />
+                    <svg viewBox="0 0 48 48" width="20" height="20" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '10px' }}>
+                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                      <path fill="#4285F4" d="M46.5 24c0-1.55-.15-3.24-.47-4.5H24v9h12.75C35.2 31.84 32.83 34 29.84 35.63l7.98 6.19C42.5 37.84 46.5 31.62 46.5 24z"/>
+                      <path fill="#34A853" d="M24 38.5c-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48c6.47 0 11.93-2.13 15.89-5.81l-7.9-6.12C29.93 37.56 27.15 38.5 24 38.5z"/>
+                      <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.98-6.19z"/>
                     </svg>
                     Continue with Google
                   </>
                 )}
               </button>
 
-              <div className={styles.dividerRow}>
-                <div className={styles.dividerLine} />
-                <span className={styles.dividerText}>or</span>
-                <div className={styles.dividerLine} />
-              </div>
 
               <div className={styles.consentTermsCheckbox}>
                 <label className={styles.checkboxLabel}>
