@@ -565,7 +565,7 @@
   .section-title::after {
     content: '';
     flex: 1;
-    border-bottom: 0.15px solid #000000;
+    border-bottom: 0.15px solid rgba(0, 0, 0, 0.08);
   }
   .section-title::before {
     margin-right: 2rem;
