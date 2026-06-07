@@ -205,6 +205,17 @@ function AuthPageContent() {
 
         {/* Right Side Auth Card */}
         <div className={styles.rightPanel}>
+          <div className={styles.mobileLogoRow}>
+            <Image
+              src="/assets/jirova_care_logo.png"
+              alt="Jirova Care Logo"
+              width={48}
+              height={48}
+              style={{ objectFit: "contain" }}
+            />
+            <span className={styles.logoText}>Jirova Care</span>
+          </div>
+
           <main className={styles.authCard}>
             <LeavesBranch className={styles.leavesCardCorner} />
             
@@ -247,12 +258,6 @@ function AuthPageContent() {
                   </>
                 )}
               </button>
-
-              <div className={styles.dividerRow}>
-                <div className={styles.dividerLine} />
-                <span className={styles.dividerText}>or</span>
-                <div className={styles.dividerLine} />
-              </div>
 
               <div className={styles.consentTermsCheckbox}>
                 <label className={styles.checkboxLabel}>
