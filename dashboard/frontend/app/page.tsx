@@ -201,7 +201,7 @@ export default function LandingPage() {
       <div className="bg-glow" ref={glowRef}></div>
 
       {/* ── NAVBAR ── */}
-      <nav className={`glass-nav ${scrolled ? "scrolled" : ""}`}>
+      <nav className={`glass-nav ${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "menu-open" : ""}`}>
         <div className="container nav-container">
           <Link href="/" className="logo">
             <Image
