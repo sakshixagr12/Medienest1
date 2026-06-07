@@ -6,20 +6,7 @@
   justify-content: center;
   overflow: hidden;
   font-family: 'Outfit', 'Inter', sans-serif;
-  background: #F8F9F5;
-}
-
-.page::before {
-  content: "";
-  position: absolute;
-  top: -5%;
-  left: -5%;
-  width: 110%;
-  height: 110%;
-  background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
-  filter: blur(6px); /* Crisp workspace blur on background */
-  z-index: 0;
-  pointer-events: none;
+  background: #F8F9F5; /* Matches mockup off-white base */
 }
 
 .overlay {
@@ -49,9 +36,7 @@
   text-align: left;
   box-sizing: border-box;
   padding: 120px 60px 80px 60px;
-  background: linear-gradient(to right, rgba(248, 249, 245, 0.95) 0%, rgba(248, 249, 245, 0.7) 60%, rgba(248, 249, 245, 0) 100%);
-  backdrop-filter: none; /* no separate blur tile */
-  border-right: none; /* no separator border */
+  background: #F8F9F5; /* Solid warm off-white from mockup */
   position: relative;
   overflow: hidden;
 }
@@ -77,7 +62,7 @@
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #111827; /* Near-black Dark Text */
+  color: #1F2937; /* Dark Text */
 }
 
 .leftMainContent {
@@ -90,7 +75,7 @@
   line-height: 1.2;
   letter-spacing: -0.8px;
   margin: 0 0 16px 0;
-  color: #111827; /* Near-black Dark Text */
+  color: #1F2937; /* Dark Text */
 }
 
 .horizontalLine {
@@ -103,7 +88,7 @@
 
 .leftSubtext {
   font-size: 16px;
-  color: #374151; /* Darker charcoal subtext */
+  color: #4B5563; /* Slate grey subtext */
   line-height: 1.5;
   margin: 0;
   font-weight: 500;
@@ -144,7 +129,7 @@
 .featureLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #374151; /* Darker charcoal feature labels */
+  color: #4B5563; /* Darker muted text */
   max-width: 110px;
   line-height: 1.35;
 }
@@ -159,11 +144,25 @@
   align-items: center;
   box-sizing: border-box;
   padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rightPanel::before {
+  content: "";
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background: url('/assets/clinic_desk_light_bg.png') no-repeat center center / cover;
+  filter: blur(6px); /* Subtle medical workspace blur */
+  z-index: 0;
+  pointer-events: none;
 }
 
 .authCard {
-  background: radial-gradient(circle at 90% 10%, #B8D8B8 0%, #ffffff 40%, #E0E4CE 100%);
-  border: 1.5px solid rgba(46, 125, 50, 0.22);
+  background: #ffffff; /* Mockup pure white */
   border-radius: 28px; /* spec: 28px */
   padding: 48px 40px;
   width: 460px; /* spec: 460px */
@@ -172,6 +171,7 @@
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .leavesCardCorner {
@@ -184,76 +184,14 @@
   z-index: 1;
 }
 
-.cardGlow {
-  position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, rgba(46, 125, 50, 0.2) 0%, rgba(224, 228, 206, 0.4) 60%, rgba(255, 255, 255, 0) 100%);
-  filter: blur(35px);
-  pointer-events: none;
-  z-index: 1;
-  animation: smokeMoveOne 16s infinite ease-in-out;
-}
-
-.cardGlowSecond {
-  position: absolute;
-  bottom: -100px;
-  left: -100px;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(234, 243, 234, 0.45) 0%, rgba(46, 125, 50, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
-  filter: blur(40px);
-  pointer-events: none;
-  z-index: 1;
-  animation: smokeMoveTwo 22s infinite ease-in-out;
-}
-
-@keyframes smokeMoveOne {
-  0% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  25% {
-    transform: translate(-140px, 60px) scale(1.15) rotate(90deg);
-  }
-  50% {
-    transform: translate(-220px, 160px) scale(0.9) rotate(180deg);
-  }
-  75% {
-    transform: translate(-80px, 220px) scale(1.1) rotate(270deg);
-  }
-  100% {
-    transform: translate(0, 0) scale(1) rotate(360deg);
-  }
-}
-
-@keyframes smokeMoveTwo {
-  0% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  25% {
-    transform: translate(120px, -80px) scale(0.85) rotate(-90deg);
-  }
-  50% {
-    transform: translate(200px, -180px) scale(1.2) rotate(-180deg);
-  }
-  75% {
-    transform: translate(60px, -240px) scale(0.95) rotate(-270deg);
-  }
-  100% {
-    transform: translate(0, 0) scale(1) rotate(-360deg);
-  }
-}
-
 .panelContent {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  z-index: 2;
   position: relative;
+  z-index: 2;
 }
 
 .logoCircle {
@@ -348,7 +286,7 @@
 /* Consent Checkbox */
 .consentTermsCheckbox {
   width: 100%;
-  margin-top: 24px;
+  margin-top: 12px;
   margin-bottom: 32px;
 }
 
