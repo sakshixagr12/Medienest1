@@ -13,8 +13,8 @@
 /* --- Leaves Decoration --- */
 .leavesCornerWrapper {
   position: absolute;
-  top: -20px;
-  right: -35px;
+  top: -60px;
+  right: -150px;
   pointer-events: none;
   z-index: 0;
   opacity: 0.95;

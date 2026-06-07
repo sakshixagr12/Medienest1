@@ -6,7 +6,7 @@ import { useClinic } from "@/context/ClinicContext";
 import styles from "./PortalNavbar.module.css";
 
 export default function PortalNavbar() {
-  const { signOut } = useClinic();
+  const { clinic, signOut } = useClinic();
 
   return (
     <nav className={styles.navbar}>
@@ -25,9 +25,11 @@ export default function PortalNavbar() {
         </div>
 
         <div className={styles.profileArea}>
-          <div className={styles.avatarCircle}>D</div>
+          <div className={styles.avatarCircle}>
+            {clinic?.name ? clinic.name.charAt(0).toUpperCase() : "C"}
+          </div>
           <div className={styles.profileText}>
-            <span className={styles.roleLabel}>Doctor</span>
+            <span className={styles.roleLabel}>{clinic?.name || "Clinic"}</span>
             <button className={styles.signOutLink} onClick={signOut} aria-label="Sign Out">
               <span>Sign Out</span>
               <svg
