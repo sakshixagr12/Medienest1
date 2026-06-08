@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { z } = require("zod");
 const { createClient } = require("@supabase/supabase-js");
+const { askLLM } = require("../utils/llmRotation");
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -640,32 +641,12 @@ async function suggestClinicalPath(cc, findings, context = {}) {
         Return required_classes ONLY from: antipyretic, analgesic, antibiotic, antibiotic_r, antitussive, bronchodilator, ppi, antihistamine, antiemetic, ors, antifungal, laxative, nsaid.
         JSON ONLY: { "severity": "mild|moderate|emergency", "category": "cardio|neuro|resp|gi|derm|uro|general", "probable_diagnosis": "", "differentials": [], "investigations": { "primary": [], "secondary": [] }, "required_classes": [], "advice": ["item1", "item2"], "confidence": 0-1 }`;
 
-    const aiResponse = await fetch(
-      "https://integrate.api.nvidia.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "meta/llama-3.1-8b-instruct",
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: `Case: ${age}y ${gender} CC: ${cc} Findings: ${findings}`,
-            },
-          ],
-          temperature: 0.1,
-        }),
-      },
+    const content = await askLLM(
+      [{ role: "user", content: `Case: ${age}y ${gender} CC: ${cc} Findings: ${findings}` }],
+      systemPrompt,
+      1200
     );
-
-    const aiData = await aiResponse.json();
-    const clinicalIntent = parseClinicalJson(
-      aiData.choices?.[0]?.message?.content || "",
-    );
+    const clinicalIntent = parseClinicalJson(content || "");
 
     // --- STEP 1: RANK DIAGNOSIS & REASONING ---
     const dxList = [

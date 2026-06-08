@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const { z } = require("zod");
 const { createClient } = require("@supabase/supabase-js");
 const { Cashfree } = require("cashfree-pg");
+const { askLLM } = require("./utils/llmRotation");
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -616,37 +617,20 @@ INPUT DATA:
           `[AI] Generation attempt ${attempts}/${maxAttempts} for ${lang}...`,
         );
 
-        const response = await fetch(
-          "https://integrate.api.nvidia.com/v1/chat/completions",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "meta/llama-3.1-8b-instruct",
-              messages: [
-                { role: "system", content: systemRole },
-                { role: "user", content: userPrompt },
-              ],
-              temperature: 0.1,
-              max_tokens: 1200, // Increased to prevent truncation
-              top_p: 1,
-            }),
-          },
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`[AI API ERROR]:`, errorText);
-          if (attempts === maxAttempts)
-            throw new Error("AI Service unavailable");
+        let content = "";
+        try {
+          content = await askLLM(
+            [{ role: "user", content: userPrompt }],
+            systemRole,
+            1200
+          );
+        } catch (aiErr) {
+          console.error(`[AI ERROR] askLLM failed:`, aiErr.message);
+          if (attempts === maxAttempts) {
+            throw new Error("AI Service unavailable. " + aiErr.message);
+          }
           continue;
         }
-
-        const aiResponse = await response.json();
-        let content = aiResponse.choices?.[0]?.message?.content || "";
 
         try {
           // 1. Standardize cleanup for control characters
