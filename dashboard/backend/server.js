@@ -173,7 +173,7 @@ app.post(
         customer_details: {
           customer_id: clinic_id,
           customer_phone: phone,
-          customer_email: clinic.email || req.user.email || "billing@jivora.care",
+          customer_email: clinic.email || req.user.email || "billing@medienest.care",
           customer_name: clinic.name || "Clinic Owner"
         },
         order_meta: {
@@ -465,7 +465,7 @@ app.post("/api/payment/webhook", async (req, res) => {
 
 // ─── Basic Health Check ───
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "Jivora Care API is running" });
+  res.json({ status: "ok", message: "MedieNest API is running" });
 });
 
 app.get("/api/ping", async (req, res) => {
@@ -807,7 +807,7 @@ app.use((err, req, res, next) => {
 const startServer = (port) => {
   app
     .listen(port, () => {
-      console.log(`[AI 4/4] Jivora Care API is LIVE on port ${port}`);
+      console.log(`[AI 4/4] MedieNest API is LIVE on port ${port}`);
     })
     .on("error", (err) => {
       if (err.code === "EADDRINUSE") {

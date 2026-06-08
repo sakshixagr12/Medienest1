@@ -256,7 +256,7 @@ function DoctorProfilePage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. doctor@jivora care.ai"
+                  placeholder="e.g. doctor@medienest care.ai"
                 />
               </div>
 

@@ -21,7 +21,7 @@ export default function PortalPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const hospitalName = clinic?.name || "Jivora Care Partner Clinic";
+  const hospitalName = clinic?.name || "MedieNest Partner Clinic";
   const hospitalLocation = clinic?.address || "Location not set";
 
   useEffect(() => {
@@ -498,7 +498,7 @@ export default function PortalPage() {
                   <span className={styles.heartIconGrey}>❤</span>
                   <span className={styles.separatorLine} />
                 </div>
-                <p className={styles.modalFooterText}>Jivora Care · Compassion. Care. Connected.</p>
+                <p className={styles.modalFooterText}>MedieNest · Compassion. Care. Connected.</p>
               </div>
             </div>
           </div>
@@ -574,7 +574,7 @@ export default function PortalPage() {
         </section>
 
         <footer className={styles.portalFooter}>
-          Authorized personnel only. Clinic Operating System v2.4. Jivora Care ensures data privacy for all clinic records.
+          Authorized personnel only. Clinic Operating System v2.4. MedieNest ensures data privacy for all clinic records.
         </footer>
       </div>
     </>

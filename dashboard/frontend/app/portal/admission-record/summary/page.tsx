@@ -429,7 +429,7 @@ export default function AdmissionSummaryPage() {
         {/* Footer */}
         <div className={styles.docFooter}>
           <div>
-            Jivora Care Clinical Record &nbsp;•&nbsp; Generated{" "}
+            MedieNest Clinical Record &nbsp;•&nbsp; Generated{" "}
             {new Date().toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",

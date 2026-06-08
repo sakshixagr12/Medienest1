@@ -49,7 +49,7 @@ export default function PrivacyPolicy() {
 
           <h2>5. Data Retention</h2>
           <p>
-            We retain your clinic profiles, patient logs, and billing details for as long as your Jivora Care account remains active, or as required by applicable medical record-keeping laws and guidelines in India.
+            We retain your clinic profiles, patient logs, and billing details for as long as your MedieNest account remains active, or as required by applicable medical record-keeping laws and guidelines in India.
           </p>
 
           <h2>6. User Rights</h2>

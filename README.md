@@ -1,4 +1,4 @@
-# Jivora Care - Clinic Management SaaS Platform
+# MedieNest - Clinic Management SaaS Platform
 
 A modern, full-stack SaaS platform for clinic management. Built with a ruthless focus on **clarity, ROI, and product stickiness**. 
 
@@ -67,4 +67,4 @@ npm run dev
 *(This launches the frontend at `http://localhost:3000` and the backend at `http://localhost:4000` concurrently.)*
 
 ---
-© 2026 Jivora Care SaaS Solutions. Built for impact. Built to last.
+© 2026 MedieNest SaaS Solutions. Built for impact. Built to last.

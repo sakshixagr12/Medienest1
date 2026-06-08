@@ -436,19 +436,19 @@ export default function OnboardingPage() {
           <div className={styles.leftPanelTopGroup}>
             <div className={styles.logoRow}>
               <Image
-                src="/assets/jivora_care_logo.png"
-                alt="Jivora Care Logo"
+                src="/assets/medienest_logo.png"
+                alt="MedieNest Logo"
                 width={64}
                 height={64}
                 style={{ objectFit: "contain" }}
               />
-              <span className={styles.logoText}>Jivora Care</span>
+              <span className={styles.logoText}>MedieNest</span>
             </div>
 
             <div className={styles.leftMainContent}>
               <h1>Onboarding Process</h1>
               <div className={styles.horizontalLine} />
-              <p>Setup your clinic details and configure practitioner profiles to get started with Jivora Care.</p>
+              <p>Setup your clinic details and configure practitioner profiles to get started with MedieNest.</p>
             </div>
 
             <nav className={styles.navMenu}>
@@ -499,7 +499,7 @@ export default function OnboardingPage() {
 
           <div className={styles.leftPanelFooter}>
             Need help?{" "}
-            <Link href="mailto:concierge@jivoracare.com" className={styles.leftPanelFooterLink}>
+            <Link href="mailto:concierge@medienest.com" className={styles.leftPanelFooterLink}>
               Contact support
             </Link>
           </div>
@@ -510,13 +510,13 @@ export default function OnboardingPage() {
           <div className={styles.mobileLogoContainer}>
             <div className={styles.mobileLogoRow}>
               <Image
-                src="/assets/jivora_care_logo.png"
-                alt="Jivora Care Logo"
+                src="/assets/medienest_logo.png"
+                alt="MedieNest Logo"
                 width={42}
                 height={42}
                 style={{ objectFit: "contain" }}
               />
-              <span className={styles.mobileLogoText}>Jivora Care</span>
+              <span className={styles.mobileLogoText}>MedieNest</span>
             </div>
             <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
           </div>
@@ -548,8 +548,8 @@ export default function OnboardingPage() {
 
               <p className={styles.cardSubtext}>
                 {step === 1 && "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing."}
-                {step === 2 && "List the practitioners who will be using Jivora Care. You can update this later from settings."}
-                {step === 3 && "Thank you for choosing Jivora Care. We are currently auditing your credentials."}
+                {step === 2 && "List the practitioners who will be using MedieNest. You can update this later from settings."}
+                {step === 3 && "Thank you for choosing MedieNest. We are currently auditing your credentials."}
               </p>
             </div>
 
@@ -844,7 +844,7 @@ export default function OnboardingPage() {
                 <div className={styles.waitActions}>
                   <button
                     className={styles.btnSolid}
-                    onClick={() => (window.location.href = "mailto:concierge@jivoracare.com")}
+                    onClick={() => (window.location.href = "mailto:concierge@medienest.com")}
                   >
                     Visit Support Center
                   </button>
@@ -854,7 +854,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className={styles.contactInfo}>
-                  Questions? Contact onboarding concierge at <strong>concierge@jivoracare.com</strong>
+                  Questions? Contact onboarding concierge at <strong>concierge@medienest.com</strong>
                 </div>
               </div>
             )}

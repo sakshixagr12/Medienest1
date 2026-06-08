@@ -297,13 +297,13 @@ export default function DashboardSidebar({
         <div className={styles.brand}>
           <div className={styles.logoContainer}>
             <img
-              src="/assets/jivora_care_logo.png"
-              alt="Jivora Care Logo"
+              src="/assets/medienest_logo.png"
+              alt="MedieNest Logo"
               className={styles.brandLogo}
             />
           </div>
           <div className={styles.brandInfo}>
-            <h1>Jivora Care</h1>
+            <h1>MedieNest</h1>
             {!isReceptionist && <p>Doctors Desk</p>}
           </div>
           {/* Mobile close button */}

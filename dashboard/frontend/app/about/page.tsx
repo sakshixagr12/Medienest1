@@ -11,26 +11,26 @@ export default function AboutUs() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1>About Us</h1>
-          <p>Learn more about the mission, vision, and team behind Jivora Care.</p>
+          <p>Learn more about the mission, vision, and team behind MedieNest.</p>
         </div>
 
         <div className={styles.content}>
           <h2>Our Mission</h2>
           <p>
-            Jivora Care exists to empower healthcare professionals by automating administrative documentation, prescription generation, and billing workflows. By removing the daily operational friction from clinic management, we enable doctors to dedicate their full focus and energy to what matters most: patient care.
+            MedieNest exists to empower healthcare professionals by automating administrative documentation, prescription generation, and billing workflows. By removing the daily operational friction from clinic management, we enable doctors to dedicate their full focus and energy to what matters most: patient care.
           </p>
 
           <h2>Our Vision</h2>
           <p>
-            We are building a future where healthcare administrative workflows are completely seamless, secure, and digitally integrated. Through intelligent clinical assistance, Jivora Care aims to be the foundational digital infrastructure for modern outpatient practices and clinics worldwide.
+            We are building a future where healthcare administrative workflows are completely seamless, secure, and digitally integrated. Through intelligent clinical assistance, MedieNest aims to be the foundational digital infrastructure for modern outpatient practices and clinics worldwide.
           </p>
 
           <h2>Company Information</h2>
           <p>
-            Jivora Care is designed, developed, and maintained with a commitment to privacy, reliability, and clinical utility.
+            MedieNest is designed, developed, and maintained with a commitment to privacy, reliability, and clinical utility.
           </p>
           <ul>
-            <li><strong>Company Name:</strong> Jivora Care Technologies</li>
+            <li><strong>Company Name:</strong> MedieNest Technologies</li>
             <li><strong>Country:</strong> India</li>
             <li><strong>Contact Email:</strong> utkarsh.shukla.ind@gmail.com</li>
           </ul>

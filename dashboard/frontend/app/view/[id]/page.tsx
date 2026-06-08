@@ -59,7 +59,7 @@ export default function ViewPrescription({
   const [doctor, setDoctor] = useState<any>(null);
   const [showDocProfile, setShowDocProfile] = useState(false);
 
-  const hospitalName = clinic?.name || "Jivora Care Partner Clinic";
+  const hospitalName = clinic?.name || "MedieNest Partner Clinic";
   const hospitalLocation = clinic?.address || "Location not set";
 
   // --- HYDRATION GUARD ---
@@ -666,7 +666,7 @@ export default function ViewPrescription({
     <>
       <nav className={styles.topNav}>
         <div className={styles.navLeft}>
-          <div className={styles.brand}>Jivora Care</div>
+          <div className={styles.brand}>MedieNest</div>
         </div>
         <div
           className={`${styles.navCenter} ${activeTab === "AI Summary" ? styles.navCenterCentered : ""}`}
@@ -1203,7 +1203,7 @@ export default function ViewPrescription({
                       <header className={styles.clinicHeader}>
                         <div className={styles.clinicInfo}>
                           <h1 className={styles.clinicName}>
-                            {clinic?.name || "Jivora Care Clinic"}
+                            {clinic?.name || "MedieNest Clinic"}
                           </h1>
                           <p className={styles.tagline}>
                             {clinic?.tagline || "Advanced Healthcare Solutions"}

@@ -31,7 +31,7 @@ app.use(express.json());
 
 // ─── Basic Health Check ───
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "Jivora Care SuperAdmin Backend is running" });
+  res.json({ status: "ok", message: "MedieNest SuperAdmin Backend is running" });
 });
 
 // ─── SUPER ADMIN MIDDLEWARE ───

@@ -124,7 +124,7 @@ export default function PublicDischargeSummary({
             fontWeight: 600,
           }}
         >
-          Jivora Care Secure Encrypted Link
+          MedieNest Secure Encrypted Link
         </div>
         <div className={styles.headerActions}>
           <button className={styles.btnPrint} onClick={() => window.print()}>
@@ -141,7 +141,7 @@ export default function PublicDischargeSummary({
               <tr>
                 <td>
                   <div className={styles.previewHeader}>
-                    <h2>{clinic?.name || "Jivora Care Partner Clinic"}</h2>
+                    <h2>{clinic?.name || "MedieNest Partner Clinic"}</h2>
                     <p>{clinic?.address}</p>
                     <p style={{ fontSize: 11, marginTop: 4 }}>
                       {clinic?.phone}

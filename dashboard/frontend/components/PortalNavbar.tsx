@@ -14,14 +14,14 @@ export default function PortalNavbar() {
         <div className={styles.brand}>
           <div className={styles.logoWrapper}>
             <Image
-              src="/assets/jivora_care_logo.png"
-              alt="Jivora Care Logo"
+              src="/assets/medienest_logo.png"
+              alt="MedieNest Logo"
               width={32}
               height={32}
               className={styles.logo}
             />
           </div>
-          <span className={styles.brandName}>Jivora Care</span>
+          <span className={styles.brandName}>MedieNest</span>
         </div>
 
         <div className={styles.profileArea}>

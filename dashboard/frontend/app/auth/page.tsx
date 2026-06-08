@@ -256,13 +256,13 @@ function AuthPageContent() {
           
           <div className={styles.logoRow}>
             <Image
-              src="/assets/jivora_care_logo.png"
-              alt="Jivora Care Logo"
+              src="/assets/medienest_logo.png"
+              alt="MedieNest Logo"
               width={54}
               height={54}
               style={{ objectFit: "contain" }}
             />
-            <span className={styles.logoText}>Jivora Care</span>
+            <span className={styles.logoText}>MedieNest</span>
           </div>
 
           <div className={styles.leftMainContent}>
@@ -298,13 +298,13 @@ function AuthPageContent() {
           <div className={styles.mobileLogoContainer}>
             <div className={styles.mobileLogoRow}>
               <Image
-                src="/assets/jivora_care_logo.png"
-                alt="Jivora Care Logo"
+                src="/assets/medienest_logo.png"
+                alt="MedieNest Logo"
                 width={42}
                 height={42}
                 style={{ objectFit: "contain" }}
               />
-              <span className={styles.mobileLogoText}>Jivora Care</span>
+              <span className={styles.mobileLogoText}>MedieNest</span>
             </div>
             <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
           </div>
@@ -387,7 +387,7 @@ function AuthPageContent() {
                   </span>
                 ) : (
                   <span>
-                    New to Jivora Care?{" "}
+                    New to MedieNest?{" "}
                     <Link href="/auth?tab=register" className={styles.blueLink}>
                       Create an account &gt;
                     </Link>

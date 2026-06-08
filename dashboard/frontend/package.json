@@ -13,7 +13,7 @@
     "@supabase/supabase-js": "^2.102.1",
     "framer-motion": "^12.40.0",
     "html2canvas": "^1.4.1",
-    "jivora-care-root": "file:../..",
+    "medienest-root": "file:../..",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.8.0",
     "next": "16.2.2",

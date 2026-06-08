@@ -1,6 +1,6 @@
 @echo off
 echo =======================================================
-echo          Starting Jivora Care Development Servers
+echo          Starting MedieNest Development Servers
 echo =======================================================
 
 echo Installing missing dependencies if any...

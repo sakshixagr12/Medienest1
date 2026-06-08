@@ -13,19 +13,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Jivora Care — Clinic Management Platform",
+  title: "MedieNest — Clinic Management Platform",
   description:
-    "Jivora Care: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
+    "MedieNest: The all-in-one digital clinic management system for modern healthcare providers. AI-powered prescriptions, billing, and patient records.",
   openGraph: {
-    title: "Jivora Care — Digital Clinic Platform",
+    title: "MedieNest — Digital Clinic Platform",
     description: "Modern healthcare management with AI patient summaries.",
     type: "website",
-    url: "https://jivoracarev1.vercel.app",
-    siteName: "Jivora Care",
+    url: "https://medienestv1.vercel.app",
+    siteName: "MedieNest",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jivora Care — AI Clinic Hub",
+    title: "MedieNest — AI Clinic Hub",
     description: "Transforming healthcare with digital clinic solutions.",
   },
   icons: {

@@ -36,7 +36,7 @@ import TiltWrapper from "@/components/TiltWrapper";
 import CountUp from "@/components/CountUp";
 
 const preloaderImages = [
-  "/assets/jivora_care_logo.png",
+  "/assets/medienest_logo.png",
   "/assets/showcase_queue.png",
   "/assets/showcase_prescription.png",
   "/assets/showcase_billing.png",
@@ -144,8 +144,8 @@ export default function LandingPage() {
             userSelect: "none",
           }}>
             <Image
-              src="/assets/jivora_care_logo.png"
-              alt="Jivora Care"
+              src="/assets/medienest_logo.png"
+              alt="MedieNest"
               width={52}
               height={52}
               style={{ borderRadius: "14px", opacity: 0.92 }}
@@ -159,7 +159,7 @@ export default function LandingPage() {
                 margin: "0 0 4px",
                 fontFamily: "'Outfit', 'Inter', sans-serif",
               }}>
-                Welcome to Jivora Care
+                Welcome to MedieNest
               </p>
               <p style={{
                 color: "rgba(255,255,255,0.45)",
@@ -205,13 +205,13 @@ export default function LandingPage() {
         <div className="container nav-container">
           <Link href="/" className="logo">
             <Image
-              src="/assets/jivora_care_logo.png"
-              alt="Jivora Care"
+              src="/assets/medienest_logo.png"
+              alt="MedieNest"
               width={36}
               height={36}
               className="logo-img"
             />
-            <span className="logo-text">Jivora Care</span>
+            <span className="logo-text">MedieNest</span>
           </Link>
 
           <div className="nav-links">
@@ -341,7 +341,7 @@ export default function LandingPage() {
                     </div>
                     <div className="dash-header-right">
                       <div className="dash-clinic-info">
-                        <p className="dash-clinic-name">Jivora Clinic</p>
+                        <p className="dash-clinic-name">MedieNest Clinic</p>
                         <p className="dash-clinic-branch">Green Park Branch</p>
                       </div>
                       <div className="dash-notif-btn"><span>🔔</span></div>
@@ -620,7 +620,7 @@ export default function LandingPage() {
       <section className="section-v3" style={{ background: "rgba(13, 148, 136, 0.02)" }} id="showcase">
         <div className="container center">
           <h2 className="section-title">See It In Action</h2>
-          <p className="section-subtitle">Watch how Jivora Care handles real clinical workflows in under 2 minutes.</p>
+          <p className="section-subtitle">Watch how MedieNest handles real clinical workflows in under 2 minutes.</p>
 
           {/* YouTube video placeholder */}
           <div className="yt-placeholder">
@@ -655,7 +655,7 @@ export default function LandingPage() {
               />
             </div>
             <div className="upgrade-content">
-              <h2 className="section-title-left" style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem' }}>The Jivora Workflow</h2>
+              <h2 className="section-title-left" style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem' }}>The MedieNest Workflow</h2>
               <p className="upgrade-sub">Built to simplify every stage of a patient visit.</p>
               
               <div className="step-list">
@@ -690,7 +690,7 @@ export default function LandingPage() {
       <section className="section-v3 wa-dark-bg" id="use-cases">
         <div className="container center">
           <h2 className="section-title">Powerful Use Cases</h2>
-          <p className="section-subtitle">Real-world examples of how Jivora Care transforms clinic workflows.</p>
+          <p className="section-subtitle">Real-world examples of how MedieNest transforms clinic workflows.</p>
           
           <div className="showcase-grid">
             <div className="showcase-card">
@@ -773,7 +773,7 @@ export default function LandingPage() {
             <div className="simple-card">
               <div className="pain-card" style={{ padding: '2rem' }}>
                 <p style={{ fontStyle: 'italic', color: '#475569', fontSize: '15px', lineHeight: 1.7, marginBottom: '20px' }}>
-                  "Jivora Care has cut our patient intake documentation time in half. The queue management between our front desk and consultation room is completely seamless."
+                  "MedieNest has cut our patient intake documentation time in half. The queue management between our front desk and consultation room is completely seamless."
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Image

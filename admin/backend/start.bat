@@ -1,6 +1,6 @@
 @echo off
 echo ==========================================
-echo   Jivora Care Super Admin Panel
+echo   MedieNest Super Admin Panel
 echo ==========================================
 echo.
 echo Starting SuperAdmin Backend on port 4002...

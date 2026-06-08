@@ -131,8 +131,8 @@ export default function App() {
     <div className="app">
       <header>
         <div className="header-logo">
-          <img src="/logo.png" className="logo-img" alt="Jivora Care Logo" />
-          <h1>Jivora Care Admin</h1>
+          <img src="/logo.png" className="logo-img" alt="MedieNest Logo" />
+          <h1>MedieNest Admin</h1>
           <div className="badge">Super Admin</div>
         </div>
         <div>

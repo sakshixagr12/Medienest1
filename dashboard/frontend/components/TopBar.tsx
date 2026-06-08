@@ -76,8 +76,8 @@ export default function TopBar({
       <div className="topbar-logo">
         <div className="topbar-logo-circle">
           <Image
-            src="/assets/jivora_care_logo.png"
-            alt="Jivora Care Logo"
+            src="/assets/medienest_logo.png"
+            alt="MedieNest Logo"
             width={34}
             height={34}
             style={{ objectFit: "contain" }}

@@ -84,8 +84,8 @@ const getProviders = () => {
           url: 'https://openrouter.ai/api/v1/chat/completions',
           model: 'google/gemini-2.5-flash',
           extraHeaders: {
-            'HTTP-Referer': 'https://jivoracare.com',
-            'X-Title': 'JivoraCare'
+            'HTTP-Referer': 'https://medienest.com',
+            'X-Title': 'MedieNest'
           }
         });
       }

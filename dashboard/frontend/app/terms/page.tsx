@@ -17,12 +17,12 @@ export default function TermsOfService() {
         <div className={styles.content}>
           <h2>1. Agreement to Terms</h2>
           <p>
-            By accessing or using the Jivora Care platform, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you do not have permission to access the Service.
+            By accessing or using the MedieNest platform, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you do not have permission to access the Service.
           </p>
 
           <h2>2. Software Service Only</h2>
           <p style={{ background: "#eff6ff", borderLeft: "4px solid #3b82f6", padding: "12px 16px", borderRadius: "4px", color: "#1e3a8a", fontWeight: 600 }}>
-            Jivora Care provides software tools and does not provide medical advice, diagnosis, or treatment.
+            MedieNest provides software tools and does not provide medical advice, diagnosis, or treatment.
           </p>
 
           <h2>3. Healthcare Responsibility</h2>
@@ -52,7 +52,7 @@ export default function TermsOfService() {
 
           <h2>8. Acceptable Use</h2>
           <p>
-            You agree to use Jivora Care only for lawful, professional clinical administration purposes. You must not use the service to transmit malicious code, attempt unauthorized database access, or violate patient data privacy rules.
+            You agree to use MedieNest only for lawful, professional clinical administration purposes. You must not use the service to transmit malicious code, attempt unauthorized database access, or violate patient data privacy rules.
           </p>
 
           <h2>9. Termination</h2>
@@ -62,7 +62,7 @@ export default function TermsOfService() {
 
           <h2>10. Limitation of Liability</h2>
           <p style={{ background: "#fef2f2", borderLeft: "4px solid #ef4444", padding: "12px 16px", borderRadius: "4px", color: "#7f1d1d", fontWeight: 600 }}>
-            Jivora Care shall not be liable for medical decisions, treatment outcomes, or patient care provided through use of the platform.
+            MedieNest shall not be liable for medical decisions, treatment outcomes, or patient care provided through use of the platform.
           </p>
         </div>
       </div>

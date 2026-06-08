@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo   Jivora Care SuperAdmin Standalone Launcher
+echo   MedieNest SuperAdmin Standalone Launcher
 echo ===================================================
 cd /d "%~dp0"
 
