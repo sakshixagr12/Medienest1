@@ -653,10 +653,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className={styles.formFooter}>
-                  <div className={styles.pageBottomBadge}>
-                    <ShieldCheck size={14} style={{ color: "#2E7D32", marginRight: "4px" }} />
-                    HIPAA SECURE
-                  </div>
+                  <div />
                   
                   <button className={styles.btnNext} onClick={goStep2}>
                     Next: Add Doctors
