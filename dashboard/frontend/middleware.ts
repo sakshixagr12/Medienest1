@@ -42,18 +42,18 @@ export async function middleware(request: NextRequest) {
 
   const { data: clinics } = await supabase
     .from("clinics")
-    .select("status")
+    .select("id, status, created_at")
     .eq("owner_user_id", user.id);
 
   let clinicStatus: string | null = null;
+  let activeClinic: any = null;
+
   if (clinics && clinics.length > 0) {
-    if (clinics.some((c) => c.status === "active")) {
-      clinicStatus = "active";
-    } else if (clinics.some((c) => c.status === "pending")) {
-      clinicStatus = "pending";
-    } else {
-      clinicStatus = clinics[0].status || null;
-    }
+    activeClinic =
+      clinics.find((c) => c.status === "active") ||
+      clinics.find((c) => c.status === "pending") ||
+      clinics[0];
+    clinicStatus = activeClinic.status || null;
   }
 
   // Case A: Trying to hit Login or Landing while already logged in
@@ -78,6 +78,46 @@ export async function middleware(request: NextRequest) {
       (pathname.startsWith("/onboarding") || pathname.startsWith("/pending"))
     ) {
       return NextResponse.redirect(new URL("/portal", request.url));
+    }
+  }
+
+  // Case C: Check Trial/Subscription status for Active clinics trying to access portal pages
+  if (
+    clinicStatus === "active" &&
+    pathname.startsWith("/portal") &&
+    !pathname.startsWith("/portal/clinic-settings")
+  ) {
+    // Check trial expiration (14 days from created_at)
+    let isTrialActive = false;
+    if (activeClinic && activeClinic.created_at) {
+      const createdAt = new Date(activeClinic.created_at);
+      const trialEnd = new Date(createdAt);
+      trialEnd.setDate(trialEnd.getDate() + 14);
+      isTrialActive = new Date() < trialEnd;
+    }
+
+    // Check active subscription
+    let isSubscriptionActive = false;
+    if (activeClinic) {
+      const { data: subscription } = await supabase
+        .from("subscriptions")
+        .select("status, end_date")
+        .eq("clinic_id", activeClinic.id)
+        .maybeSingle();
+
+      if (
+        subscription &&
+        subscription.status === "active" &&
+        new Date(subscription.end_date) > new Date()
+      ) {
+        isSubscriptionActive = true;
+      }
+    }
+
+    if (!isTrialActive && !isSubscriptionActive) {
+      return NextResponse.redirect(
+        new URL("/portal/clinic-settings?expired=true", request.url)
+      );
     }
   }
 

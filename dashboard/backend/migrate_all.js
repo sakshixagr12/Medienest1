@@ -16,7 +16,9 @@ const migrationFiles = [
   "v2_clean/35_queue_optimizations.sql",
   "v2_clean/36_doctor_specific_queue.sql",
   "v2_clean/37_unique_clinic_services.sql",
+  "v2_clean/38_subscriptions_and_payments.sql",
 ];
+
 
 const run = async () => {
   const connectionString = process.env.DATABASE_URL;

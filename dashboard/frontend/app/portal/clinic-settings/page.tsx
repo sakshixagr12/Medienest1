@@ -16,12 +16,19 @@ import {
   FileText,
   Link as LinkIcon,
   Trash2,
+  CreditCard,
+  Check,
+  Zap,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeDoctorName } from "@/lib/utils";
+import { API_BASE_URL, authenticatedFetch } from "@/lib/api";
+import { load } from "@cashfreepayments/cashfree-js";
 import styles from "./page.module.css";
 
 export default function ClinicSettingsPage() {
@@ -44,12 +51,120 @@ export default function ClinicSettingsPage() {
   const [newDocPhoto, setNewDocPhoto] = useState("");
   const [isAddingDoc, setIsAddingDoc] = useState(false);
 
+  // Subscription States
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isLoadingSub, setIsLoadingSub] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState("Starter");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showExpiredWarning, setShowExpiredWarning] = useState(false);
+
+  // Fetch subscription details
+  const fetchSubscription = async () => {
+    if (!clinic?.id) return;
+    setIsLoadingSub(true);
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("clinic_id", clinic.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setSubscription(data);
+    } catch (e: any) {
+      console.error("Error fetching subscription:", e.message);
+    } finally {
+      setIsLoadingSub(false);
+    }
+  };
+
+  // Verify payment on the server
+  const verifyPaymentOnServer = async (orderId: string) => {
+    if (!clinic?.id) return;
+    setIsCheckingOut(true);
+    try {
+      const res = await authenticatedFetch(`${API_BASE_URL}/api/payment/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clinic_id: clinic.id,
+          order_id: orderId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.order_status === "PAID") {
+        alert("Payment verified! Your subscription is now active.");
+        await fetchSubscription();
+      } else {
+        alert("Verification status: " + (data.error || "Payment not verified yet. Please try again."));
+      }
+    } catch (e: any) {
+      alert("Error verifying payment: " + e.message);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  // Run initial loading of settings and verify check
   useEffect(() => {
     if (clinic) {
       setClinicName(clinic.name || "");
       setClinicAddress(clinic.address || "");
+      fetchSubscription();
+
+      // Check if redirected back with an order_id
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get("order_id");
+        if (orderId) {
+          // Clean parameters from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          verifyPaymentOnServer(orderId);
+        }
+        if (params.get("expired") === "true") {
+          setShowExpiredWarning(true);
+        }
+      }
     }
   }, [clinic]);
+
+  // Determine trial details
+  const getTrialDetails = () => {
+    if (!clinic?.created_at) return { active: false, daysLeft: 0, expired: true };
+    const createdAt = new Date(clinic.created_at);
+    const trialEnd = new Date(createdAt);
+    trialEnd.setDate(trialEnd.getDate() + 14);
+
+    const today = new Date();
+    const isExpired = today >= trialEnd;
+    const diffTime = trialEnd.getTime() - today.getTime();
+    const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+    return {
+      active: !isExpired,
+      daysLeft,
+      expired: isExpired,
+      endDateStr: trialEnd.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+    };
+  };
+
+  const trial = getTrialDetails();
+
+  // Dynamic doctor limits
+  let maxAllowedDoctors = 2;
+  if (subscription) {
+    if (subscription.plan_name === "Clinic") {
+      maxAllowedDoctors = 5;
+    } else if (subscription.plan_name === "Professional") {
+      maxAllowedDoctors = 999;
+    }
+  }
 
   const handleSaveClinic = async () => {
     if (!clinic?.id) return;
@@ -76,15 +191,14 @@ export default function ClinicSettingsPage() {
   const handleAddDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clinic?.id) return;
-    if (doctors && doctors.length >= 2) {
-      alert("Clinic Limit Reached: Maximum 2 doctors allowed per clinic.");
+    if (doctors && doctors.length >= maxAllowedDoctors) {
+      alert(`Clinic Limit Reached: Maximum ${maxAllowedDoctors} doctors allowed on your current plan.`);
       return;
     }
 
     setIsAddingDoc(true);
     try {
       const normalizedName = normalizeDoctorName(newDocName);
-      // 1. Insert into doctors table
       const { data: newDoc, error: docErr } = await supabase
         .from("doctors")
         .insert([
@@ -103,7 +217,6 @@ export default function ClinicSettingsPage() {
 
       if (docErr) throw docErr;
 
-      // 2. Map to clinic
       const { error: mapErr } = await supabase.from("clinic_doctors").insert([
         {
           clinic_id: clinic.id,
@@ -149,55 +262,280 @@ export default function ClinicSettingsPage() {
     }
   };
 
+  // Initiate Cashfree checkout SDK
+  const handleUpgradeCheckout = async () => {
+    if (!clinic?.id) return;
+    setIsCheckingOut(true);
+    try {
+      // 1. Get payment session ID from backend
+      const res = await authenticatedFetch(`${API_BASE_URL}/api/payment/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clinic_id: clinic.id,
+          plan_name: selectedPlan,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to initiate payment");
+      }
+
+      // 2. Initialize Cashfree PG SDK
+      const cashfree = await load({
+        mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
+      });
+
+      // 3. Open Checkout Overlay
+      const checkoutOptions = {
+        paymentSessionId: data.payment_session_id,
+        returnUrl: `${window.location.origin}/portal/clinic-settings?order_id=${data.order_id}`,
+      };
+
+      await cashfree.checkout(checkoutOptions);
+    } catch (err: any) {
+      alert("Checkout failed: " + err.message);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
   return (
     <DashboardLayout hideSidebar>
       <div className={styles.header}>
         <div className={styles.headerText}>
           <h1>Clinic Management</h1>
-          <p>Update branding and manage your medical staff (Max 2 Doctors)</p>
+          <p>Update branding, subscription plan, and manage your medical staff</p>
         </div>
       </div>
 
+      {showExpiredWarning && (
+        <div className={styles.warningBanner}>
+          <AlertTriangle size={18} />
+          <span>Your 14-day trial or subscription has expired. Please choose a plan and subscribe to restore access.</span>
+        </div>
+      )}
+
       <div className={styles.grid}>
-        {/* Left: Clinic Profile */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.iconBox}>
-              <Building size={20} />
+        {/* Left Column: Clinic Profile & Subscription */}
+        <div className={styles.leftColumn}>
+          {/* Clinic Branding */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconBox}>
+                <Building size={20} />
+              </div>
+              <h3>Clinic Branding</h3>
             </div>
-            <h3>Clinic Branding</h3>
+            <div className={styles.cardBody}>
+              <div className={styles.field}>
+                <label>
+                  <ShieldCheck size={14} /> Official Clinic Name
+                </label>
+                <input
+                  type="text"
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                  placeholder="e.g. City Care Hospital"
+                />
+              </div>
+              <div className={styles.field}>
+                <label>
+                  <MapPin size={14} /> Physical Address
+                </label>
+                <textarea
+                  rows={3}
+                  value={clinicAddress}
+                  onChange={(e) => setClinicAddress(e.target.value)}
+                  placeholder="e.g. 123 Healthcare Ave, Sector 4..."
+                />
+              </div>
+              <button
+                className={styles.saveBtn}
+                onClick={handleSaveClinic}
+                disabled={isSavingClinic}
+              >
+                <Save size={16} />
+                {isSavingClinic ? "Saving..." : "Update Clinic Profile"}
+              </button>
+            </div>
           </div>
-          <div className={styles.cardBody}>
-            <div className={styles.field}>
-              <label>
-                <ShieldCheck size={14} /> Official Clinic Name
-              </label>
-              <input
-                type="text"
-                value={clinicName}
-                onChange={(e) => setClinicName(e.target.value)}
-                placeholder="e.g. City Care Hospital"
-              />
+
+          {/* Subscription Card */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconBox}>
+                <CreditCard size={20} />
+              </div>
+              <h3>Plan & Billing</h3>
             </div>
-            <div className={styles.field}>
-              <label>
-                <MapPin size={14} /> Physical Address
-              </label>
-              <textarea
-                rows={3}
-                value={clinicAddress}
-                onChange={(e) => setClinicAddress(e.target.value)}
-                placeholder="e.g. 123 Healthcare Ave, Sector 4..."
-              />
+            <div className={styles.cardBody}>
+              {/* Active Subscription Status Banner */}
+              {subscription && subscription.status === "active" ? (
+                <div className={`${styles.subStatusBox} ${styles.subActive}`}>
+                  <div className={styles.subStatusIcon}>
+                    <Zap size={18} />
+                  </div>
+                  <div className={styles.subStatusText}>
+                    <h4>Active: {subscription.plan_name} Tier</h4>
+                    <p>
+                      Expires/Renews on{" "}
+                      {new Date(subscription.end_date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ) : trial.active ? (
+                <div className={`${styles.subStatusBox} ${styles.trialActive}`}>
+                  <div className={styles.subStatusIcon}>
+                    <Clock size={18} />
+                  </div>
+                  <div className={styles.subStatusText}>
+                    <h4>14-Day Free Trial</h4>
+                    <p>Expires in {trial.daysLeft} days ({trial.endDateStr})</p>
+                  </div>
+                </div>
+              ) : (
+                <div className={`${styles.subStatusBox} ${styles.trialExpired}`}>
+                  <div className={styles.subStatusIcon}>
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div className={styles.subStatusText}>
+                    <h4>Subscription / Trial Expired</h4>
+                    <p>Upgrade to a paid plan below to restore access</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Tier Selector */}
+              <h4 style={{ fontSize: "14px", fontWeight: "800", color: "#1e293b", margin: "16px 0 8px" }}>
+                Select Subscription Tier
+              </h4>
+
+              <div className={styles.planTierList}>
+                {/* Starter Plan */}
+                <div
+                  className={`${styles.planTier} ${selectedPlan === "Starter" ? styles.planTierSelected : ""}`}
+                  onClick={() => setSelectedPlan("Starter")}
+                >
+                  <input
+                    type="radio"
+                    className={styles.planRadio}
+                    name="billing-plan"
+                    checked={selectedPlan === "Starter"}
+                    onChange={() => setSelectedPlan("Starter")}
+                  />
+                  <div className={styles.planTierInfo}>
+                    <div className={styles.planTierName}>Starter Tier</div>
+                    <div className={styles.planTierPrice}>₹99 / month</div>
+                  </div>
+                </div>
+
+                {/* Clinic Plan */}
+                <div
+                  className={`${styles.planTier} ${selectedPlan === "Clinic" ? styles.planTierSelected : ""}`}
+                  onClick={() => setSelectedPlan("Clinic")}
+                >
+                  <input
+                    type="radio"
+                    className={styles.planRadio}
+                    name="billing-plan"
+                    checked={selectedPlan === "Clinic"}
+                    onChange={() => setSelectedPlan("Clinic")}
+                  />
+                  <div className={styles.planTierInfo}>
+                    <div className={styles.planTierName}>Clinic Tier</div>
+                    <div className={styles.planTierPrice}>₹249 / month</div>
+                  </div>
+                </div>
+
+                {/* Professional Plan */}
+                <div
+                  className={`${styles.planTier} ${selectedPlan === "Professional" ? styles.planTierSelected : ""}`}
+                  onClick={() => setSelectedPlan("Professional")}
+                >
+                  <input
+                    type="radio"
+                    className={styles.planRadio}
+                    name="billing-plan"
+                    checked={selectedPlan === "Professional"}
+                    onChange={() => setSelectedPlan("Professional")}
+                  />
+                  <div className={styles.planTierInfo}>
+                    <div className={styles.planTierName}>Professional Tier</div>
+                    <div className={styles.planTierPrice}>₹499 / month</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tier Details list based on selectedPlan */}
+              <ul className={styles.planFeatures}>
+                {selectedPlan === "Starter" && (
+                  <>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Max 2 Doctors
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Patient Queue Manager
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Basic AI summary metrics
+                    </li>
+                  </>
+                )}
+                {selectedPlan === "Clinic" && (
+                  <>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Max 5 Doctors
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Patient Queue & Analytics
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Multi-language prescriptions
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Priority Email Support
+                    </li>
+                  </>
+                )}
+                {selectedPlan === "Professional" && (
+                  <>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Unlimited Doctors
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Full Queue, billing & analytics
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Custom branding & prescription logos
+                    </li>
+                    <li>
+                      <Check size={14} className={styles.featureCheck} /> Dedicated account manager
+                    </li>
+                  </>
+                )}
+              </ul>
+
+              <button
+                className={styles.saveBtn}
+                onClick={handleUpgradeCheckout}
+                disabled={isCheckingOut || (subscription?.plan_name === selectedPlan && subscription?.status === "active")}
+              >
+                <CreditCard size={16} />
+                {isCheckingOut
+                  ? "Initializing payment..."
+                  : subscription?.plan_name === selectedPlan && subscription?.status === "active"
+                  ? "Current Plan"
+                  : `Pay & Activate Tier (₹${selectedPlan === "Starter" ? "99" : selectedPlan === "Clinic" ? "249" : "499"})`}
+              </button>
             </div>
-            <button
-              className={styles.saveBtn}
-              onClick={handleSaveClinic}
-              disabled={isSavingClinic}
-            >
-              <Save size={16} />
-              {isSavingClinic ? "Saving..." : "Update Clinic Profile"}
-            </button>
           </div>
         </div>
 
@@ -209,7 +547,7 @@ export default function ClinicSettingsPage() {
             </div>
             <h3>Medical Staff</h3>
             <span className={styles.countBadge}>
-              {doctors?.length || 0} / 2
+              {doctors?.length || 0} / {maxAllowedDoctors === 999 ? "∞" : maxAllowedDoctors}
             </span>
           </div>
           <div className={styles.cardBody}>
@@ -242,14 +580,14 @@ export default function ClinicSettingsPage() {
             <button
               className={styles.addBtn}
               onClick={() => setIsAddModalOpen(true)}
-              disabled={doctors && doctors.length >= 2}
+              disabled={doctors && doctors.length >= maxAllowedDoctors}
             >
               <UserPlus size={18} />
               Add New Doctor
             </button>
-            {doctors && doctors.length >= 2 && (
+            {doctors && doctors.length >= maxAllowedDoctors && (
               <p className={styles.limitText}>
-                Limit reached. Upgrade plan for more doctors.
+                Limit reached. Upgrade your plan to add more doctors.
               </p>
             )}
           </div>

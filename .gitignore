@@ -37,9 +37,14 @@ yarn-debug.log*
 # tool-specific
 .antigravity/
 .gemini/
-
 # debug/test scripts with secrets
 junk/
 scratch/
 backend/scratch/
 
+# Temporary workspace duplicates and scratch files
+/New folder (2)/
+/scratch_diff_page.txt
+/amit.png
+/ritu.png
+/sk.png

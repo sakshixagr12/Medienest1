@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { z } = require("zod");
 const { createClient } = require("@supabase/supabase-js");
+const { Cashfree } = require("cashfree-pg");
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -13,6 +14,13 @@ const PORT = process.env.PORT || 4001;
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseServiceRole);
+
+// Cashfree PG SDK Initialization
+const cashfree = new Cashfree(
+  process.env.CASHFREE_ENV === "production" ? "PRODUCTION" : "SANDBOX",
+  process.env.CASHFREE_APP_ID,
+  process.env.CASHFREE_SECRET_KEY
+);
 // Patient History route
 const patientHistoryRouter = require("./routes/patientHistory");
 const recommendationsRouter = require("./routes/recommendations");
@@ -97,6 +105,362 @@ app.use(
   requireClinicAccess,
   notificationsRouter,
 );
+
+// ─── CASHFREE PAYMENT & SUBSCRIPTION ENDPOINTS ────────────────────────────────
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: "Too many requests. Please try again later.",
+  },
+});
+
+// Map plans to amounts
+const PLAN_PRICING = {
+  "Starter": { inr: 99.00, paise: 9900 },
+  "Clinic": { inr: 249.00, paise: 24900 },
+  "Professional": { inr: 499.00, paise: 49900 }
+};
+
+app.post(
+  "/api/payment/create-order",
+  requireAuth,
+  requireClinicAccess,
+  paymentLimiter,
+  async (req, res) => {
+    try {
+      const { clinic_id, plan_name } = req.body;
+      if (!clinic_id || !plan_name) {
+        return res.status(400).json({ success: false, error: "clinic_id and plan_name are required" });
+      }
+
+      const plan = PLAN_PRICING[plan_name];
+      if (!plan) {
+        return res.status(400).json({ success: false, error: "Invalid plan selection" });
+      }
+
+      // Fetch clinic details for user email/phone
+      const { data: clinic, error: clinicErr } = await supabase
+        .from("clinics")
+        .select("*")
+        .eq("id", clinic_id)
+        .maybeSingle();
+
+      if (clinicErr || !clinic) {
+        return res.status(404).json({ success: false, error: "Clinic not found" });
+      }
+
+      // Handle and clean phone number for Cashfree
+      let phone = clinic.phone || req.user.phone || "9999999999";
+      phone = phone.replace(/\D/g, "");
+      if (phone.length === 12 && phone.startsWith("91")) {
+        phone = phone.substring(2);
+      }
+      if (phone.length !== 10) {
+        phone = "9999999999";
+      }
+
+      const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      const request = {
+        order_amount: plan.inr,
+        order_currency: "INR",
+        order_id: orderId,
+        customer_details: {
+          customer_id: clinic_id,
+          customer_phone: phone,
+          customer_email: clinic.email || req.user.email || "billing@jivora.care",
+          customer_name: clinic.name || "Clinic Owner"
+        },
+        order_meta: {
+          return_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/portal/clinic-settings?order_id={order_id}`
+        }
+      };
+
+      const cfResponse = await cashfree.PGCreateOrder(request);
+
+      // Save pending payment record to database
+      const { error: dbErr } = await supabase
+        .from("processed_payments")
+        .insert({
+          order_id: orderId,
+          amount: plan.paise,
+          user_id: req.user.id,
+          clinic_id: clinic_id,
+          status: "pending"
+        });
+
+      if (dbErr) {
+        console.error("Failed to insert pending payment:", dbErr.message);
+      }
+
+      res.json({
+        success: true,
+        order_id: orderId,
+        payment_session_id: cfResponse.data.payment_session_id
+      });
+    } catch (err) {
+      console.error("Create Order Error:", err.response?.data || err.message);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create payment order. " + (err.response?.data?.message || err.message)
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/payment/verify",
+  requireAuth,
+  requireClinicAccess,
+  paymentLimiter,
+  async (req, res) => {
+    try {
+      const { order_id } = req.body;
+      if (!order_id) {
+        return res.status(400).json({ success: false, error: "order_id is required" });
+      }
+
+      // Check order status from Cashfree
+      const cfResponse = await cashfree.PGFetchOrder(order_id);
+      const orderData = cfResponse.data;
+
+      if (orderData.order_status === "PAID") {
+        // Retrieve pending payment to get the clinic ID and user ID
+        const { data: dbPayment, error: fetchErr } = await supabase
+          .from("processed_payments")
+          .select("*")
+          .eq("order_id", order_id)
+          .maybeSingle();
+
+        if (!dbPayment) {
+          return res.status(404).json({ success: false, error: "Payment record not found" });
+        }
+
+        if (dbPayment.status !== "paid") {
+          // Update payment status to paid
+          await supabase
+            .from("processed_payments")
+            .update({
+              status: "paid",
+              payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+              updated_at: new Date().toISOString()
+            })
+            .eq("order_id", order_id);
+
+          // Determine subscription plan
+          const amountInInr = parseFloat(orderData.order_amount);
+          let planName = "Starter";
+          if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
+          else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
+
+          const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+          // Upsert active subscription
+          await supabase
+            .from("subscriptions")
+            .upsert({
+              clinic_id: dbPayment.clinic_id,
+              plan_name: planName,
+              status: "active",
+              start_date: new Date().toISOString(),
+              end_date: endDate.toISOString(),
+              payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+              updated_at: new Date().toISOString()
+            }, { onConflict: "clinic_id" });
+
+          // Create audit log
+          await supabase
+            .from("audit_logs")
+            .insert({
+              actor_id: req.user.id,
+              clinic_id: dbPayment.clinic_id,
+              action: "PAYMENT_COMPLETED",
+              entity_type: "payments",
+              entity_id: dbPayment.id,
+              ip_address: req.ip || req.headers['x-forwarded-for'] || ""
+            });
+        }
+
+        return res.json({
+          success: true,
+          order_status: "PAID",
+          message: "Payment verified successfully"
+        });
+      } else {
+        // Update payment status to failed if Cashfree marked it failed
+        if (orderData.order_status === "FAILED") {
+          await supabase
+            .from("processed_payments")
+            .update({
+              status: "failed",
+              updated_at: new Date().toISOString()
+            })
+            .eq("order_id", order_id);
+        }
+
+        return res.json({
+          success: false,
+          order_status: orderData.order_status,
+          error: "Payment not completed yet"
+        });
+      }
+    } catch (err) {
+      console.error("Verify Payment Error:", err.response?.data || err.message);
+      res.status(500).json({
+        success: false,
+        error: "Failed to verify payment. " + (err.response?.data?.message || err.message)
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/payment/status/:orderId",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { data: dbPayment, error: fetchErr } = await supabase
+        .from("processed_payments")
+        .select("*")
+        .eq("order_id", orderId)
+        .maybeSingle();
+
+      if (fetchErr || !dbPayment) {
+        return res.status(404).json({ success: false, error: "Payment record not found" });
+      }
+
+      // If the database says paid, we are good to go
+      if (dbPayment.status === "paid") {
+        return res.json({ success: true, status: "paid", payment: dbPayment });
+      }
+
+      // Check Cashfree directly in case the client/webhook hasn't processed it yet
+      const cfResponse = await cashfree.PGFetchOrder(orderId);
+      const orderData = cfResponse.data;
+
+      if (orderData.order_status === "PAID" && dbPayment.status !== "paid") {
+        // Update the payment record and subscription inline
+        await supabase
+          .from("processed_payments")
+          .update({
+            status: "paid",
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq("order_id", orderId);
+
+        const amountInInr = parseFloat(orderData.order_amount);
+        let planName = "Starter";
+        if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
+        else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
+
+        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+        await supabase
+          .from("subscriptions")
+          .upsert({
+            clinic_id: dbPayment.clinic_id,
+            plan_name: planName,
+            status: "active",
+            start_date: new Date().toISOString(),
+            end_date: endDate.toISOString(),
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "clinic_id" });
+
+        await supabase
+          .from("audit_logs")
+          .insert({
+            actor_id: dbPayment.user_id,
+            clinic_id: dbPayment.clinic_id,
+            action: "PAYMENT_COMPLETED",
+            entity_type: "payments",
+            entity_id: dbPayment.id,
+            ip_address: req.ip || req.headers['x-forwarded-for'] || ""
+          });
+
+        return res.json({ success: true, status: "paid" });
+      }
+
+      res.json({ success: true, status: dbPayment.status });
+    } catch (err) {
+      console.error("Get Payment Status Error:", err.message);
+      res.status(500).json({ success: false, error: "Failed to get payment status" });
+    }
+  }
+);
+
+app.post("/api/payment/webhook", async (req, res) => {
+  try {
+    const { data } = req.body;
+    if (!data || !data.order || !data.order.order_id) {
+      return res.status(400).json({ error: "Invalid webhook payload" });
+    }
+    const orderId = data.order.order_id;
+    
+    // Query Cashfree directly for the official order state
+    const cfResponse = await cashfree.PGFetchOrder(orderId);
+    const orderData = cfResponse.data;
+    
+    if (orderData.order_status === "PAID") {
+      const { data: dbPayment, error: fetchErr } = await supabase
+        .from("processed_payments")
+        .select("*")
+        .eq("order_id", orderId)
+        .maybeSingle();
+        
+      if (dbPayment && dbPayment.status !== "paid") {
+        await supabase
+          .from("processed_payments")
+          .update({
+            status: "paid",
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq("order_id", orderId);
+          
+        const amountInInr = parseFloat(orderData.order_amount);
+        let planName = "Starter";
+        if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
+        else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
+        
+        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        
+        await supabase
+          .from("subscriptions")
+          .upsert({
+            clinic_id: dbPayment.clinic_id,
+            plan_name: planName,
+            status: "active",
+            start_date: new Date().toISOString(),
+            end_date: endDate.toISOString(),
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "clinic_id" });
+          
+        await supabase
+          .from("audit_logs")
+          .insert({
+            actor_id: dbPayment.user_id,
+            clinic_id: dbPayment.clinic_id,
+            action: "PAYMENT_COMPLETED",
+            entity_type: "payments",
+            entity_id: dbPayment.id,
+            ip_address: req.ip || req.headers['x-forwarded-for'] || ""
+          });
+      }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Webhook Error:", err.message);
+    res.status(500).json({ error: "Webhook processing failed" });
+  }
+});
 
 // ─── Basic Health Check ───
 app.get("/health", (req, res) => {
