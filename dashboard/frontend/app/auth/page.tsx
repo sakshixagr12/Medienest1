@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +8,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useClinic } from "@/context/ClinicContext";
 import { User, FileText, Users, Hospital } from "lucide-react";
 import styles from "./page.module.css";
+
+// ── CUSTOM SVG LEAVES FOR BOTTOM LEFT CORNER ──
+// ... (omitting unchanged SVG components for length) ...
+// (Note: replace_file_content will match lines exactly)
+
 
 // ── CUSTOM SVG LEAVES FOR BOTTOM LEFT CORNER ──
 function LeavesLeftBottom({ className }: { className?: string }) {
@@ -206,6 +211,16 @@ function AuthPageContent() {
   const [agreeChecked, setAgreeChecked] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"clinic" | "store" | null>(null);
+
+  // Load stored role choice on mount to remember user choice
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("user_role_choice") as "clinic" | "store" | null;
+      if (stored === "clinic" || stored === "store") {
+        setSelectedRole(stored);
+      }
+    }
+  }, []);
 
   // ── GOOGLE LOGIN ──
   const handleGoogleLogin = async () => {
