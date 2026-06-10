@@ -6,7 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeDoctorName } from "@/lib/utils";
-import { Hospital, Users, Clock, ShieldCheck, Mail, ArrowRight, Check } from "lucide-react";
+import { Hospital, Users, Clock, ShieldCheck, Mail, ArrowRight, Check, AlertTriangle, Loader2, CheckCircle2, Zap } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
+import { load } from "@cashfreepayments/cashfree-js";
 import styles from "./page.module.css";
 
 interface Doctor {
@@ -244,6 +246,89 @@ export default function OnboardingPage() {
   const [step2Error, setStep2Error] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Pricing/Payment step state
+  const [createdClinic, setCreatedClinic] = useState<any>(null);
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+
+  const handleStartTrial = async (planName: string) => {
+    if (!createdClinic) return;
+    if (processingPlan) return;
+    setProcessingPlan(planName);
+    setPaymentError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${API_BASE_URL}/api/payment/start-trial`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
+          clinic_id: createdClinic.id,
+          plan_name: planName
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to initiate free trial.");
+      }
+
+      setVerificationSuccess(true);
+      const dest = createdClinic.clinic_type === "store" ? "/store" : "/portal";
+      setTimeout(() => {
+        window.location.href = dest;
+      }, 1500);
+    } catch (err: any) {
+      setPaymentError(err.message || "An error occurred starting your free trial.");
+      setProcessingPlan(null);
+    }
+  };
+
+  const handlePayCheckout = async (planName: string) => {
+    if (!createdClinic) return;
+    if (processingPlan) return;
+    setProcessingPlan(planName);
+    setPaymentError("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${API_BASE_URL}/api/payment/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
+          clinic_id: createdClinic.id,
+          plan_name: planName
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to initiate payment checkout.");
+      }
+
+      // Initialize Cashfree PG SDK
+      const cashfree = await load({
+        mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: data.payment_session_id,
+        returnUrl: `${window.location.origin}/pending?order_id=${data.order_id}`,
+      };
+
+      await cashfree.checkout(checkoutOptions);
+    } catch (err: any) {
+      setPaymentError(err.message || "Payment initialization failed.");
+      setProcessingPlan(null);
+    }
+  };
+
   const goStep2 = () => {
     if (!clinicName) {
       setStep1Error("Clinic name is required.");
@@ -423,7 +508,9 @@ export default function OnboardingPage() {
         }
       }
 
-      router.replace("/pending");
+      setCreatedClinic(clinic);
+      setStep(roleChoice === "store" ? 2 : 3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       setStep2Error(err.message || "Submission failed. Try again.");
     } finally {
@@ -463,11 +550,14 @@ export default function OnboardingPage() {
             </div>
 
             <nav className={styles.navMenu}>
-              {/* Clinic Setup */}
+              {/* Clinic/Store Setup */}
               <div
                 className={`${styles.navItem} ${step === 1 ? styles.navItemActive : ""} ${step > 1 ? styles.navItemCompleted : ""}`}
-                onClick={() => setStep(1)}
-                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  // Only allow clicking back to Step 1 if we haven't submitted the onboarding form yet
+                  if (!createdClinic) setStep(1);
+                }}
+                style={{ cursor: createdClinic ? "default" : "pointer" }}
               >
                 <div className={styles.navIconCircle}>
                   {step > 1 ? <Check size={18} /> : <Hospital size={20} />}
@@ -482,8 +572,11 @@ export default function OnboardingPage() {
               {roleChoice !== "store" && (
                 <div
                   className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""} ${step > 2 ? styles.navItemCompleted : ""}`}
-                  onClick={() => (step === 1 ? goStep2() : undefined)}
-                  style={{ cursor: step === 1 ? "pointer" : "default" }}
+                  onClick={() => {
+                    // Only allow clicking back to Step 2 if we haven't submitted the onboarding form yet
+                    if (!createdClinic && step === 1) goStep2();
+                  }}
+                  style={{ cursor: (createdClinic || step !== 1) ? "default" : "pointer" }}
                 >
                   <div className={styles.navIconCircle}>
                     {step > 2 ? <Check size={18} /> : <Users size={20} />}
@@ -494,6 +587,19 @@ export default function OnboardingPage() {
                   </div>
                 </div>
               )}
+
+              {/* Choose Plan */}
+              <div
+                className={`${styles.navItem} ${step === (roleChoice === "store" ? 2 : 3) ? styles.navItemActive : ""}`}
+              >
+                <div className={styles.navIconCircle}>
+                  <Zap size={18} />
+                </div>
+                <div className={styles.navTextWrapper}>
+                  <span className={styles.navStepNumber}>{roleChoice === "store" ? "Step 02" : "Step 03"}</span>
+                  <span className={styles.navStepTitle}>Choose Plan</span>
+                </div>
+              </div>
             </nav>
           </div>
 
@@ -521,7 +627,7 @@ export default function OnboardingPage() {
             <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
           </div>
 
-          <main className={styles.onboardingCard}>
+          <main className={`${styles.onboardingCard} ${step === (roleChoice === "store" ? 2 : 3) ? styles.pricingStepCard : ""}`}>
             <LeavesBranch className={styles.leavesCardCorner} />
 
             <div className={styles.cardHeaderArea}>
@@ -531,7 +637,8 @@ export default function OnboardingPage() {
 
               <h2 className={styles.cardHeading}>
                 {step === 1 && (roleChoice === "store" ? "Store Setup" : "Clinic Setup")}
-                {step === 2 && "Team Members"}
+                {step === 2 && (roleChoice === "store" ? "Choose Plan" : "Team Members")}
+                {step === 3 && "Choose Plan"}
               </h2>
 
               <div className={styles.heartSeparator}>
@@ -542,12 +649,13 @@ export default function OnboardingPage() {
 
               {/* Mobile Stepper Progress bar (hidden on desktop) */}
               <div className={styles.mobileStepIndicator}>
-                Step {step} of {roleChoice === "store" ? 1 : 2} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : "Team Members"}
+                Step {step} of {roleChoice === "store" ? 2 : 3} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : (step === 2 ? (roleChoice === "store" ? "Choose Plan" : "Team Members") : "Choose Plan")}
               </div>
 
               <p className={styles.cardSubtext}>
                 {step === 1 && (roleChoice === "store" ? "Tell us about your medical store. This information will be visible on invoice receipts and used for billing." : "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing.")}
-                {step === 2 && "List the practitioners who will be using MedieNest. You can update this later from settings."}
+                {step === 2 && (roleChoice === "store" ? "Get started with a 7-day free trial or subscribe to a plan to access patient queue management, electronic prescriptions, and clinic reports." : "List the practitioners who will be using MedieNest. You can update this later from settings.")}
+                {step === 3 && "Get started with a 7-day free trial or subscribe to a plan to access patient queue management, electronic prescriptions, and clinic reports."}
               </p>
             </div>
 
@@ -867,6 +975,184 @@ export default function OnboardingPage() {
                   >
                     {submitting ? "Submitting..." : "Submit for Onboarding"}
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3 (Clinic) / STEP 2 (Store): CHOOSE PLAN */}
+            {step === (roleChoice === "store" ? 2 : 3) && (
+              <div className={styles.formContainer}>
+                {paymentError && (
+                  <div className={styles.errorBanner} style={{ marginBottom: "24px" }}>
+                    <AlertTriangle size={18} />
+                    <span>{paymentError}</span>
+                  </div>
+                )}
+
+                {/* Pricing Cards Grid */}
+                <div className={styles.pricingGrid}>
+                  {/* Plan 1: Starter */}
+                  <div className={styles.pricingCard}>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.planName}>Starter</span>
+                      <div className={styles.priceRow}>
+                        <span className={styles.currency}>₹</span>
+                        <span className={styles.amount}>99</span>
+                        <span className={styles.period}>/month</span>
+                      </div>
+                    </div>
+                    <div className={styles.divider} />
+                    <ul className={styles.featuresList}>
+                      {roleChoice === "store" ? (
+                        <>
+                          <li><Check size={16} /> Basic Billing & Receipts</li>
+                          <li><Check size={16} /> Day Sales Summary</li>
+                          <li><Check size={16} /> Standard Email Support</li>
+                        </>
+                      ) : (
+                        <>
+                          <li><Check size={16} /> Max 2 Consulting Doctors</li>
+                          <li><Check size={16} /> Patient Queue Manager</li>
+                          <li><Check size={16} /> Basic AI summary metrics</li>
+                        </>
+                      )}
+                    </ul>
+                    <div className={styles.buttonCol}>
+                      <button
+                        className={styles.trialBtn}
+                        onClick={() => handleStartTrial("Starter")}
+                        disabled={!!processingPlan}
+                      >
+                        {processingPlan === "Starter" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
+                      </button>
+                      <button
+                        className={styles.payBtn}
+                        onClick={() => handlePayCheckout("Starter")}
+                        disabled={!!processingPlan}
+                      >
+                        <Zap size={15} style={{ marginRight: "6px" }} />
+                        Subscribe Now
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Plan 2: Clinic */}
+                  <div className={`${styles.pricingCard} ${styles.featuredCard}`}>
+                    <div className={styles.popularTag}>MOST POPULAR</div>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.planName} style={{ color: "#2E7D32" }}>Clinic</span>
+                      <div className={styles.priceRow}>
+                        <span className={styles.currency}>₹</span>
+                        <span className={styles.amount}>249</span>
+                        <span className={styles.period}>/month</span>
+                      </div>
+                    </div>
+                    <div className={styles.divider} />
+                    <ul className={styles.featuresList}>
+                      {roleChoice === "store" ? (
+                        <>
+                          <li><Check size={16} /> Advanced Billing & Reports</li>
+                          <li><Check size={16} /> Analytics & Insights</li>
+                          <li><Check size={16} /> Priority Email Support</li>
+                        </>
+                      ) : (
+                        <>
+                          <li><Check size={16} /> Max 5 Consulting Doctors</li>
+                          <li><Check size={16} /> Patient Queue & Analytics</li>
+                          <li><Check size={16} /> Multi-language prescriptions</li>
+                          <li><Check size={16} /> Priority Email Support</li>
+                        </>
+                      )}
+                    </ul>
+                    <div className={styles.buttonCol}>
+                      <button
+                        className={`${styles.trialBtn} ${styles.featuredTrialBtn}`}
+                        onClick={() => handleStartTrial("Clinic")}
+                        disabled={!!processingPlan}
+                      >
+                        {processingPlan === "Clinic" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
+                      </button>
+                      <button
+                        className={`${styles.payBtn} ${styles.featuredPayBtn}`}
+                        onClick={() => handlePayCheckout("Clinic")}
+                        disabled={!!processingPlan}
+                      >
+                        <Zap size={15} style={{ marginRight: "6px" }} />
+                        Subscribe Now
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Plan 3: Professional */}
+                  <div className={styles.pricingCard}>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.planName}>Professional</span>
+                      <div className={styles.priceRow}>
+                        <span className={styles.currency}>₹</span>
+                        <span className={styles.amount}>499</span>
+                        <span className={styles.period}>/month</span>
+                      </div>
+                    </div>
+                    <div className={styles.divider} />
+                    <ul className={styles.featuresList}>
+                      {roleChoice === "store" ? (
+                        <>
+                          <li><Check size={16} /> Unlimited Billing & Invoices</li>
+                          <li><Check size={16} /> Custom branding & receipt logos</li>
+                          <li><Check size={16} /> Dedicated Account Manager</li>
+                        </>
+                      ) : (
+                        <>
+                          <li><Check size={16} /> Unlimited Doctors</li>
+                          <li><Check size={16} /> Full Queue, billing & analytics</li>
+                          <li><Check size={16} /> Custom branding & prescription logos</li>
+                          <li><Check size={16} /> Dedicated Account Manager</li>
+                        </>
+                      )}
+                    </ul>
+                    <div className={styles.buttonCol}>
+                      <button
+                        className={styles.trialBtn}
+                        onClick={() => handleStartTrial("Professional")}
+                        disabled={!!processingPlan}
+                      >
+                        {processingPlan === "Professional" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
+                      </button>
+                      <button
+                        className={styles.payBtn}
+                        onClick={() => handlePayCheckout("Professional")}
+                        disabled={!!processingPlan}
+                      >
+                        <Zap size={15} style={{ marginRight: "6px" }} />
+                        Subscribe Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.footerHelp} style={{ textAlign: "center", maxWidth: "none", marginTop: "32px" }}>
+                  Secure payments processed via Cashfree. Having issues? <a href="mailto:support@medienest.care" style={{ color: "#2E7D32", textDecoration: "none", fontWeight: 700 }}>Contact Support</a>
+                </div>
+              </div>
+            )}
+
+            {/* Verifying Loader Screen Overlay */}
+            {(verifying || verificationSuccess) && (
+              <div className={styles.verifyingOverlay}>
+                <div className={styles.verifyingCard}>
+                  {verificationSuccess ? (
+                    <div className={styles.successWrapper}>
+                      <CheckCircle2 className={styles.successIcon} size={64} />
+                      <h2>Activation Successful!</h2>
+                      <p>Your subscription is active. Redirecting to your dashboard...</p>
+                    </div>
+                  ) : (
+                    <div className={styles.verifyingWrapper}>
+                      <Loader2 className={styles.verifyingSpinner} size={64} />
+                      <h2>Activating License...</h2>
+                      <p>Please do not close or refresh this page.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
