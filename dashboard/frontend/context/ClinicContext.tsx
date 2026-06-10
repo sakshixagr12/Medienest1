@@ -160,9 +160,16 @@ export function ClinicProvider({ children }: { children: ReactNode }) {
           });
         }
         setClinic(null);
+        if (currentUser && typeof window !== "undefined") {
+          localStorage.removeItem("medienest_account_exists");
+        }
       } else {
         console.log("ClinicContext: Clinic data loaded:", clinicData.name);
         setClinic(clinicData);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("medienest_account_exists", "true");
+          localStorage.setItem("user_role_choice", clinicData.clinic_type || "clinic");
+        }
 
         const { data: doctorData, error: docError } = await supabase
           .from("clinic_doctors")

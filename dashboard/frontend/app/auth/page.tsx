@@ -230,9 +230,11 @@ function AuthPageContent() {
     }
     setAuthError("");
     
-    // If we have a remembered role, proceed directly to Google OAuth.
-    // If not, prompt with the selection popup modal.
-    if (selectedRole) {
+    const accountExists = typeof window !== "undefined" && localStorage.getItem("medienest_account_exists") === "true";
+    
+    // If we have a remembered role, the account exists in the DB, and they are not on the register tab,
+    // we can bypass the popup modal. Otherwise, prompt them.
+    if (selectedRole && accountExists && tab !== "register") {
       await triggerGoogleOAuth(selectedRole);
     } else {
       setShowRoleModal(true);
