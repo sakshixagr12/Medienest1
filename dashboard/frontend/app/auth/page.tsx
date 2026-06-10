@@ -209,18 +209,6 @@ function AuthPageContent() {
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [agreeChecked, setAgreeChecked] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"clinic" | "store" | null>(null);
-
-  // Load stored role choice on mount to remember user choice
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user_role_choice") as "clinic" | "store" | null;
-      if (stored === "clinic" || stored === "store") {
-        setSelectedRole(stored);
-      }
-    }
-  }, []);
 
   // ── GOOGLE LOGIN ──
   const handleGoogleLogin = async () => {
@@ -229,32 +217,14 @@ function AuthPageContent() {
       return;
     }
     setAuthError("");
-    
-    const accountExists = typeof window !== "undefined" && localStorage.getItem("medienest_account_exists") === "true";
-    
-    // If we have a remembered role, the account exists in the DB, and they are not on the register tab,
-    // we can bypass the popup modal. Otherwise, prompt them.
-    if (selectedRole && accountExists && tab !== "register") {
-      await triggerGoogleOAuth(selectedRole);
-    } else {
-      setShowRoleModal(true);
-    }
+    await triggerGoogleOAuth();
   };
 
-  const handleConfirmRole = async () => {
-    if (!selectedRole) return;
-    setShowRoleModal(false);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user_role_choice", selectedRole);
-    }
-    await triggerGoogleOAuth(selectedRole);
-  };
-
-  const triggerGoogleOAuth = async (role: "clinic" | "store") => {
+  const triggerGoogleOAuth = async () => {
     setAuthError("");
     setAuthLoading(true);
     try {
-      console.log(`Auth: Initiating Google OAuth for role: ${role}...`);
+      console.log(`Auth: Initiating Google OAuth...`);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -457,89 +427,6 @@ function AuthPageContent() {
           </main>
         </div>
       </div>
-
-      {showRoleModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <button
-              type="button"
-              className={styles.modalCloseBtn}
-              onClick={() => {
-                setShowRoleModal(false);
-                setSelectedRole(null);
-              }}
-              aria-label="Close"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-
-            <h3 className={styles.modalTitle}>Select Account Type</h3>
-            <p className={styles.modalSubtitle}>
-              Please select your account type to proceed with registration or sign-in.
-            </p>
-
-            <div className={styles.modalGrid}>
-              <div
-                className={`${styles.modalRoleCard} ${selectedRole === "clinic" ? styles.modalRoleCardActive : ""}`}
-                onClick={() => setSelectedRole("clinic")}
-              >
-                <div className={styles.modalRoleIconCircle}>
-                  <Hospital size={22} />
-                </div>
-                <div className={styles.modalRoleDetails}>
-                  <span className={styles.modalRoleTitle}>Clinic / Hospital</span>
-                  <span className={styles.modalRoleDescription}>
-                    For doctors, practitioners, and clinical staff.
-                  </span>
-                </div>
-              </div>
-
-              <div
-                className={`${styles.modalRoleCard} ${selectedRole === "store" ? styles.modalRoleCardActive : ""}`}
-                onClick={() => setSelectedRole("store")}
-              >
-                <div className={styles.modalRoleIconCircle}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m2 22 1-1h3l9-9" />
-                    <path d="M12.5 7.5 17 3c1-1 3-1 4 0s1 3 0 4l-4.5 4.5" />
-                    <path d="m8 11 5 5" />
-                  </svg>
-                </div>
-                <div className={styles.modalRoleDetails}>
-                  <span className={styles.modalRoleTitle}>Medical Store</span>
-                  <span className={styles.modalRoleDescription}>
-                    For pharmacies, pharmacists, and medical shops.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.modalButtonRow}>
-              <button
-                type="button"
-                className={styles.modalCancelBtn}
-                onClick={() => {
-                  setShowRoleModal(false);
-                  setSelectedRole(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className={styles.modalConfirmBtn}
-                onClick={handleConfirmRole}
-                disabled={!selectedRole}
-              >
-                Confirm & Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

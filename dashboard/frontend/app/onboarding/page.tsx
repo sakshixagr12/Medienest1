@@ -342,6 +342,7 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     if (
+      roleChoice !== "store" &&
       doctors.length === 0 &&
       !(await confirm("You have not added any doctors. Continue without adding?"))
     )
@@ -422,8 +423,7 @@ export default function OnboardingPage() {
         }
       }
 
-      setStep(3);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      router.replace("/pending");
     } catch (err: any) {
       setStep2Error(err.message || "Submission failed. Try again.");
     } finally {
@@ -466,8 +466,8 @@ export default function OnboardingPage() {
               {/* Clinic Setup */}
               <div
                 className={`${styles.navItem} ${step === 1 ? styles.navItemActive : ""} ${step > 1 ? styles.navItemCompleted : ""}`}
-                onClick={() => step !== 3 && setStep(1)}
-                style={{ cursor: step !== 3 ? "pointer" : "default" }}
+                onClick={() => setStep(1)}
+                style={{ cursor: "pointer" }}
               >
                 <div className={styles.navIconCircle}>
                   {step > 1 ? <Check size={18} /> : <Hospital size={20} />}
@@ -494,19 +494,6 @@ export default function OnboardingPage() {
                   </div>
                 </div>
               )}
-
-              {/* Status */}
-              <div
-                className={`${styles.navItem} ${step === 3 ? styles.navItemActive : ""}`}
-              >
-                <div className={styles.navIconCircle}>
-                  <Clock size={20} />
-                </div>
-                <div className={styles.navTextWrapper}>
-                  <span className={styles.navStepNumber}>{roleChoice === "store" ? "Step 02" : "Step 03"}</span>
-                  <span className={styles.navStepTitle}>Review Status</span>
-                </div>
-              </div>
             </nav>
           </div>
 
@@ -545,7 +532,6 @@ export default function OnboardingPage() {
               <h2 className={styles.cardHeading}>
                 {step === 1 && (roleChoice === "store" ? "Store Setup" : "Clinic Setup")}
                 {step === 2 && "Team Members"}
-                {step === 3 && "Registration Status"}
               </h2>
 
               <div className={styles.heartSeparator}>
@@ -556,13 +542,12 @@ export default function OnboardingPage() {
 
               {/* Mobile Stepper Progress bar (hidden on desktop) */}
               <div className={styles.mobileStepIndicator}>
-                Step {step} of {roleChoice === "store" ? 2 : 3} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : step === 2 ? "Team Members" : "Status"}
+                Step {step} of {roleChoice === "store" ? 1 : 2} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : "Team Members"}
               </div>
 
               <p className={styles.cardSubtext}>
                 {step === 1 && (roleChoice === "store" ? "Tell us about your medical store. This information will be visible on invoice receipts and used for billing." : "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing.")}
                 {step === 2 && "List the practitioners who will be using MedieNest. You can update this later from settings."}
-                {step === 3 && "Thank you for choosing MedieNest. We are currently auditing your credentials."}
               </p>
             </div>
 
@@ -880,64 +865,12 @@ export default function OnboardingPage() {
                     onClick={handleSubmit}
                     disabled={submitting}
                   >
-                    {submitting ? "Submitting..." : "Submit for Approval"}
+                    {submitting ? "Submitting..." : "Submit for Onboarding"}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 3: WAITLIST STATUS */}
-            {step === 3 && (
-              <div className={styles.formContainer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div className={styles.waitlistIconBox}>
-                  <Clock size={36} />
-                </div>
-
-                <div className={styles.statusPill}>STATUS: PENDING APPROVAL</div>
-
-                <div className={styles.waitlistGrid}>
-                  <div className={styles.waitCard}>
-                    <div className={styles.waitCardIcon}>
-                      <ShieldCheck size={16} />
-                    </div>
-                    <h4>Quality Audit</h4>
-                    <p>We verify all credentials to maintain a secure environment.</p>
-                  </div>
-
-                  <div className={styles.waitCard}>
-                    <div className={styles.waitCardIcon}>
-                      <Clock size={16} />
-                    </div>
-                    <h4>24h Response</h4>
-                    <p>Most approvals are processed within one business day.</p>
-                  </div>
-
-                  <div className={styles.waitCard}>
-                    <div className={styles.waitCardIcon}>
-                      <Mail size={16} />
-                    </div>
-                    <h4>Next Steps</h4>
-                    <p>Check your inbox for a confirmation link once approved.</p>
-                  </div>
-                </div>
-
-                <div className={styles.waitActions}>
-                  <button
-                    className={styles.btnSolid}
-                    onClick={() => (window.location.href = "mailto:concierge@medienest.com")}
-                  >
-                    Visit Support Center
-                  </button>
-                  <button className={styles.btnGray} onClick={() => setStep(1)}>
-                    View Info
-                  </button>
-                </div>
-
-                <div className={styles.contactInfo}>
-                  Questions? Contact onboarding concierge at <strong>concierge@medienest.com</strong>
-                </div>
-              </div>
-            )}
           </main>
         </div>
       </div>
