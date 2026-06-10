@@ -215,9 +215,9 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const choice = sessionStorage.getItem("user_role_choice") as "clinic" | "store";
-      if (choice === "store") {
-        setRoleChoice("store");
+      const choice = localStorage.getItem("user_role_choice") as "clinic" | "store";
+      if (choice === "store" || choice === "clinic") {
+        setRoleChoice(choice);
       }
     }
   }, []);
@@ -571,38 +571,60 @@ export default function OnboardingPage() {
               <div className={styles.formContainer}>
                 {step1Error && <div className={styles.errMsg}>{step1Error}</div>}
 
-                {/* ── ACCOUNT TYPE BANNER (READ-ONLY) ── */}
+                {/* ── SEGMENTED SELECTOR FOR ACCOUNT TYPE ── */}
                 <div style={{ marginBottom: "24px" }}>
                   <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", letterSpacing: "0.3px", textTransform: "uppercase", display: "block", marginBottom: "8px" }}>
-                    Account Type
+                    Select Account Type
                   </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "14px 18px",
-                      borderRadius: "12px",
-                      border: "2.5px solid #2E7D32",
-                      background: "#EAF3EA",
-                      maxWidth: "320px",
-                    }}
-                  >
-                    {roleChoice === "clinic" ? (
-                      <>
-                        <Hospital size={20} style={{ color: "#2E7D32" }} />
-                        <span style={{ fontSize: "15px", fontWeight: 700, color: "#2E7D32" }}>Clinic / Hospital</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#2E7D32" }}>
-                          <path d="m2 22 1-1h3l9-9" />
-                          <path d="M12.5 7.5 17 3c1-1 3-1 4 0s1 3 0 4l-4.5 4.5" />
-                          <path d="m8 11 5 5" />
-                        </svg>
-                        <span style={{ fontSize: "15px", fontWeight: 700, color: "#2E7D32" }}>Medical Store</span>
-                      </>
-                    )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "14px 18px",
+                        borderRadius: "12px",
+                        border: roleChoice === "clinic" ? "2.5px solid #2E7D32" : "1.5px solid #E5E7EB",
+                        background: roleChoice === "clinic" ? "#EAF3EA" : "#F9FAFB",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onClick={() => {
+                        setRoleChoice("clinic");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("user_role_choice", "clinic");
+                        }
+                      }}
+                    >
+                      <Hospital size={18} style={{ color: roleChoice === "clinic" ? "#2E7D32" : "#9CA3AF" }} />
+                      <span style={{ fontSize: "14.5px", fontWeight: 700, color: roleChoice === "clinic" ? "#2E7D32" : "#4B5563" }}>Clinic / Hospital</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "14px 18px",
+                        borderRadius: "12px",
+                        border: roleChoice === "store" ? "2.5px solid #2E7D32" : "1.5px solid #E5E7EB",
+                        background: roleChoice === "store" ? "#EAF3EA" : "#F9FAFB",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onClick={() => {
+                        setRoleChoice("store");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("user_role_choice", "store");
+                        }
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: roleChoice === "store" ? "#2E7D32" : "#9CA3AF" }}>
+                        <path d="m2 22 1-1h3l9-9" />
+                        <path d="M12.5 7.5 17 3c1-1 3-1 4 0s1 3 0 4l-4.5 4.5" />
+                        <path d="m8 11 5 5" />
+                      </svg>
+                      <span style={{ fontSize: "14.5px", fontWeight: 700, color: roleChoice === "store" ? "#2E7D32" : "#4B5563" }}>Medical Store</span>
+                    </div>
                   </div>
                 </div>
 

@@ -215,7 +215,7 @@ function AuthPageContent() {
   // Load stored role choice on mount to remember user choice
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("user_role_choice") as "clinic" | "store" | null;
+      const stored = localStorage.getItem("user_role_choice") as "clinic" | "store" | null;
       if (stored === "clinic" || stored === "store") {
         setSelectedRole(stored);
       }
@@ -224,19 +224,26 @@ function AuthPageContent() {
 
   // ── GOOGLE LOGIN ──
   const handleGoogleLogin = async () => {
-    if (!agreeChecked) return;
-    if (!selectedRole) {
-      setShowRoleModal(true);
+    if (!agreeChecked) {
+      setAuthError("Please agree to the Terms of Service and Privacy Policy to proceed.");
       return;
     }
-    await triggerGoogleOAuth(selectedRole);
+    setAuthError("");
+    
+    // If we have a remembered role, proceed directly to Google OAuth.
+    // If not, prompt with the selection popup modal.
+    if (selectedRole) {
+      await triggerGoogleOAuth(selectedRole);
+    } else {
+      setShowRoleModal(true);
+    }
   };
 
   const handleConfirmRole = async () => {
     if (!selectedRole) return;
     setShowRoleModal(false);
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("user_role_choice", selectedRole);
+      localStorage.setItem("user_role_choice", selectedRole);
     }
     await triggerGoogleOAuth(selectedRole);
   };
@@ -375,7 +382,7 @@ function AuthPageContent() {
                 type="button"
                 onClick={handleGoogleLogin}
                 className={styles.googleBtn}
-                disabled={authLoading || !agreeChecked}
+                disabled={authLoading}
               >
                 {authLoading ? (
                   <span
