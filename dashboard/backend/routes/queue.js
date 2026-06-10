@@ -78,6 +78,21 @@ router.post("/add", async (req, res) => {
   const queueDate = today();
 
   try {
+    // Verify patient belongs to this clinic
+    const { data: patient, error: pErr } = await supabase
+      .from("patients")
+      .select("id")
+      .eq("id", patient_id)
+      .eq("clinic_id", clinic_id)
+      .maybeSingle();
+
+    if (pErr || !patient) {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden: Patient does not belong to this clinic"
+      });
+    }
+
     const { data, error } = await supabase.rpc("add_patient_to_queue", {
       p_clinic_id: clinic_id,
       p_doctor_id: doctor_id || null,
@@ -119,6 +134,7 @@ router.put("/:id/status", async (req, res) => {
       .status(400)
       .json({ success: false, error: "Invalid queue entry ID" });
   const { status } = req.body;
+  const clinic_id = req.query.clinic_id || req.body.clinic_id;
 
   const validStatuses = ["waiting", "serving", "done", "skipped"];
   if (!validStatuses.includes(status)) {
@@ -141,10 +157,16 @@ router.put("/:id/status", async (req, res) => {
       .from("doctor_queue")
       .update(updates)
       .eq("id", id)
+      .eq("clinic_id", clinic_id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST116") {
+        return res.status(404).json({ success: false, error: "Queue entry not found or access denied" });
+      }
+      throw error;
+    }
 
     console.log(`[Queue] Status → ${status} for entry ${id}`);
     res.json({ success: true, entry: data });
@@ -165,6 +187,7 @@ router.put("/:id/priority", async (req, res) => {
       .status(400)
       .json({ success: false, error: "Invalid queue entry ID" });
   const { priority } = req.body;
+  const clinic_id = req.query.clinic_id || req.body.clinic_id;
 
   const validPriorities = ["normal", "urgent", "elderly"];
   if (!validPriorities.includes(priority)) {
@@ -181,10 +204,16 @@ router.put("/:id/priority", async (req, res) => {
       .from("doctor_queue")
       .update({ priority })
       .eq("id", id)
+      .eq("clinic_id", clinic_id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST116") {
+        return res.status(404).json({ success: false, error: "Queue entry not found or access denied" });
+      }
+      throw error;
+    }
     res.json({ success: true, entry: data });
   } catch (err) {
     console.error("[Queue PRIORITY]", err.message);
@@ -202,10 +231,22 @@ router.delete("/:id", async (req, res) => {
     return res
       .status(400)
       .json({ success: false, error: "Invalid queue entry ID" });
+  const clinic_id = req.query.clinic_id || req.body.clinic_id;
+
   try {
-    const { error } = await supabase.from("doctor_queue").delete().eq("id", id);
+    const { data, error } = await supabase
+      .from("doctor_queue")
+      .delete()
+      .eq("id", id)
+      .eq("clinic_id", clinic_id)
+      .select();
 
     if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ success: false, error: "Queue entry not found or access denied" });
+    }
+
     res.json({ success: true, deleted: id });
   } catch (err) {
     console.error("[Queue DELETE]", err.message);

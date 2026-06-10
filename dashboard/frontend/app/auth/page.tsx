@@ -204,14 +204,33 @@ function AuthPageContent() {
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [agreeChecked, setAgreeChecked] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"clinic" | "store" | null>(null);
 
   // ── GOOGLE LOGIN ──
   const handleGoogleLogin = async () => {
     if (!agreeChecked) return;
+    if (!selectedRole) {
+      setShowRoleModal(true);
+      return;
+    }
+    await triggerGoogleOAuth(selectedRole);
+  };
+
+  const handleConfirmRole = async () => {
+    if (!selectedRole) return;
+    setShowRoleModal(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("user_role_choice", selectedRole);
+    }
+    await triggerGoogleOAuth(selectedRole);
+  };
+
+  const triggerGoogleOAuth = async (role: "clinic" | "store") => {
     setAuthError("");
     setAuthLoading(true);
     try {
-      console.log("Auth: Initiating Google OAuth...");
+      console.log(`Auth: Initiating Google OAuth for role: ${role}...`);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -333,6 +352,8 @@ function AuthPageContent() {
                   : "Sign in or create a new account using your Google account."}
               </p>
 
+
+
               {authError && <div className={styles.errorBox}>{authError}</div>}
 
               <button
@@ -412,6 +433,89 @@ function AuthPageContent() {
           </main>
         </div>
       </div>
+
+      {showRoleModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <button
+              type="button"
+              className={styles.modalCloseBtn}
+              onClick={() => {
+                setShowRoleModal(false);
+                setSelectedRole(null);
+              }}
+              aria-label="Close"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <h3 className={styles.modalTitle}>Select Account Type</h3>
+            <p className={styles.modalSubtitle}>
+              Please select your account type to proceed with registration or sign-in.
+            </p>
+
+            <div className={styles.modalGrid}>
+              <div
+                className={`${styles.modalRoleCard} ${selectedRole === "clinic" ? styles.modalRoleCardActive : ""}`}
+                onClick={() => setSelectedRole("clinic")}
+              >
+                <div className={styles.modalRoleIconCircle}>
+                  <Hospital size={22} />
+                </div>
+                <div className={styles.modalRoleDetails}>
+                  <span className={styles.modalRoleTitle}>Clinic / Hospital</span>
+                  <span className={styles.modalRoleDescription}>
+                    For doctors, practitioners, and clinical staff.
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={`${styles.modalRoleCard} ${selectedRole === "store" ? styles.modalRoleCardActive : ""}`}
+                onClick={() => setSelectedRole("store")}
+              >
+                <div className={styles.modalRoleIconCircle}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m2 22 1-1h3l9-9" />
+                    <path d="M12.5 7.5 17 3c1-1 3-1 4 0s1 3 0 4l-4.5 4.5" />
+                    <path d="m8 11 5 5" />
+                  </svg>
+                </div>
+                <div className={styles.modalRoleDetails}>
+                  <span className={styles.modalRoleTitle}>Medical Store</span>
+                  <span className={styles.modalRoleDescription}>
+                    For pharmacies, pharmacists, and medical shops.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalButtonRow}>
+              <button
+                type="button"
+                className={styles.modalCancelBtn}
+                onClick={() => {
+                  setShowRoleModal(false);
+                  setSelectedRole(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.modalConfirmBtn}
+                onClick={handleConfirmRole}
+                disabled={!selectedRole}
+              >
+                Confirm & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

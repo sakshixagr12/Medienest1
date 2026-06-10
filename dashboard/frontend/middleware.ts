@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
   // 2. Protected Routes (Portal, Onboarding, Pending)
   const isProtectedRoute =
     pathname.startsWith("/portal") ||
+    pathname.startsWith("/store") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/pending");
 
@@ -26,10 +27,26 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = pathname.startsWith("/auth");
   const isLandingRoute = pathname === "/";
 
+  const handleRedirect = (destUrl: string) => {
+    const redirectResponse = NextResponse.redirect(new URL(destUrl, request.url));
+    response.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, {
+        path: cookie.path,
+        domain: cookie.domain,
+        maxAge: cookie.maxAge,
+        expires: cookie.expires,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        sameSite: cookie.sameSite,
+      });
+    });
+    return redirectResponse;
+  };
+
   // --- LOGIC FOR LOGGED-OUT USERS ---
   if (!user) {
     if (isProtectedRoute) {
-      return NextResponse.redirect(new URL("/auth", request.url));
+      return handleRedirect("/auth");
     }
     return response;
   }
@@ -40,10 +57,35 @@ export async function middleware(request: NextRequest) {
   // We only fetch this if they are hitting /auth or / or a protected route
   // to minimize DB load on every static asset request (handled by matcher though)
 
-  const { data: clinics } = await supabase
+  // 1. Get clinics owned by the user
+  const { data: ownedClinics } = await supabase
     .from("clinics")
-    .select("id, status, created_at")
+    .select("id, status, created_at, clinic_type")
     .eq("owner_user_id", user.id);
+
+  // 2. Get clinics where user is an assigned doctor
+  const { data: doctorProfile } = await supabase
+    .from("doctors")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  let assignedClinics: any[] = [];
+  if (doctorProfile) {
+    const { data: doctorClinics } = await supabase
+      .from("clinic_doctors")
+      .select("clinic_id, clinics(id, status, created_at, clinic_type)")
+      .eq("doctor_id", doctorProfile.id)
+      .eq("is_active", true);
+
+    if (doctorClinics) {
+      assignedClinics = doctorClinics
+        .map((dc: any) => dc.clinics)
+        .filter(Boolean);
+    }
+  }
+
+  const clinics = [...(ownedClinics || []), ...assignedClinics];
 
   let clinicStatus: string | null = null;
   let activeClinic: any = null;
@@ -56,68 +98,47 @@ export async function middleware(request: NextRequest) {
     clinicStatus = activeClinic.status || null;
   }
 
+  const clinicType = activeClinic?.clinic_type || "clinic";
+
   // Case A: Trying to hit Login or Landing while already logged in
   if (isAuthRoute || isLandingRoute) {
     if (!clinicStatus)
-      return NextResponse.redirect(new URL("/onboarding", request.url));
+      return handleRedirect("/onboarding");
     if (clinicStatus === "pending")
-      return NextResponse.redirect(new URL("/pending", request.url));
-    return NextResponse.redirect(new URL("/portal", request.url));
+      return handleRedirect("/pending");
+    if (clinicStatus === "inactive")
+      return handleRedirect("/pending?expired=true");
+    const dest = clinicType === "store" ? "/store" : "/portal";
+    return handleRedirect(dest);
   }
 
-  // Case B: Accessing Portal/Onboarding/Pending - ensure they are in the right sub-page
+  // Case B: Accessing Portal/Store/Onboarding/Pending - ensure they are in the right sub-page
   if (isProtectedRoute) {
     if (!clinicStatus && !pathname.startsWith("/onboarding")) {
-      return NextResponse.redirect(new URL("/onboarding", request.url));
+      return handleRedirect("/onboarding");
     }
     if (clinicStatus === "pending" && !pathname.startsWith("/pending")) {
-      return NextResponse.redirect(new URL("/pending", request.url));
+      return handleRedirect("/pending");
+    }
+    if (clinicStatus === "inactive" && !pathname.startsWith("/pending")) {
+      return handleRedirect("/pending?expired=true");
     }
     if (
       clinicStatus === "active" &&
       (pathname.startsWith("/onboarding") || pathname.startsWith("/pending"))
     ) {
-      return NextResponse.redirect(new URL("/portal", request.url));
+      const dest = clinicType === "store" ? "/store" : "/portal";
+      return handleRedirect(dest);
     }
   }
 
-  // Case C: Check Trial/Subscription status for Active clinics trying to access portal pages
-  if (
-    clinicStatus === "active" &&
-    pathname.startsWith("/portal") &&
-    !pathname.startsWith("/portal/clinic-settings")
-  ) {
-    // Check trial expiration (14 days from created_at)
-    let isTrialActive = false;
-    if (activeClinic && activeClinic.created_at) {
-      const createdAt = new Date(activeClinic.created_at);
-      const trialEnd = new Date(createdAt);
-      trialEnd.setDate(trialEnd.getDate() + 14);
-      isTrialActive = new Date() < trialEnd;
+  // Prevent Cross-Access for Active Users
+  if (clinicStatus === "active") {
+    if (clinicType === "store" && pathname.startsWith("/portal")) {
+      return handleRedirect("/store");
     }
-
-    // Check active subscription
-    let isSubscriptionActive = false;
-    if (activeClinic) {
-      const { data: subscription } = await supabase
-        .from("subscriptions")
-        .select("status, end_date")
-        .eq("clinic_id", activeClinic.id)
-        .maybeSingle();
-
-      if (
-        subscription &&
-        subscription.status === "active" &&
-        new Date(subscription.end_date) > new Date()
-      ) {
-        isSubscriptionActive = true;
-      }
-    }
-
-    if (!isTrialActive && !isSubscriptionActive) {
-      return NextResponse.redirect(
-        new URL("/portal/clinic-settings?expired=true", request.url)
-      );
+    if (clinicType === "clinic" && pathname.startsWith("/store")) {
+      return handleRedirect("/portal");
     }
   }
 

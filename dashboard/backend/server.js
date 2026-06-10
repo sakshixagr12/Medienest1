@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -143,6 +144,33 @@ app.post(
         return res.status(400).json({ success: false, error: "Invalid plan selection" });
       }
 
+      // Check if there is already an active subscription to prevent duplicate billing
+      const { data: existingSub } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (existingSub && new Date(existingSub.end_date) > new Date()) {
+        return res.status(400).json({ success: false, error: "You already have an active subscription." });
+      }
+
+      // Check if there is any pending payment order created within the last 2 minutes for this clinic (Rate limit)
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const { data: recentPendingPayment } = await supabase
+        .from("processed_payments")
+        .select("id")
+        .eq("clinic_id", clinic_id)
+        .eq("status", "pending")
+        .gte("created_at", twoMinutesAgo)
+        .limit(1)
+        .maybeSingle();
+
+      if (recentPendingPayment) {
+        return res.status(429).json({ success: false, error: "A payment order was recently initiated. Please wait a moment before trying again." });
+      }
+
       // Fetch clinic details for user email/phone
       const { data: clinic, error: clinicErr } = await supabase
         .from("clinics")
@@ -183,7 +211,7 @@ app.post(
 
       const cfResponse = await cashfree.PGCreateOrder(request);
 
-      // Save pending payment record to database
+      // Save pending payment record to database (inserted, never deleted or overwritten)
       const { error: dbErr } = await supabase
         .from("processed_payments")
         .insert({
@@ -214,6 +242,108 @@ app.post(
 );
 
 app.post(
+  "/api/payment/start-trial",
+  requireAuth,
+  requireClinicAccess,
+  paymentLimiter,
+  async (req, res) => {
+    try {
+      const { clinic_id, plan_name } = req.body;
+      if (!clinic_id || !plan_name) {
+        return res.status(400).json({ success: false, error: "clinic_id and plan_name are required" });
+      }
+
+      // Fetch clinic to get email and phone
+      const { data: clinic, error: clinicErr } = await supabase
+        .from("clinics")
+        .select("email, phone")
+        .eq("id", clinic_id)
+        .single();
+
+      if (clinicErr || !clinic) {
+        return res.status(404).json({ success: false, error: "Clinic not found" });
+      }
+
+      const email = clinic.email || req.user.email || "";
+      const phone = clinic.phone || "";
+
+      // Anti-Abuse: Check trial_claims table
+      const filters = [];
+      if (req.user.id) filters.push(`user_id.eq.${req.user.id}`);
+      if (email) filters.push(`email.eq.${email}`);
+      if (phone) filters.push(`phone.eq.${phone}`);
+
+      const { data: existingClaim } = await supabase
+        .from("trial_claims")
+        .select("id")
+        .or(filters.join(","))
+        .limit(1)
+        .maybeSingle();
+
+      if (existingClaim) {
+        return res.status(400).json({
+          success: false,
+          error: "A free trial has already been claimed for this account, email, or phone number."
+        });
+      }
+
+      // Insert trial claim record
+      const { error: claimInsertErr } = await supabase
+        .from("trial_claims")
+        .insert({
+          user_id: req.user.id,
+          email: email,
+          phone: phone,
+          claimed_at: new Date().toISOString()
+        });
+
+      if (claimInsertErr) throw claimInsertErr;
+
+      const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days trial
+
+      // Create trial subscription
+      const { error: subErr } = await supabase
+        .from("subscriptions")
+        .upsert({
+          clinic_id,
+          plan_name,
+          status: "trial",
+          start_date: new Date().toISOString(),
+          end_date: endDate.toISOString(),
+          payment_id: "trial",
+          updated_at: new Date().toISOString()
+        }, { onConflict: "clinic_id" });
+
+      if (subErr) throw subErr;
+
+      // Update clinic status to active
+      const { error: clinicUpdErr } = await supabase
+        .from("clinics")
+        .update({ status: "active", updated_at: new Date().toISOString() })
+        .eq("id", clinic_id);
+
+      if (clinicUpdErr) throw clinicUpdErr;
+
+      // Create audit log
+      await supabase
+        .from("audit_logs")
+        .insert({
+          actor_id: req.user.id,
+          clinic_id,
+          action: "TRIAL_STARTED",
+          entity_type: "subscriptions",
+          ip_address: req.ip || req.headers['x-forwarded-for'] || ""
+        });
+
+      res.json({ success: true, message: "7-day free trial started successfully" });
+    } catch (err) {
+      console.error("Start Trial Error:", err.message);
+      res.status(500).json({ success: false, error: "Failed to start free trial: " + err.message });
+    }
+  }
+);
+
+app.post(
   "/api/payment/verify",
   requireAuth,
   requireClinicAccess,
@@ -225,66 +355,101 @@ app.post(
         return res.status(400).json({ success: false, error: "order_id is required" });
       }
 
+      // Retrieve pending payment first to verify access
+      const { data: dbPayment, error: fetchErr } = await supabase
+        .from("processed_payments")
+        .select("*")
+        .eq("order_id", order_id)
+        .maybeSingle();
+
+      if (!dbPayment) {
+        return res.status(404).json({ success: false, error: "Payment record not found" });
+      }
+
+      // Ownership Guard: Must match req.user.id and body/query clinic_id
+      const clinic_id = req.body.clinic_id || req.query.clinic_id;
+      if (dbPayment.clinic_id !== clinic_id || dbPayment.user_id !== req.user.id) {
+        return res.status(403).json({ success: false, error: "Forbidden: Payment record mismatch" });
+      }
+
+      // Webhook Idempotency: Return success if already paid
+      if (dbPayment.status === "paid") {
+        return res.json({
+          success: true,
+          order_status: "PAID",
+          message: "Payment already verified successfully"
+        });
+      }
+
       // Check order status from Cashfree
       const cfResponse = await cashfree.PGFetchOrder(order_id);
       const orderData = cfResponse.data;
 
       if (orderData.order_status === "PAID") {
-        // Retrieve pending payment to get the clinic ID and user ID
-        const { data: dbPayment, error: fetchErr } = await supabase
+
+        // Update payment status to paid
+        await supabase
           .from("processed_payments")
-          .select("*")
-          .eq("order_id", order_id)
+          .update({
+            status: "paid",
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq("order_id", order_id);
+
+        // Determine subscription plan
+        const amountInInr = parseFloat(orderData.order_amount);
+        let planName = "Starter";
+        if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
+        else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
+
+        // Expiry Date Rollover Calculation: max(current_end_date, now) + 30 days
+        const { data: existingSub } = await supabase
+          .from("subscriptions")
+          .select("end_date")
+          .eq("clinic_id", dbPayment.clinic_id)
           .maybeSingle();
 
-        if (!dbPayment) {
-          return res.status(404).json({ success: false, error: "Payment record not found" });
+        const now = new Date();
+        let baseDate = now;
+        if (existingSub && existingSub.end_date) {
+          const currentEndDate = new Date(existingSub.end_date);
+          if (currentEndDate > now) {
+            baseDate = currentEndDate;
+          }
         }
+        const endDate = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-        if (dbPayment.status !== "paid") {
-          // Update payment status to paid
-          await supabase
-            .from("processed_payments")
-            .update({
-              status: "paid",
-              payment_id: orderData.payments?.[0]?.cf_payment_id || null,
-              updated_at: new Date().toISOString()
-            })
-            .eq("order_id", order_id);
+        // Upsert active subscription
+        await supabase
+          .from("subscriptions")
+          .upsert({
+            clinic_id: dbPayment.clinic_id,
+            plan_name: planName,
+            status: "active",
+            start_date: new Date().toISOString(),
+            end_date: endDate.toISOString(),
+            payment_id: orderData.payments?.[0]?.cf_payment_id || null,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "clinic_id" });
 
-          // Determine subscription plan
-          const amountInInr = parseFloat(orderData.order_amount);
-          let planName = "Starter";
-          if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
-          else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
+        // Update clinic status to active
+        await supabase
+          .from("clinics")
+          .update({ status: "active", updated_at: new Date().toISOString() })
+          .eq("id", dbPayment.clinic_id);
 
-          const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-          // Upsert active subscription
-          await supabase
-            .from("subscriptions")
-            .upsert({
-              clinic_id: dbPayment.clinic_id,
-              plan_name: planName,
-              status: "active",
-              start_date: new Date().toISOString(),
-              end_date: endDate.toISOString(),
-              payment_id: orderData.payments?.[0]?.cf_payment_id || null,
-              updated_at: new Date().toISOString()
-            }, { onConflict: "clinic_id" });
-
-          // Create audit log
-          await supabase
-            .from("audit_logs")
-            .insert({
-              actor_id: req.user.id,
-              clinic_id: dbPayment.clinic_id,
-              action: "PAYMENT_COMPLETED",
-              entity_type: "payments",
-              entity_id: dbPayment.id,
-              ip_address: req.ip || req.headers['x-forwarded-for'] || ""
-            });
-        }
+        // Create audit log
+        await supabase
+          .from("audit_logs")
+          .insert({
+            actor_id: req.user.id,
+            clinic_id: dbPayment.clinic_id,
+            action: "PAYMENT_COMPLETED",
+            entity_type: "payments",
+            entity_id: dbPayment.id,
+            ip_address: req.ip || req.headers['x-forwarded-for'] || ""
+          });
 
         return res.json({
           success: true,
@@ -292,7 +457,6 @@ app.post(
           message: "Payment verified successfully"
         });
       } else {
-        // Update payment status to failed if Cashfree marked it failed
         if (orderData.order_status === "FAILED") {
           await supabase
             .from("processed_payments")
@@ -335,17 +499,18 @@ app.get(
         return res.status(404).json({ success: false, error: "Payment record not found" });
       }
 
-      // If the database says paid, we are good to go
+      if (dbPayment.user_id !== req.user.id) {
+        return res.status(403).json({ success: false, error: "Forbidden: You do not own this payment record" });
+      }
+
       if (dbPayment.status === "paid") {
         return res.json({ success: true, status: "paid", payment: dbPayment });
       }
 
-      // Check Cashfree directly in case the client/webhook hasn't processed it yet
       const cfResponse = await cashfree.PGFetchOrder(orderId);
       const orderData = cfResponse.data;
 
       if (orderData.order_status === "PAID" && dbPayment.status !== "paid") {
-        // Update the payment record and subscription inline
         await supabase
           .from("processed_payments")
           .update({
@@ -360,7 +525,21 @@ app.get(
         if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
         else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
 
-        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const { data: existingSub } = await supabase
+          .from("subscriptions")
+          .select("end_date")
+          .eq("clinic_id", dbPayment.clinic_id)
+          .maybeSingle();
+
+        const now = new Date();
+        let baseDate = now;
+        if (existingSub && existingSub.end_date) {
+          const currentEndDate = new Date(existingSub.end_date);
+          if (currentEndDate > now) {
+            baseDate = currentEndDate;
+          }
+        }
+        const endDate = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
         await supabase
           .from("subscriptions")
@@ -373,6 +552,11 @@ app.get(
             payment_id: orderData.payments?.[0]?.cf_payment_id || null,
             updated_at: new Date().toISOString()
           }, { onConflict: "clinic_id" });
+
+        await supabase
+          .from("clinics")
+          .update({ status: "active", updated_at: new Date().toISOString() })
+          .eq("id", dbPayment.clinic_id);
 
         await supabase
           .from("audit_logs")
@@ -404,12 +588,11 @@ app.post("/api/payment/webhook", async (req, res) => {
     }
     const orderId = data.order.order_id;
     
-    // Query Cashfree directly for the official order state
     const cfResponse = await cashfree.PGFetchOrder(orderId);
     const orderData = cfResponse.data;
     
     if (orderData.order_status === "PAID") {
-      const { data: dbPayment, error: fetchErr } = await supabase
+      const { data: dbPayment } = await supabase
         .from("processed_payments")
         .select("*")
         .eq("order_id", orderId)
@@ -430,7 +613,21 @@ app.post("/api/payment/webhook", async (req, res) => {
         if (Math.abs(amountInInr - 249.00) < 1.0) planName = "Clinic";
         else if (Math.abs(amountInInr - 499.00) < 1.0) planName = "Professional";
         
-        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const { data: existingSub } = await supabase
+          .from("subscriptions")
+          .select("end_date")
+          .eq("clinic_id", dbPayment.clinic_id)
+          .maybeSingle();
+
+        const now = new Date();
+        let baseDate = now;
+        if (existingSub && existingSub.end_date) {
+          const currentEndDate = new Date(existingSub.end_date);
+          if (currentEndDate > now) {
+            baseDate = currentEndDate;
+          }
+        }
+        const endDate = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000);
         
         await supabase
           .from("subscriptions")
@@ -443,6 +640,11 @@ app.post("/api/payment/webhook", async (req, res) => {
             payment_id: orderData.payments?.[0]?.cf_payment_id || null,
             updated_at: new Date().toISOString()
           }, { onConflict: "clinic_id" });
+
+        await supabase
+          .from("clinics")
+          .update({ status: "active", updated_at: new Date().toISOString() })
+          .eq("id", dbPayment.clinic_id);
           
         await supabase
           .from("audit_logs")
@@ -462,6 +664,60 @@ app.post("/api/payment/webhook", async (req, res) => {
     res.status(500).json({ error: "Webhook processing failed" });
   }
 });
+
+app.post(
+  "/api/internal/process-expired-subscriptions",
+  async (req, res) => {
+    try {
+      const cronSecret = process.env.CRON_SECRET || "medienest_cron_secret_token";
+      if (req.headers["x-cron-token"] !== cronSecret) {
+        return res.status(403).json({ success: false, error: "Unauthorized" });
+      }
+
+      console.log("[Cron] Running expired subscription cleaner...");
+      const now = new Date().toISOString();
+
+      // Find all subscriptions that have expired
+      const { data: expiredSubs, error: subErr } = await supabase
+        .from("subscriptions")
+        .select("clinic_id")
+        .in("status", ["trial", "active"])
+        .lt("end_date", now);
+
+      if (subErr) throw subErr;
+
+      if (expiredSubs && expiredSubs.length > 0) {
+        const clinicIds = expiredSubs.map(s => s.clinic_id);
+        console.log(`[Cron] Found ${clinicIds.length} expired subscriptions. Processing deactivations...`);
+
+        // Update subscriptions to expired
+        const { error: updSubErr } = await supabase
+          .from("subscriptions")
+          .update({ status: "expired", updated_at: now })
+          .in("clinic_id", clinicIds);
+
+        if (updSubErr) throw updSubErr;
+
+        // Set clinics to inactive status
+        const { error: updClinicErr } = await supabase
+          .from("clinics")
+          .update({ status: "inactive", updated_at: now })
+          .in("id", clinicIds);
+
+        if (updClinicErr) throw updClinicErr;
+
+        console.log(`[Cron] Successfully deactivated ${clinicIds.length} clinics.`);
+      } else {
+        console.log("[Cron] No expired subscriptions found.");
+      }
+
+      res.json({ success: true, processed: expiredSubs?.length || 0 });
+    } catch (err) {
+      console.error("[Cron Error]:", err.message);
+      res.status(500).json({ success: false, error: "Cron check failed. " + err.message });
+    }
+  }
+);
 
 // ─── Basic Health Check ───
 app.get("/health", (req, res) => {
@@ -537,25 +793,61 @@ app.post(
     );
 
     try {
-      let rx = req.body || {};
-      let patientName = rx.patientName || "Patient";
-      let medicines = rx.medicines || [];
+      // 1. Always fetch Prescription from database to prevent spoofing and verify access control
+      const { data: dbRx, error: rxError } = await supabase
+        .from("prescriptions")
+        .select("*, patients(name)")
+        .eq("id", id)
+        .single();
 
-      // 1. Fetch Rx Data if incomplete
-      if (!rx.complaints || !rx.findings) {
-        const { data: dbRx, error: rxError } = await supabase
-          .from("prescriptions")
-          .select("*, patients(name)")
-          .eq("id", id)
-          .single();
+      if (rxError || !dbRx) {
+        return res.status(404).json({ success: false, error: "Prescription not found" });
+      }
 
-        if (rxError || !dbRx) throw new Error("Prescription not found");
-        rx = dbRx;
-        patientName = dbRx.patients?.name || "Patient";
-        medicines =
-          typeof dbRx.medicines === "string"
-            ? JSON.parse(dbRx.medicines)
-            : dbRx.medicines;
+      // Check if user is owner of the clinic that owns the prescription
+      const { data: clinicOwner, error: ownerErr } = await supabase
+        .from("clinics")
+        .select("id")
+        .eq("id", dbRx.clinic_id)
+        .eq("owner_user_id", req.user.id)
+        .maybeSingle();
+
+      if (ownerErr) throw ownerErr;
+
+      if (!clinicOwner) {
+        // If not owner, check if user is an active assigned doctor at the clinic
+        const { data: doctorProfile } = await supabase
+          .from("doctors")
+          .select("id")
+          .eq("user_id", req.user.id)
+          .maybeSingle();
+
+        let isAssignedDoctor = false;
+        if (doctorProfile) {
+          const { data: docAccess } = await supabase
+            .from("clinic_doctors")
+            .select("id")
+            .eq("clinic_id", dbRx.clinic_id)
+            .eq("doctor_id", doctorProfile.id)
+            .eq("is_active", true)
+            .maybeSingle();
+          if (docAccess) isAssignedDoctor = true;
+        }
+
+        if (!isAssignedDoctor) {
+          return res.status(403).json({ success: false, error: "Forbidden: You do not have access to this prescription's clinic" });
+        }
+      }
+
+      const rx = dbRx;
+      const patientName = dbRx.patients?.name || "Patient";
+      let medicines = [];
+      try {
+        medicines = typeof dbRx.medicines === "string"
+          ? JSON.parse(dbRx.medicines)
+          : dbRx.medicines || [];
+      } catch (err) {
+        console.error("Malformed medicines JSON:", err.message);
       }
 
       // 2. Production Grade Prompt Construction

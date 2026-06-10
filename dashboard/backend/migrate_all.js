@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { Client } = require("pg");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 // Define migrations: master initialization consolidated first, then extra features
 const migrationFiles = [
@@ -17,6 +17,10 @@ const migrationFiles = [
   "v2_clean/36_doctor_specific_queue.sql",
   "v2_clean/37_unique_clinic_services.sql",
   "v2_clean/38_subscriptions_and_payments.sql",
+  "v2_clean/39_add_clinic_type.sql",
+  "v2_clean/40_fix_doctor_rls.sql",
+  "v2_clean/41_add_trial_claims.sql",
+  "v2_clean/42_harden_rls_policies.sql",
 ];
 
 

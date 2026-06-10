@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -211,6 +211,16 @@ export default function OnboardingPage() {
   const router = useRouter();
   const supabase = createClient();
   const [step, setStep] = useState(1);
+  const [roleChoice, setRoleChoice] = useState<"clinic" | "store">("clinic");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const choice = sessionStorage.getItem("user_role_choice") as "clinic" | "store";
+      if (choice === "store") {
+        setRoleChoice("store");
+      }
+    }
+  }, []);
 
   // Step 1 state
   const [clinicName, setClinicName] = useState("");
@@ -372,6 +382,7 @@ export default function OnboardingPage() {
           email: user.email,
           owner_user_id: user.id,
           status: "pending",
+          clinic_type: roleChoice,
         })
         .select()
         .single();
@@ -446,9 +457,9 @@ export default function OnboardingPage() {
             </div>
 
             <div className={styles.leftMainContent}>
-              <h1>Onboarding Process</h1>
+              <h1>{roleChoice === "store" ? "Store Onboarding" : "Onboarding Process"}</h1>
               <div className={styles.horizontalLine} />
-              <p>Setup your clinic details and configure practitioner profiles to get started with MedieNest.</p>
+              <p>{roleChoice === "store" ? "Setup your medical store details to get started with MedieNest." : "Setup your clinic details and configure practitioner profiles to get started with MedieNest."}</p>
             </div>
 
             <nav className={styles.navMenu}>
@@ -463,24 +474,26 @@ export default function OnboardingPage() {
                 </div>
                 <div className={styles.navTextWrapper}>
                   <span className={styles.navStepNumber}>Step 01</span>
-                  <span className={styles.navStepTitle}>Clinic Setup</span>
+                  <span className={styles.navStepTitle}>{roleChoice === "store" ? "Store Setup" : "Clinic Setup"}</span>
                 </div>
               </div>
               
               {/* Team Members */}
-              <div
-                className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""} ${step > 2 ? styles.navItemCompleted : ""}`}
-                onClick={() => (step === 1 ? goStep2() : undefined)}
-                style={{ cursor: step === 1 ? "pointer" : "default" }}
-              >
-                <div className={styles.navIconCircle}>
-                  {step > 2 ? <Check size={18} /> : <Users size={20} />}
+              {roleChoice !== "store" && (
+                <div
+                  className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""} ${step > 2 ? styles.navItemCompleted : ""}`}
+                  onClick={() => (step === 1 ? goStep2() : undefined)}
+                  style={{ cursor: step === 1 ? "pointer" : "default" }}
+                >
+                  <div className={styles.navIconCircle}>
+                    {step > 2 ? <Check size={18} /> : <Users size={20} />}
+                  </div>
+                  <div className={styles.navTextWrapper}>
+                    <span className={styles.navStepNumber}>Step 02</span>
+                    <span className={styles.navStepTitle}>Team Members</span>
+                  </div>
                 </div>
-                <div className={styles.navTextWrapper}>
-                  <span className={styles.navStepNumber}>Step 02</span>
-                  <span className={styles.navStepTitle}>Team Members</span>
-                </div>
-              </div>
+              )}
 
               {/* Status */}
               <div
@@ -490,7 +503,7 @@ export default function OnboardingPage() {
                   <Clock size={20} />
                 </div>
                 <div className={styles.navTextWrapper}>
-                  <span className={styles.navStepNumber}>Step 03</span>
+                  <span className={styles.navStepNumber}>{roleChoice === "store" ? "Step 02" : "Step 03"}</span>
                   <span className={styles.navStepTitle}>Review Status</span>
                 </div>
               </div>
@@ -530,7 +543,7 @@ export default function OnboardingPage() {
               </div>
 
               <h2 className={styles.cardHeading}>
-                {step === 1 && "Clinic Setup"}
+                {step === 1 && (roleChoice === "store" ? "Store Setup" : "Clinic Setup")}
                 {step === 2 && "Team Members"}
                 {step === 3 && "Registration Status"}
               </h2>
@@ -543,11 +556,11 @@ export default function OnboardingPage() {
 
               {/* Mobile Stepper Progress bar (hidden on desktop) */}
               <div className={styles.mobileStepIndicator}>
-                Step {step} of 3 • {step === 1 ? "Clinic Setup" : step === 2 ? "Team Members" : "Status"}
+                Step {step} of {roleChoice === "store" ? 2 : 3} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : step === 2 ? "Team Members" : "Status"}
               </div>
 
               <p className={styles.cardSubtext}>
-                {step === 1 && "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing."}
+                {step === 1 && (roleChoice === "store" ? "Tell us about your medical store. This information will be visible on invoice receipts and used for billing." : "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing.")}
                 {step === 2 && "List the practitioners who will be using MedieNest. You can update this later from settings."}
                 {step === 3 && "Thank you for choosing MedieNest. We are currently auditing your credentials."}
               </p>
@@ -558,10 +571,67 @@ export default function OnboardingPage() {
               <div className={styles.formContainer}>
                 {step1Error && <div className={styles.errMsg}>{step1Error}</div>}
 
+                {/* ── SEGMENTED SELECTOR FOR ACCOUNT TYPE ── */}
+                <div style={{ marginBottom: "24px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", letterSpacing: "0.3px", textTransform: "uppercase", display: "block", marginBottom: "8px" }}>
+                    Select Account Type
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "14px 18px",
+                        borderRadius: "12px",
+                        border: roleChoice === "clinic" ? "2.5px solid #2E7D32" : "1.5px solid #E5E7EB",
+                        background: roleChoice === "clinic" ? "#EAF3EA" : "#F9FAFB",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onClick={() => {
+                        setRoleChoice("clinic");
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("user_role_choice", "clinic");
+                        }
+                      }}
+                    >
+                      <Hospital size={18} style={{ color: roleChoice === "clinic" ? "#2E7D32" : "#9CA3AF" }} />
+                      <span style={{ fontSize: "14.5px", fontWeight: 700, color: roleChoice === "clinic" ? "#2E7D32" : "#4B5563" }}>Clinic / Hospital</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "14px 18px",
+                        borderRadius: "12px",
+                        border: roleChoice === "store" ? "2.5px solid #2E7D32" : "1.5px solid #E5E7EB",
+                        background: roleChoice === "store" ? "#EAF3EA" : "#F9FAFB",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onClick={() => {
+                        setRoleChoice("store");
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("user_role_choice", "store");
+                        }
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: roleChoice === "store" ? "#2E7D32" : "#9CA3AF" }}>
+                        <path d="m2 22 1-1h3l9-9" />
+                        <path d="M12.5 7.5 17 3c1-1 3-1 4 0s1 3 0 4l-4.5 4.5" />
+                        <path d="m8 11 5 5" />
+                      </svg>
+                      <span style={{ fontSize: "14.5px", fontWeight: 700, color: roleChoice === "store" ? "#2E7D32" : "#4B5563" }}>Medical Store</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className={styles.formGrid}>
                   <div className={styles.formField}>
                     <label>
-                      Clinic/Hospital Name <span style={{ color: "#ef4444" }}>*</span>
+                      {roleChoice === "store" ? "Medical Store Name" : "Clinic/Hospital Name"} <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <input
                       className={styles.inputBox}
@@ -574,7 +644,7 @@ export default function OnboardingPage() {
 
                   <div className={styles.formField}>
                     <label>
-                      Clinic Name in Hindi <span>(Optional)</span>
+                      {roleChoice === "store" ? "Store Name in Hindi" : "Clinic Name in Hindi"} <span>(Optional)</span>
                     </label>
                     <input
                       className={styles.inputBox}
@@ -641,7 +711,7 @@ export default function OnboardingPage() {
 
                   <div className={`${styles.formField} ${styles.fullWidth}`}>
                     <label>
-                      Clinic Tagline <span>(Optional)</span>
+                      {roleChoice === "store" ? "Store Tagline" : "Clinic Tagline"} <span>(Optional)</span>
                     </label>
                     <input
                       className={styles.inputBox}
@@ -654,11 +724,21 @@ export default function OnboardingPage() {
 
                 <div className={styles.formFooter}>
                   <div />
-                  
-                  <button className={styles.btnNext} onClick={goStep2}>
-                    Next: Add Doctors
-                    <ArrowRight size={18} />
-                  </button>
+                  {roleChoice === "store" ? (
+                    <button
+                      className={styles.btnNext}
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                    >
+                      {submitting ? "Submitting..." : "Submit for Onboarding"}
+                      <ArrowRight size={18} />
+                    </button>
+                  ) : (
+                    <button className={styles.btnNext} onClick={goStep2}>
+                      Next: Add Doctors
+                      <ArrowRight size={18} />
+                    </button>
+                  )}
                 </div>
               </div>
             )}

@@ -42,6 +42,7 @@ interface Clinic {
   status: "pending" | "active" | "suspended";
   owner_user_id: string;
   created_at: string;
+  clinic_type?: "clinic" | "store";
 }
 
 interface ClinicContextType {
@@ -106,10 +107,40 @@ export function ClinicProvider({ children }: { children: ReactNode }) {
         "ClinicContext: User found, fetching clinic data...",
         currentUser.id,
       );
-      const { data: clinics, error: clinicError } = await supabase
+      let clinics: any[] | null = null;
+      let clinicError: any = null;
+
+      // 1. Fetch clinics owned by current user
+      const ownedRes = await supabase
         .from("clinics")
         .select("*")
         .eq("owner_user_id", currentUser.id);
+
+      clinics = ownedRes.data;
+      clinicError = ownedRes.error;
+
+      // 2. If no owned clinics, fetch clinics where user is an assigned doctor
+      if ((!clinics || clinics.length === 0) && !clinicError) {
+        const { data: doctorProfile } = await supabase
+          .from("doctors")
+          .select("id")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if (doctorProfile) {
+          const { data: doctorClinics } = await supabase
+            .from("clinic_doctors")
+            .select("clinics(*)")
+            .eq("doctor_id", doctorProfile.id)
+            .eq("is_active", true);
+
+          if (doctorClinics) {
+            clinics = doctorClinics
+              .map((dc: any) => dc.clinics)
+              .filter(Boolean);
+          }
+        }
+      }
 
       const clinicData =
         clinics && clinics.length > 0

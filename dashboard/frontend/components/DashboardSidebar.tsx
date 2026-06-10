@@ -328,77 +328,126 @@ export default function DashboardSidebar({
 
         <nav className={styles.nav}>
           {/* --- Doctor's Desk Section --- */}
-          <div
-            className={styles.clinicalDesk}
-            style={{
-              borderTop: isReceptionist
-                ? "none"
-                : "1px solid rgba(23, 3, 55, 0.05)",
-              marginTop: isReceptionist ? 0 : "12px",
-            }}
-          >
-            {!isReceptionist && (
+          {clinic?.clinic_type === "store" ? (
+            <div className={styles.clinicalDesk} style={{ borderTop: "none", marginTop: 0 }}>
               <div className={styles.deskHeader}>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                  <path d="M8 7h6" />
-                  <path d="M8 11h8" />
-                  <path d="M8 15h6" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                  <path d="M3 6h18" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
-                <span>Doctors Desk</span>
+                <span>Store Desk</span>
               </div>
-            )}
 
-            {/* Dashboard Link directly under header */}
-            {navItems.map((item) => {
-              if (isReceptionist && item.label === "Dashboard") return null;
+              <Link
+                href="/store"
+                onClick={handleNavClick}
+                className={`${styles.navLink} ${pathname === "/store" ? styles.activeLink : ""}`}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+              </Link>
 
-              let dynamicHref = item.href;
+              <Link
+                href="/store/billing-receipts"
+                onClick={handleNavClick}
+                className={`${styles.deskAction} ${pathname?.startsWith("/store/billing-receipts") ? styles.activeLink : ""}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                <span>Billing & Invoices</span>
+              </Link>
 
-              if (!isReceptionist && item.label === "Dashboard") {
-                dynamicHref = buildDoctorUrl(item.href);
-              }
+              <Link
+                href="/store/day-summary"
+                onClick={handleNavClick}
+                className={`${styles.deskAction} ${pathname?.startsWith("/store/day-summary") ? styles.activeLink : ""}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <span>Day Summary</span>
+              </Link>
 
-              const isActive = isReceptionist
-                ? pathname === "/portal/front-desk"
-                : pathname === item.href;
-              return (
-                <Link
-                  key={item.label}
-                  href={dynamicHref}
-                  onClick={handleNavClick}
-                  className={`${styles.navLink} ${isActive ? styles.activeLink : ""}`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+              <Link
+                href="/store/clinic-settings"
+                onClick={handleNavClick}
+                className={`${styles.deskAction} ${pathname?.startsWith("/store/clinic-settings") ? styles.activeLink : ""}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.80.31l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .31-1.80 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1-2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.31-1.8l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.8.31 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.8-.31l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.31 1.80 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Store Settings</span>
+              </Link>
+            </div>
+          ) : (
+            <div
+              className={styles.clinicalDesk}
+              style={{
+                borderTop: isReceptionist
+                  ? "none"
+                  : "1px solid rgba(23, 3, 55, 0.05)",
+                marginTop: isReceptionist ? 0 : "12px",
+              }}
+            >
+              {!isReceptionist && (
+                <div className={styles.deskHeader}>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+                    <path d="M8 7h6" />
+                    <path d="M8 11h8" />
+                    <path d="M8 15h6" />
+                  </svg>
+                  <span>Doctors Desk</span>
+                </div>
+              )}
 
-            {/* --- Unified Front Office Actions --- */}
-            {isReceptionist &&
-              frontDeskActions.map((action) => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  onClick={handleNavClick}
-                  className={styles.deskAction}
-                >
-                  {action.icon}
-                  <span>{action.label}</span>
-                </Link>
-              ))}
+              {/* Dashboard Link directly under header */}
+              {navItems.map((item) => {
+                if (isReceptionist && item.label === "Dashboard") return null;
 
-            {!isReceptionist && (
-              <div className={styles.deskActions}>
-                {quickActions.map((action) => (
+                let dynamicHref = item.href;
+
+                if (!isReceptionist && item.label === "Dashboard") {
+                  dynamicHref = buildDoctorUrl(item.href);
+                }
+
+                const isActive = isReceptionist
+                  ? pathname === "/portal/front-desk"
+                  : pathname === item.href;
+                return (
+                  <Link
+                    key={item.label}
+                    href={dynamicHref}
+                    onClick={handleNavClick}
+                    className={`${styles.navLink} ${isActive ? styles.activeLink : ""}`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+
+              {/* --- Unified Front Office Actions --- */}
+              {isReceptionist &&
+                frontDeskActions.map((action) => (
                   <Link
                     key={action.label}
                     href={action.href}
@@ -409,12 +458,27 @@ export default function DashboardSidebar({
                     <span>{action.label}</span>
                   </Link>
                 ))}
-              </div>
-            )}
-          </div>
+
+              {!isReceptionist && (
+                <div className={styles.deskActions}>
+                  {quickActions.map((action) => (
+                    <Link
+                      key={action.label}
+                      href={action.href}
+                      onClick={handleNavClick}
+                      className={styles.deskAction}
+                    >
+                      {action.icon}
+                      <span>{action.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <Link
-            href="/portal"
+            href={clinic?.clinic_type === "store" ? "/store" : "/portal"}
             onClick={handleNavClick}
             className={styles.portalButton}
           >
@@ -434,7 +498,7 @@ export default function DashboardSidebar({
         </nav>
 
         <div className={styles.sidebarFooter}>
-          {!isReceptionist && (
+          {!isReceptionist && clinic?.clinic_type !== "store" && (
             <Link
               href={buildDoctorUrl("/portal/doctor-dashboard/profile")}
               onClick={handleNavClick}

@@ -107,17 +107,22 @@ function calculateHeuristicSummary(visits) {
 // GET patient history
 router.get("/:patientId", async (req, res) => {
   const { patientId } = req.params;
+  const clinic_id = req.query.clinic_id || req.body.clinic_id;
 
   try {
     const { data: patient, error: patErr } = await supabase
       .from("patients")
       .select(
-        "id, name, age, gender, contact, blood_group, address, created_at",
+        "id, name, age, gender, contact, blood_group, address, created_at, clinic_id",
       )
       .eq("id", patientId)
       .single();
 
-    if (patErr) return res.status(404).json({ error: "Patient not found" });
+    if (patErr || !patient) return res.status(404).json({ error: "Patient not found" });
+
+    if (patient.clinic_id !== clinic_id) {
+      return res.status(403).json({ error: "Forbidden: Patient record mismatch or access denied" });
+    }
 
     const { data: rawPrescriptions } = await supabase
       .from("prescriptions")

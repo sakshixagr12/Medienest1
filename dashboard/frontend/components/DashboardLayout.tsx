@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardTopBar from "./DashboardTopBar";
 import MobileBottomNav from "./MobileBottomNav";
@@ -17,16 +17,20 @@ export default function DashboardLayout({ children, hideSidebar = false }: Dashb
   return (
     <div className={styles.layout}>
       {!hideSidebar && (
-        <DashboardSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <DashboardSidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </Suspense>
       )}
       <div className={`${styles.contentArea} ${hideSidebar ? styles.noSidebar : ""}`}>
-        <DashboardTopBar
-          onMenuOpen={hideSidebar ? undefined : () => setSidebarOpen(true)}
-          showBackToPortal={hideSidebar}
-        />
+        <Suspense fallback={<div style={{ height: "70px", background: "#f8fafc" }} />}>
+          <DashboardTopBar
+            onMenuOpen={hideSidebar ? undefined : () => setSidebarOpen(true)}
+            showBackToPortal={hideSidebar}
+          />
+        </Suspense>
         <main className={styles.canvas}>{children}</main>
       </div>
       <MobileBottomNav />
