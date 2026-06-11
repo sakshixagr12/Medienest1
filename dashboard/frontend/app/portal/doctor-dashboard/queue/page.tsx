@@ -458,7 +458,9 @@ function DoctorQueueContent() {
                           className={styles.removeBtn}
                           onClick={() => updateStatus(entry.id, "skipped")}
                           title="Skip"
-                        ></button>
+                        >
+                          Skip
+                        </button>
                       </div>
                     ))}
                   </div>

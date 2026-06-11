@@ -274,7 +274,9 @@ export default function ClinicSettingsPage() {
               <button
                 className={styles.closeBtn}
                 onClick={() => setIsAddModalOpen(false)}
-              ></button>
+              >
+                &times;
+              </button>
             </div>
             <form onSubmit={handleAddDoctor} className={styles.modalBody}>
               <div className={styles.field}>
