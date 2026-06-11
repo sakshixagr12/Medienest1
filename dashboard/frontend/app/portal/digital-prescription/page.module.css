@@ -1,54 +1,46 @@
 .page {
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
-  padding-bottom: 50px;
+  overflow: hidden;
 }
 
 .main {
+  width: 100%;
   max-width: 1550px;
   margin: 0 auto;
-  padding: 32px 14px;
+  padding: 24px 14px 12px 14px;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .grid {
   display: flex;
   gap: 48px;
   align-items: flex-start;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
 }
 
 .formPanel {
   flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 16px;
 }
 
 .previewPanel {
   width: 794px; /* A4 Ratio */
-  position: sticky;
-  top: 86px;
   background: #fff;
   border-radius: var(--radius);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-  max-height: calc(100vh - 120px);
+  height: 100%;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
-}
-
-.previewPanel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.previewPanel::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.previewPanel::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.previewPanel::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  flex-shrink: 0;
 }
 
 .tabs {
@@ -409,6 +401,19 @@
 }
 
 @media print {
+  .page {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+  .main {
+    max-width: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    display: block !important;
+  }
   @page {
     size: A4;
     margin: 0;
@@ -420,6 +425,8 @@
   }
   .grid {
     display: block;
+    overflow: visible !important;
+    height: auto !important;
   }
 
   /* FIX: Explicitly hide the navigation and form panel */
