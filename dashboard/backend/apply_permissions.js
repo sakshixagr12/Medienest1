@@ -19,7 +19,8 @@ const run = async () => {
 
     const permissionFiles = [
       "v2_clean/10_permissions/1_fix_onboarding_insert.sql",
-      "v2_clean/10_permissions/2_clinical_access_fix.sql"
+      "v2_clean/10_permissions/2_clinical_access_fix.sql",
+      "v2_clean/10_permissions/3_public_sharing_access.sql"
     ];
 
     for (const fileRelPath of permissionFiles) {
