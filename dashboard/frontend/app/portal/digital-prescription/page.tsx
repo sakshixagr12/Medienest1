@@ -97,32 +97,8 @@ export default function PrescriptionPage() {
   if (!supabaseRef.current) supabaseRef.current = createClient();
   const supabase = supabaseRef.current;
   const guidancePaperRef = useRef<HTMLDivElement>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [pendingAiMeds, setPendingAiMeds] = useState<any[]>([]);
-  const [aiValidationFlags, setAiValidationFlags] = useState<string[]>([]);
-  const [aiDiagnosis, setAiDiagnosis] = useState("");
-  const [aiDifferentials, setAiDifferentials] = useState<string[]>([]);
-  const [primaryInvestigations, setPrimaryInvestigations] = useState<string[]>(
-    [],
-  );
-  const [secondaryInvestigations, setSecondaryInvestigations] = useState<
-    string[]
-  >([]);
-  const [aiConfidence, setAiConfidence] = useState(0);
-  const [aiSeverity, setAiSeverity] = useState(""); // 'mild', 'moderate', 'emergency'
-  const [aiIntent, setAiIntent] = useState("");
-  const [aiStage, setAiStage] = useState("");
-  const [aiStatus, setAiStatus] = useState(""); // 'analyzing', 'ready', 'error', or ''
-  const [aiError, setAiError] = useState("");
-  const [aiWarnings, setAiWarnings] = useState<string[]>([]);
-  const [isAutoAiEnabled, setIsAutoAiEnabled] = useState(false);
-  const [adviceApproved, setAdviceApproved] = useState(true);
-  const [ptConditions, setPtConditions] = useState("");
-  const [ptDiet, setPtDiet] = useState("Veg");
-  const [ptLifestyle, setPtLifestyle] = useState("");
-  const [aiLifestyleAdvice, setAiLifestyleAdvice] = useState("");
-
   // Guidance Sheet State
+
   const [guidanceSheet, setGuidanceSheet] = useState<any>(null);
   const [guidanceStatus, setGuidanceStatus] = useState<{ [key: string]: 'pending' | 'accepted' | 'rejected' | 'editing' }>({});
   const [guidanceEditedTexts, setGuidanceEditedTexts] = useState<{ [key: string]: string }>({});
@@ -131,8 +107,6 @@ export default function PrescriptionPage() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [guidanceApproved, setGuidanceApproved] = useState(false);
 
-  // Smart Trigger Tracking
-  const lastAiHashRef = useRef("");
 
   // Draft Persistence (Cache) Logic
   useEffect(() => {
@@ -162,12 +136,6 @@ export default function PrescriptionPage() {
         setMNote(draft.mNote || "");
         setAdvice(draft.advice || "");
         setFollowUp(draft.followUp || "");
-        setPendingAiMeds(draft.pendingAiMeds || []);
-        if (draft.adviceApproved !== undefined) {
-          setAdviceApproved(draft.adviceApproved);
-        } else {
-          setAdviceApproved(true);
-        }
         console.log("Draft restored from cache for patient:", pId);
       } catch (e) {
         console.error("Failed to restore draft:", e);
@@ -194,8 +162,6 @@ export default function PrescriptionPage() {
         setMNote("");
         setAdvice("");
         setFollowUp("");
-        setPendingAiMeds([]);
-        setAdviceApproved(true);
         setPtSnapshot(null);
         setSelectedPatientId(searchParams.get("patientId"));
       } else {
@@ -203,15 +169,6 @@ export default function PrescriptionPage() {
       }
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const autoAi = localStorage.getItem("medienest care_auto_ai");
-    if (autoAi !== null) setIsAutoAiEnabled(JSON.parse(autoAi));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("medienest care_auto_ai", JSON.stringify(isAutoAiEnabled));
-  }, [isAutoAiEnabled]);
 
   // 'Zero Latency' Auto-Fill from Deep-Link Params
   useEffect(() => {
@@ -276,18 +233,6 @@ export default function PrescriptionPage() {
     fetchPatientById();
   }, [searchParams, supabase, clinic?.id]);
 
-  // AI Auto-Trigger Effect (Smart Persistence)
-  useEffect(() => {
-    if (activeTab === "rx" && isAutoAiEnabled) {
-      const currentHash = `${cc}|${findings}`;
-
-      // Trigger if we have data AND it's different from our last successful run
-      if ((cc || findings) && currentHash !== lastAiHashRef.current) {
-        handleAiSuggest();
-      }
-    }
-  }, [activeTab, isAutoAiEnabled, cc, findings]);
-
   // Guidance Sheet Auto-Trigger Effect
   useEffect(() => {
     if (activeTab === "rx") {
@@ -321,8 +266,6 @@ export default function PrescriptionPage() {
       mNote,
       advice,
       followUp,
-      pendingAiMeds,
-      adviceApproved,
     };
     const pId = searchParams.get("patientId") || "unlinked";
     const draftKey = `medienest care_rx_draft_${pId}`;
@@ -347,8 +290,6 @@ export default function PrescriptionPage() {
     mNote,
     advice,
     followUp,
-    pendingAiMeds,
-    adviceApproved,
     savedRxId,
     searchParams,
   ]);
@@ -375,121 +316,8 @@ export default function PrescriptionPage() {
       setMeds([]);
       setAdvice("");
       setFollowUp("");
-      setAiDiagnosis("");
       setPtSnapshot(null);
-      lastAiHashRef.current = ""; // Reset AI memory
     }
-  };
-
-  const handleAiSuggest = async () => {
-    if (!cc && !findings) return;
-    const currentHash = `${cc}|${findings}`;
-    setIsAiLoading(true);
-    setAiStatus("analyzing");
-    setAiError("");
-    setAiDiagnosis("");
-    setAiDifferentials([]);
-    setPrimaryInvestigations([]);
-    setSecondaryInvestigations([]);
-    setAiConfidence(0);
-    setAiSeverity("");
-    setAiValidationFlags([]);
-    try {
-      console.log("[Clinical AI Engine] Running production inference...");
-      const res = await authenticatedFetch(
-        `${API_BASE_URL}/api/recommendations/suggest`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cc,
-            findings,
-            age: ptAge,
-            gender: ptSex.toLowerCase(),
-            specialty: doctors?.[0]?.specialty || "General Practitioner",
-            diagnosis,
-            medicines: meds,
-            weight: ptWeight,
-            existing_conditions: ptSnapshot ? ([
-              ...(ptSnapshot.keyConditions || []),
-              ...(ptSnapshot.chronicFlags || []).map((f: string) => `[CHRONIC] ${f}`),
-            ].join(", ") || "") : "",
-            lifestyle: ptSnapshot ? ([
-              ...(ptSnapshot.currentMedications || []),
-              ...(ptSnapshot.allergies || []).length > 0
-                ? [`ALLERGIES: ${ptSnapshot.allergies.join(", ")}`]
-                : [],
-            ].join(", ") || "") : "",
-          }),
-        },
-      );
-
-      const data = await res.json();
-
-      if (data.success && data.suggestions && !data.suggestions.error) {
-        const {
-          recommendations,
-          advice: suggestedAdvice,
-          probable_diagnosis,
-        } = data.suggestions;
-
-        // Set recommendations for the Guidance Cards
-        if (recommendations && Array.isArray(recommendations)) {
-          setPendingAiMeds(recommendations);
-          if (recommendations.length === 0 && !probable_diagnosis)
-            setAiStatus("no_suggestions");
-          else setAiStatus("ready");
-        }
-
-        if (probable_diagnosis) setAiDiagnosis(probable_diagnosis);
-        if (data.suggestions.differentials)
-          setAiDifferentials(data.suggestions.differentials);
-        if (data.suggestions.investigations) {
-          setPrimaryInvestigations(
-            data.suggestions.investigations.primary || [],
-          );
-          setSecondaryInvestigations(
-            data.suggestions.investigations.secondary || [],
-          );
-        }
-        if (data.suggestions.severity) setAiSeverity(data.suggestions.severity);
-        if (data.suggestions.confidence)
-          setAiConfidence(data.suggestions.confidence);
-
-        if (suggestedAdvice) {
-          setAdvice(suggestedAdvice);
-          setAdviceApproved(false);
-        }
-
-        lastAiHashRef.current = currentHash;
-      } else {
-        setAiStatus("error");
-        setAiError(data.suggestions?.error || "Service Unavailable");
-      }
-    } catch (err) {
-      setAiStatus("error");
-      setAiError("Connection failure");
-      console.error("[AI] Communication failure:", err);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
-  const handleApproveSuggestedMed = (med: any) => {
-    // 1. Fill manual writing section
-    skipSearchRef.current = true; // Prevent DB search from triggering on auto-fill
-    setMName(med.name);
-    setMType(med.type || med.dosage_form || "Tab");
-    setMDose(med.dose || med.pack_size || "");
-    setMNote("");
-
-    // Remaining details left for doctor
-    setMFreq("");
-    setMDur("");
-    setMInst("");
-
-    // UI Feedback: Focus on Frequency for faster typing
-    console.log("[UI] Auto-filled brand:", med.name);
   };
 
   // Real-time Patient Lookup
@@ -694,15 +522,6 @@ export default function PrescriptionPage() {
       setIsReviewModalOpen(true);
       return;
     }
-
-    // Safety check for unapproved AI suggestions
-    if (!adviceApproved) {
-      const confirmResult = await window.confirm(
-        "The Clinical Advice box contains AI-generated content that hasn't been approved. Proceed and Save anyway?",
-      );
-      if (!confirmResult) return;
-    }
-
     if (!ptName || !ptPhone) {
       showAlert("Please enter patient name and contact details.", "warning", "Validation Warning");
       return;
@@ -1585,41 +1404,6 @@ export default function PrescriptionPage() {
                     >
                       Prescribe Medicine
                     </h3>
-                    <div className={styles.aiControlArea}>
-                      <span className={styles.aiStatusLabel}>
-                        {isAiLoading && (
-                          <span className={styles.aiLoadingText}>
-                            Analyzing...
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "ready" && (
-                          <span style={{ color: "#10b981" }}>
-                            Suggestions Ready
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "no_suggestions" && (
-                          <span style={{ color: "#94a3b8" }}>
-                            No suggestions found
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "error" && (
-                          <span style={{ color: "#ef4444" }}>
-                            ️ AI Error: {aiError}
-                          </span>
-                        )}
-                        {!isAiLoading && !aiStatus && "AI Auto-Suggest"}
-                      </span>
-                      <label className={styles.switch}>
-                        <input
-                          type="checkbox"
-                          checked={isAutoAiEnabled}
-                          onChange={(e) => setIsAutoAiEnabled(e.target.checked)}
-                        />
-                        <span
-                          className={`${styles.slider} ${isAiLoading ? styles.sliderLoading : ""}`}
-                        ></span>
-                      </label>
-                    </div>
                   </div>
                   <div
                     style={{
@@ -1847,444 +1631,6 @@ export default function PrescriptionPage() {
                     </div>
                   )}
                 </div>
-
-                {(isAiLoading ||
-                  pendingAiMeds.length > 0 ||
-                  (advice && !adviceApproved)) &&
-                  isAutoAiEnabled && (
-                    <div
-                      className={styles.auditContainer}
-                      style={{
-                        background: "#ffffff",
-                        border: "1px solid #cbd5e1",
-                        color: "#0f172a",
-                        padding: "16px",
-                        borderRadius: "12px",
-                      }}
-                    >
-                      {aiDifferentials.length > 0 && (
-                        <div
-                          style={{
-                            background: "#fff",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: "0 0 8px 0",
-                              fontSize: "11px",
-                              color: "#64748b",
-                              fontWeight: 800,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                            }}
-                          >
-                            ️ Differential Diagnoses
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "6px",
-                            }}
-                          >
-                            {aiDifferentials.map((diff, idx) => (
-                              <span
-                                key={idx}
-                                style={{
-                                  fontSize: "11px",
-                                  background: "#f8fafc",
-                                  color: "#475569",
-                                  padding: "3px 8px",
-                                  borderRadius: "6px",
-                                  border: "1px solid #cbd5e1",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {diff}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {(primaryInvestigations.length > 0 ||
-                        secondaryInvestigations.length > 0) && (
-                        <div
-                          style={{
-                            background: "#f5f3ff",
-                            border: "1px solid #ddd6fe",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: "0 0 12px 0",
-                              fontSize: "11px",
-                              color: "#6d28d9",
-                              fontWeight: 800,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                            }}
-                          >
-                            Suggested Investigations
-                          </p>
-
-                          {primaryInvestigations.length > 0 && (
-                            <div
-                              style={{
-                                marginBottom:
-                                  secondaryInvestigations.length > 0
-                                    ? "12px"
-                                    : 0,
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: "0 0 6px 0",
-                                  fontSize: "10px",
-                                  color: "#7c3aed",
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                }}
-                              >
-                                Essential (Primary)
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "4px",
-                                }}
-                              >
-                                {primaryInvestigations.map((test, idx) => (
-                                  <div
-                                    key={idx}
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#5b21b6",
-                                      fontWeight: 600,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    <span style={{ color: "#a78bfa" }}>•</span>{" "}
-                                    {test}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {secondaryInvestigations.length > 0 && (
-                            <div>
-                              <p
-                                style={{
-                                  margin: "0 0 6px 0",
-                                  fontSize: "10px",
-                                  color: "#94a3b8",
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                }}
-                              >
-                                Further Workup (Secondary)
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "4px",
-                                }}
-                              >
-                                {secondaryInvestigations.map((test, idx) => (
-                                  <div
-                                    key={idx}
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#64748b",
-                                      fontWeight: 500,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    <span style={{ color: "#cbd5e1" }}>•</span>{" "}
-                                    {test}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {pendingAiMeds.length > 0 && (
-                        <div
-                          className={styles.suggestedMedsArea}
-                          style={{ marginBottom: advice ? "24px" : 0 }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: 12,
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: "11px",
-                                color: "#6366f1",
-                                fontWeight: 800,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.05em",
-                              }}
-                            >
-                              Clinical Guidance Cards
-                            </p>
-                            <button
-                              onClick={() => setPendingAiMeds([])}
-                              className={styles.btnClearAudit}
-                              style={{
-                                fontSize: "10px",
-                                background: "none",
-                                border: "none",
-                                color: "#94a3b8",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Clear All
-                            </button>
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "12px",
-                            }}
-                          >
-                            {pendingAiMeds.map((rec) => (
-                              <div
-                                key={rec.drug}
-                                className={styles.guidanceCard}
-                                style={{
-                                  background: "#f8fafc",
-                                  border: "1px solid #e2e8f0",
-                                  borderRadius: "12px",
-                                  padding: "12px",
-                                }}
-                              >
-                                <div style={{ marginBottom: "8px" }}>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                      marginBottom: "2px",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        fontWeight: 800,
-                                        color: "#1e293b",
-                                      }}
-                                    >
-                                      {rec.drug}
-                                    </span>
-                                    <span
-                                      style={{
-                                        fontSize: "9px",
-                                        background: "#e0e7ff",
-                                        color: "#4338ca",
-                                        padding: "1px 6px",
-                                        borderRadius: "4px",
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      GENERIC
-                                    </span>
-                                  </div>
-                                  <p
-                                    style={{
-                                      margin: 0,
-                                      fontSize: "11.5px",
-                                      color: "#64748b",
-                                      lineHeight: 1.4,
-                                    }}
-                                  >
-                                    {rec.reason}
-                                  </p>
-                                </div>
-
-                                {rec.brands && rec.brands.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexWrap: "wrap",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    {rec.brands.map((brand: any) => (
-                                      <button
-                                        key={brand.id}
-                                        onClick={() =>
-                                          handleApproveSuggestedMed({
-                                            ...brand,
-                                            type: brand.dosage_form || "Tab",
-                                            dose: brand.pack_size || "",
-                                          })
-                                        }
-                                        style={{
-                                          padding: "5px 10px",
-                                          background: "#ffffff",
-                                          border: "1px solid #cbd5e1",
-                                          borderRadius: "6px",
-                                          fontSize: "11px",
-                                          fontWeight: 700,
-                                          color: "#334155",
-                                          cursor: "pointer",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          gap: "4px",
-                                          transition: "0.2s",
-                                        }}
-                                        onMouseOver={(e) => {
-                                          e.currentTarget.style.borderColor =
-                                            "#6366f1";
-                                          e.currentTarget.style.color =
-                                            "#6366f1";
-                                        }}
-                                        onMouseOut={(e) => {
-                                          e.currentTarget.style.borderColor =
-                                            "#cbd5e1";
-                                          e.currentTarget.style.color =
-                                            "#334155";
-                                        }}
-                                      >
-                                        <span>{brand.emoji || ""}</span>{" "}
-                                        {brand.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div
-                                    style={{
-                                      fontSize: "10px",
-                                      color: "#94a3b8",
-                                      fontStyle: "italic",
-                                    }}
-                                  >
-                                    No matches in inventory.
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {advice && !adviceApproved && (
-                        <div
-                          className={styles.adviceDraftArea}
-                          style={{
-                            background: "#f8fafc",
-                            padding: "16px",
-                            borderRadius: "12px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            <p
-                              style={{
-                                fontSize: "11px",
-                                color: "#6366f1",
-                                fontWeight: 800,
-                                margin: 0,
-                              }}
-                            >
-                              AI CLINICAL GUIDANCE
-                            </p>
-                            <span
-                              style={{
-                                fontSize: "9px",
-                                background: "#e0e7ff",
-                                color: "#4338ca",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontWeight: 700,
-                              }}
-                            >
-                              DRAFT
-                            </span>
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "13px",
-                              whiteSpace: "pre-line",
-                              color: "#334155",
-                              lineHeight: 1.5,
-                              marginBottom: "12px",
-                            }}
-                          >
-                            {advice}
-                          </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              onClick={() => setAdviceApproved(true)}
-                              style={{
-                                flex: 1,
-                                padding: "8px",
-                                background: "#10b981",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Accept Advice
-                            </button>
-                            <button
-                              onClick={() => {
-                                setAdvice("");
-                                setAdviceApproved(true);
-                              }}
-                              style={{
-                                padding: "8px 12px",
-                                background: "#f1f5f9",
-                                color: "#64748b",
-                                border: "none",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
 
                 {guidanceApproved ? (
                   <div className={styles.exportRow}>
