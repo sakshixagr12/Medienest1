@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getLocalTodayStr, displayDoctorName } from "@/lib/utils";
+import { getLocalTodayStr, displayDoctorName, normalizeDoctorName } from "@/lib/utils";
 import styles from "./page.module.css";
 
 const IconPatientHistory = (
@@ -43,7 +43,7 @@ export default function DoctorPage() {
   const doctorId = searchParams.get("doctorId");
   const doctorNameParam = searchParams.get("doctorName");
 
-  const { doctors, clinic, user } = useClinic();
+  const { doctors, clinic, user, refresh } = useClinic();
   const [metricsData, setMetricsData] = useState({ todayCount: 0, revenue: 0 });
   const [liveQueue, setLiveQueue] = useState<any[]>([]);
   const [todayPatients, setTodayPatients] = useState<any[]>([]);
@@ -60,9 +60,121 @@ export default function DoctorPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [remainingExpanded, setRemainingExpanded] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Doctor switcher and add modal states
+  const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+  const [isAddDoctorMode, setIsAddDoctorMode] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isLoadingSub, setIsLoadingSub] = useState(true);
+  const [newDocName, setNewDocName] = useState("");
+  const [newDocSpecialty, setNewDocSpecialty] = useState("");
+  const [newDocQual, setNewDocQual] = useState("");
+  const [newDocContact, setNewDocContact] = useState("");
+  const [newDocRegNumber, setNewDocRegNumber] = useState("");
+  const [newDocExpiry, setNewDocExpiry] = useState("");
+  const [newDocPhoto, setNewDocPhoto] = useState("");
+  const [isAddingDoc, setIsAddingDoc] = useState(false);
+
   // Stable Supabase client — never recreated between renders
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
+
+  // Fetch subscription details
+  useEffect(() => {
+    if (!clinic?.id) return;
+    const fetchSubscription = async () => {
+      setIsLoadingSub(true);
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("clinic_id", clinic.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setSubscription(data);
+      } catch (e: any) {
+        console.error("Error fetching subscription:", e.message);
+      } finally {
+        setIsLoadingSub(false);
+      }
+    };
+    fetchSubscription();
+  }, [clinic, supabase]);
+
+  // Dynamic doctor limits
+  let maxAllowedDoctors = 2;
+  if (subscription) {
+    if (subscription.plan_name === "Clinic") {
+      maxAllowedDoctors = 5;
+    } else if (subscription.plan_name === "Professional") {
+      maxAllowedDoctors = 999;
+    }
+  }
+
+  const handleAddDoctor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clinic?.id) return;
+    if (doctors && doctors.length >= maxAllowedDoctors) {
+      alert(`Clinic Limit Reached: Maximum ${maxAllowedDoctors} doctors allowed on your current plan.`);
+      return;
+    }
+    if (!newDocName.trim()) {
+      alert("Doctor name is required.");
+      return;
+    }
+    if (!newDocRegNumber.trim()) {
+      alert("Medical License Number is required.");
+      return;
+    }
+
+    setIsAddingDoc(true);
+    try {
+      const normalizedName = normalizeDoctorName(newDocName);
+      const { data: newDoc, error: docErr } = await supabase
+        .from("doctors")
+        .insert([
+          {
+            name: normalizedName,
+            specialty: newDocSpecialty || "General Consultant",
+            qualification: newDocQual,
+            contact: newDocContact.trim(),
+            registration_number: newDocRegNumber.trim(),
+            license_expiry_date: newDocExpiry || null,
+            profile_photo_url: newDocPhoto.trim() || null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (docErr) throw docErr;
+
+      const { error: mapErr } = await supabase.from("clinic_doctors").insert([
+        {
+          clinic_id: clinic.id,
+          doctor_id: newDoc.id,
+          is_active: true,
+        },
+      ]);
+
+      if (mapErr) throw mapErr;
+
+      setNewDocName("");
+      setNewDocSpecialty("");
+      setNewDocQual("");
+      setNewDocContact("");
+      setNewDocRegNumber("");
+      setNewDocExpiry("");
+      setNewDocPhoto("");
+      setIsAddDoctorMode(false);
+      await refresh();
+      alert(`Dr. ${normalizedName} added to the clinic staff!`);
+    } catch (e: any) {
+      alert("Error adding doctor: " + e.message);
+    } finally {
+      setIsAddingDoc(false);
+    }
+  };
 
   const [activeDoctorId, setActiveDoctorId] = useState<string | null>(null);
   const [activeDoctorName, setActiveDoctorName] = useState<string>("Doctor");
@@ -452,20 +564,26 @@ export default function DoctorPage() {
     <DashboardLayout>
       {/* Desktop Welcoming Header */}
       <div className={`${styles.dashboardHeader} ${styles.desktopOnly}`}>
-        <h2>Welcome back, {doctorDisplayName}.</h2>
-        <p>You've seen {metricsData.todayCount} patients today.</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div>
+            <h2>Welcome back, {doctorDisplayName}.</h2>
+            <p>You&apos;ve seen {metricsData.todayCount} patient{metricsData.todayCount !== 1 ? "s" : ""} today.</p>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Welcoming Header */}
-      <div className={`${styles.dashboardHeader} ${styles.mobileOnly}`}>
-        <h2>
-          Welcome back,
-          <br />
-          <span className={styles.doctorNameHighlight}>{doctorDisplayName}</span>
-          <span className={styles.wavingHand}>👋</span>
-        </h2>
+      <div className={`${styles.dashboardHeader} ${styles.mobileOnly}`} style={{ position: "relative" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+          <h2>
+            Welcome back,
+            <br />
+            <span className={styles.doctorNameHighlight}>{doctorDisplayName}</span>
+            <span className={styles.wavingHand}>👋</span>
+          </h2>
+        </div>
         <p>
-          You've seen <span className={styles.purpleHighlight}>{metricsData.todayCount}</span> patient{metricsData.todayCount !== 1 ? "s" : ""} today.
+          You&apos;ve seen <span className={styles.purpleHighlight}>{metricsData.todayCount}</span> patient{metricsData.todayCount !== 1 ? "s" : ""} today.
         </p>
       </div>
 
@@ -1372,6 +1490,154 @@ export default function DoctorPage() {
           </div>
         </div>
       </div>
+
+      {isAddDoctorMode && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setIsAddDoctorMode(false)}
+        >
+          <div
+            className={`${styles.doctorModal} ${styles.addDocModalWidth}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              className={styles.closeBtn}
+              onClick={() => setIsAddDoctorMode(false)}
+              aria-label="Close"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+              </svg>
+            </button>
+
+            <form onSubmit={handleAddDoctor} className={styles.modalAddForm}>
+              {/* Header */}
+              <div className={styles.modalTop}>
+                <div className={styles.modalLogoCircle} style={{ background: "#E0F2FE", color: "#0284C7", borderColor: "rgba(2, 132, 199, 0.4)" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="19" y1="8" x2="19" y2="14" />
+                    <line x1="16" y1="11" x2="22" y2="11" />
+                  </svg>
+                </div>
+                <h3 className={styles.modalTitle}>Add New Doctor</h3>
+
+                <div className={styles.heartSeparator}>
+                  <span className={styles.separatorLine} />
+                  <span className={styles.heartIcon} style={{ color: "#0284c7" }}>💙</span>
+                  <span className={styles.separatorLine} />
+                </div>
+
+                <p className={styles.modalSubtext}>
+                  Add doctor to {clinic?.name || "clinic"} ({doctors.length}/{maxAllowedDoctors} active)
+                </p>
+              </div>
+
+              {/* Form fields scrollable */}
+              <div className={styles.formFieldsScroll}>
+                <div className={styles.modalFormField}>
+                  <label>Doctor's Name <span style={{ color: "#EF4444" }}>*</span></label>
+                  <input
+                    type="text"
+                    value={newDocName}
+                    onChange={(e) => setNewDocName(e.target.value)}
+                    placeholder="e.g. Dr. Ramesh Gupta"
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>Specialty</label>
+                  <input
+                    type="text"
+                    value={newDocSpecialty}
+                    onChange={(e) => setNewDocSpecialty(e.target.value)}
+                    placeholder="e.g. Pediatrics"
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>Qualification</label>
+                  <input
+                    type="text"
+                    value={newDocQual}
+                    onChange={(e) => setNewDocQual(e.target.value)}
+                    placeholder="e.g. MBBS, MD"
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>Contact Number</label>
+                  <input
+                    type="text"
+                    value={newDocContact}
+                    onChange={(e) => setNewDocContact(e.target.value)}
+                    placeholder="e.g. 9876543210"
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>Medical License No. <span style={{ color: "#EF4444" }}>*</span></label>
+                  <input
+                    type="text"
+                    value={newDocRegNumber}
+                    onChange={(e) => setNewDocRegNumber(e.target.value)}
+                    placeholder="e.g. MCI-12345"
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>License Expiry Date</label>
+                  <input
+                    type="date"
+                    value={newDocExpiry}
+                    onChange={(e) => setNewDocExpiry(e.target.value)}
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.modalFormField}>
+                  <label>Profile Photo URL</label>
+                  <input
+                    type="text"
+                    value={newDocPhoto}
+                    onChange={(e) => setNewDocPhoto(e.target.value)}
+                    placeholder="https://example.com/photo.jpg"
+                    className={styles.modalInput}
+                  />
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddDoctorMode(false)}
+                  disabled={isAddingDoc}
+                  className={styles.cancelBtn}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingDoc}
+                  className={styles.submitBtn}
+                >
+                  {isAddingDoc ? "Adding..." : "Add Doctor"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

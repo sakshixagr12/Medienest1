@@ -177,6 +177,12 @@ export default function ClinicSettingsPage() {
         throw new Error(data.error || "Failed to initiate payment");
       }
 
+      if (data.bypass) {
+        alert("Subscription updated successfully!");
+        window.location.reload();
+        return;
+      }
+
       // 2. Initialize Cashfree PG SDK
       const cashfree = await load({
         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
@@ -230,7 +236,7 @@ export default function ClinicSettingsPage() {
                 type="text"
                 value={clinicName}
                 onChange={(e) => setClinicName(e.target.value)}
-                placeholder="e.g. City Meds Pharmacy"
+                placeholder="e.g. City Meds Medical Store"
               />
             </div>
             <div className={styles.field}>

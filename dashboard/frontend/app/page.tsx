@@ -207,8 +207,8 @@ export default function LandingPage() {
             <Image
               src="/assets/medienest_logo.png"
               alt="MedieNest"
-              width={36}
-              height={36}
+              width={42}
+              height={42}
               className="logo-img"
             />
             <span className="logo-text">MedieNest</span>

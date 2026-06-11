@@ -6,9 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeDoctorName } from "@/lib/utils";
-import { Hospital, Users, Clock, ShieldCheck, Mail, ArrowRight, Check, AlertTriangle, Loader2, CheckCircle2, Zap } from "lucide-react";
+import { Hospital, Users, Clock, ShieldCheck, Mail, ArrowRight, Check, AlertTriangle, Loader2, CheckCircle2, Zap, Lock, Headphones, MessageSquare } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 import { load } from "@cashfreepayments/cashfree-js";
+import CountUp from "@/components/CountUp";
 import styles from "./page.module.css";
 
 interface Doctor {
@@ -233,17 +234,6 @@ export default function OnboardingPage() {
   const [tagline, setTagline] = useState("");
   const [step1Error, setStep1Error] = useState("");
 
-  // Step 2 state
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [docName, setDocName] = useState("");
-  const [docQual, setDocQual] = useState("");
-  const [docContact, setDocContact] = useState("");
-  const [docSpecialty, setDocSpecialty] = useState("");
-  const [docRegNumber, setDocRegNumber] = useState("");
-  const [docExpiry, setDocExpiry] = useState("");
-  const [docPhoto, setDocPhoto] = useState("");
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [step2Error, setStep2Error] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Pricing/Payment step state
@@ -312,6 +302,13 @@ export default function OnboardingPage() {
         throw new Error(data.error || "Failed to initiate payment checkout.");
       }
 
+      if (data.bypass) {
+        // Redirect directly
+        const dest = createdClinic.clinic_type === "store" ? "/store" : "/portal";
+        window.location.href = dest;
+        return;
+      }
+
       // Initialize Cashfree PG SDK
       const cashfree = await load({
         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
@@ -329,109 +326,24 @@ export default function OnboardingPage() {
     }
   };
 
-  const goStep2 = () => {
-    if (!clinicName) {
-      setStep1Error("Clinic name is required.");
+  const handleSubmit = async () => {
+    if (!clinicName.trim()) {
+      setStep1Error(roleChoice === "store" ? "Store name is required." : "Clinic name is required.");
       return;
     }
-    if (!phone) {
+    if (!phone.trim()) {
       setStep1Error("Phone number is required.");
       return;
     }
+    if (!city.trim()) {
+      setStep1Error("City/Location is required.");
+      return;
+    }
+    if (!address.trim()) {
+      setStep1Error("Full Address is required.");
+      return;
+    }
     setStep1Error("");
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const addDoctor = () => {
-    if (!docName.trim()) {
-      setStep2Error("Doctor name is required.");
-      return;
-    }
-    if (!docRegNumber.trim()) {
-      setStep2Error("Medical License Number is required.");
-      return;
-    }
-
-    const normalizedName = normalizeDoctorName(docName);
-
-    const docData: Doctor = {
-      name: normalizedName,
-      qualification: docQual.trim(),
-      contact: docContact.trim(),
-      specialty: docSpecialty.trim() || "General Medicine",
-      registration_number: docRegNumber.trim(),
-      license_expiry_date: docExpiry || undefined,
-      profile_photo_url: docPhoto || undefined,
-      is_active: true,
-      display_order:
-        editingIndex !== null
-          ? doctors[editingIndex].display_order
-          : doctors.length,
-    };
-
-    if (editingIndex !== null) {
-      setDoctors((prev) => {
-        const updated = [...prev];
-        updated[editingIndex] = docData;
-        return updated;
-      });
-      setEditingIndex(null);
-    } else {
-      setDoctors((prev) => [...prev, docData]);
-    }
-
-    setDocName("");
-    setDocQual("");
-    setDocContact("");
-    setDocSpecialty("");
-    setDocRegNumber("");
-    setDocExpiry("");
-    setDocPhoto("");
-    setStep2Error("");
-  };
-
-  const prepareEdit = (i: number) => {
-    const d = doctors[i];
-    setDocName(d.name);
-    setDocQual(d.qualification);
-    setDocContact(d.contact);
-    setDocSpecialty(d.specialty);
-    setDocRegNumber(d.registration_number);
-    setDocExpiry(d.license_expiry_date || "");
-    setDocPhoto(d.profile_photo_url || "");
-    setEditingIndex(i);
-    setStep2Error("");
-    window.scrollTo({ top: 400, behavior: "smooth" }); // Scroll to form
-  };
-
-  const cancelEdit = () => {
-    setEditingIndex(null);
-    setDocName("");
-    setDocQual("");
-    setDocContact("");
-    setDocSpecialty("");
-    setDocRegNumber("");
-    setDocExpiry("");
-    setDocPhoto("");
-    setStep2Error("");
-  };
-
-  const removeDoctor = (i: number) => {
-    setDoctors((prev) =>
-      prev
-        .filter((_, idx) => idx !== i)
-        .map((d, j) => ({ ...d, display_order: j })),
-    );
-  };
-
-  const handleSubmit = async () => {
-    if (
-      roleChoice !== "store" &&
-      doctors.length === 0 &&
-      !(await confirm("You have not added any doctors. Continue without adding?"))
-    )
-      return;
     setSubmitting(true);
     try {
       const {
@@ -475,44 +387,10 @@ export default function OnboardingPage() {
 
       if (clinicErr) throw clinicErr;
 
-      if (doctors.length > 0) {
-        for (const d of doctors) {
-          // 1. Insert into global doctors registry
-          const { data: docRecord, error: docErr } = await supabase
-            .from("doctors")
-            .insert({
-              name: d.name,
-              qualification: d.qualification,
-              contact: d.contact,
-              specialty: d.specialty,
-              registration_number: d.registration_number,
-              license_expiry_date: d.license_expiry_date,
-              profile_photo_url: d.profile_photo_url,
-            })
-            .select()
-            .single();
-
-          if (docErr) throw docErr;
-
-          // 2. Map doctor to this specific clinic context
-          const { error: assocErr } = await supabase
-            .from("clinic_doctors")
-            .insert({
-              clinic_id: clinic.id,
-              doctor_id: docRecord.id,
-              display_order: d.display_order,
-              is_active: d.is_active,
-            });
-
-          if (assocErr) throw assocErr;
-        }
-      }
-
       setCreatedClinic(clinic);
-      setStep(roleChoice === "store" ? 2 : 3);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      router.replace("/pending");
     } catch (err: any) {
-      setStep2Error(err.message || "Submission failed. Try again.");
+      setStep1Error(err.message || "Submission failed. Try again.");
     } finally {
       setSubmitting(false);
     }
@@ -568,35 +446,15 @@ export default function OnboardingPage() {
                 </div>
               </div>
               
-              {/* Team Members */}
-              {roleChoice !== "store" && (
-                <div
-                  className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""} ${step > 2 ? styles.navItemCompleted : ""}`}
-                  onClick={() => {
-                    // Only allow clicking back to Step 2 if we haven't submitted the onboarding form yet
-                    if (!createdClinic && step === 1) goStep2();
-                  }}
-                  style={{ cursor: (createdClinic || step !== 1) ? "default" : "pointer" }}
-                >
-                  <div className={styles.navIconCircle}>
-                    {step > 2 ? <Check size={18} /> : <Users size={20} />}
-                  </div>
-                  <div className={styles.navTextWrapper}>
-                    <span className={styles.navStepNumber}>Step 02</span>
-                    <span className={styles.navStepTitle}>Team Members</span>
-                  </div>
-                </div>
-              )}
-
               {/* Choose Plan */}
               <div
-                className={`${styles.navItem} ${step === (roleChoice === "store" ? 2 : 3) ? styles.navItemActive : ""}`}
+                className={`${styles.navItem} ${step === 2 ? styles.navItemActive : ""}`}
               >
                 <div className={styles.navIconCircle}>
                   <Zap size={18} />
                 </div>
                 <div className={styles.navTextWrapper}>
-                  <span className={styles.navStepNumber}>{roleChoice === "store" ? "Step 02" : "Step 03"}</span>
+                  <span className={styles.navStepNumber}>Step 02</span>
                   <span className={styles.navStepTitle}>Choose Plan</span>
                 </div>
               </div>
@@ -627,37 +485,35 @@ export default function OnboardingPage() {
             <p className={styles.mobileLogoTagline}>Compassion. Care. Connected.</p>
           </div>
 
-          <main className={`${styles.onboardingCard} ${step === (roleChoice === "store" ? 2 : 3) ? styles.pricingStepCard : ""}`}>
+          <main className={`${styles.onboardingCard} ${step === 2 ? styles.pricingStepCard : ""}`}>
             <LeavesBranch className={styles.leavesCardCorner} />
 
-            <div className={styles.cardHeaderArea}>
-              <div className={styles.logoCircle}>
-                <Hospital size={28} className={styles.hospitalIcon} />
+            {step === 1 && (
+              <div className={styles.cardHeaderArea}>
+                <div className={styles.logoCircle}>
+                  <Hospital size={28} className={styles.hospitalIcon} />
+                </div>
+
+                <h2 className={styles.cardHeading}>
+                  {roleChoice === "store" ? "Store Setup" : "Clinic Setup"}
+                </h2>
+
+                <div className={styles.heartSeparator}>
+                  <span className={styles.separatorLine} />
+                  <span className={styles.heartIcon}>💚</span>
+                  <span className={styles.separatorLine} />
+                </div>
+
+                {/* Mobile Stepper Progress bar (hidden on desktop) */}
+                <div className={styles.mobileStepIndicator}>
+                  Step 1 of 2 • {roleChoice === "store" ? "Store Setup" : "Clinic Setup"}
+                </div>
+
+                <p className={styles.cardSubtext}>
+                  {roleChoice === "store" ? "Tell us about your medical store. This information will be visible on invoice receipts and used for billing." : "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing."}
+                </p>
               </div>
-
-              <h2 className={styles.cardHeading}>
-                {step === 1 && (roleChoice === "store" ? "Store Setup" : "Clinic Setup")}
-                {step === 2 && (roleChoice === "store" ? "Choose Plan" : "Team Members")}
-                {step === 3 && "Choose Plan"}
-              </h2>
-
-              <div className={styles.heartSeparator}>
-                <span className={styles.separatorLine} />
-                <span className={styles.heartIcon}>💚</span>
-                <span className={styles.separatorLine} />
-              </div>
-
-              {/* Mobile Stepper Progress bar (hidden on desktop) */}
-              <div className={styles.mobileStepIndicator}>
-                Step {step} of {roleChoice === "store" ? 2 : 3} • {step === 1 ? (roleChoice === "store" ? "Store Setup" : "Clinic Setup") : (step === 2 ? (roleChoice === "store" ? "Choose Plan" : "Team Members") : "Choose Plan")}
-              </div>
-
-              <p className={styles.cardSubtext}>
-                {step === 1 && (roleChoice === "store" ? "Tell us about your medical store. This information will be visible on invoice receipts and used for billing." : "Tell us about your clinic's digital presence. This information will be visible to patients and used for billing.")}
-                {step === 2 && (roleChoice === "store" ? "Get started with a 7-day free trial or subscribe to a plan to access patient queue management, electronic prescriptions, and clinic reports." : "List the practitioners who will be using MedieNest. You can update this later from settings.")}
-                {step === 3 && "Get started with a 7-day free trial or subscribe to a plan to access patient queue management, electronic prescriptions, and clinic reports."}
-              </p>
-            </div>
+            )}
 
             {/* STEP 1: CLINIC SETUP FORM */}
             {step === 1 && (
@@ -817,323 +673,283 @@ export default function OnboardingPage() {
 
                 <div className={styles.formFooter}>
                   <div />
-                  {roleChoice === "store" ? (
-                    <button
-                      className={styles.btnNext}
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                    >
-                      {submitting ? "Submitting..." : "Submit for Onboarding"}
-                      <ArrowRight size={18} />
-                    </button>
-                  ) : (
-                    <button className={styles.btnNext} onClick={goStep2}>
-                      Next: Add Doctors
-                      <ArrowRight size={18} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* STEP 2: TEAM MEMBERS FORM */}
-            {step === 2 && (
-              <div className={styles.formContainer}>
-                {step2Error && <div className={styles.errMsg}>{step2Error}</div>}
-
-                <div className={styles.doctorsList}>
-                  {doctors.map((d, i) => (
-                    <div key={i} className={styles.doctorListItem}>
-                      <div className={styles.doctorInfoText}>
-                        <strong>Dr. {d.name}</strong> • {d.specialty}
-                        <div className={styles.doctorSubText}>
-                          {d.qualification} | {d.contact} | Reg: {d.registration_number}
-                        </div>
-                      </div>
-                      <div className={styles.doctorActions}>
-                        <button className={styles.btnEditDoc} onClick={() => prepareEdit(i)}>
-                          Edit
-                        </button>
-                        <button className={styles.btnDeleteDoc} onClick={() => removeDoctor(i)}>
-                          X
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className={styles.addDoctorForm}>
-                  <h3 className={styles.addDoctorFormTitle}>
-                    {editingIndex !== null ? "Edit Doctor Details" : "Add New Doctor"}
-                  </h3>
-                  
-                  <div className={styles.formGrid}>
-                    <div className={styles.formField}>
-                      <label>Doctor's Name</label>
-                      <input
-                        className={styles.inputBox}
-                        value={docName}
-                        onChange={(e) => setDocName(e.target.value)}
-                        placeholder="e.g. Pradeep Kumar"
-                      />
-                    </div>
-                    
-                    <div className={styles.formField}>
-                      <label>Specialty</label>
-                      <input
-                        className={styles.inputBox}
-                        value={docSpecialty}
-                        onChange={(e) => setDocSpecialty(e.target.value)}
-                        placeholder="e.g. Pediatrics"
-                      />
-                    </div>
-
-                    <div className={styles.formField}>
-                      <label>Qualification</label>
-                      <input
-                        className={styles.inputBox}
-                        value={docQual}
-                        onChange={(e) => setDocQual(e.target.value)}
-                        placeholder="e.g. MBBS, MD"
-                      />
-                    </div>
-
-                    <div className={styles.formField}>
-                      <label>Contact Number</label>
-                      <input
-                        className={styles.inputBox}
-                        value={docContact}
-                        onChange={(e) => setDocContact(e.target.value)}
-                        placeholder="98XXXXXXXX"
-                      />
-                    </div>
-
-                    <div className={styles.formField}>
-                      <label>
-                        Medical License No. <span style={{ color: "#ef4444" }}>*</span>
-                      </label>
-                      <input
-                        className={styles.inputBox}
-                        value={docRegNumber}
-                        onChange={(e) => setDocRegNumber(e.target.value)}
-                        placeholder="e.g. MCI-12345"
-                      />
-                    </div>
-
-                    <div className={styles.formField}>
-                      <label>License Expiry Date</label>
-                      <input
-                        className={styles.inputBox}
-                        type="date"
-                        value={docExpiry}
-                        onChange={(e) => setDocExpiry(e.target.value)}
-                      />
-                    </div>
-
-                    <div className={`${styles.formField} ${styles.fullWidth}`}>
-                      <label>
-                        Profile Photo URL <span>(Optional)</span>
-                      </label>
-                      <input
-                        className={styles.inputBox}
-                        value={docPhoto}
-                        onChange={(e) => setDocPhoto(e.target.value)}
-                        placeholder="https://example.com/photo.jpg"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-                    <button
-                      onClick={addDoctor}
-                      className={styles.btnSolid}
-                      style={{ padding: "10px 20px", borderRadius: "8px" }}
-                    >
-                      {editingIndex !== null ? "Update Detail" : "Add to List"}
-                    </button>
-                    {editingIndex !== null && (
-                      <button
-                        onClick={cancelEdit}
-                        className={styles.btnSecondary}
-                        style={{ padding: "9px 20px", borderRadius: "8px" }}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.formFooter}>
-                  <button className={styles.btnSecondary} onClick={() => setStep(1)}>
-                    Back to Setup
-                  </button>
-                  
                   <button
                     className={styles.btnNext}
                     onClick={handleSubmit}
                     disabled={submitting}
                   >
-                    {submitting ? "Submitting..." : "Submit for Onboarding"}
+                    {submitting ? "Continuing..." : "Continue"}
+                    <ArrowRight size={18} />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 3 (Clinic) / STEP 2 (Store): CHOOSE PLAN */}
-            {step === (roleChoice === "store" ? 2 : 3) && (
-              <div className={styles.formContainer}>
-                {paymentError && (
-                  <div className={styles.errorBanner} style={{ marginBottom: "24px" }}>
-                    <AlertTriangle size={18} />
-                    <span>{paymentError}</span>
-                  </div>
-                )}
+            {/* STEP 2: CHOOSE PLAN */}
+            {step === 2 && (
+              <>
+                {/* Background decorations for Step 2 */}
+                <div className={styles.stethoscopeBgDecoration}>
+                  <Image
+                    src="/assets/stethoscope_bg.png"
+                    alt="Stethoscope Decoration"
+                    width={380}
+                    height={380}
+                    style={{ objectFit: 'contain', opacity: 0.65 }}
+                  />
+                </div>
+                <div className={styles.plantBgDecoration}>
+                  <Image
+                    src="/assets/plant_cross_bg.png"
+                    alt="Potted Plant Decoration"
+                    width={340}
+                    height={340}
+                    style={{ objectFit: 'contain', opacity: 0.85 }}
+                  />
+                </div>
 
-                {/* Pricing Cards Grid */}
-                <div className={styles.pricingGrid}>
-                  {/* Plan 1: Starter */}
-                  <div className={styles.pricingCard}>
-                    <div className={styles.cardHeader}>
-                      <span className={styles.planName}>Starter</span>
-                      <div className={styles.priceRow}>
-                        <span className={styles.currency}>₹</span>
-                        <span className={styles.amount}>99</span>
-                        <span className={styles.period}>/month</span>
-                      </div>
+                <div className={styles.formContainer} style={{ maxWidth: "100%" }}>
+                  {paymentError && (
+                    <div className={styles.errorBanner} style={{ marginBottom: "24px" }}>
+                      <AlertTriangle size={18} />
+                      <span>{paymentError}</span>
                     </div>
-                    <div className={styles.divider} />
-                    <ul className={styles.featuresList}>
-                      {roleChoice === "store" ? (
-                        <>
-                          <li><Check size={16} /> Basic Billing & Receipts</li>
-                          <li><Check size={16} /> Day Sales Summary</li>
-                          <li><Check size={16} /> Standard Email Support</li>
-                        </>
-                      ) : (
-                        <>
-                          <li><Check size={16} /> Max 2 Consulting Doctors</li>
-                          <li><Check size={16} /> Patient Queue Manager</li>
-                          <li><Check size={16} /> Basic AI summary metrics</li>
-                        </>
-                      )}
-                    </ul>
-                    <div className={styles.buttonCol}>
-                      <button
-                        className={styles.trialBtn}
-                        onClick={() => handleStartTrial("Starter")}
-                        disabled={!!processingPlan}
-                      >
-                        {processingPlan === "Starter" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
-                      </button>
-                      <button
-                        className={styles.payBtn}
-                        onClick={() => handlePayCheckout("Starter")}
-                        disabled={!!processingPlan}
-                      >
-                        <Zap size={15} style={{ marginRight: "6px" }} />
-                        Subscribe Now
-                      </button>
+                  )}
+
+                  {/* Account Created Badge and Headings */}
+                  <div className={styles.titleArea}>
+                    <div className={styles.successBadge}>
+                      <Check size={14} style={{ marginRight: '6px' }} /> Account created successfully
                     </div>
+                    <h1>
+                      Plans designed for care.<br />
+                      Built for <span className={styles.italicGreen}>{roleChoice === "store" ? "your store" : "your clinic"}.</span>
+                    </h1>
+                    <p>Subscribe anytime to streamline patient queue management, electronic prescriptions, and billing reports.</p>
                   </div>
 
-                  {/* Plan 2: Clinic */}
-                  <div className={`${styles.pricingCard} ${styles.featuredCard}`}>
-                    <div className={styles.popularTag}>MOST POPULAR</div>
-                    <div className={styles.cardHeader}>
-                      <span className={styles.planName} style={{ color: "#2E7D32" }}>Clinic</span>
-                      <div className={styles.priceRow}>
-                        <span className={styles.currency}>₹</span>
-                        <span className={styles.amount}>249</span>
-                        <span className={styles.period}>/month</span>
+                  {/* Beta Alert Banner */}
+                  <div className={styles.betaAlertBanner}>
+                    🎉 All plans are currently at <strong style={{ fontWeight: 900, color: '#0d9488' }}><CountUp from={10} to={90} duration={1.2} startWhen={true} roundTo={10} />%</strong> off during our beta testing period.
+                  </div>
+
+                  {/* Pricing Cards Grid */}
+                  <div className={styles.pricingGrid}>
+                    {/* Plan 1: Starter */}
+                    <div className={styles.pricingCard}>
+                      <div className={styles.cardBgIllustration}>
+                        <Image
+                          src="/assets/3d_starter_clipboard.png"
+                          alt="Starter Clipboard Icon"
+                          width={140}
+                          height={140}
+                          className={styles.illustrationImg}
+                        />
+                      </div>
+
+                      <div className={styles.cardHeader}>
+                        <span className={styles.planName}>Starter</span>
+                        <p className={styles.planSubtitle}>{roleChoice === "store" ? "For solo stores/owners" : "Perfect for individual practitioners"}</p>
+                        <div className={styles.priceRow}>
+                          <span className={styles.priceOriginal}>₹999</span>
+                          <span className={styles.currency}>₹</span>
+                          <span className={styles.amount}>
+                            <CountUp from={999} to={99} duration={1.2} startWhen={true} roundTo={10} />
+                          </span>
+                          <span className={styles.period}>/month</span>
+                        </div>
+                      </div>
+                      <div className={styles.divider} />
+                      <ul className={styles.featuresList}>
+                        {roleChoice === "store" ? (
+                          <>
+                            <li><Check size={16} /> Basic Billing & Receipts</li>
+                            <li><Check size={16} /> Day Sales Summary</li>
+                            <li><Check size={16} /> Standard Email Support</li>
+                          </>
+                        ) : (
+                          <>
+                            <li><Check size={16} /> Max 2 Consulting Doctors</li>
+                            <li><Check size={16} /> Patient Queue Manager</li>
+                            <li><Check size={16} /> Basic AI summary metrics</li>
+                          </>
+                        )}
+                      </ul>
+                      <div className={styles.buttonCol}>
+                        <button
+                          className={styles.payBtn}
+                          onClick={() => handlePayCheckout("Starter")}
+                          disabled={!!processingPlan}
+                        >
+                          {processingPlan === "Starter" ? (
+                            <Loader2 className={styles.spin} size={18} />
+                          ) : (
+                            "Subscribe Now"
+                          )}
+                        </button>
                       </div>
                     </div>
-                    <div className={styles.divider} />
-                    <ul className={styles.featuresList}>
-                      {roleChoice === "store" ? (
-                        <>
-                          <li><Check size={16} /> Advanced Billing & Reports</li>
-                          <li><Check size={16} /> Analytics & Insights</li>
-                          <li><Check size={16} /> Priority Email Support</li>
-                        </>
-                      ) : (
-                        <>
-                          <li><Check size={16} /> Max 5 Consulting Doctors</li>
-                          <li><Check size={16} /> Patient Queue & Analytics</li>
-                          <li><Check size={16} /> Multi-language prescriptions</li>
-                          <li><Check size={16} /> Priority Email Support</li>
-                        </>
-                      )}
-                    </ul>
-                    <div className={styles.buttonCol}>
-                      <button
-                        className={`${styles.trialBtn} ${styles.featuredTrialBtn}`}
-                        onClick={() => handleStartTrial("Clinic")}
-                        disabled={!!processingPlan}
-                      >
-                        {processingPlan === "Clinic" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
-                      </button>
-                      <button
-                        className={`${styles.payBtn} ${styles.featuredPayBtn}`}
-                        onClick={() => handlePayCheckout("Clinic")}
-                        disabled={!!processingPlan}
-                      >
-                        <Zap size={15} style={{ marginRight: "6px" }} />
-                        Subscribe Now
-                      </button>
+
+                    {/* Plan 2: Clinic */}
+                    <div className={`${styles.pricingCard} ${styles.featuredCard}`}>
+                      <div className={styles.popularTag}>★ MOST POPULAR</div>
+                      <div className={styles.cardBgIllustration}>
+                        <Image
+                          src="/assets/3d_clinic_monitor.png"
+                          alt="Clinic Monitor Icon"
+                          width={140}
+                          height={140}
+                          className={styles.illustrationImg}
+                        />
+                      </div>
+
+                      <div className={styles.cardHeader}>
+                        <span className={styles.planName} style={{ color: "#2E7D32" }}>Clinic</span>
+                        <p className={styles.planSubtitle}>{roleChoice === "store" ? "For active stores & groups" : "Ideal for growing clinics"}</p>
+                        <div className={styles.priceRow}>
+                          <span className={styles.priceOriginal}>₹2,499</span>
+                          <span className={styles.currency}>₹</span>
+                          <span className={styles.amount}>
+                            <CountUp from={2499} to={249} duration={1.2} startWhen={true} roundTo={10} />
+                          </span>
+                          <span className={styles.period}>/month</span>
+                        </div>
+                      </div>
+                      <div className={styles.divider} />
+                      <ul className={styles.featuresList}>
+                        {roleChoice === "store" ? (
+                          <>
+                            <li><Check size={16} /> Advanced Billing & Reports</li>
+                            <li><Check size={16} /> Analytics & Insights</li>
+                            <li><Check size={16} /> Priority Email Support</li>
+                          </>
+                        ) : (
+                          <>
+                            <li><Check size={16} /> Max 5 Consulting Doctors</li>
+                            <li><Check size={16} /> Patient Queue & Analytics</li>
+                            <li><Check size={16} /> Multi-language prescriptions</li>
+                            <li><Check size={16} /> Priority Email Support</li>
+                          </>
+                        )}
+                      </ul>
+                      <div className={styles.buttonCol}>
+                        <button
+                          className={`${styles.payBtn} ${styles.featuredPayBtn}`}
+                          onClick={() => handlePayCheckout("Clinic")}
+                          disabled={!!processingPlan}
+                        >
+                          {processingPlan === "Clinic" ? (
+                            <Loader2 className={styles.spin} size={18} />
+                          ) : (
+                            "Subscribe Now"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Plan 3: Professional */}
+                    <div className={styles.pricingCard}>
+                      <div className={styles.cardBgIllustration}>
+                        <Image
+                          src="/assets/3d_professional_bag.png"
+                          alt="Professional Bag Icon"
+                          width={140}
+                          height={140}
+                          className={styles.illustrationImg}
+                        />
+                      </div>
+
+                      <div className={styles.cardHeader}>
+                        <span className={styles.planName}>Professional</span>
+                        <p className={styles.planSubtitle}>{roleChoice === "store" ? "Unlimited multi-location stores" : "Advanced tools for your practice"}</p>
+                        <div className={styles.priceRow}>
+                          <span className={styles.priceOriginal}>₹4,999</span>
+                          <span className={styles.currency}>₹</span>
+                          <span className={styles.amount}>
+                            <CountUp from={4999} to={499} duration={1.2} startWhen={true} roundTo={10} />
+                          </span>
+                          <span className={styles.period}>/month</span>
+                        </div>
+                      </div>
+                      <div className={styles.divider} />
+                      <ul className={styles.featuresList}>
+                        {roleChoice === "store" ? (
+                          <>
+                            <li><Check size={16} /> Unlimited Billing & Invoices</li>
+                            <li><Check size={16} /> Custom branding & receipt logos</li>
+                            <li><Check size={16} /> Dedicated Account Manager</li>
+                          </>
+                        ) : (
+                          <>
+                            <li><Check size={16} /> Unlimited Doctors</li>
+                            <li><Check size={16} /> Full Queue, billing & analytics</li>
+                            <li><Check size={16} /> Custom branding & prescription logos</li>
+                            <li><Check size={16} /> Dedicated Account Manager</li>
+                          </>
+                        )}
+                      </ul>
+                      <div className={styles.buttonCol}>
+                        <button
+                          className={styles.payBtn}
+                          onClick={() => handlePayCheckout("Professional")}
+                          disabled={!!processingPlan}
+                        >
+                          {processingPlan === "Professional" ? (
+                            <Loader2 className={styles.spin} size={18} />
+                          ) : (
+                            "Subscribe Now"
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Plan 3: Professional */}
-                  <div className={styles.pricingCard}>
-                    <div className={styles.cardHeader}>
-                      <span className={styles.planName}>Professional</span>
-                      <div className={styles.priceRow}>
-                        <span className={styles.currency}>₹</span>
-                        <span className={styles.amount}>499</span>
-                        <span className={styles.period}>/month</span>
+                  {/* Trust Badges Grid Footer */}
+                  <div className={styles.trustGridContainer}>
+                    <div className={styles.trustItem}>
+                      <div className={styles.trustIconWrap}>
+                        <ShieldCheck size={24} className={styles.trustIcon} />
+                      </div>
+                      <div className={styles.trustTextWrap}>
+                        <h4>Secure & Encrypted</h4>
+                        <p>Your data is safe with us</p>
                       </div>
                     </div>
-                    <div className={styles.divider} />
-                    <ul className={styles.featuresList}>
-                      {roleChoice === "store" ? (
-                        <>
-                          <li><Check size={16} /> Unlimited Billing & Invoices</li>
-                          <li><Check size={16} /> Custom branding & receipt logos</li>
-                          <li><Check size={16} /> Dedicated Account Manager</li>
-                        </>
-                      ) : (
-                        <>
-                          <li><Check size={16} /> Unlimited Doctors</li>
-                          <li><Check size={16} /> Full Queue, billing & analytics</li>
-                          <li><Check size={16} /> Custom branding & prescription logos</li>
-                          <li><Check size={16} /> Dedicated Account Manager</li>
-                        </>
-                      )}
-                    </ul>
-                    <div className={styles.buttonCol}>
-                      <button
-                        className={styles.trialBtn}
-                        onClick={() => handleStartTrial("Professional")}
-                        disabled={!!processingPlan}
-                      >
-                        {processingPlan === "Professional" ? <Loader2 className={styles.spin} size={18} /> : "Start 7-Day Free Trial"}
-                      </button>
-                      <button
-                        className={styles.payBtn}
-                        onClick={() => handlePayCheckout("Professional")}
-                        disabled={!!processingPlan}
-                      >
-                        <Zap size={15} style={{ marginRight: "6px" }} />
-                        Subscribe Now
-                      </button>
+                    <div className={styles.trustItemDivider} />
+                    <div className={styles.trustItem}>
+                      <div className={styles.trustIconWrap}>
+                        <Lock size={20} className={styles.trustIcon} />
+                      </div>
+                      <div className={styles.trustTextWrap}>
+                        <h4>PCI Compliant</h4>
+                        <p>Industry-standard security</p>
+                      </div>
+                    </div>
+                    <div className={styles.trustItemDivider} />
+                    <div className={styles.trustItem}>
+                      <div className={styles.trustIconWrap}>
+                        <Headphones size={22} className={styles.trustIcon} />
+                      </div>
+                      <div className={styles.trustTextWrap}>
+                        <h4>24/7 Support</h4>
+                        <p>We're here to help you</p>
+                      </div>
+                    </div>
+                    <div className={styles.trustItemDivider} />
+                    <div className={styles.trustItem}>
+                      <div className={styles.trustIconWrap}>
+                        <MessageSquare size={20} className={styles.trustIcon} />
+                      </div>
+                      <div className={styles.trustTextWrap}>
+                        <h4>Have questions?</h4>
+                        <a href="mailto:support@medienest.care" className={styles.contactSupportLink}>
+                          Contact Support <ArrowRight size={14} style={{ marginLeft: '4px' }} />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <div className={styles.footerHelp} style={{ textAlign: "center", maxWidth: "none", marginTop: "32px" }}>
-                  Secure payments processed via Cashfree. Having issues? <a href="mailto:support@medienest.care" style={{ color: "#2E7D32", textDecoration: "none", fontWeight: 700 }}>Contact Support</a>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Verifying Loader Screen Overlay */}

@@ -2,7 +2,7 @@
    MedieNest Global Design Tokens
    ============================================= */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Patrick+Hand&family=DM+Serif+Display&family=Outfit:wght@400;600;700;800;900&display=swap");
 
 :root {
   /* Brand Colors */
@@ -392,3 +392,24 @@ img {
   color: #991b1b;
   border: 1px solid #fecaca;
 }
+
+/* ==========================================================================
+   Thin Black Borders for Dashboard Cards / Rectangles (Outer Edges Only)
+   ========================================================================== */
+[class*="card" i]:not([class*="Title"]):not([class*="Header"]):not([class*="Body"]):not([class*="Content"]):not([class*="Text"]):not([class*="Row"]):not([class*="Right"]):not([class*="Avatar"]):not([class*="Meta"]):not([class*="Link"]):not([class*="Btn"]):not([class*="Input"]):not([class*="Field"]):not([class*="Brief"]):not([class*="Info"]):not([class*="Icon"]):not([class*="Dot"]):not([class*="Divider"]):not([class*="Badge"]):not([class*="Trend"]):not([class*="Value"]):not([class*="Active"]):not([class*="Triage"]):not([class*="Action"]):not([class*="Arrow"]):not([class*="Illustration"]):not([class*="Overlay"]):not([class*="Close"]):not([class*="FormField"]):not([class*="Actions"]):not([class*="Footer"]):not([class*="Notice"]):not([class*="Pill"]):not([class*="Toggle"]):not([class*="List"]):not([class*="Item"]):not([class*="Section"]):not([class*="Label"]):not([class*="wrapper" i]):not([class*="Wrapper"]):not([class*="container" i]):not([class*="Container"]):not([class*="col" i]):not([class*="Col"]),
+[class*="metricsGrid"],
+[class*="sectionBox"],
+[class*="clinicalDesk"],
+[class*="waitingSection"],
+[class*="remainingSection"],
+[class*="activityFeed"],
+[class*="doctorModal"],
+[class*="censusFullWidthCard"] {
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02) !important;
+}
+
+
+
+
+

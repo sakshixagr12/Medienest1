@@ -9,8 +9,8 @@ export default function PublicNav() {
         <Image
           src="/assets/medienest_logo.png"
           alt="MedieNest"
-          width={32}
-          height={32}
+          width={28}
+          height={28}
         />
         <span>MedieNest</span>
       </Link>

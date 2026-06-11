@@ -846,3 +846,154 @@
     height: auto !important;
   }
 }
+
+/* Inline Add Doctor Button in Modal */
+.addDoctorModalBtn {
+  width: 100%;
+  padding: 14px;
+  background: #2E7D32;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+}
+
+.addDoctorModalBtn:hover {
+  background: #1B5E20;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.25);
+}
+
+/* Limit reached notice */
+.limitReachedNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Form Styles inside Modal */
+.modalAddForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.formFieldsScroll {
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 8px;
+}
+
+.formFieldsScroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.formFieldsScroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.modalFormField {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.modalFormField label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #4B5563;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modalInput {
+  padding: 10px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #1F2937;
+  background: #F9FAFB;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: #0284C7;
+  background: #FFF;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid #E5E7EB;
+  background: #FFF;
+  color: #4B5563;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #F9FAFB;
+  color: #1F2937;
+  border-color: #D1D5DB;
+}
+
+.submitBtn {
+  flex: 1;
+  padding: 12px;
+  background: #0284C7;
+  color: #FFF;
+  border: none;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #0369A1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+}
+
+.submitBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.addDocModalWidth {
+  max-width: 460px;
+}
+

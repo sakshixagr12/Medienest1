@@ -350,6 +350,7 @@ function AuthPageContent() {
 
               {authError && <div className={styles.errorBox}>{authError}</div>}
 
+
               <button
                 type="button"
                 onClick={handleGoogleLogin}

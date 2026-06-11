@@ -84,13 +84,13 @@ export default function SettingsPage() {
     if (!doctors || doctors.length === 0) return;
     try {
       const { error } = await supabase
-        .from("clinic_doctors")
+        .from("doctors")
         .update({
           name: docName,
           qualification: docQual,
           specialty: docSpec,
         })
-        .eq("id", doctors[0].id);
+        .eq("id", doctors[0].doctor_id || doctors[0].id);
 
       if (error) throw error;
       alert("Practitioner Profile Updated!");
@@ -309,7 +309,7 @@ export default function SettingsPage() {
             <select value={sCat} onChange={(e) => setSCat(e.target.value)}>
               <option>OPD</option>
               <option>Diagnostic</option>
-              <option>Pharmacy</option>
+              <option>Medical Store</option>
               <option>IPD Stay</option>
               <option>Other</option>
             </select>

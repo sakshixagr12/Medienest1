@@ -5,9 +5,28 @@ import { createClient } from "@/lib/supabase/client";
 import { API_BASE_URL } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { CheckCircle2, ShieldCheck, Lock, Headphones, AlertTriangle } from "lucide-react";
 import styles from "./page.module.css";
+
+// ── CUSTOM SVG LEAVES FOR BACKGROUND ──
+function LeavesBackground({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 160 C 25 135, 55 115, 95 105" stroke="#2E7D32" strokeWidth="2.5" strokeLinecap="round" opacity="0.15" />
+      <path d="M15 155 C 28 128, 48 123, 52 143 C 37 148, 22 153, 15 155 Z" fill="url(#leafGrad)" opacity="0.2" />
+      <path d="M45 125 C 65 102, 80 107, 75 128 C 58 128, 48 128, 45 125 Z" fill="url(#leafGrad)" opacity="0.2" />
+      <defs>
+        <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#81C784" />
+          <stop offset="100%" stopColor="#2E7D32" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
 
 interface Prescription {
   id: string;
@@ -310,14 +329,13 @@ export default function ViewPrescription({
     }
   }, [activeTab, !!activeSummary, isSpeaking, showLangModal]);
 
-  async function fetchHistory(pId: string) {
-    if (!pId) return;
+  async function fetchHistory() {
     setLoadingHistory(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/patient-history/${pId}`);
+      const res = await fetch(`${API_BASE_URL}/api/public/patient-history/${id}`);
       if (!res.ok) {
         console.warn(
-          "️ Clinical history API error - falling back to degraded mode",
+          "⚠️ Clinical history API error - falling back to degraded mode",
         );
         return;
       }
@@ -435,7 +453,7 @@ export default function ViewPrescription({
           .single();
         if (pData) setPatient(pData);
         // Fetch history immediately
-        fetchHistory(rxData.patient_id);
+        fetchHistory();
       }
       if (rxData.clinic_id) {
         const { data: cData } = await supabase
@@ -661,6 +679,462 @@ export default function ViewPrescription({
       ),
     },
   ];
+
+  if (!user) {
+    return (
+      <div className={styles.patientHubBg}>
+        {/* Background decorations */}
+        <div className={styles.stethoscopeBgDecoration}>
+          <Image
+            src="/assets/stethoscope_bg.png"
+            alt="Stethoscope Decoration"
+            width={380}
+            height={380}
+            style={{ objectFit: 'contain', opacity: 0.15 }}
+          />
+        </div>
+        <div className={styles.plantBgDecoration}>
+          <Image
+            src="/assets/plant_cross_bg.png"
+            alt="Potted Plant Decoration"
+            width={340}
+            height={340}
+            style={{ objectFit: 'contain', opacity: 0.25 }}
+          />
+        </div>
+
+        {/* Floating Capsule Navigation Bar */}
+        <nav className={styles.navbar}>
+          <div className={styles.navContainer}>
+            <div className={styles.brand}>
+              <Image
+                src="/assets/medienest_logo.png"
+                alt="MedieNest Logo"
+                width={28}
+                height={28}
+                style={{ objectFit: "contain" }}
+              />
+              <span className={styles.brandName}>MedieNest</span>
+            </div>
+
+            {/* Language Selector */}
+            <div className={styles.navRight}>
+              <button
+                className={styles.langBtn}
+                onClick={() => setShowLangModal(true)}
+              >
+                <span>{selectedLang === "Hindi" ? "हिन्दी" : "English"}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 6 }}>
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content Hub */}
+        <div className={styles.container}>
+          {loading ? (
+            <div className={styles.loadingContainer} style={{ textAlign: "center", padding: "100px 40px" }}>
+              <div className="spinner" style={{ width: "40px", height: "40px", borderTopColor: "#2E7D32", margin: "0 auto" }} />
+              <p style={{ marginTop: 16, color: "var(--text-soft)", fontWeight: 600 }}>{t.loadingRecords}</p>
+            </div>
+          ) : error || !rx ? (
+            <div className={styles.errorContainer} style={{ textAlign: "center", padding: "100px 40px" }}>
+              <h2 style={{ fontSize: 28, fontWeight: 900, color: "#EF4444", margin: 0 }}>{t.oops}</h2>
+              <p style={{ color: "var(--text-soft)", margin: "8px 0 24px 0" }}>{error || t.accessDenied}</p>
+              <button className={styles.retryBtn} onClick={() => window.location.reload()}>
+                {t.retry}
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Title & Hub Header */}
+              <div className={styles.titleArea}>
+                <div className={styles.successBadge}>
+                  <CheckCircle2 size={14} style={{ marginRight: '6px', color: '#2E7D32' }} /> Verified Prescription
+                </div>
+                <h1>
+                  {hospitalName}<br />
+                  <span className={styles.italicGreen}>Patient Health Hub</span>
+                </h1>
+                <p>Consultation by <strong>{rx.doctor_name || "Consulting Physician"}</strong> on {new Date(rx.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+              </div>
+
+              {/* Sliding Capsule Navigation Tabs */}
+              <div className={styles.horizontalNav}>
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.name}
+                    className={`${styles.horizontalNavItem} ${activeTab === item.name ? styles.horizontalNavItemActive : ""}`}
+                    onClick={() => setActiveTab(item.name as any)}
+                  >
+                    <span className={styles.sideIcon} style={{ marginRight: 6 }}>{item.icon}</span>
+                    <span className={styles.sideLabel}>
+                      {item.name === "Patient Profile"
+                        ? t.profile
+                        : item.name === "Current Script"
+                          ? t.script
+                          : item.name === "AI Summary"
+                            ? t.summary
+                            : item.name === "Patient History"
+                              ? t.history
+                              : item.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Central Card */}
+              <div className={styles.patientCard}>
+                {/* Decorative leaves inside card */}
+                <LeavesBackground className={styles.leavesCardCornerLeft} />
+                
+                {/* Tab Contents */}
+                {activeTab === "Patient Profile" && (
+                  <div className={styles.tabContent}>
+                    {/* Render patient details beautifully */}
+                    <div style={{ display: "flex", gap: "24px", alignItems: "center", marginBottom: "32px", borderBottom: "1px solid #f1f5f9", paddingBottom: "24px" }}>
+                      <div className={styles.patientAvatar}>
+                        {patient?.name?.[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "12px", fontWeight: "bold", color: "#2E7D32", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>{t.verifiedPatient}</div>
+                        <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 900, color: "#1F2937" }}>{patient?.name}</h2>
+                        <div style={{ display: "flex", gap: "12px", fontSize: "14px", color: "#6B7280", marginTop: "4px", fontWeight: 500 }}>
+                          <span>{patient?.age} Yrs</span>
+                          <span>•</span>
+                          <span>{patient?.gender}</span>
+                          <span>•</span>
+                          <span>ID: {rx.patient_id.slice(0, 8).toUpperCase()}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "16px", marginBottom: "32px" }}>
+                      <div style={{ background: "#F9FAFB", padding: "16px", borderRadius: "16px", border: "1px solid #F3F4F6", textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase" }}>{t.age}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 900, color: "#1F2937", marginTop: "4px" }}>{patient?.age || "—"}</div>
+                      </div>
+                      <div style={{ background: "#F9FAFB", padding: "16px", borderRadius: "16px", border: "1px solid #F3F4F6", textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase" }}>{t.sex}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 900, color: "#1F2937", marginTop: "4px" }}>{patient?.gender || "—"}</div>
+                      </div>
+                      <div style={{ background: "#F9FAFB", padding: "16px", borderRadius: "16px", border: "1px solid #F3F4F6", textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase" }}>{t.weight}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 900, color: "#1F2937", marginTop: "4px" }}>{rx.weight ? `${rx.weight} Kg` : "—"}</div>
+                      </div>
+                      <div style={{ background: "#F9FAFB", padding: "16px", borderRadius: "16px", border: "1px solid #F3F4F6", textAlign: "center" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase" }}>{t.bGrp}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 900, color: "#1F2937", marginTop: "4px" }}>{patient?.blood_group || "—"}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: "#F4FAF4", border: "1px solid rgba(46, 125, 50, 0.15)", borderRadius: "20px", padding: "20px", display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+                      <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#EAF3EA", display: "flex", alignItems: "center", justifyContent: "center", color: "#2E7D32" }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", fontWeight: "bold", color: "#2E7D32" }}>CONTACT NUMBER</div>
+                        <div style={{ fontSize: "16px", fontWeight: 700, color: "#1F2937" }}>{patient?.contact || "—"}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "20px" }}>
+                      <div>
+                        <h3 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "12px", color: "#1F2937" }}>{t.keyConditions}</h3>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                          {history?.summary?.keyConditions && Array.isArray(history.summary.keyConditions) ? (
+                            history.summary.keyConditions.map((c: string, i: number) => (
+                              <div key={i} style={{ padding: "8px 16px", background: i === 0 ? "#FEE2E2" : "#E0E7FF", color: i === 0 ? "#EF4444" : "#4F46E5", borderRadius: "100px", fontSize: "13px", fontWeight: 700 }}>
+                                {c}
+                              </div>
+                            ))
+                          ) : (
+                            <div style={{ padding: "8px 16px", background: "#F3F4F6", color: "#6B7280", borderRadius: "100px", fontSize: "13px", fontWeight: 600 }}>
+                              {t.assessmentPending}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "Current Script" && (
+                  <div className={styles.tabContent} style={{ padding: 0 }}>
+                    {/* Redesigned minimal prescription display inside the card */}
+                    <div style={{ borderBottom: "2px solid #2E7D32", paddingBottom: "20px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 900, color: "#1F2937" }}>{clinic?.name || "Clinic Prescription"}</h2>
+                        <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#6B7280", fontWeight: 500 }}>{clinic?.tagline || "Healthcare Facility"}</p>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#2E7D32" }}>{rx.doctor_name}</h3>
+                        <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#6B7280", fontWeight: 500 }}>Lic: {rx.doctor_id?.slice(0, 8).toUpperCase() || "MED-N-A"}</p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "32px" }}>
+                      <div>
+                        {rx.complaints && (
+                          <div style={{ marginBottom: "20px" }}>
+                            <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase", margin: "0 0 6px 0" }}>{t.cc}</h4>
+                            <p style={{ margin: 0, fontSize: "14px", color: "#374151", lineHeight: 1.5 }}>{rx.complaints}</p>
+                          </div>
+                        )}
+                        {rx.findings && (
+                          <div style={{ marginBottom: "20px" }}>
+                            <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#9CA3AF", textTransform: "uppercase", margin: "0 0 6px 0" }}>{t.findings}</h4>
+                            <p style={{ margin: 0, fontSize: "14px", color: "#374151", lineHeight: 1.5 }}>{rx.findings}</p>
+                          </div>
+                        )}
+                        {rx.diagnosis && (
+                          <div style={{ background: "#F4FAF4", padding: "16px", borderRadius: "12px", borderLeft: "4px solid #2E7D32" }}>
+                            <h4 style={{ fontSize: "11px", fontWeight: "bold", color: "#2E7D32", textTransform: "uppercase", margin: "0 0 4px 0" }}>{t.diagnosis}</h4>
+                            <p style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#1F2937" }}>{rx.diagnosis}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ borderLeft: "1px solid #E5E7EB", paddingLeft: "32px" }}>
+                        <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2E7D32", fontFamily: "Georgia, serif", fontStyle: "italic", marginBottom: "16px", opacity: 0.8 }}>Rx</div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                          {meds && meds.length > 0 ? (
+                            meds.map((m: any, idx: number) => (
+                              <div key={idx} style={{ fontSize: "14px", borderBottom: "1px solid #F3F4F6", paddingBottom: "10px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, color: "#1F2937" }}>
+                                  <span>{idx + 1}. {m.type} {m.name}</span>
+                                  <span>{m.dose}</span>
+                                </div>
+                                <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "2px" }}>
+                                  {m.freq} • {m.dur || m.duration} • {m.inst || m.instructions}
+                                </div>
+                                {m.note && (
+                                  <div style={{ fontSize: "11px", color: "#9CA3AF", fontStyle: "italic", marginTop: "4px" }}>
+                                    * {m.note}
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <p style={{ margin: 0, color: "#9CA3AF", fontSize: "13px" }}>{t.noMedicines}</p>
+                          )}
+                        </div>
+
+                        {rx.advice && (
+                          <div style={{ marginTop: "24px", background: "#FAFDFB", padding: "14px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+                            <h4 style={{ fontSize: "11px", fontWeight: "bold", color: "#6B7280", textTransform: "uppercase", margin: "0 0 6px 0" }}>{t.adv}</h4>
+                            <p style={{ margin: 0, fontSize: "13px", color: "#4B5563", lineHeight: 1.5 }}>{rx.advice}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "40px", paddingTop: "20px", borderTop: "1px solid #E5E7EB", fontSize: "11px", color: "#9CA3AF", fontWeight: 500 }}>
+                      <div>{clinic?.address || "Clinical Facility Address"} • Ph: {clinic?.phone}</div>
+                      <div>Digital Clinical Record</div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "AI Summary" && (
+                  <div className={styles.tabContent}>
+                    {activeSummary ? (
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                          <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 900, color: "#1F2937" }}>{activeSummary?.greeting || "Your Clinical Guide"}</h2>
+                          <button
+                            onClick={handleToggleSpeech}
+                            style={{ display: "flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)", color: "white", border: "none", padding: "8px 16px", borderRadius: "100px", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              {isSpeaking ? (
+                                <>
+                                  <rect x="6" y="4" width="4" height="16"></rect>
+                                  <rect x="14" y="4" width="4" height="16"></rect>
+                                </>
+                              ) : (
+                                <>
+                                  <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </>
+                              )}
+                            </svg>
+                            <span>{isSpeaking ? t.stopListen : t.listenSummary}</span>
+                          </button>
+                        </div>
+
+                        <div style={{ background: "#F4FAF4", border: "1px solid rgba(46, 125, 50, 0.15)", padding: "20px", borderRadius: "20px", marginBottom: "24px" }}>
+                          <h3 style={{ margin: "0 0 8px 0", fontSize: "15px", fontWeight: 800, color: "#2E7D32" }}>{t.condition}</h3>
+                          <p style={{ margin: 0, fontSize: "14px", color: "#374151", lineHeight: 1.6 }}>{activeSummary?.condition}</p>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            <div style={{ border: "1px solid #E5E7EB", borderRadius: "20px", padding: "20px" }}>
+                              <h3 style={{ margin: "0 0 16px 0", fontSize: "15px", fontWeight: 800, color: "#1F2937" }}>💊 {t.medicines}</h3>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                {activeSummary?.medicines?.map((m: any, i: number) => (
+                                  <div key={i} style={{ borderBottom: "1px solid #F3F4F6", paddingBottom: "10px" }}>
+                                    <div style={{ fontWeight: 700, color: "#1F2937", fontSize: "14px" }}>{m.name}</div>
+                                    <div style={{ fontSize: "12px", color: "#6B7280", marginTop: "2px" }}>{m.purpose}</div>
+                                    {m.dosage && (
+                                      <div style={{ display: "inline-block", padding: "2px 8px", background: "#EAF3EA", color: "#2E7D32", borderRadius: "4px", fontSize: "11px", fontWeight: 700, marginTop: "6px" }}>
+                                        {m.dosage}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div style={{ border: "1px solid #E5E7EB", borderRadius: "20px", padding: "20px" }}>
+                              <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 800, color: "#1F2937" }}>🥗 {t.care}</h3>
+                              <p style={{ margin: 0, fontSize: "13px", color: "#4B5563", lineHeight: 1.6 }}>{activeSummary?.care}</p>
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            <div style={{ border: "1px solid #E5E7EB", borderRadius: "20px", padding: "20px" }}>
+                              <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 800, color: "#1F2937" }}>⏳ {t.expectations}</h3>
+                              <p style={{ margin: 0, fontSize: "13px", color: "#4B5563", lineHeight: 1.6 }}>{activeSummary?.expectations}</p>
+                            </div>
+
+                            <div style={{ border: "1px solid #FEE2E2", background: "#FFF5F5", borderRadius: "20px", padding: "20px" }}>
+                              <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 800, color: "#EF4444" }}>⚠️ {t.warnings}</h3>
+                              {Array.isArray(activeSummary?.warnings) ? (
+                                <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "13px", color: "#B91C1C", lineHeight: 1.6 }}>
+                                  {activeSummary.warnings.map((w: string, i: number) => (
+                                    <li key={i}>{w}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p style={{ margin: 0, fontSize: "13px", color: "#B91C1C", lineHeight: 1.6 }}>{activeSummary?.warnings || "No specific warnings."}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: "center", padding: "40px" }}>
+                        <div className="spinner" style={{ width: "40px", height: "40px", borderTopColor: "#2E7D32", margin: "0 auto 16px auto" }} />
+                        <p style={{ color: "#6B7280", fontWeight: 600 }}>{t.aiPreparing}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "Patient History" && (
+                  <div className={styles.tabContent}>
+                    <h2 style={{ fontSize: "20px", fontWeight: 900, marginBottom: "20px" }}>{t.history}</h2>
+                    {loadingHistory ? (
+                      <div style={{ textAlign: "center", padding: "20px" }}>
+                        <div className="spinner" style={{ width: "32px", height: "32px", borderTopColor: "#2E7D32", margin: "0 auto 12px auto" }} />
+                        <p style={{ color: "#6B7280" }}>{t.retrieving}</p>
+                      </div>
+                    ) : history?.visits && history.visits.length > 0 ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        {history.visits.map((visit: any, index: number) => (
+                          <div key={index} style={{ border: "1px solid #E5E7EB", borderRadius: "16px", padding: "16px", background: "#FAFDFB" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                              <span style={{ fontSize: "12px", fontWeight: "bold", background: "#EAF3EA", color: "#2E7D32", padding: "4px 10px", borderRadius: "6px" }}>{t.consultation}</span>
+                              <span style={{ fontSize: "12px", color: "#9CA3AF" }}>{new Date(visit.visit_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                            </div>
+                            <div style={{ fontSize: "14px", color: "#374151", marginBottom: "8px" }}>
+                              <strong>Doctor:</strong> {visit.doctor}
+                            </div>
+                            <div style={{ fontSize: "13px", color: "#4B5563" }}>
+                              <strong>Chief Complaints:</strong> {visit.complaints || "—"}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: "center", padding: "30px", background: "#F9FAFB", borderRadius: "16px" }}>
+                        <h4 style={{ margin: 0, color: "#6B7280" }}>{t.noPastVisits}</h4>
+                        <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#9CA3AF" }}>{t.firstVisit}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Trust badges footer */}
+              <div className={styles.trustGridContainer} style={{ marginTop: "40px", maxWidth: "800px", width: "100%", boxSizing: "border-box" }}>
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIconWrap}><ShieldCheck size={24} className={styles.trustIcon} /></div>
+                  <div className={styles.trustTextWrap}>
+                    <h4>Secure Records</h4>
+                    <p>Protected by end-to-end encryption</p>
+                  </div>
+                </div>
+                <div className={styles.trustItemDivider} />
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIconWrap}><Lock size={20} className={styles.trustIcon} /></div>
+                  <div className={styles.trustTextWrap}>
+                    <h4>HIPAA Compliant</h4>
+                    <p>Standard patient privacy protocols</p>
+                  </div>
+                </div>
+                <div className={styles.trustItemDivider} />
+                <div className={styles.trustItem}>
+                  <div className={styles.trustIconWrap}><Headphones size={22} className={styles.trustIcon} /></div>
+                  <div className={styles.trustTextWrap}>
+                    <h4>Direct Care</h4>
+                    <p>Instantly contact your practitioner</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Copyright */}
+              <p style={{ fontSize: "11px", color: "#9CA3AF", textAlign: "center", marginTop: "32px", marginBottom: "40px" }}>
+                © {new Date().getFullYear()} MedieNest. All rights reserved. Powered by secure clinical AI.
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* --- LANGUAGE SELECTION MODAL --- */}
+        {showLangModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.langModal}>
+              <h2>Select Language</h2>
+              <p>Choose your preferred language for the AI clinical guide.</p>
+              <div className={styles.langGrid}>
+                {languages.map((l) => (
+                  <div
+                    key={l.name}
+                    className={styles.langCard}
+                    onClick={() => handleLangSelect(l.name)}
+                  >
+                    <div className={styles.langIcon}>{l.icon}</div>
+                    <div className={styles.langName}>{l.name}</div>
+                    <div className={styles.langSub}>{l.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <button
+                style={{
+                  marginTop: 24,
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-soft)",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                }}
+                onClick={() => setShowLangModal(false)}
+              >
+                Continue in English
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <>

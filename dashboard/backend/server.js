@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { z } = require("zod");
 const { createClient } = require("@supabase/supabase-js");
-const { Cashfree } = require("cashfree-pg");
+const { Cashfree, CFEnvironment } = require("cashfree-pg");
 const { askLLM } = require("./utils/llmRotation");
 
 const app = express();
@@ -19,7 +19,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceRole);
 
 // Cashfree PG SDK Initialization
 const cashfree = new Cashfree(
-  process.env.CASHFREE_ENV === "production" ? "PRODUCTION" : "SANDBOX",
+  process.env.CASHFREE_ENV === "production" ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
   process.env.CASHFREE_APP_ID,
   process.env.CASHFREE_SECRET_KEY
 );
@@ -182,6 +182,62 @@ app.post(
         return res.status(404).json({ success: false, error: "Clinic not found" });
       }
 
+      // --- BYPASS PAYMENT BYPASS ---
+      // As requested: Skip payment, directly activate subscription and return success
+      const bypassPayment = true;
+      if (bypassPayment) {
+        const now = new Date();
+        const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const orderId = `bypass_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+        // 1. Insert processed payment directly as paid
+        await supabase
+          .from("processed_payments")
+          .insert({
+            order_id: orderId,
+            amount: plan.paise,
+            user_id: req.user.id,
+            clinic_id: clinic_id,
+            status: "paid",
+            payment_id: `pay_${orderId}`
+          });
+
+        // 2. Upsert active subscription
+        await supabase
+          .from("subscriptions")
+          .upsert({
+            clinic_id: clinic_id,
+            plan_name: plan_name,
+            status: "active",
+            start_date: new Date().toISOString(),
+            end_date: endDate.toISOString(),
+            payment_id: `pay_${orderId}`,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "clinic_id" });
+
+        // 3. Update clinic status to active
+        await supabase
+          .from("clinics")
+          .update({ status: "active", updated_at: new Date().toISOString() })
+          .eq("id", clinic_id);
+
+        // 4. Create audit log
+        await supabase
+          .from("audit_logs")
+          .insert({
+            actor_id: req.user.id,
+            clinic_id: clinic_id,
+            action: "PAYMENT_COMPLETED",
+            details: { plan_name, is_bypassed: true }
+          });
+
+        return res.json({
+          success: true,
+          bypass: true,
+          order_id: orderId
+        });
+      }
+
       // Handle and clean phone number for Cashfree
       let phone = clinic.phone || req.user.phone || "9999999999";
       phone = phone.replace(/\D/g, "");
@@ -205,7 +261,9 @@ app.post(
           customer_name: clinic.name || "Clinic Owner"
         },
         order_meta: {
-          return_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/portal/clinic-settings?order_id={order_id}`
+          return_url: (process.env.CASHFREE_ENV === "production"
+            ? (process.env.CLIENT_ORIGIN || "http://localhost:3000").replace("http://", "https://")
+            : (process.env.CLIENT_ORIGIN || "http://localhost:3000")) + "/portal/clinic-settings?order_id={order_id}"
         }
       };
 
@@ -1075,6 +1133,206 @@ app.get("/api/doctor-profile-by-rx/:rxId", async (req, res) => {
     });
   } catch (err) {
     console.error("Doctor Profile by Rx Error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Helper: Calculate immediate heuristic summary for public view (WARP SPEED)
+function calculateHeuristicSummaryPublic(visits) {
+  if (!visits || visits.length === 0) {
+    return {
+      keyConditions: ["New Patient"],
+      currentMedications: ["None recorded"],
+      recentVisitsSummary:
+        "This is the patient's first clinical interaction at this facility.",
+    };
+  }
+
+  // Extract unique key conditions (last 3 chief complaints)
+  const conditions = Array.from(
+    new Set(
+      visits
+        .map((v) => v.complaints)
+        .filter((c) => c && c.toLowerCase() !== "routine checkup")
+        .slice(0, 3),
+    ),
+  );
+
+  // Extract latest unique medications
+  const meds = Array.from(
+    new Set(
+      visits
+        .flatMap((v) => v.medicines)
+        .map((m) => (typeof m === "object" ? m.name : m))
+        .filter((m) => m)
+        .slice(0, 5),
+    ),
+  );
+
+  const lastVisitDate = new Date(visits[0].visit_date).toLocaleDateString();
+
+  return {
+    keyConditions: conditions.length > 0 ? conditions : ["General Wellness"],
+    currentMedications: meds.length > 0 ? meds : ["No active prescriptions"],
+    recentVisitsSummary: `Clinical history includes ${visits.length} recorded interactions. Latest visit was on ${lastVisitDate}.`,
+  };
+}
+
+// ─── PUBLIC PATIENT HISTORY BY PRESCRIPTION ID ─────────
+app.get("/api/public/patient-history/:rxId", async (req, res) => {
+  const { rxId } = req.params;
+  try {
+    if (
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        rxId,
+      )
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid prescription ID format" });
+    }
+
+    // 1. Fetch prescription to retrieve patient_id and clinic_id
+    const { data: rx, error: rxErr } = await supabase
+      .from("prescriptions")
+      .select("patient_id, clinic_id")
+      .eq("id", rxId)
+      .single();
+
+    if (rxErr || !rx || !rx.patient_id) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Prescription or patient not found" });
+    }
+
+    const patientId = rx.patient_id;
+    const clinicId = rx.clinic_id;
+
+    // 2. Fetch patient profile, enforcing clinic_id check for isolation
+    const { data: patient, error: patErr } = await supabase
+      .from("patients")
+      .select(
+        "id, name, age, gender, contact, blood_group, address, created_at, clinic_id",
+      )
+      .eq("id", patientId)
+      .single();
+
+    if (patErr || !patient) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Patient record not found" });
+    }
+
+    if (patient.clinic_id !== clinicId) {
+      return res
+        .status(403)
+        .json({ success: false, error: "Forbidden: clinic mismatch" });
+    }
+
+    // 3. Fetch visits
+    const { data: rawPrescriptions } = await supabase
+      .from("prescriptions")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("date", { ascending: false });
+
+    const visits = (rawPrescriptions || []).map((p) => {
+      let medicines = [];
+      try {
+        medicines =
+          typeof p.medicines === "string"
+            ? JSON.parse(p.medicines)
+            : p.medicines;
+      } catch (e) {
+        console.error(`Prescription ${p.id} has malformed medicines JSON`);
+      }
+
+      return {
+        visit_date: p.date || p.created_at,
+        created_at: p.created_at,
+        doctor: p.doctor_name,
+        complaints: p.complaints,
+        findings: p.findings,
+        medicines: medicines || [],
+        advice: p.advice,
+        prescription_id: p.id,
+      };
+    });
+
+    // 4. Fetch discharge summaries
+    const { data: rawSummaries } = await supabase
+      .from("discharge_summaries")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: false });
+
+    const summaries = (rawSummaries || []).map((s) => {
+      const safeParse = (val) => {
+        if (!val) return [];
+        try {
+          return typeof val === "string" ? JSON.parse(val) : val;
+        } catch (e) {
+          return [];
+        }
+      };
+
+      return {
+        ...s,
+        medicines: safeParse(s.medicines),
+        complaints: safeParse(s.complaints),
+        findings: safeParse(s.findings),
+        treatment: safeParse(s.treatment),
+        advice: safeParse(s.advice),
+      };
+    });
+
+    // 5. Fetch admission records
+    const { data: rawAdmissions } = await supabase
+      .from("admission_records")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: false });
+
+    const admissions = (rawAdmissions || []).map((a) => {
+      const safeParse = (val) => {
+        if (!val) return [];
+        try {
+          return typeof val === "string" ? JSON.parse(val) : val;
+        } catch (e) {
+          return [];
+        }
+      };
+
+      return {
+        ...a,
+        complaints: safeParse(a.complaints),
+        findings: safeParse(a.findings),
+        investigations: safeParse(a.investigations),
+        treatment_plan: safeParse(a.treatment_plan),
+      };
+    });
+
+    // 6. Fetch cached AI snapshot
+    const { data: existing } = await supabase
+      .from("patient_histories")
+      .select("summary_text, updated_at")
+      .eq("patient_id", patientId)
+      .maybeSingle();
+
+    let finalSummary;
+    if (existing?.summary_text) {
+      try {
+        finalSummary = JSON.parse(existing.summary_text);
+      } catch (e) {
+        finalSummary = calculateHeuristicSummaryPublic(visits);
+      }
+    } else {
+      finalSummary = calculateHeuristicSummaryPublic(visits);
+    }
+
+    res.json({ patient, visits, summaries, admissions, summary: finalSummary });
+  } catch (err) {
+    console.error("Public Patient History Error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

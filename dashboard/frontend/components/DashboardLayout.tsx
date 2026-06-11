@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import { usePathname } from "next/navigation";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardTopBar from "./DashboardTopBar";
 import MobileBottomNav from "./MobileBottomNav";
@@ -13,9 +14,11 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, hideSidebar = false }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const isDoctorDashboard = pathname?.includes("/portal/doctor-dashboard");
 
   return (
-    <div className={styles.layout}>
+    <div className={`${styles.layout} ${isDoctorDashboard ? styles.doctorLayoutBg : ""}`}>
       {!hideSidebar && (
         <Suspense fallback={null}>
           <DashboardSidebar

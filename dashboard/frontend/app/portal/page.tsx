@@ -5,12 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
-import { displayDoctorName } from "@/lib/utils";
+import { displayDoctorName, normalizeDoctorName } from "@/lib/utils";
 import PortalNavbar from "@/components/PortalNavbar";
 import styles from "./page.module.css";
 
 export default function PortalPage() {
-  const { clinic, doctors, loading: clinicLoading } = useClinic();
+  const { clinic, doctors, loading: clinicLoading, refresh } = useClinic();
   const [showDoctorSelect, setShowDoctorSelect] = useState(false);
   const [metrics, setMetrics] = useState({
     patients: 0,
@@ -20,6 +20,120 @@ export default function PortalPage() {
   });
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Subscription States
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isLoadingSub, setIsLoadingSub] = useState(true);
+
+  // Add Doctor Form States
+  const [isAddDoctorMode, setIsAddDoctorMode] = useState(false);
+  const [newDocName, setNewDocName] = useState("");
+  const [newDocSpecialty, setNewDocSpecialty] = useState("");
+  const [newDocQual, setNewDocQual] = useState("");
+  const [newDocContact, setNewDocContact] = useState("");
+  const [newDocRegNumber, setNewDocRegNumber] = useState("");
+  const [newDocExpiry, setNewDocExpiry] = useState("");
+  const [newDocPhoto, setNewDocPhoto] = useState("");
+  const [isAddingDoc, setIsAddingDoc] = useState(false);
+
+  // Fetch subscription details
+  useEffect(() => {
+    if (!clinic?.id) return;
+    const fetchSubscription = async () => {
+      const supabase = createClient();
+      setIsLoadingSub(true);
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("clinic_id", clinic.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setSubscription(data);
+      } catch (e: any) {
+        console.error("Error fetching subscription:", e.message);
+      } finally {
+        setIsLoadingSub(false);
+      }
+    };
+    fetchSubscription();
+  }, [clinic]);
+
+  // Dynamic doctor limits
+  let maxAllowedDoctors = 2;
+  if (subscription) {
+    if (subscription.plan_name === "Clinic") {
+      maxAllowedDoctors = 5;
+    } else if (subscription.plan_name === "Professional") {
+      maxAllowedDoctors = 999;
+    }
+  }
+
+  const handleAddDoctor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clinic?.id) return;
+    if (doctors && doctors.length >= maxAllowedDoctors) {
+      alert(`Clinic Limit Reached: Maximum ${maxAllowedDoctors} doctors allowed on your current plan.`);
+      return;
+    }
+    if (!newDocName.trim()) {
+      alert("Doctor name is required.");
+      return;
+    }
+    if (!newDocRegNumber.trim()) {
+      alert("Medical License Number is required.");
+      return;
+    }
+
+    setIsAddingDoc(true);
+    try {
+      const supabase = createClient();
+      const normalizedName = normalizeDoctorName(newDocName);
+      const { data: newDoc, error: docErr } = await supabase
+        .from("doctors")
+        .insert([
+          {
+            name: normalizedName,
+            specialty: newDocSpecialty || "General Consultant",
+            qualification: newDocQual,
+            contact: newDocContact.trim(),
+            registration_number: newDocRegNumber.trim(),
+            license_expiry_date: newDocExpiry || null,
+            profile_photo_url: newDocPhoto.trim() || null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (docErr) throw docErr;
+
+      const { error: mapErr } = await supabase.from("clinic_doctors").insert([
+        {
+          clinic_id: clinic.id,
+          doctor_id: newDoc.id,
+          is_active: true,
+        },
+      ]);
+
+      if (mapErr) throw mapErr;
+
+      setNewDocName("");
+      setNewDocSpecialty("");
+      setNewDocQual("");
+      setNewDocContact("");
+      setNewDocRegNumber("");
+      setNewDocExpiry("");
+      setNewDocPhoto("");
+      setIsAddDoctorMode(false);
+      await refresh();
+      alert(`Dr. ${normalizedName} added to the clinic staff!`);
+    } catch (e: any) {
+      alert("Error adding doctor: " + e.message);
+    } finally {
+      setIsAddingDoc(false);
+    }
+  };
 
   const hospitalName = clinic?.name || "MedieNest Partner Clinic";
   const hospitalLocation = clinic?.address || "Location not set";
@@ -424,16 +538,22 @@ export default function PortalPage() {
         {showDoctorSelect && (
           <div
             className={styles.modalOverlay}
-            onClick={() => setShowDoctorSelect(false)}
+            onClick={() => {
+              setShowDoctorSelect(false);
+              setIsAddDoctorMode(false);
+            }}
           >
             <div
-              className={styles.doctorModal}
+              className={`${styles.doctorModal} ${isAddDoctorMode ? styles.addDocModalWidth : ""}`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
                 className={styles.closeBtn}
-                onClick={() => setShowDoctorSelect(false)}
+                onClick={() => {
+                  setShowDoctorSelect(false);
+                  setIsAddDoctorMode(false);
+                }}
                 aria-label="Close"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -441,55 +561,210 @@ export default function PortalPage() {
                 </svg>
               </button>
 
-              {/* Header */}
-              <div className={styles.modalTop}>
-                <div className={styles.modalLogoCircle}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </div>
-                <h3 className={styles.modalTitle}>Select Consulting Doctor</h3>
-
-                <div className={styles.heartSeparator}>
-                  <span className={styles.separatorLine} />
-                  <span className={styles.heartIcon}>💚</span>
-                  <span className={styles.separatorLine} />
-                </div>
-
-                <p className={styles.modalSubtext}>
-                  {doctors.length} doctor{doctors.length !== 1 ? "s" : ""} available at {hospitalName}
-                </p>
-              </div>
-
-              {/* Doctor List */}
-              <div className={styles.doctorList}>
-                {doctors.map((doc, idx) => (
-                  <Link
-                    key={doc.id}
-                    href={`/portal/doctor-dashboard?doctorId=${doc.doctor_id || doc.id}&doctorName=${encodeURIComponent(doc.name)}`}
-                    className={styles.doctorItem}
-                    style={{ animationDelay: `${idx * 80}ms` }}
-                  >
-                    <div className={styles.doctorAvatar}>
-                      {doc.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className={styles.doctorInfo}>
-                      <h4>{displayDoctorName(doc.name)}</h4>
-                      <span className={styles.specialtyBadge}>
-                        {doc.specialty || "Medical Officer"}
-                      </span>
-                    </div>
-                    <div className={styles.doctorArrow}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6" />
+              {!isAddDoctorMode ? (
+                <>
+                  {/* Header */}
+                  <div className={styles.modalTop}>
+                    <div className={styles.modalLogoCircle}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                     </div>
-                  </Link>
-                ))}
-              </div>
+                    <h3 className={styles.modalTitle}>Select Consulting Doctor</h3>
+
+                    <div className={styles.heartSeparator}>
+                      <span className={styles.separatorLine} />
+                      <span className={styles.heartIcon}>💚</span>
+                      <span className={styles.separatorLine} />
+                    </div>
+
+                    <p className={styles.modalSubtext}>
+                      {doctors.length} doctor{doctors.length !== 1 ? "s" : ""} available at {hospitalName}
+                    </p>
+                  </div>
+
+                  {/* Doctor List */}
+                  <div className={styles.doctorList}>
+                    {doctors.map((doc, idx) => (
+                      <Link
+                        key={doc.id}
+                        href={`/portal/doctor-dashboard?doctorId=${doc.doctor_id || doc.id}&doctorName=${encodeURIComponent(doc.name)}`}
+                        className={styles.doctorItem}
+                        style={{ animationDelay: `${idx * 80}ms` }}
+                      >
+                        <div className={styles.doctorAvatar}>
+                          {doc.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className={styles.doctorInfo}>
+                          <h4>{displayDoctorName(doc.name)}</h4>
+                          <span className={styles.specialtyBadge}>
+                            {doc.specialty || "Medical Officer"}
+                          </span>
+                        </div>
+                        <div className={styles.doctorArrow}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Add New Doctor button / limits indicator */}
+                  <div style={{ marginTop: "20px" }}>
+                    {doctors.length < maxAllowedDoctors ? (
+                      <button
+                        className={styles.addDoctorModalBtn}
+                        onClick={() => setIsAddDoctorMode(true)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "8px" }}>
+                          <path d="M5 12h14" />
+                          <path d="M12 5v14" />
+                        </svg>
+                        Add New Doctor
+                      </button>
+                    ) : (
+                      <div className={styles.limitReachedNotice}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: "6px", flexShrink: 0 }}>
+                          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        <span>Limit Reached ({doctors.length}/{maxAllowedDoctors} doctors). Upgrade plan to add more.</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* Add Doctor Form View */
+                <form onSubmit={handleAddDoctor} className={styles.modalAddForm}>
+                  {/* Header */}
+                  <div className={styles.modalTop}>
+                    <div className={styles.modalLogoCircle} style={{ background: "#E0F2FE", color: "#0284C7", borderColor: "rgba(2, 132, 199, 0.4)" }}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <line x1="19" y1="8" x2="19" y2="14" />
+                        <line x1="16" y1="11" x2="22" y2="11" />
+                      </svg>
+                    </div>
+                    <h3 className={styles.modalTitle}>Add New Doctor</h3>
+
+                    <div className={styles.heartSeparator}>
+                      <span className={styles.separatorLine} />
+                      <span className={styles.heartIcon} style={{ color: "#0284c7" }}>💙</span>
+                      <span className={styles.separatorLine} />
+                    </div>
+
+                    <p className={styles.modalSubtext}>
+                      Add doctor to {hospitalName} ({doctors.length}/{maxAllowedDoctors} active)
+                    </p>
+                  </div>
+
+                  {/* Form fields scrollable */}
+                  <div className={styles.formFieldsScroll}>
+                    <div className={styles.modalFormField}>
+                      <label>Doctor's Name <span style={{ color: "#EF4444" }}>*</span></label>
+                      <input
+                        type="text"
+                        value={newDocName}
+                        onChange={(e) => setNewDocName(e.target.value)}
+                        placeholder="e.g. Dr. Ramesh Gupta"
+                        required
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>Specialty</label>
+                      <input
+                        type="text"
+                        value={newDocSpecialty}
+                        onChange={(e) => setNewDocSpecialty(e.target.value)}
+                        placeholder="e.g. Pediatrics"
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>Qualification</label>
+                      <input
+                        type="text"
+                        value={newDocQual}
+                        onChange={(e) => setNewDocQual(e.target.value)}
+                        placeholder="e.g. MBBS, MD"
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>Contact Number</label>
+                      <input
+                        type="text"
+                        value={newDocContact}
+                        onChange={(e) => setNewDocContact(e.target.value)}
+                        placeholder="e.g. 9876543210"
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>Medical License No. <span style={{ color: "#EF4444" }}>*</span></label>
+                      <input
+                        type="text"
+                        value={newDocRegNumber}
+                        onChange={(e) => setNewDocRegNumber(e.target.value)}
+                        placeholder="e.g. MCI-12345"
+                        required
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>License Expiry Date</label>
+                      <input
+                        type="date"
+                        value={newDocExpiry}
+                        onChange={(e) => setNewDocExpiry(e.target.value)}
+                        className={styles.modalInput}
+                      />
+                    </div>
+
+                    <div className={styles.modalFormField}>
+                      <label>Profile Photo URL</label>
+                      <input
+                        type="text"
+                        value={newDocPhoto}
+                        onChange={(e) => setNewDocPhoto(e.target.value)}
+                        placeholder="https://example.com/photo.jpg"
+                        className={styles.modalInput}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className={styles.formActions}>
+                    <button
+                      type="button"
+                      className={styles.cancelBtn}
+                      onClick={() => setIsAddDoctorMode(false)}
+                      disabled={isAddingDoc}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className={styles.submitBtn}
+                      disabled={isAddingDoc}
+                    >
+                      {isAddingDoc ? "Adding..." : "Save Doctor"}
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Footer */}
               <div className={styles.modalFooter}>

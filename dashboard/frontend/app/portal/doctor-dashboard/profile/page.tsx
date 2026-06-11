@@ -53,7 +53,7 @@ function DoctorProfilePage() {
     const doctorIdParam = searchParams?.get("doctorId");
     if (doctors && doctors.length > 0) {
       const doc = doctorIdParam
-        ? doctors.find((d) => d.id === doctorIdParam) || doctors[0]
+        ? doctors.find((d) => d.doctor_id === doctorIdParam || d.id === doctorIdParam) || doctors[0]
         : doctors[0];
       setName(doc.name || "");
       setQualification(doc.qualification || "");
@@ -76,7 +76,7 @@ function DoctorProfilePage() {
     try {
       const doctorIdParam = searchParams?.get("doctorId");
       const activeDoc = doctorIdParam
-        ? doctors.find((d) => d.id === doctorIdParam) || doctors[0]
+        ? doctors.find((d) => d.doctor_id === doctorIdParam || d.id === doctorIdParam) || doctors[0]
         : doctors[0];
 
       const normalizedName = normalizeDoctorName(name);

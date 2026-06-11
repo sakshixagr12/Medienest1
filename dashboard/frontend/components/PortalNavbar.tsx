@@ -16,8 +16,8 @@ export default function PortalNavbar() {
             <Image
               src="/assets/medienest_logo.png"
               alt="MedieNest Logo"
-              width={32}
-              height={32}
+              width={28}
+              height={28}
               className={styles.logo}
             />
           </div>

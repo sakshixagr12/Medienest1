@@ -46,6 +46,29 @@ export default function PrescriptionPage() {
   const [isLoadingPts, setIsLoadingPts] = useState(false);
   const [ptSnapshot, setPtSnapshot] = useState<any>(null);
 
+  // Premium Custom Alert Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "warning" | "error" | "info";
+  } | null>(null);
+
+  const showAlert = (message: string, type: "success" | "warning" | "error" | "info" = "warning", title?: string) => {
+    const defaultTitles = {
+      success: "Action Completed Successfully",
+      warning: "Attention Required",
+      error: "Error Occurred",
+      info: "Information",
+    };
+    setModalConfig({
+      isOpen: true,
+      title: title || defaultTitles[type],
+      message,
+      type,
+    });
+  };
+
   const [cc, setCc] = useState("");
   const [findings, setFindings] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
@@ -91,6 +114,10 @@ export default function PrescriptionPage() {
   const [aiWarnings, setAiWarnings] = useState<string[]>([]);
   const [isAutoAiEnabled, setIsAutoAiEnabled] = useState(false);
   const [adviceApproved, setAdviceApproved] = useState(true);
+  const [ptConditions, setPtConditions] = useState("");
+  const [ptDiet, setPtDiet] = useState("Veg");
+  const [ptLifestyle, setPtLifestyle] = useState("");
+  const [aiLifestyleAdvice, setAiLifestyleAdvice] = useState("");
 
   // Smart Trigger Tracking
   const lastAiHashRef = useRef("");
@@ -103,34 +130,63 @@ export default function PrescriptionPage() {
     if (savedDraft) {
       try {
         const draft = JSON.parse(savedDraft);
-        if (draft.ptName) setPtName(draft.ptName);
-        if (draft.ptPhone) setPtPhone(draft.ptPhone);
-        if (draft.ptAge) setPtAge(draft.ptAge);
-        if (draft.ptSex) setPtSex(draft.ptSex);
-        if (draft.ptWeight) setPtWeight(draft.ptWeight);
-        if (draft.ptBloodGroup) setPtBloodGroup(draft.ptBloodGroup);
-        if (draft.cc) setCc(draft.cc);
-        if (draft.findings) setFindings(draft.findings);
-        if (draft.diagnosis) setDiagnosis(draft.diagnosis);
-        if (draft.meds) setMeds(draft.meds);
-        if (draft.mName) setMName(draft.mName);
-        if (draft.mType) setMType(draft.mType);
-        if (draft.mDose) setMDose(draft.mDose);
-        if (draft.mFreq) setMFreq(draft.mFreq);
-        if (draft.mDur) setMDur(draft.mDur);
-        if (draft.mInst) setMInst(draft.mInst);
-        if (draft.mNote) setMNote(draft.mNote);
-        if (draft.advice) setAdvice(draft.advice);
-        if (draft.followUp) setFollowUp(draft.followUp);
-        if (draft.pendingAiMeds) setPendingAiMeds(draft.pendingAiMeds);
-        if (draft.adviceApproved !== undefined)
+        setPtName(draft.ptName || "");
+        setPtPhone(draft.ptPhone || "");
+        setPtAge(draft.ptAge || "");
+        setPtSex(draft.ptSex || "Male");
+        setPtWeight(draft.ptWeight || "");
+        setPtBloodGroup(draft.ptBloodGroup || "");
+        setCc(draft.cc || "");
+        setFindings(draft.findings || "");
+        setDiagnosis(draft.diagnosis || "");
+        setMeds(draft.meds || []);
+        setMName(draft.mName || "");
+        setMType(draft.mType || "Tab");
+        setMDose(draft.mDose || "");
+        setMFreq(draft.mFreq || "");
+        setMDur(draft.mDur || "");
+        setMInst(draft.mInst || "");
+        setMNote(draft.mNote || "");
+        setAdvice(draft.advice || "");
+        setFollowUp(draft.followUp || "");
+        setPendingAiMeds(draft.pendingAiMeds || []);
+        if (draft.adviceApproved !== undefined) {
           setAdviceApproved(draft.adviceApproved);
-        console.log("Draft restored from cache");
+        } else {
+          setAdviceApproved(true);
+        }
+        console.log("Draft restored from cache for patient:", pId);
       } catch (e) {
         console.error("Failed to restore draft:", e);
       }
+    } else {
+      // Clear form states when patientId changes and no draft exists
+      if (searchParams.get("patientId")) {
+        setPtName("");
+        setPtPhone("");
+        setPtAge("");
+        setPtSex("Male");
+        setPtWeight("");
+        setPtBloodGroup("");
+        setCc("");
+        setFindings("");
+        setDiagnosis("");
+        setMeds([]);
+        setMName("");
+        setMType("Tab");
+        setMDose("");
+        setMFreq("");
+        setMDur("");
+        setMInst("");
+        setMNote("");
+        setAdvice("");
+        setFollowUp("");
+        setPendingAiMeds([]);
+        setAdviceApproved(true);
+        setPtSnapshot(null);
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     const autoAi = localStorage.getItem("medienest care_auto_ai");
@@ -178,13 +234,15 @@ export default function PrescriptionPage() {
 
           // Also fetch AI summary if available
           try {
-            const res = await authenticatedFetch(
-              `${API_BASE_URL}/api/patient-history/${data.id}`,
-            );
-            if (res.ok) {
-              const historyData = await res.json();
-              if (historyData && historyData.summary) {
-                setPtSnapshot(historyData.summary);
+            if (clinic?.id) {
+              const res = await authenticatedFetch(
+                `${API_BASE_URL}/api/patient-history/${data.id}?clinic_id=${clinic.id}`,
+              );
+              if (res.ok) {
+                const historyData = await res.json();
+                if (historyData && historyData.summary) {
+                  setPtSnapshot(historyData.summary);
+                }
               }
             }
           } catch (historyErr) {
@@ -199,7 +257,7 @@ export default function PrescriptionPage() {
     };
 
     fetchPatientById();
-  }, [searchParams, supabase]);
+  }, [searchParams, supabase, clinic?.id]);
 
   // AI Auto-Trigger Effect (Smart Persistence)
   useEffect(() => {
@@ -273,7 +331,7 @@ export default function PrescriptionPage() {
   const selectedDoctorObj =
     doctors.length === 1
       ? doctors[0]
-      : doctors.find((d) => d.id === searchParams.get("doctorId")) ||
+      : doctors.find((d) => d.doctor_id === searchParams.get("doctorId") || d.id === searchParams.get("doctorId")) ||
         doctors.find((d) => d.name === searchParams.get("doctorName"));
 
   const handleNewRecord = async () => {
@@ -323,6 +381,11 @@ export default function PrescriptionPage() {
             age: ptAge,
             gender: ptSex.toLowerCase(),
             specialty: doctors?.[0]?.specialty || "General Practitioner",
+            diagnosis,
+            medicines: meds,
+            weight: ptWeight,
+            existing_conditions: ptSnapshot ? (ptSnapshot.keyConditions?.join(", ") || "") : "",
+            lifestyle: ptSnapshot ? (ptSnapshot.currentMedications?.join(", ") || "") : "",
           }),
         },
       );
@@ -479,12 +542,16 @@ export default function PrescriptionPage() {
 
     // Fetch AI Snapshot for selected patient
     try {
-      const res = await authenticatedFetch(
-        `${API_BASE_URL}/api/patient-history/${p.id}`,
-      );
-      const data = await res.json();
-      if (data && data.summary) {
-        setPtSnapshot(data.summary);
+      if (clinic?.id) {
+        const res = await authenticatedFetch(
+          `${API_BASE_URL}/api/patient-history/${p.id}?clinic_id=${clinic.id}`,
+        );
+        const data = await res.json();
+        if (data && data.summary) {
+          setPtSnapshot(data.summary);
+        }
+      } else {
+        console.warn("No clinic ID available for fetching patient history");
       }
     } catch (err) {
       console.error("Error fetching patient snapshot:", err);
@@ -594,11 +661,11 @@ export default function PrescriptionPage() {
     }
 
     if (!ptName || !ptPhone) {
-      alert("Please enter patient name.");
+      showAlert("Please enter patient name and contact details.", "warning", "Validation Warning");
       return;
     }
     if (!selectedDoctorObj) {
-      alert("Please select a consulting doctor.");
+      showAlert("Please select a consulting doctor from the dropdown list.", "warning", "Consultant Required");
       return;
     }
 
@@ -608,7 +675,7 @@ export default function PrescriptionPage() {
     // STRICT SANITIZATION: Clean phone number to exactly 10 digits for DB constraint
     const cleanPhone = ptPhone.replace(/\D/g, "").slice(-10);
     if (cleanPhone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number.");
+      showAlert("Please enter a valid 10-digit phone number.", "warning", "Invalid Contact Number");
       setIsSaving(false);
       return;
     }
@@ -670,7 +737,7 @@ export default function PrescriptionPage() {
         .insert([
           {
             patient_id: patientId,
-            doctor_id: selectedDoctorObj?.id || null,
+            doctor_id: selectedDoctorObj?.doctor_id || selectedDoctorObj?.id || null,
             complaints: cc,
             findings: findings,
             diagnosis: diagnosis,
@@ -723,12 +790,14 @@ export default function PrescriptionPage() {
       const thisPatientId = searchParams.get("patientId") || "unlinked";
       localStorage.removeItem(`medienest care_rx_draft_${thisPatientId}`);
 
-      alert(
-        "Prescription saved successfully! Patient marked as completed.\n\nYou can now Download PDF or share via WhatsApp.",
+      showAlert(
+        "Prescription saved successfully! Patient has been marked as completed in the queue.\n\nYou can now export the PDF or share it directly via WhatsApp.",
+        "success",
+        "Prescription Saved"
       );
     } catch (err: any) {
       console.error("Save error:", err);
-      alert("Error: " + (err.message || "Check database permissions."));
+      showAlert("Could not save prescription: " + (err.message || "Please check database permissions and try again."), "error", "Database Error");
     } finally {
       setIsSaving(false);
     }
@@ -736,7 +805,7 @@ export default function PrescriptionPage() {
 
   const shareWhatsApp = () => {
     if (!savedRxId && !ptName) {
-      alert("Please save the prescription first to generate a link.");
+      showAlert("Please save the prescription first to generate a secure sharing link.", "info", "Action Required");
       return;
     }
 
@@ -1428,22 +1497,45 @@ export default function PrescriptionPage() {
                       {meds.map((m) => (
                         <div key={m.id} className={styles.medItem}>
                           <div className={styles.mLeft}>
-                            <b style={{ color: "var(--teal)" }}>
-                              {m.type}. {m.name}
-                            </b>{" "}
-                            {m.dose}
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                              <span className={styles.mTypeBadge}>{m.type}</span>
+                              <strong style={{ fontSize: "15px", color: "#1e293b", fontWeight: 700 }}>{m.name}</strong>
+                              {m.dose && <span style={{ color: "#64748b", fontSize: "13px", fontWeight: 600 }}>({m.dose})</span>}
+                            </div>
                             <div className={styles.mDetails}>
-                              {m.freq} × {m.duration} · {m.instructions}
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "var(--teal)", flexShrink: 0 }}>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                              </svg>
+                              <span>{m.freq || "As directed"}</span>
+                              {m.duration && (
+                                <>
+                                  <span style={{ color: "#cbd5e1" }}>•</span>
+                                  <span>{m.duration}</span>
+                                </>
+                              )}
+                              {m.instructions && (
+                                <>
+                                  <span style={{ color: "#cbd5e1" }}>•</span>
+                                  <span>{m.instructions}</span>
+                                </>
+                              )}
                             </div>
                             {m.note && (
-                              <div className={styles.mNote}>Note: {m.note}</div>
+                              <div className={styles.mNote}>
+                                Note: {m.note}
+                              </div>
                             )}
                           </div>
                           <button
                             className={styles.btnRemove}
                             onClick={() => removeMed(m.id)}
+                            title="Remove from Prescription"
                           >
-                            ×
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
                           </button>
                         </div>
                       ))}
@@ -2338,6 +2430,55 @@ export default function PrescriptionPage() {
           </div>
         </div>
       </main>
+
+      {modalConfig?.isOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.customModal} ${styles[modalConfig.type]}`}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>
+                {modalConfig.type === "success" && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+                {modalConfig.type === "warning" && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                )}
+                {modalConfig.type === "error" && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                )}
+                {modalConfig.type === "info" && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                )}
+              </div>
+              <h3>{modalConfig.title}</h3>
+            </div>
+            <div className={styles.modalBody}>
+              <p>{modalConfig.message}</p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setModalConfig(null)}
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

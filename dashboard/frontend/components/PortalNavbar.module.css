@@ -1,11 +1,11 @@
 .navbar {
   position: fixed;
-  top: 1rem;
+  top: 0.9rem;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
   max-width: 1800px;
-  height: 72px;
+  height: 64px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -16,7 +16,7 @@
   align-items: center;
   z-index: 1000;
   transition: all 0.3s ease;
-  padding: 0 2rem;
+  padding: 0 1.8rem;
 }
 
 .container {
@@ -34,8 +34,8 @@
 }
 
 .logoWrapper {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
 
 .brandName {
   font-family: var(--font-headline);
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.03em;
@@ -57,8 +57,8 @@
 }
 
 .avatarCircle {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #EAF3EA; /* Light green background */
   color: #2E7D32; /* Deep green */
@@ -66,7 +66,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   border: 1px solid rgba(46, 125, 50, 0.12);
   user-select: none;
   font-family: var(--font-headline);
@@ -80,11 +80,11 @@
 }
 
 .roleLabel {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--sanctuary-primary);
   line-height: 1.2;
-  max-width: 180px;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -98,7 +98,7 @@
   align-items: center;
   gap: 4px;
   color: #6B7280; /* Gray text */
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -118,28 +118,28 @@
 /* Mobile Adjustments */
 @media (max-width: 640px) {
   .navbar {
-    height: 64px;
+    height: 58px;
     width: 95%;
-    top: 0.5rem;
-    padding: 0 1.2rem;
+    top: 0.45rem;
+    padding: 0 1.1rem;
   }
 
   .brandName {
-    font-size: 1.15rem;
+    font-size: 1.0rem;
   }
 
   .logoWrapper {
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
   }
 
   .avatarCircle {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    font-size: 12.5px;
   }
 
   .roleLabel {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
