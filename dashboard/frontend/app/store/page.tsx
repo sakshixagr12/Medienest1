@@ -12,7 +12,9 @@ export default function StorePage() {
   const { clinic, loading: clinicLoading } = useClinic();
   const [metrics, setMetrics] = useState({
     receipts: 0,
+    receiptsTrend: "+0% from yesterday",
     revenue: 0,
+    revenueTrend: "+0% from yesterday",
   });
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,9 @@ export default function StorePage() {
     const fetchData = async () => {
       const supabase = createClient();
       const today = new Date().toISOString().split("T")[0];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split("T")[0];
 
       try {
         // Fetch Receipts Created Today
@@ -37,12 +42,32 @@ export default function StorePage() {
 
         if (receiptsErr) throw receiptsErr;
 
+        // Fetch Receipts Created Yesterday
+        const { data: receiptsYesterday } = await supabase
+          .from("receipts")
+          .select("total_amount, printed_at")
+          .gte("printed_at", yesterday)
+          .lt("printed_at", today)
+          .eq("clinic_id", clinic.id);
+
         const rev =
           receipts?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+        const revYesterday =
+          receiptsYesterday?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+
+        const calculateTrend = (todayVal: number, yesterdayVal: number) => {
+          if (!yesterdayVal || yesterdayVal === 0) {
+            return todayVal > 0 ? "+100% from yesterday" : "+0% from yesterday";
+          }
+          const pct = Math.round(((todayVal - yesterdayVal) / yesterdayVal) * 100);
+          return pct >= 0 ? `+${pct}% from yesterday` : `${pct}% from yesterday`;
+        };
 
         setMetrics({
           receipts: receipts?.length || 0,
+          receiptsTrend: calculateTrend(receipts?.length || 0, receiptsYesterday?.length || 0),
           revenue: rev,
+          revenueTrend: calculateTrend(rev, revYesterday),
         });
 
         // Fetch Recent Activities (Receipt creations)
@@ -134,7 +159,7 @@ export default function StorePage() {
             <div className={styles.metricInfo}>
               <p>SALES TRANSACTIONS TODAY</p>
               <h3>{metrics.receipts}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.receiptsTrend}</span>
             </div>
           </div>
 
@@ -157,7 +182,7 @@ export default function StorePage() {
             <div className={styles.metricInfo}>
               <p>STORE SALES REVENUE TODAY</p>
               <h3>₹{metrics.revenue.toLocaleString()}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.revenueTrend}</span>
             </div>
           </div>
         </section>

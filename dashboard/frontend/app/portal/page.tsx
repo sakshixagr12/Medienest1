@@ -14,9 +14,13 @@ export default function PortalPage() {
   const [showDoctorSelect, setShowDoctorSelect] = useState(false);
   const [metrics, setMetrics] = useState({
     patients: 0,
+    patientsTrend: "+0% from yesterday",
     prescriptions: 0,
+    prescriptionsTrend: "+0% from yesterday",
     followups: 0,
+    followupsTrend: "+0% from yesterday",
     revenue: 0,
+    revenueTrend: "+0% from yesterday",
   });
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,6 +148,9 @@ export default function PortalPage() {
     const fetchData = async () => {
       const supabase = createClient();
       const today = new Date().toISOString().split("T")[0];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split("T")[0];
 
       try {
         // 1. Fetch Metrics (Total Clinic)
@@ -152,26 +159,59 @@ export default function PortalPage() {
           .select("*", { count: "exact", head: true })
           .eq("date", today)
           .eq("clinic_id", clinic.id);
+        const { count: pCountYesterday } = await supabase
+          .from("prescriptions")
+          .select("*", { count: "exact", head: true })
+          .eq("date", yesterday)
+          .eq("clinic_id", clinic.id);
+
         const { data: receipts } = await supabase
           .from("receipts")
           .select("total_amount")
           .gte("printed_at", today)
           .eq("clinic_id", clinic.id);
+        const { data: receiptsYesterday } = await supabase
+          .from("receipts")
+          .select("total_amount")
+          .gte("printed_at", yesterday)
+          .lt("printed_at", today)
+          .eq("clinic_id", clinic.id);
+
         const { count: followupCount } = await supabase
           .from("prescriptions")
           .select("*", { count: "exact", head: true })
           .eq("clinic_id", clinic.id)
           .not("valid_till", "is", null)
           .gte("valid_till", today);
+        const { count: followupCountYesterday } = await supabase
+          .from("prescriptions")
+          .select("*", { count: "exact", head: true })
+          .eq("clinic_id", clinic.id)
+          .not("valid_till", "is", null)
+          .gte("valid_till", yesterday);
 
         const rev =
           receipts?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+        const revYesterday =
+          receiptsYesterday?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+
+        const calculateTrend = (todayVal: number, yesterdayVal: number) => {
+          if (!yesterdayVal || yesterdayVal === 0) {
+            return todayVal > 0 ? "+100% from yesterday" : "+0% from yesterday";
+          }
+          const pct = Math.round(((todayVal - yesterdayVal) / yesterdayVal) * 100);
+          return pct >= 0 ? `+${pct}% from yesterday` : `${pct}% from yesterday`;
+        };
 
         setMetrics({
           patients: pCount || 0,
+          patientsTrend: calculateTrend(pCount || 0, pCountYesterday || 0),
           prescriptions: pCount || 0,
+          prescriptionsTrend: calculateTrend(pCount || 0, pCountYesterday || 0),
           followups: followupCount || 0,
+          followupsTrend: calculateTrend(followupCount || 0, followupCountYesterday || 0),
           revenue: rev,
+          revenueTrend: calculateTrend(rev, revYesterday),
         });
 
         // 2. Fetch Recent Activities
@@ -263,7 +303,7 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>PATIENTS TODAY</p>
               <h3>{metrics.patients}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.patientsTrend}</span>
             </div>
           </div>
 
@@ -289,7 +329,7 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>PRESCRIPTIONS</p>
               <h3>{metrics.prescriptions}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.prescriptionsTrend}</span>
             </div>
           </div>
 
@@ -311,7 +351,7 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>FOLLOW-UPS</p>
               <h3>{metrics.followups}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.followupsTrend}</span>
             </div>
           </div>
 
@@ -334,7 +374,7 @@ export default function PortalPage() {
             <div className={styles.metricInfo}>
               <p>REVENUE</p>
               <h3>₹{metrics.revenue.toLocaleString()}</h3>
-              <span className={styles.trendText}>+0% from yesterday</span>
+              <span className={styles.trendText}>{metrics.revenueTrend}</span>
             </div>
           </div>
         </section>
