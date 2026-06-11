@@ -645,7 +645,9 @@ export default function FrontDeskPage() {
                   fontSize: 14,
                   cursor: "pointer",
                 }}
-              ></button>
+              >
+                Remove
+              </button>
             </div>
           </div>
         )}
@@ -776,7 +778,9 @@ export default function FrontDeskPage() {
                   fontSize: 13,
                   cursor: "pointer",
                 }}
-              ></button>
+              >
+                Skip
+              </button>
             </div>
           </div>
         ))}
@@ -1064,7 +1068,9 @@ export default function FrontDeskPage() {
                   setIsCheckInOpen(false);
                   resetCheckIn();
                 }}
-              ></button>
+              >
+                &times;
+              </button>
             </div>
             <form className={styles.modalBody} onSubmit={handleCheckIn}>
               <div className={styles.formSection}>

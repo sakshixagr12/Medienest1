@@ -781,7 +781,9 @@ export default function DoctorPage() {
                     color: "#94a3b8",
                     lineHeight: 1,
                   }}
-                ></button>
+                >
+                  &times;
+                </button>
               </div>
               {todayPatients.length === 0 ? (
                 <div
