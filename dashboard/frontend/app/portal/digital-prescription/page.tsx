@@ -2360,56 +2360,72 @@ export default function PrescriptionPage() {
                     />
                   </div>
                 </div>
-                <div className={styles.exportRow}>
-                  <button
-                    className={styles.btnEx}
-                    onClick={handleSave}
-                    title="Save to Database"
-                    disabled={isSaving}
-                    style={{ opacity: isSaving ? 0.5 : 1 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M17,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V7L17,3M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M15,9H5V5H15V9Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={downloadPDF}
-                    title="Download PDF"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M10,18V12H12V18H10M13,18V12H15V18H13M16,18V12H18V18H16Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={downloadImage}
-                    title="Save Image"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M5,5H19V19H5V5Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={shareWhatsApp}
-                    title="WhatsApp Share"
-                    style={{ background: "#25d366" }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M12.04,2C6.58,2,2.13,6.45,2.13,11.91c0,1.75,0.45,3.45,1.32,4.95L2,22l5.25-1.38c1.45,0.79,3.08,1.21,4.74,1.21c5.44,0,9.89-4.45,9.89-9.91C21.89,6.45,17.5,2,12.04,2z M16.59,16.27c-0.27,0.76-1.58,1.39-2.16,1.47c-0.58,0.08-1.13,0.01-1.78-0.2c-0.43-0.14-1.01-0.34-1.74-0.66c-3.1-1.36-5.11-4.52-5.26-4.73c-0.15-0.21-1.25-1.63-1.25-3.11c0-1.48,0.73-2.21,1-2.52c0.27-0.3,0.6-0.38,0.79-0.38c0.19,0,0.38,0,0.54,0.01c0.17,0.01,0.39-0.06,0.61,0.46c0.23,0.54,0.79,1.91,0.85,2.04c0.06,0.13,0.11,0.28,0.02,0.46c-0.08,0.18-0.13,0.29-0.26,0.44c-0.13,0.15-0.27,0.34-0.39,0.46c-0.13,0.13-0.28,0.28-0.12,0.54c0.16,0.27,0.7,1.15,1.49,1.85c1.02,0.91,1.88,1.2,2.16,1.32c0.28,0.11,0.44,0.1,0.61-0.09c0.17-0.19,0.73-0.85,0.93-1.14c0.2-0.29,0.39-0.24,0.66-0.15c0.27,0.09,1.7,0.8,2,0.94c0.3,0.14,0.5,0.22,0.57,0.34C17.09,14.88,16.86,15.51,16.59,16.27z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={() => window.print()}
-                    title="Print"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 19,10A1,1 0 0,1 20,11A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" />
-                    </svg>
-                  </button>
-                </div>
+                {guidanceApproved ? (
+                  <div className={styles.exportRow}>
+                    <button
+                      className={styles.btnEx}
+                      onClick={handleSave}
+                      title="Save to Database"
+                      disabled={isSaving}
+                      style={{ opacity: isSaving ? 0.5 : 1 }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M17,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V7L17,3M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M15,9H5V5H15V9Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={downloadPDF}
+                      title="Download PDF"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M10,18V12H12V18H10M13,18V12H15V18H13M16,18V12H18V18H16Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={downloadImage}
+                      title="Save Image"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M5,5H19V19H5V5Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={shareWhatsApp}
+                      title="WhatsApp Share"
+                      style={{ background: "#25d366" }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M12.04,2C6.58,2,2.13,6.45,2.13,11.91c0,1.75,0.45,3.45,1.32,4.95L2,22l5.25-1.38c1.45,0.79,3.08,1.21,4.74,1.21c5.44,0,9.89-4.45,9.89-9.91C21.89,6.45,17.5,2,12.04,2z M16.59,16.27c-0.27,0.76-1.58,1.39-2.16,1.47c-0.58,0.08-1.13,0.01-1.78-0.2c-0.43-0.14-1.01-0.34-1.74-0.66c-3.1-1.36-5.11-4.52-5.26-4.73c-0.15-0.21-1.25-1.63-1.25-3.11c0-1.48,0.73-2.21,1-2.52c0.27-0.3,0.6-0.38,0.79-0.38c0.19,0,0.38,0,0.54,0.01c0.17,0.01,0.39-0.06,0.61,0.46c0.23,0.54,0.79,1.91,0.85,2.04c0.06,0.13,0.11,0.28,0.02,0.46c-0.08,0.18-0.13,0.29-0.26,0.44c-0.13,0.15-0.27,0.34-0.39,0.46c-0.13,0.13-0.28,0.28-0.12,0.54c0.16,0.27,0.7,1.15,1.49,1.85c1.02,0.91,1.88,1.2,2.16,1.32c0.28,0.11,0.44,0.1,0.61-0.09c0.17-0.19,0.73-0.85,0.93-1.14c0.2-0.29,0.39-0.24,0.66-0.15c0.27,0.09,1.7,0.8,2,0.94c0.3,0.14,0.5,0.22,0.57,0.34C17.09,14.88,16.86,15.51,16.59,16.27z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={() => window.print()}
+                      title="Print"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 19,10A1,1 0 0,1 20,11A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.exportRow}>
+                    <button
+                      className={styles.adviceRecommendBtn}
+                      onClick={() => setIsReviewModalOpen(true)}
+                      type="button"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 8 }}>
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      <span>Advice & Recommendation</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
