@@ -385,7 +385,7 @@ router.post("/receipts", requireAuth, requireClinicAccess, async (req, res) => {
   // Enforce: receipt must be saved to the user's own clinic
   // requireClinicAccess already verified req.body.clinic_id matches the user's clinic.
   // We re-extract from the body to be explicit.
-  receiptData.clinic_id = req.body.clinic_id; // already validated by requireClinicAccess
+  receiptData.clinic_id = req.body.clinic_id || receiptData.clinic_id; // already validated by requireClinicAccess
 
   try {
     const { data, error } = await supabase

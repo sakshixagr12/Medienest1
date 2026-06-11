@@ -172,7 +172,7 @@ function DoctorQueueContent() {
       await authenticatedFetch(`${API}/api/queue/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, clinic_id: clinic?.id }),
       });
       fetchQueue();
     } finally {

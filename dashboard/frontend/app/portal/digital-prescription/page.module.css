@@ -121,7 +121,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 48px 20px;
+  padding: 30px 28px 20px;
 }
 
 .headerColumn {
@@ -183,7 +183,7 @@
   display: flex;
   justify-content: space-between;
   background: #f0fdfa;
-  margin: 0 48px 10px;
+  margin: 0 28px 10px;
   padding: 10px 24px;
   border-radius: 8px;
   color: #0d6e56;
@@ -225,7 +225,7 @@
 .bodyLeftColumn {
   width: 240px;
   border-right: 2px solid #0d6e56;
-  padding: 0 48px;
+  padding: 0 20px;
   margin-right: 20px;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -233,7 +233,7 @@
 
 .bodyRightColumn {
   flex: 1;
-  padding: 0 48px;
+  padding: 0 20px;
 }
 
 .rxBigLogo {
@@ -267,7 +267,7 @@
 /* ─── Aesthetic Footer & Revamped Sections ─── */
 .rxFooterSection {
   margin-top: auto;
-  padding: 0 48px 40px; /* Increased bottom padding to move content up */
+  padding: 0 28px 40px; /* Increased bottom padding to move content up */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -528,13 +528,127 @@
 .snapshotHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   font-size: 12px;
   font-weight: 800;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.snapshotBadge {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0d9488;
+  background: #ccfbf1;
+  border: 1px solid #99f6e4;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.snapshotGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.snapshotRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.snapshotLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 90px;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+
+.snapshotValue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+
+.conditionTag {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.chronicTag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.medTag {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.allergyTag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.snapshotSummary {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  font-style: italic;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.viewProfileBtn {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal);
+  text-decoration: none;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.viewProfileBtn:hover {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
 }
 
 /* ─── Premium Medicine Cards Styling ─── */
@@ -1175,3 +1289,537 @@
   border-radius: 4px;
   font-weight: 800;
 }
+
+/* ─── Patient Guidance Sheet (Page 2) ─── */
+.guidanceCard {
+  background: #fff;
+  width: 210mm;
+  height: 297mm;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Outfit", sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+  margin-top: 30px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+/* Print Specific Rules */
+@media print {
+  .guidanceCard {
+    margin-top: 0;
+    border-top: none;
+    page-break-before: always;
+  }
+}
+
+.guidanceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 28px 10px;
+}
+
+.guidanceTitleArea {
+  text-align: center;
+  margin: 10px 0 20px;
+}
+
+.guidanceBadge {
+  background: #0d6e56;
+  color: white;
+  padding: 6px 20px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.guidanceSubtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.guidanceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 0 28px;
+  flex: 1;
+}
+
+.guidanceSection {
+  background: #fcfdfd;
+  border: 1px solid #e6f4f2;
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(13, 110, 86, 0.02);
+}
+
+.guidanceSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f0fdfa;
+  padding-bottom: 8px;
+}
+
+.guidanceSectionIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e6f4f2;
+  color: #0d6e56;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guidanceSectionTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0d6e56;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.guidancePointsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guidancePointItem {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #334155;
+  position: relative;
+  padding-left: 18px;
+}
+
+.guidancePointItem::before {
+  content: "•";
+  color: #0d6e56;
+  font-size: 16px;
+  position: absolute;
+  left: 4px;
+  top: -2px;
+}
+
+.guidanceCallout {
+  background: #f0fdfa;
+  border-left: 3px solid #0d6e56;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: auto;
+  font-size: 11px;
+  color: #0d6e56;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guidanceAvoidItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.guidanceAvoidTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ba1a1a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guidanceAvoidReason {
+  font-size: 11px;
+  color: #64748b;
+  padding-left: 18px;
+}
+
+.guidanceRedFlagItem {
+  font-size: 12px;
+  color: #334155;
+  padding-left: 18px;
+  position: relative;
+}
+
+.guidanceRedFlagItem::before {
+  content: "⚠";
+  color: #ba1a1a;
+  position: absolute;
+  left: 2px;
+  top: 0;
+  font-size: 11px;
+}
+
+.guidanceFooter {
+  background: #0d6e56;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 15px;
+  font-size: 11px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.guidanceFooterTips {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.guidanceFooterTip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Review overlay for preview panel */
+.guidanceOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 40px;
+  text-align: center;
+}
+
+.overlayTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.overlayText {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 24px;
+  max-width: 400px;
+}
+
+.overlayBtn {
+  background: #0d6e56;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(13, 110, 86, 0.2);
+}
+
+.overlayBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(13, 110, 86, 0.3);
+}
+
+/* Multi-Section Review Modal */
+.reviewModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.reviewModal {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  height: 85vh;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.reviewHeader {
+  padding: 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewHeaderTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.reviewHeaderSubtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.reviewCloseBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.reviewBody {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewSectionCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.reviewSectionCard.pending {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.reviewSectionCard.accepted {
+  border-left: 4px solid #10b981;
+  background: #f0fdf4;
+}
+
+.reviewSectionCard.rejected {
+  border-left: 4px solid #ef4444;
+  background: #fef2f2;
+}
+
+.reviewSectionCard.editing {
+  border-left: 4px solid #3b82f6;
+  background: #eff6ff;
+}
+
+.reviewSectionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reviewSectionTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e293b;
+  text-transform: uppercase;
+}
+
+.reviewSectionBadge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.reviewSectionBadge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.reviewSectionBadge.accepted {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.reviewSectionBadge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.reviewSectionBadge.editing {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.reviewSectionContent {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.reviewSectionContent ul {
+  padding-left: 18px;
+  margin: 8px 0;
+}
+
+.reviewSectionContent textarea {
+  width: 100%;
+  height: 100px;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  margin-top: 8px;
+  outline: none;
+  resize: vertical;
+}
+
+.reviewSectionActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  padding-top: 12px;
+}
+
+.actionBtn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.actionBtn.accept {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.actionBtn.reject {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.actionBtn.edit {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.actionBtn.save {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.actionBtn:hover {
+  filter: brightness(1.05);
+}
+
+.reviewFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewProgressText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.reviewFooterActions {
+  display: flex;
+  gap: 12px;
+}
+
+.footerBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.footerBtn.primary {
+  background: #0d6e56;
+  color: white;
+  border-color: #0d6e56;
+}
+
+.footerBtn.primary:disabled {
+  background: #cbd5e1;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.footerBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.generatingSpinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  color: #0d6e56;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e6f4f2;
+  border-top: 3px solid #0d6e56;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +46,7 @@ export default function PrescriptionPage() {
   const [ptSuggestions, setPtSuggestions] = useState<any[]>([]);
   const [isLoadingPts, setIsLoadingPts] = useState(false);
   const [ptSnapshot, setPtSnapshot] = useState<any>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   // Premium Custom Alert Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -94,6 +96,7 @@ export default function PrescriptionPage() {
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   if (!supabaseRef.current) supabaseRef.current = createClient();
   const supabase = supabaseRef.current;
+  const guidancePaperRef = useRef<HTMLDivElement>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [pendingAiMeds, setPendingAiMeds] = useState<any[]>([]);
   const [aiValidationFlags, setAiValidationFlags] = useState<string[]>([]);
@@ -119,6 +122,15 @@ export default function PrescriptionPage() {
   const [ptLifestyle, setPtLifestyle] = useState("");
   const [aiLifestyleAdvice, setAiLifestyleAdvice] = useState("");
 
+  // Guidance Sheet State
+  const [guidanceSheet, setGuidanceSheet] = useState<any>(null);
+  const [guidanceStatus, setGuidanceStatus] = useState<{ [key: string]: 'pending' | 'accepted' | 'rejected' | 'editing' }>({});
+  const [guidanceEditedTexts, setGuidanceEditedTexts] = useState<{ [key: string]: string }>({});
+  const [isGeneratingGuidance, setIsGeneratingGuidance] = useState(false);
+  const [guidanceError, setGuidanceError] = useState("");
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [guidanceApproved, setGuidanceApproved] = useState(false);
+
   // Smart Trigger Tracking
   const lastAiHashRef = useRef("");
 
@@ -128,6 +140,7 @@ export default function PrescriptionPage() {
     const draftKey = `medienest care_rx_draft_${pId}`;
     const savedDraft = localStorage.getItem(draftKey);
     if (savedDraft) {
+      setSelectedPatientId(pId === "unlinked" ? null : pId);
       try {
         const draft = JSON.parse(savedDraft);
         setPtName(draft.ptName || "");
@@ -184,6 +197,9 @@ export default function PrescriptionPage() {
         setPendingAiMeds([]);
         setAdviceApproved(true);
         setPtSnapshot(null);
+        setSelectedPatientId(searchParams.get("patientId"));
+      } else {
+        setSelectedPatientId(null);
       }
     }
   }, [searchParams]);
@@ -224,6 +240,7 @@ export default function PrescriptionPage() {
           .single();
 
         if (!error && data) {
+          setSelectedPatientId(data.id);
           // Sync with DB values if they differ or weren't provided in URL
           if (!pName) setPtName(data.name || "");
           if (!pPhone) setPtPhone(data.contact || "");
@@ -270,6 +287,15 @@ export default function PrescriptionPage() {
       }
     }
   }, [activeTab, isAutoAiEnabled, cc, findings]);
+
+  // Guidance Sheet Auto-Trigger Effect
+  useEffect(() => {
+    if (activeTab === "rx") {
+      if ((diagnosis || cc) && !guidanceSheet && !isGeneratingGuidance && !guidanceApproved) {
+        generateGuidance();
+      }
+    }
+  }, [activeTab, diagnosis, cc, meds.length]);
 
   useEffect(() => {
     // If we've already officially saved this prescription to the DB, stop updating the draft.
@@ -384,8 +410,16 @@ export default function PrescriptionPage() {
             diagnosis,
             medicines: meds,
             weight: ptWeight,
-            existing_conditions: ptSnapshot ? (ptSnapshot.keyConditions?.join(", ") || "") : "",
-            lifestyle: ptSnapshot ? (ptSnapshot.currentMedications?.join(", ") || "") : "",
+            existing_conditions: ptSnapshot ? ([
+              ...(ptSnapshot.keyConditions || []),
+              ...(ptSnapshot.chronicFlags || []).map((f: string) => `[CHRONIC] ${f}`),
+            ].join(", ") || "") : "",
+            lifestyle: ptSnapshot ? ([
+              ...(ptSnapshot.currentMedications || []),
+              ...(ptSnapshot.allergies || []).length > 0
+                ? [`ALLERGIES: ${ptSnapshot.allergies.join(", ")}`]
+                : [],
+            ].join(", ") || "") : "",
           }),
         },
       );
@@ -526,6 +560,7 @@ export default function PrescriptionPage() {
     setMeds([]);
     setPtSnapshot(null);
     setPtSuggestions([]);
+    setSelectedPatientId(null);
   };
 
   const handleSelectPatient = async (p: any) => {
@@ -539,6 +574,7 @@ export default function PrescriptionPage() {
     setPtSex(p.gender || "Male");
     setPtBloodGroup(p.blood_group || "");
     setPtSuggestions([]);
+    setSelectedPatientId(p.id);
 
     // Fetch AI Snapshot for selected patient
     try {
@@ -651,7 +687,14 @@ export default function PrescriptionPage() {
     setMeds(meds.filter((m) => m.id !== id));
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideGuidance: any = false) => {
+    const isOverride = overrideGuidance === true;
+    // If guidance exists but isn't approved, prompt doctor to review/approve first
+    if (guidanceSheet && !guidanceApproved && !isOverride) {
+      setIsReviewModalOpen(true);
+      return;
+    }
+
     // Safety check for unapproved AI suggestions
     if (!adviceApproved) {
       const confirmResult = await window.confirm(
@@ -758,6 +801,61 @@ export default function PrescriptionPage() {
             clinic_id: clinic?.id,
             doctor_name: selectedDoctorObj?.name || "Dr. Consultant",
             valid_till: followUp || null,
+            guidance_sheet: guidanceApproved && guidanceSheet ? {
+              understanding_condition: {
+                title: guidanceSheet.understanding_condition?.title || "Understanding Your Condition",
+                disease_name: guidanceSheet.understanding_condition?.disease_name || diagnosis,
+                points: guidanceStatus.understanding_condition === 'accepted'
+                  ? (guidanceEditedTexts.understanding_condition 
+                      ? guidanceEditedTexts.understanding_condition.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:"))
+                      : [])
+                  : []
+              },
+              diet_nutrition: {
+                title: guidanceSheet.diet_nutrition?.title || "Diet & Nutrition",
+                points: guidanceStatus.diet_nutrition === 'accepted'
+                  ? (guidanceEditedTexts.diet_nutrition ? guidanceEditedTexts.diet_nutrition.split("\n").filter(Boolean) : [])
+                  : []
+              },
+              hydration: {
+                title: guidanceSheet.hydration?.title || "Water & Hydration",
+                points: guidanceStatus.hydration === 'accepted'
+                  ? (guidanceEditedTexts.hydration ? guidanceEditedTexts.hydration.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                  : [],
+                tip: guidanceSheet.hydration?.tip || ""
+              },
+              activity_exercise: {
+                title: guidanceSheet.activity_exercise?.title || "Activity & Exercise",
+                points: guidanceStatus.activity_exercise === 'accepted'
+                  ? (guidanceEditedTexts.activity_exercise ? guidanceEditedTexts.activity_exercise.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                  : [],
+                tip: guidanceSheet.activity_exercise?.tip || ""
+              },
+              things_to_avoid: {
+                title: guidanceSheet.things_to_avoid?.title || "Things To Avoid",
+                items: guidanceStatus.things_to_avoid === 'accepted'
+                  ? (guidanceEditedTexts.things_to_avoid
+                      ? guidanceEditedTexts.things_to_avoid.split("\n").filter(Boolean).map((line: string) => {
+                          const parts = line.split(":");
+                          return {
+                            text: parts[0]?.replace(/^-\s*/, '')?.trim() || "",
+                            reason: parts.slice(1).join(":")?.trim() || ""
+                          };
+                        })
+                      : [])
+                  : []
+              },
+              warning_signs: {
+                title: guidanceSheet.warning_signs?.title || "Warning Signs & Follow-up",
+                red_flags: guidanceStatus.warning_signs === 'accepted'
+                  ? (guidanceEditedTexts.warning_signs ? guidanceEditedTexts.warning_signs.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:") && !l.toLowerCase().includes("red flags:")) : [])
+                  : [],
+                follow_up: guidanceStatus.warning_signs === 'accepted'
+                  ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up || "")
+                  : ""
+              },
+              general_tips: guidanceSheet.general_tips || []
+            } : null
           },
         ])
         .select("id")
@@ -801,6 +899,97 @@ export default function PrescriptionPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const generateGuidance = async () => {
+    if (isGeneratingGuidance || guidanceApproved) return;
+    setIsGeneratingGuidance(true);
+    setGuidanceError("");
+    try {
+      const treatmentText = meds.length > 0
+        ? meds.map(m => `${m.type || 'Tab'}. ${m.name} ${m.dose || ''} (${m.freq || ''}, ${m.duration || ''})`).join('; ')
+        : "None prescribed yet";
+
+      const res = await authenticatedFetch(
+        `${API_BASE_URL}/api/recommendations/guidance-sheet`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            diagnosis,
+            cc,
+            findings,
+            medicines: meds,
+            age: ptAge,
+            gender: ptSex,
+            weight: ptWeight,
+            existing_conditions: ptSnapshot ? [
+              ...(ptSnapshot.keyConditions || []),
+              ...(ptSnapshot.chronicFlags || []).map((f: string) => `[CHRONIC] ${f}`),
+            ].join(", ") : "",
+            follow_up_date: followUp,
+            clinic_name: clinic?.name || "",
+            doctor_name: selectedDoctorObj?.name || "",
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (data.success && data.guidance) {
+        setGuidanceSheet(data.guidance);
+        const initialStatus: { [key: string]: 'pending' | 'accepted' | 'rejected' | 'editing' } = {};
+        const initialTexts: { [key: string]: string } = {};
+
+        const sections = [
+          'understanding_condition',
+          'diet_nutrition',
+          'hydration',
+          'activity_exercise',
+          'things_to_avoid',
+          'warning_signs'
+        ];
+
+        sections.forEach(sec => {
+          initialStatus[sec] = 'pending';
+          if (sec === 'understanding_condition') {
+            const disease = data.guidance.understanding_condition.disease_name || diagnosis || "Condition";
+            const pts = (data.guidance.understanding_condition.points || []).join("\n");
+            initialTexts[sec] = `Diagnosis: ${disease}\n\n${pts}`;
+          } else if (sec === 'things_to_avoid') {
+            const items = (data.guidance.things_to_avoid.items || []).map((i: any) => `- ${i.text}: ${i.reason}`).join("\n");
+            initialTexts[sec] = items;
+          } else if (sec === 'warning_signs') {
+            const redFlags = (data.guidance.warning_signs.red_flags || []).join("\n");
+            const followUpTxt = data.guidance.warning_signs.follow_up || "";
+            initialTexts[sec] = `Red Flags:\n${redFlags}\n\nFollow-up:\n${followUpTxt}`;
+          } else {
+            const pts = (data.guidance[sec].points || []).join("\n");
+            const tip = data.guidance[sec].tip ? `\n\nTip: ${data.guidance[sec].tip}` : "";
+            initialTexts[sec] = pts + tip;
+          }
+        });
+
+        setGuidanceStatus(initialStatus);
+        setGuidanceEditedTexts(initialTexts);
+      } else {
+        setGuidanceError(data.error || "Failed to generate patient guidance.");
+      }
+    } catch (err: any) {
+      console.error("Guidance Sheet generation error:", err);
+      setGuidanceError(err.message || "Failed to connect to AI server.");
+    } finally {
+      setIsGeneratingGuidance(false);
+    }
+  };
+
+  const handleConfirmAndSaveGuidance = async (approvedGuidanceData: any) => {
+    setGuidanceApproved(true);
+    setIsReviewModalOpen(false);
+    
+    // Auto-save: Trigger handleSave immediately after setting guidance state.
+    setTimeout(() => {
+      handleSave(true);
+    }, 100);
   };
 
   const shareWhatsApp = () => {
@@ -854,14 +1043,30 @@ export default function PrescriptionPage() {
 
   const downloadPDF = async () => {
     if (!rxPaperRef.current) return;
-    const canvas = await html2canvas(rxPaperRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Prescription_${ptName}_${date}.pdf`);
+    setIsSaving(true);
+    try {
+      const canvas1 = await html2canvas(rxPaperRef.current, { scale: 2 });
+      const imgData1 = canvas1.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      pdf.addImage(imgData1, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      if (guidanceSheet && guidanceApproved && guidancePaperRef.current) {
+        pdf.addPage();
+        const canvas2 = await html2canvas(guidancePaperRef.current, { scale: 2 });
+        const imgData2 = canvas2.toDataURL("image/png");
+        pdf.addImage(imgData2, "PNG", 0, 0, pdfWidth, pdfHeight);
+      }
+      
+      pdf.save(`Prescription_${ptName}_${date}.pdf`);
+    } catch (pdfErr) {
+      console.error("PDF generation failed:", pdfErr);
+      showAlert("Could not generate PDF document.", "error", "Export Error");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const quickAdd = (setter: any, val: string) => {
@@ -1088,24 +1293,74 @@ export default function PrescriptionPage() {
                   {ptSnapshot && (
                     <div className={styles.aiSnapshotBox}>
                       <div className={styles.snapshotHeader}>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                        >
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                        </svg>
-                        Clinical Profile Snapshot
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          >
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                          </svg>
+                          Clinical Profile Snapshot
+                          {ptSnapshot.totalVisits > 0 && (
+                            <span className={styles.snapshotBadge}>{ptSnapshot.totalVisits} visit{ptSnapshot.totalVisits > 1 ? "s" : ""}</span>
+                          )}
+                        </div>
+                        {selectedPatientId && (
+                          <Link
+                            href={`/portal/doctor-dashboard/patients/${selectedPatientId}`}
+                            target="_blank"
+                            className={styles.viewProfileBtn}
+                          >
+                            See Patient Profile →
+                          </Link>
+                        )}
                       </div>
-                      <div className={styles.snapshotData}>
-                        <strong>Recent Conditions:</strong>{" "}
-                        {ptSnapshot.keyConditions?.join(", ")}
-                        <br />
-                        <strong>Maintenance Meds:</strong>{" "}
-                        {ptSnapshot.currentMedications?.join(", ")}
+                      <div className={styles.snapshotGrid}>
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>🩺 Conditions</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.keyConditions?.map((c: string, i: number) => (
+                              <span key={i} className={styles.conditionTag}>{c}</span>
+                            ))}
+                          </span>
+                        </div>
+                        {ptSnapshot.chronicFlags?.length > 0 && (
+                          <div className={styles.snapshotRow}>
+                            <span className={styles.snapshotLabel}>⚠️ Chronic</span>
+                            <span className={styles.snapshotValue}>
+                              {ptSnapshot.chronicFlags.map((f: string, i: number) => (
+                                <span key={i} className={styles.chronicTag}>{f}</span>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>💊 Medications</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.currentMedications?.map((m: string, i: number) => (
+                              <span key={i} className={styles.medTag}>{m}</span>
+                            ))}
+                          </span>
+                        </div>
+                        {ptSnapshot.allergies?.length > 0 && (
+                          <div className={styles.snapshotRow}>
+                            <span className={styles.snapshotLabel}>🚫 Allergies</span>
+                            <span className={styles.snapshotValue}>
+                              {ptSnapshot.allergies.map((a: string, i: number) => (
+                                <span key={i} className={styles.allergyTag}>{a}</span>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        {ptSnapshot.recentVisitsSummary && (
+                          <div className={styles.snapshotSummary}>
+                            {ptSnapshot.recentVisitsSummary}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1243,24 +1498,74 @@ export default function PrescriptionPage() {
                     style={{ marginBottom: 20 }}
                   >
                     <div className={styles.snapshotHeader}>
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                      >
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                      </svg>
-                      Clinical Profile Snapshot
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                        >
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                        Clinical Profile Snapshot
+                        {ptSnapshot.totalVisits > 0 && (
+                          <span className={styles.snapshotBadge}>{ptSnapshot.totalVisits} visit{ptSnapshot.totalVisits > 1 ? "s" : ""}</span>
+                        )}
+                      </div>
+                      {selectedPatientId && (
+                        <Link
+                          href={`/portal/doctor-dashboard/patients/${selectedPatientId}`}
+                          target="_blank"
+                          className={styles.viewProfileBtn}
+                        >
+                          See Patient Profile →
+                        </Link>
+                      )}
                     </div>
-                    <div className={styles.snapshotData}>
-                      <strong>Recent Conditions:</strong>{" "}
-                      {ptSnapshot.keyConditions?.join(", ")}
-                      <br />
-                      <strong>Maintenance Meds:</strong>{" "}
-                      {ptSnapshot.currentMedications?.join(", ")}
+                    <div className={styles.snapshotGrid}>
+                      <div className={styles.snapshotRow}>
+                        <span className={styles.snapshotLabel}>🩺 Conditions</span>
+                        <span className={styles.snapshotValue}>
+                          {ptSnapshot.keyConditions?.map((c: string, i: number) => (
+                            <span key={i} className={styles.conditionTag}>{c}</span>
+                          ))}
+                        </span>
+                      </div>
+                      {ptSnapshot.chronicFlags?.length > 0 && (
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>⚠️ Chronic</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.chronicFlags.map((f: string, i: number) => (
+                              <span key={i} className={styles.chronicTag}>{f}</span>
+                            ))}
+                          </span>
+                        </div>
+                      )}
+                      <div className={styles.snapshotRow}>
+                        <span className={styles.snapshotLabel}>💊 Medications</span>
+                        <span className={styles.snapshotValue}>
+                          {ptSnapshot.currentMedications?.map((m: string, i: number) => (
+                            <span key={i} className={styles.medTag}>{m}</span>
+                          ))}
+                        </span>
+                      </div>
+                      {ptSnapshot.allergies?.length > 0 && (
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>🚫 Allergies</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.allergies.map((a: string, i: number) => (
+                              <span key={i} className={styles.allergyTag}>{a}</span>
+                            ))}
+                          </span>
+                        </div>
+                      )}
+                      {ptSnapshot.recentVisitsSummary && (
+                        <div className={styles.snapshotSummary}>
+                          {ptSnapshot.recentVisitsSummary}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1557,120 +1862,6 @@ export default function PrescriptionPage() {
                         borderRadius: "12px",
                       }}
                     >
-                      {aiDiagnosis && (
-                        <div
-                          className={styles.diagnosisArea}
-                          style={{
-                            background: "#eff6ff",
-                            border: "1px solid #bfdbfe",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: "11px",
-                                  color: "#1d4ed8",
-                                  fontWeight: 800,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.05em",
-                                }}
-                              >
-                                Probable Diagnosis
-                              </p>
-                              {aiSeverity && (
-                                <span
-                                  style={{
-                                    fontSize: "9px",
-                                    background:
-                                      aiSeverity === "emergency"
-                                        ? "#fee2e2"
-                                        : aiSeverity === "moderate"
-                                          ? "#fef9c3"
-                                          : "#dcfce7",
-                                    color:
-                                      aiSeverity === "emergency"
-                                        ? "#991b1b"
-                                        : aiSeverity === "moderate"
-                                          ? "#854d0e"
-                                          : "#166534",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    fontWeight: 800,
-                                    textTransform: "uppercase",
-                                    border: "1px solid",
-                                  }}
-                                >
-                                  {aiSeverity}
-                                </span>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => setDiagnosis(aiDiagnosis)}
-                              style={{
-                                fontSize: "10px",
-                                background: "#3b82f6",
-                                color: "white",
-                                border: "none",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                fontWeight: 800,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Apply
-                            </button>
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: "13px",
-                                color: "#1e3a8a",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {aiDiagnosis}
-                            </p>
-                            {aiConfidence > 0 && (
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: "10px",
-                                  color: "#60a5fa",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {Math.round(aiConfidence * 100)}% Confidence
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
                       {aiDifferentials.length > 0 && (
                         <div
                           style={{
@@ -2427,6 +2618,269 @@ export default function PrescriptionPage() {
                 </div>
               </div>
             </div>
+
+            {/* Page 2: Patient Guidance Sheet (if generated) */}
+            {guidanceSheet && (
+              <div 
+                className={styles.guidanceCard} 
+                ref={guidancePaperRef} 
+                id="guidance-preview"
+                style={{ position: 'relative' }}
+              >
+                {/* Overlay for pending review */}
+                {!guidanceApproved && (
+                  <div className={styles.guidanceOverlay}>
+                    <div className={styles.overlayTitle}>Patient Guidance Sheet Ready</div>
+                    <div className={styles.overlayText}>
+                      An AI-generated lifestyle, diet, and care guidance sheet is ready based on your diagnosis and medicines.
+                    </div>
+                    <button 
+                      className={styles.overlayBtn}
+                      onClick={() => setIsReviewModalOpen(true)}
+                    >
+                      Review & Approve Guidance Sheet
+                    </button>
+                  </div>
+                )}
+
+                {/* 1. Header (matching rxCard header) */}
+                <div className={styles.guidanceHeader}>
+                  <div className={styles.headerColumn}>
+                    <div className={styles.drName}>
+                      Dr. {selectedDoctorObj?.name || "Consultant Name"}
+                    </div>
+                    <div className={styles.drQual}>
+                      {selectedDoctorObj?.qualification || "M.B.B.S., M.D."}
+                    </div>
+                    <div className={styles.drSmall}>
+                      {selectedDoctorObj?.specialty || "General Consultant"}
+                    </div>
+                  </div>
+                  <div className={styles.headerLogo}>
+                    <div className={styles.logoCircle}>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className={styles.headerColumn} style={{ textAlign: "right" }}>
+                    <div className={styles.hospName}>
+                      {clinic?.name || "HOSPITAL NAME"}
+                    </div>
+                    <div className={styles.hospSlogan}>
+                      {clinic?.tagline || "Advanced Healthcare Solutions"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.guidanceTitleArea}>
+                  <div className={styles.guidanceBadge}>Patient Guidance Sheet</div>
+                  <div className={styles.guidanceSubtitle}>Custom Care Plan & Advice</div>
+                </div>
+
+                {/* 2-column Grid Layout for Sections */}
+                <div className={styles.guidanceGrid}>
+                  {/* Section 1: Understanding Condition */}
+                  {guidanceStatus.understanding_condition !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Understanding Condition</span>
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
+                        {guidanceSheet.understanding_condition?.disease_name || diagnosis || "Condition"}
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.understanding_condition === 'accepted' 
+                          ? (guidanceEditedTexts.understanding_condition ? guidanceEditedTexts.understanding_condition.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:")) : [])
+                          : (guidanceSheet.understanding_condition?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Section 2: Diet & Nutrition */}
+                  {guidanceStatus.diet_nutrition !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M12 2A10 10 0 0 0 2 12a9.9 9.9 0 0 0 .5 3.2l-1.5 5.3a1 1 0 0 0 1.2 1.2l5.3-1.5a10 10 0 1 0 4.5-20.2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Diet & Nutrition</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.diet_nutrition === 'accepted'
+                          ? (guidanceEditedTexts.diet_nutrition ? guidanceEditedTexts.diet_nutrition.split("\n").filter(Boolean) : [])
+                          : (guidanceSheet.diet_nutrition?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Section 3: Hydration */}
+                  {guidanceStatus.hydration !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Water & Hydration</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.hydration === 'accepted'
+                          ? (guidanceEditedTexts.hydration ? guidanceEditedTexts.hydration.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                          : (guidanceSheet.hydration?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {guidanceSheet.hydration?.tip && (
+                        <div className={styles.guidanceCallout}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>{guidanceSheet.hydration.tip}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Section 4: Activity & Exercise */}
+                  {guidanceStatus.activity_exercise !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h1a4 4 0 0 0 0 8H2M6 12h12M6 8v8M18 8v8" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Activity & Exercise</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.activity_exercise === 'accepted'
+                          ? (guidanceEditedTexts.activity_exercise ? guidanceEditedTexts.activity_exercise.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                          : (guidanceSheet.activity_exercise?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {guidanceSheet.activity_exercise?.tip && (
+                        <div className={styles.guidanceCallout}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>{guidanceSheet.activity_exercise.tip}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Section 5: Things To Avoid */}
+                  {guidanceStatus.things_to_avoid !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Things To Avoid</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {(guidanceStatus.things_to_avoid === 'accepted'
+                          ? (guidanceEditedTexts.things_to_avoid
+                              ? guidanceEditedTexts.things_to_avoid.split("\n").filter(Boolean).map((line: string) => {
+                                  const parts = line.split(":");
+                                  return {
+                                    text: parts[0]?.replace(/^-\s*/, '')?.trim() || "",
+                                    reason: parts.slice(1).join(":")?.trim() || ""
+                                  };
+                                })
+                              : [])
+                          : (guidanceSheet.things_to_avoid?.items || [])
+                        ).map((item: any, idx: number) => (
+                          <div key={idx} className={styles.guidanceAvoidItem}>
+                            <div className={styles.guidanceAvoidTitle}>
+                              <span style={{ color: '#ef4444' }}>❌</span>
+                              <span>{item.text}</span>
+                            </div>
+                            {item.reason && <div className={styles.guidanceAvoidReason}>{item.reason}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Section 6: Warning Signs */}
+                  {guidanceStatus.warning_signs !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Warning Signs</span>
+                      </div>
+                      <ul className={styles.guidancePointsList} style={{ marginBottom: '12px' }}>
+                        {(guidanceStatus.warning_signs === 'accepted'
+                          ? (guidanceEditedTexts.warning_signs ? guidanceEditedTexts.warning_signs.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:") && !l.toLowerCase().includes("red flags:")) : [])
+                          : (guidanceSheet.warning_signs?.red_flags || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidanceRedFlagItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {(guidanceStatus.warning_signs === 'accepted'
+                        ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up)
+                        : (guidanceSheet.warning_signs?.follow_up)
+                      ) && (
+                        <div className={styles.guidanceCallout} style={{ background: '#fff5f5', borderColor: '#ef4444', color: '#b91c1c' }}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>
+                            {guidanceStatus.warning_signs === 'accepted'
+                              ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up)
+                              : (guidanceSheet.warning_signs?.follow_up)
+                            }
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. General Care Tips Footer */}
+                {guidanceSheet.general_tips && guidanceSheet.general_tips.length > 0 && (
+                  <div className={styles.guidanceFooter}>
+                    <div className={styles.guidanceFooterTips}>
+                      {(guidanceSheet.general_tips || []).slice(0, 3).map((tip: string, idx: number) => (
+                        <div key={idx} className={styles.guidanceFooterTip}>
+                          <span>🛡️</span>
+                          <span>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -2475,6 +2929,315 @@ export default function PrescriptionPage() {
               >
                 Okay
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isReviewModalOpen && guidanceSheet && (
+        <div className={styles.reviewModalOverlay}>
+          <div className={styles.reviewModal}>
+            <div className={styles.reviewHeader}>
+              <div>
+                <div className={styles.reviewHeaderTitle}>Review Patient Guidance Sheet</div>
+                <div className={styles.reviewHeaderSubtitle}>Accept, edit, or reject each section before finalizing the prescription.</div>
+              </div>
+              <button className={styles.reviewCloseBtn} onClick={() => setIsReviewModalOpen(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.reviewBody}>
+              {/* Card 1: Understanding Condition */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.understanding_condition]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>1. Understanding Condition</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.understanding_condition]}`}>
+                    {guidanceStatus.understanding_condition}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.understanding_condition === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.understanding_condition}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        understanding_condition: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <strong>Condition:</strong> {guidanceSheet.understanding_condition?.disease_name || diagnosis || "Condition"}
+                      <ul>
+                        {(guidanceStatus.understanding_condition === 'accepted'
+                          ? guidanceEditedTexts.understanding_condition?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:"))
+                          : guidanceSheet.understanding_condition?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.understanding_condition === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 2: Diet & Nutrition */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.diet_nutrition]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>2. Diet & Nutrition</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.diet_nutrition]}`}>
+                    {guidanceStatus.diet_nutrition}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.diet_nutrition === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.diet_nutrition}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        diet_nutrition: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <ul>
+                      {(guidanceStatus.diet_nutrition === 'accepted'
+                        ? guidanceEditedTexts.diet_nutrition?.split("\n").filter(Boolean)
+                        : guidanceSheet.diet_nutrition?.points || []
+                      ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                    </ul>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.diet_nutrition === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 3: Water & Hydration */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.hydration]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>3. Water & Hydration</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.hydration]}`}>
+                    {guidanceStatus.hydration}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.hydration === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.hydration}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        hydration: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.hydration === 'accepted'
+                          ? guidanceEditedTexts.hydration?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:"))
+                          : guidanceSheet.hydration?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.hydration?.tip && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#0d6e56' }}>
+                          Tip: {guidanceSheet.hydration.tip}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.hydration === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 4: Activity & Exercise */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.activity_exercise]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>4. Activity & Exercise</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.activity_exercise]}`}>
+                    {guidanceStatus.activity_exercise}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.activity_exercise === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.activity_exercise}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        activity_exercise: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.activity_exercise === 'accepted'
+                          ? guidanceEditedTexts.activity_exercise?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:"))
+                          : guidanceSheet.activity_exercise?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.activity_exercise?.tip && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#0d6e56' }}>
+                          Tip: {guidanceSheet.activity_exercise.tip}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.activity_exercise === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 5: Things To Avoid */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.things_to_avoid]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>5. Things To Avoid</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.things_to_avoid]}`}>
+                    {guidanceStatus.things_to_avoid}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.things_to_avoid === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.things_to_avoid}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        things_to_avoid: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <ul>
+                      {(guidanceStatus.things_to_avoid === 'accepted'
+                        ? guidanceEditedTexts.things_to_avoid?.split("\n").filter(Boolean)
+                        : (guidanceSheet.things_to_avoid?.items || []).map((item: any) => `${item.text}: ${item.reason}`)
+                      ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                    </ul>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.things_to_avoid === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 6: Warning Signs */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.warning_signs]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>6. Warning Signs & Follow-up</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.warning_signs]}`}>
+                    {guidanceStatus.warning_signs}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.warning_signs === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.warning_signs}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        warning_signs: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.warning_signs === 'accepted'
+                          ? guidanceEditedTexts.warning_signs?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:"))
+                          : guidanceSheet.warning_signs?.red_flags || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.warning_signs?.follow_up && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#b91c1c' }}>
+                          Follow-up: {guidanceSheet.warning_signs.follow_up}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.warning_signs === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.reviewFooter}>
+              <div className={styles.reviewProgressText}>
+                {Object.values(guidanceStatus).filter(s => s === 'accepted').length} of 6 sections approved
+              </div>
+              <div className={styles.reviewFooterActions}>
+                <button 
+                  className={styles.footerBtn} 
+                  onClick={() => {
+                    const nextStatus = { ...guidanceStatus };
+                    Object.keys(nextStatus).forEach(k => {
+                      if (nextStatus[k] === 'pending') nextStatus[k] = 'accepted';
+                    });
+                    setGuidanceStatus(nextStatus);
+                  }}
+                >
+                  Accept All
+                </button>
+                <button 
+                  className={`${styles.footerBtn} ${styles.primary}`}
+                  onClick={() => {
+                    const approvedData = { ...guidanceSheet };
+                    handleConfirmAndSaveGuidance(approvedData);
+                  }}
+                  disabled={Object.values(guidanceStatus).some(s => s === 'pending' || s === 'editing')}
+                >
+                  Confirm & Save Prescription
+                </button>
+              </div>
             </div>
           </div>
         </div>

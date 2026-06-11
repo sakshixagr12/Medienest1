@@ -1154,15 +1154,6 @@ function DischargeSummaryRedesign() {
                     </svg>
                     Diagnosis
                   </div>
-                  <button
-                    className={styles.aiAssistBtn}
-                    onClick={handleSuggestDiagnosis}
-                    disabled={aiLoading === "diagnosis"}
-                  >
-                    {aiLoading === "diagnosis"
-                      ? "Analyzing..."
-                      : "Suggest Diagnosis"}
-                  </button>
                 </div>
                 <input
                   className={styles.bulletInput}

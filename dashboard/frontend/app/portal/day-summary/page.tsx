@@ -70,13 +70,13 @@ function DaySummary() {
 
     try {
       // 1. Fetch Today's Prescriptions (Visits) with Patient Info
-      // Optimized to use the 'date' index
-      const todayStr = new Date().toISOString().split("T")[0];
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
       const { data: rxData, error: rxErr } = await supabase
         .from("prescriptions")
         .select("*, patients!patient_id(name)")
         .eq("clinic_id", clinic.id)
-        .eq("date", todayStr);
+        .gte("created_at", startOfToday.toISOString());
 
       if (rxErr) {
         console.error("RX Error Full:", rxErr);

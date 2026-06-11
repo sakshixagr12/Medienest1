@@ -55,12 +55,17 @@ const requireAuth = async (req, res, next) => {
 
 const requireClinicAccess = async (req, res, next) => {
   // Extract clinic_id from query or body
-  const clinic_id = req.query.clinic_id || req.body.clinic_id;
+  const clinic_id = req.query.clinic_id || req.body.clinic_id || req.body.receiptData?.clinic_id;
 
   if (!clinic_id) {
     return res
       .status(400)
       .json({ success: false, error: "clinic_id is required" });
+  }
+
+  // Ensure clinic_id is present at req.body for downstream route handlers
+  if (req.body && typeof req.body === "object" && !req.body.clinic_id) {
+    req.body.clinic_id = clinic_id;
   }
 
   try {

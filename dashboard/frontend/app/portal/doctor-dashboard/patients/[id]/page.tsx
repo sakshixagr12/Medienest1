@@ -37,7 +37,10 @@ interface Visit {
 interface Snapshot {
   keyConditions: string[];
   currentMedications: any[];
+  allergies?: string[];
+  chronicFlags?: string[];
   recentVisitsSummary: string;
+  totalVisits?: number;
 }
 
 function PatientHubContent({
@@ -262,42 +265,63 @@ function PatientHubContent({
             {patient?.contact}
           </div>
           {patient?.allergies && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: "8px 12px",
-                background: "#fef2f2",
-                border: "1px solid #fee2e2",
-                borderRadius: 8,
-                color: "#b91c1c",
-                fontSize: 12,
-                fontWeight: 800,
-              }}
-            >
-              ️ ALLERGIC: {patient.allergies}
+            <div className={styles.allergyBanner}>
+              🚫 ALLERGIC: {patient.allergies}
+            </div>
+          )}
+          {snapshot?.totalVisits != null && snapshot.totalVisits > 0 && (
+            <div className={styles.visitCountBadge}>
+              {snapshot.totalVisits} clinical visit{snapshot.totalVisits > 1 ? "s" : ""} on record
             </div>
           )}
         </div>
 
         <div className={styles.snapGroup}>
-          <h4>️ Key Conditions</h4>
-          <ul className={styles.conditionList}>
+          <h4>🩺 Key Conditions</h4>
+          <div className={styles.tagWrap}>
             {snapshot?.keyConditions ? (
-              snapshot.keyConditions.map((c, i) => <li key={i}>{c}</li>)
-            ) : (
-              <li>{loading ? "Calculated..." : "No conditions found"}</li>
-            )}
-          </ul>
-          <h4 style={{ marginTop: 24 }}>Current Medications</h4>
-          <ul className={styles.conditionList}>
-            {snapshot?.currentMedications ? (
-              snapshot.currentMedications.map((m, i) => (
-                <li key={i}>{typeof m === "object" ? m.name : m}</li>
+              snapshot.keyConditions.map((c, i) => (
+                <span key={i} className={styles.snapConditionTag}>{c}</span>
               ))
             ) : (
-              <li>{loading ? "Analyzing Rx..." : "None listed"}</li>
+              <span className={styles.snapEmptyTag}>{loading ? "Calculating..." : "No conditions found"}</span>
             )}
-          </ul>
+          </div>
+
+          {snapshot?.chronicFlags && snapshot.chronicFlags.length > 0 && (
+            <>
+              <h4 style={{ marginTop: 20 }}>⚠️ Chronic Conditions</h4>
+              <div className={styles.tagWrap}>
+                {snapshot.chronicFlags.map((f, i) => (
+                  <span key={i} className={styles.snapChronicTag}>{f}</span>
+                ))}
+              </div>
+            </>
+          )}
+
+          <h4 style={{ marginTop: 20 }}>💊 Medications</h4>
+          <div className={styles.tagWrap}>
+            {snapshot?.currentMedications ? (
+              snapshot.currentMedications.map((m, i) => (
+                <span key={i} className={styles.snapMedTag}>
+                  {typeof m === "object" ? m.name : m}
+                </span>
+              ))
+            ) : (
+              <span className={styles.snapEmptyTag}>{loading ? "Analyzing Rx..." : "None listed"}</span>
+            )}
+          </div>
+
+          {snapshot?.allergies && snapshot.allergies.length > 0 && (
+            <>
+              <h4 style={{ marginTop: 20 }}>🚫 Drug Allergies / Reactions</h4>
+              <div className={styles.tagWrap}>
+                {snapshot.allergies.map((a, i) => (
+                  <span key={i} className={styles.snapAllergyTag}>{a}</span>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.snapGroup}>
@@ -324,7 +348,7 @@ function PatientHubContent({
                 <line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
               <span style={{ fontWeight: 800, fontSize: 13 }}>
-                RECENT VISITS
+                CLINICAL SUMMARY
               </span>
             </div>
             <p className={styles.summaryText}>

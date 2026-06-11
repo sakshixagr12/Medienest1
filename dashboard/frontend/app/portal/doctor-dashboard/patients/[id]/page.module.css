@@ -215,6 +215,84 @@
   opacity: 0.9;
 }
 
+/* --- Rich Snapshot Tags --- */
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.snapConditionTag {
+  font-size: 12px;
+  font-weight: 600;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.snapChronicTag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(252, 211, 77, 0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.snapMedTag {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(110, 231, 183, 0.25);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.snapAllergyTag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(252, 165, 165, 0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.snapEmptyTag {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.allergyBanner {
+  margin-top: 16;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(252, 165, 165, 0.3);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 16px;
+}
+
+.visitCountBadge {
+  margin-top: 16px;
+  padding: 6px 12px;
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 10px;
+  color: #c4b5fd;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
 /* --- Timeline Styles --- */
 .timelineSection {
   padding-left: 20px;

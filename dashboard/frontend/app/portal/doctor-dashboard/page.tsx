@@ -355,17 +355,21 @@ export default function DoctorPage() {
   // ── Fetch clinical analytics ─────────────────────────────────────────
   const fetchAnalytics = useCallback(async () => {
     if (!clinic?.id || !activeDoctorId) return;
-    const today = new Date();
     const todayStr = getLocalTodayStr();
-    const startOfWeek = new Date();
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const weekStr = startOfWeek.toISOString().split("T")[0];
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthStr = startOfMonth.toISOString().split("T")[0];
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
 
-    let rxTodayQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).eq("date", todayStr).eq("clinic_id", clinic.id);
-    let rxWeekQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("date", weekStr).eq("clinic_id", clinic.id);
-    let rxMonthQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("date", monthStr).eq("clinic_id", clinic.id);
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    let rxTodayQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("created_at", startOfToday.toISOString()).eq("clinic_id", clinic.id);
+    let rxWeekQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("created_at", startOfWeek.toISOString()).eq("clinic_id", clinic.id);
+    let rxMonthQuery = supabase.from("prescriptions").select("id", { count: "exact", head: true }).gte("created_at", startOfMonth.toISOString()).eq("clinic_id", clinic.id);
 
     if (activeDoctorId) {
       rxTodayQuery = rxTodayQuery.eq("doctor_id", activeDoctorId);
@@ -394,7 +398,7 @@ export default function DoctorPage() {
     let avgQuery = supabase
       .from("prescriptions")
       .select("created_at")
-      .eq("date", todayStr)
+      .gte("created_at", startOfToday.toISOString())
       .eq("clinic_id", clinic.id)
       .order("created_at", { ascending: true });
     if (activeDoctorId) {

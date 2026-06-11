@@ -24,6 +24,7 @@ interface QueueEntry {
   id: string;
   patient_id: string;
   patient_name: string;
+  doctor_id?: string | null;
   token_number: number;
   status: "waiting" | "serving" | "done" | "skipped";
   priority: "normal" | "urgent" | "elderly";
@@ -46,6 +47,7 @@ export default function FrontDeskPage() {
   const [showDone, setShowDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeDoctorId, setActiveDoctorId] = useState<string>("all");
+  const isUpdatingDb = useRef(false);
 
   // ── Drag-and-drop state ──────────────────────────────────────────────
   const dragItem = useRef<number | null>(null);
@@ -151,10 +153,18 @@ export default function FrontDeskPage() {
           table: "doctor_queue",
           filter: `clinic_id=eq.${clinic.id}`,
         },
-        fetchQueue,
+        () => {
+          if (!isUpdatingDb.current) {
+            fetchQueue();
+          }
+        },
       )
       .subscribe();
-    const poll = setInterval(fetchQueue, 10000);
+    const poll = setInterval(() => {
+      if (!isUpdatingDb.current) {
+        fetchQueue();
+      }
+    }, 10000);
     return () => {
       supabase.removeChannel(channel);
       clearInterval(poll);
@@ -328,12 +338,10 @@ export default function FrontDeskPage() {
   const serving = queue.find((q) => q.status === "serving");
 
   const handleDragStart = (idx: number, id: string) => {
-    if (activeDoctorId === "all") return;
     dragItem.current = idx;
     setDragging(id);
   };
   const handleDragEnter = (idx: number, id: string) => {
-    if (activeDoctorId === "all") return;
     dragOverItem.current = idx;
     setDragOver(id);
   };
@@ -343,7 +351,6 @@ export default function FrontDeskPage() {
   };
 
   const handleDrop = async () => {
-    if (activeDoctorId === "all") return;
     const from = dragItem.current,
       to = dragOverItem.current;
     if (from === null || to === null || from === to) {
@@ -356,29 +363,70 @@ export default function FrontDeskPage() {
     const [moved] = reordered.splice(from, 1);
     reordered.splice(to, 0, moved);
 
-    // 2. Extract and sort existing token numbers to maintain the same sequence
-    // This prevents tokens from resetting to 1/2 when rearranging.
-    const tokens = waiting.map((q) => q.token_number).sort((a, b) => a - b);
+    let updated: any[] = [];
 
-    // 3. Map tokens back to the new order
-    const updated = reordered.map((e, i) => ({
-      ...e,
-      token_number: tokens[i],
-    }));
+    if (activeDoctorId !== "all") {
+      const tokens = waiting.map((q) => q.token_number).sort((a, b) => a - b);
+      updated = reordered.map((e, i) => ({
+        ...e,
+        token_number: tokens[i],
+      }));
+    } else {
+      // Group by doctor_id and re-assign their respective tokens in the new visual order
+      const doctorsInQueue = [...new Set(reordered.map((q) => q.doctor_id))];
+      const tokenMap = new Map();
+      doctorsInQueue.forEach((docId) => {
+        const tokens = waiting
+          .filter((q) => q.doctor_id === docId)
+          .map((q) => q.token_number)
+          .sort((a, b) => a - b);
+        tokenMap.set(docId, tokens);
+      });
 
+      const indexMap = new Map();
+      updated = reordered.map((p) => {
+        const docId = p.doctor_id;
+        const tokens = tokenMap.get(docId) || [];
+        const currentIndex = indexMap.get(docId) || 0;
+        const nextToken = tokens[currentIndex] ?? p.token_number;
+        indexMap.set(docId, currentIndex + 1);
+        return {
+          ...p,
+          token_number: nextToken,
+        };
+      });
+    }
+
+    isUpdatingDb.current = true;
     setQueue([...(serving ? [serving] : []), ...updated]);
     handleDragEnd();
     try {
+      // Step 1: Temporarily set target entries to negative tokens to vacate the positive sequence
+      await Promise.all(
+        updated.map((e, idx) =>
+          supabase
+            .from("doctor_queue")
+            .update({ token_number: -(1000 + idx) })
+            .eq("id", e.id)
+        )
+      );
+
+      // Step 2: Set the final new tokens
       await Promise.all(
         updated.map((e) =>
           supabase
             .from("doctor_queue")
             .update({ token_number: e.token_number })
-            .eq("id", e.id),
-        ),
+            .eq("id", e.id)
+        )
       );
-    } catch {
-      fetchQueue();
+    } catch (err) {
+      console.error("Error saving queue order:", err);
+    } finally {
+      setTimeout(() => {
+        isUpdatingDb.current = false;
+        fetchQueue();
+      }, 1000);
     }
   };
 
@@ -683,7 +731,7 @@ export default function FrontDeskPage() {
         {waiting.map((entry, idx) => (
           <div
             key={entry.id}
-            draggable={activeDoctorId !== "all"}
+            draggable
             onDragStart={() => handleDragStart(idx, entry.id)}
             onDragEnter={() => handleDragEnter(idx, entry.id)}
             onDragOver={(e) => e.preventDefault()}

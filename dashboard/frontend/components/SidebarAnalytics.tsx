@@ -37,15 +37,23 @@ export default function SidebarAnalytics({
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     const todayStr = getLocalTodayStr();
-    const weekStr = getLocalWeekStartStr();
-    const monthStr = getLocalMonthStartStr();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
     try {
       // 1. Patient Census Today/Week/Month
       let todayQuery = supabase
         .from("prescriptions")
         .select("id", { count: "exact", head: true })
-        .eq("date", todayStr)
+        .gte("created_at", startOfToday.toISOString())
         .eq("clinic_id", clinicId);
       if (doctorId) todayQuery = todayQuery.eq("doctor_id", doctorId);
       const { count: countToday } = await todayQuery;
@@ -53,7 +61,7 @@ export default function SidebarAnalytics({
       let weekQuery = supabase
         .from("prescriptions")
         .select("id", { count: "exact", head: true })
-        .gte("date", weekStr)
+        .gte("created_at", startOfWeek.toISOString())
         .eq("clinic_id", clinicId);
       if (doctorId) weekQuery = weekQuery.eq("doctor_id", doctorId);
       const { count: countWeek } = await weekQuery;
@@ -61,7 +69,7 @@ export default function SidebarAnalytics({
       let monthQuery = supabase
         .from("prescriptions")
         .select("id", { count: "exact", head: true })
-        .gte("date", monthStr)
+        .gte("created_at", startOfMonth.toISOString())
         .eq("clinic_id", clinicId);
       if (doctorId) monthQuery = monthQuery.eq("doctor_id", doctorId);
       const { count: countMonth } = await monthQuery;
@@ -84,7 +92,7 @@ export default function SidebarAnalytics({
       let timeQuery = supabase
         .from("prescriptions")
         .select("created_at")
-        .eq("date", todayStr)
+        .gte("created_at", startOfToday.toISOString())
         .eq("clinic_id", clinicId)
         .order("created_at", { ascending: true });
 
