@@ -105,7 +105,7 @@
 .metricDivider {
   width: 1px;
   height: 48px;
-  background-color: rgba(23, 3, 55, 0.08);
+  background-color: transparent;
   align-self: center;
   flex-shrink: 0;
 }

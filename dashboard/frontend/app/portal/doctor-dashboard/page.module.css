@@ -1140,7 +1140,7 @@
 .censusDivider {
   width: 1px;
   height: 32px;
-  background-color: rgba(23, 3, 55, 0.08);
+  background-color: transparent;
 }
 
 /* Clinical Intelligence section */
