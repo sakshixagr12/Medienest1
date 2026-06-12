@@ -1332,29 +1332,76 @@ function AdmissionRecordRedesign() {
                 </div>
               )}
 
-              {/* Allergy Alert */}
-              {summary.allergies?.trim() && (
-                <div className={styles.allergyAlertChip}>
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
+              {/* Critical Alerts: Allergies + Comorbidities */}
+              {(summary.allergies?.trim() ||
+                summary.has_diabetes ||
+                summary.has_hypertension ||
+                summary.has_thyroid) && (() => {
+                const flags: string[] = [];
+                if (summary.allergies?.trim()) flags.push(summary.allergies.trim());
+                if (summary.has_diabetes) flags.push("Diabetes");
+                if (summary.has_hypertension) flags.push("Hypertension");
+                if (summary.has_thyroid) flags.push("Thyroid");
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      background: "#fff1f2",
+                      border: "1.5px solid #fecdd3",
+                      borderRadius: 10,
+                      padding: "6px 12px",
+                      maxWidth: 260,
+                    }}
                   >
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  <span>
-                    {summary.allergies.length > 30
-                      ? summary.allergies.slice(0, 28) + "…"
-                      : summary.allergies}{" "}
-                    Allergy
-                  </span>
-                </div>
-              )}
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#e11d48"
+                      strokeWidth="3"
+                      style={{ marginTop: 2, flexShrink: 0 }}
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 900,
+                          color: "#be123c",
+                          textTransform: "uppercase",
+                          letterSpacing: 0.8,
+                        }}
+                      >
+                        Critical Alerts
+                      </span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 8px" }}>
+                        {flags.map((flag, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: "#9f1239",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 3,
+                            }}
+                          >
+                            <span style={{ color: "#e11d48", fontSize: 9 }}>•</span>
+                            {flag.length > 22 ? flag.slice(0, 20) + "…" : flag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Right: Quick Actions */}
               <div className={styles.stickyQuickActions}>
@@ -1438,173 +1485,267 @@ function AdmissionRecordRedesign() {
           >
             {!isQuickMode && (
               <section className={styles.leftColumn}>
-                {/* --- Clinical Readiness Progress --- */}
+                {/* --- Smart Admission Assistant Panel --- */}
                 {(() => {
-                  const { percentage, missing } = calculateProgress();
-                  const color =
-                    percentage < 40
-                      ? "#ef4444"
-                      : percentage < 80
-                        ? "#f59e0b"
-                        : "#10b981";
+                  const admissionChecklist = [
+                    { label: "Name", value: summary.patientName },
+                    { label: "Age", value: summary.age },
+                    { label: "Phone Number", value: summary.phone },
+                    { label: "Doctor Assigned", value: summary.doctor },
+                    { label: "Ward", value: summary.ward },
+                    { label: "Bed", value: summary.bed },
+                    { label: "Complaints", value: summary.complaints?.length > 0 ? summary.complaints[0] : "" },
+                  ];
+                  const completed = admissionChecklist.filter((f) => !!f.value).length;
+                  const total = admissionChecklist.length;
+                  const allDone = completed === total;
                   return (
-                    <div className={styles.progressCard}>
+                    <div
+                      className={styles.progressCard}
+                      style={{
+                        borderLeft: "4px solid #6366f1",
+                        background: "linear-gradient(135deg, #f8f7ff 0%, #eef2ff 100%)",
+                      }}
+                    >
+                      {/* Header */}
                       <div
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          marginBottom: 12,
+                          marginBottom: 16,
                         }}
                       >
-                        <div className={styles.cardTitle} style={{ margin: 0 }}>
+                        <div className={styles.cardTitle} style={{ margin: 0, color: "#4f46e5" }}>
                           <svg
-                            width="18"
-                            height="18"
+                            width="17"
+                            height="17"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="currentColor"
+                            stroke="#6366f1"
                             strokeWidth="2.5"
                           >
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                            <rect
-                              x="8"
-                              y="2"
-                              width="8"
-                              height="4"
-                              rx="1"
-                              ry="1"
-                            ></rect>
-                            <path d="M9 14l2 2 4-4"></path>
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                           </svg>
-                          Clinical Readiness
+                          ADMISSION STATUS
                         </div>
-                        <div style={{ fontSize: 18, fontWeight: 900, color }}>
-                          {percentage}%
-                        </div>
-                      </div>
-                      <div className={styles.progressBarTrack}>
                         <div
-                          className={styles.progressBarFill}
-                          style={{ width: `${percentage}%`, background: color }}
-                        />
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 800,
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            background: allDone ? "#d1fae5" : "#e0e7ff",
+                            color: allDone ? "#065f46" : "#4338ca",
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          {completed}/{total}
+                        </div>
                       </div>
-                      {missing.length > 0 && (
-                        <div style={{ marginTop: 16 }}>
-                          <div
+
+                      {/* Checklist Items */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {admissionChecklist.map((item, i) => {
+                          const done = !!item.value;
+                          return (
+                            <div
+                              key={i}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                padding: "7px 10px",
+                                borderRadius: 8,
+                                background: done ? "#f0fdf4" : "#fff7ed",
+                                border: `1px solid ${done ? "#bbf7d0" : "#fed7aa"}`,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: done ? "#166534" : "#92400e",
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {done ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
+                                  <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="3">
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                  <line x1="12" y1="9" x2="12" y2="13" />
+                                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                              )}
+                              <span style={{ flex: 1 }}>{item.label}</span>
+                              {!done && (
+                                <span
+                                  style={{
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: "#b45309",
+                                    background: "#fef3c7",
+                                    padding: "1px 7px",
+                                    borderRadius: 10,
+                                    letterSpacing: 0.3,
+                                  }}
+                                >
+                                  Missing
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Completion Footer */}
+                      <div
+                        style={{
+                          marginTop: 14,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          paddingTop: 12,
+                          borderTop: "1px dashed #c7d2fe",
+                        }}
+                      >
+                        <span style={{ fontSize: 11, color: "#6366f1", fontWeight: 700 }}>
+                          Completion: {completed}/{total}
+                        </span>
+                        {allDone && (
+                          <span
                             style={{
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: 800,
-                              color: "#94a3b8",
-                              textTransform: "uppercase",
-                              marginBottom: 8,
+                              color: "#059669",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
                             }}
                           >
-                            Missing Information ({missing.length})
-                          </div>
-                          <div style={{ maxHeight: 100, overflowY: "auto" }}>
-                            {missing.slice(0, 3).map((m, i) => (
-                              <div key={i} className={styles.missingItem}>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                >
-                                  <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-                                </svg>
-                                {m}
-                              </div>
-                            ))}
-                            {missing.length > 3 && (
-                              <div
-                                style={{
-                                  fontSize: 10,
-                                  color: "#64748b",
-                                  padding: "4px 0",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                + {missing.length - 3} more fields...
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                            Ready to Submit
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })()}
 
-                <div className={styles.summaryCard} style={{ marginTop: 12 }}>
-                  <div className={styles.cardHeader}>
-                    <div className={styles.cardTitle}>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                      </svg>
-                      Attachments
-                    </div>
+
+                {/* --- Alerts & History Panel --- */}
+                <div
+                  className={styles.progressCard}
+                  style={{
+                    borderLeft: "4px solid #ef4444",
+                    background: "linear-gradient(135deg, #fff5f5 0%, #fff1f2 100%)",
+                    marginTop: 0,
+                  }}
+                >
+                  {/* Header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 7,
+                      marginBottom: 14,
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    <span style={{ fontSize: 11, fontWeight: 900, color: "#b91c1c", textTransform: "uppercase", letterSpacing: 0.7 }}>
+                      Alerts &amp; History
+                    </span>
                   </div>
-                  <div className={styles.uploadZone}>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*,application/pdf"
-                      onChange={handleFileUpload}
-                      className={styles.fileInputHidden}
-                      id="file-upload"
-                    />
-                    <label htmlFor="file-upload" className={styles.uploadLabel}>
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
+
+                  {/* Comorbidities */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px", marginBottom: 12 }}>
+                    {[
+                      { key: "has_diabetes" as const, label: "Diabetes" },
+                      { key: "has_hypertension" as const, label: "Hypertension" },
+                      { key: "has_thyroid" as const, label: "Thyroid" },
+                    ].map(({ key, label }) => (
+                      <label
+                        key={key}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: summary[key] ? "#b91c1c" : "#64748b",
+                          background: summary[key] ? "#fee2e2" : "#f8fafc",
+                          border: `1px solid ${summary[key] ? "#fca5a5" : "#e2e8f0"}`,
+                          borderRadius: 8,
+                          padding: "5px 8px",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
                       >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-                      </svg>
-                      <span>Upload Reports</span>
-                    </label>
-                  </div>
-                  <div className={styles.attachmentList}>
-                    {summary.attachments.map((file, i) => (
-                      <div key={i} className={styles.attachmentItem}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className={styles.fileName}>{file.name}</div>
-                          <div className={styles.fileMeta}>
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", gap: 10 }}>
-                          <a
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.btnFileAction}
-                          >
-                            View
-                          </a>
-                          <button
-                            onClick={() => handleDeleteAttachment(i)}
-                            className={styles.btnFileDelete}
-                          >
-                            ️
-                          </button>
-                        </div>
-                      </div>
+                        <input
+                          type="checkbox"
+                          checked={summary[key]}
+                          onChange={(e) => updateField(key, e.target.checked)}
+                          style={{ accentColor: "#ef4444", width: 12, height: 12 }}
+                        />
+                        {label}
+                      </label>
                     ))}
                   </div>
+
+                  {/* Critical Allergies */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ fontSize: 10, fontWeight: 800, color: "#ef4444", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
+                      Critical Allergies
+                    </label>
+                    <textarea
+                      value={summary.allergies || ""}
+                      onChange={(e) => updateField("allergies", e.target.value)}
+                      placeholder="Drug or environmental allergies..."
+                      rows={2}
+                      style={{
+                        width: "100%",
+                        border: "1px solid #fecaca",
+                        background: "#fef2f2",
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        outline: "none",
+                        fontSize: 12,
+                        resize: "none",
+                        color: "#7f1d1d",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  {/* Past Surgeries */}
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
+                      Past Surgeries
+                    </label>
+                    <input
+                      type="text"
+                      value={summary.past_surgeries || ""}
+                      onChange={(e) => updateField("past_surgeries", e.target.value)}
+                      placeholder="e.g. Appendectomy (2018)"
+                      style={{
+                        width: "100%",
+                        border: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        outline: "none",
+                        fontSize: 12,
+                        color: "#334155",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
                 </div>
+
               </section>
             )}
 
@@ -1969,105 +2110,6 @@ function AdmissionRecordRedesign() {
                               ))}
                             </select>
                           </div>
-                        </div>
-                      </div>
-
-                      <div
-                        className={styles.summaryCard}
-                        style={{ borderTop: "4px solid #ef4444" }}
-                      >
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                            </svg>
-                            Alerts & History
-                          </div>
-                          {summary.allergies?.trim() && (
-                            <div className={styles.allergyBadge}>Allergies</div>
-                          )}
-                        </div>
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 12,
-                            marginBottom: 20,
-                          }}
-                        >
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_diabetes}
-                              onChange={(e) =>
-                                updateField("has_diabetes", e.target.checked)
-                              }
-                            />
-                            Diabetes
-                          </label>
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_hypertension}
-                              onChange={(e) =>
-                                updateField(
-                                  "has_hypertension",
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                            Hypertension
-                          </label>
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_thyroid}
-                              onChange={(e) =>
-                                updateField("has_thyroid", e.target.checked)
-                              }
-                            />
-                            Thyroid
-                          </label>
-                        </div>
-                        <div className="field">
-                          <label style={{ color: "#ef4444", fontWeight: 900 }}>
-                            ️ Critical Allergies
-                          </label>
-                          <textarea
-                            value={summary.allergies || ""}
-                            onChange={(e) =>
-                              updateField("allergies", e.target.value)
-                            }
-                            placeholder="List all drug or environmental allergies..."
-                            style={{
-                              width: "100%",
-                              minHeight: 60,
-                              border: "1px solid #fecaca",
-                              background: "#fef2f2",
-                              padding: 12,
-                              borderRadius: 8,
-                              outline: "none",
-                              fontSize: 13,
-                            }}
-                          ></textarea>
-                        </div>
-                        <div className="field">
-                          <label>Past Surgeries</label>
-                          <input
-                            type="text"
-                            value={summary.past_surgeries || ""}
-                            onChange={(e) =>
-                              updateField("past_surgeries", e.target.value)
-                            }
-                            placeholder="e.g. Appendectomy (2018)"
-                          />
                         </div>
                       </div>
                     </div>

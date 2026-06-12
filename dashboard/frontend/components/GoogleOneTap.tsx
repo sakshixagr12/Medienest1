@@ -73,6 +73,13 @@ export default function GoogleOneTap() {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
       if (!clientId) return;
 
+      // Skip One Tap prompt on localhost to avoid FedCM NetworkError in dev.
+      // The button-based Google OAuth flow on /auth still works fine locally.
+      const isLocalhost =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+      if (isLocalhost) return;
+
       // Generate and hash nonce for security
       const rawNonce = generateNonce();
       nonceRef.current = rawNonce;
