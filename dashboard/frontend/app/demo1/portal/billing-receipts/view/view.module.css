@@ -178,7 +178,7 @@
 
 @media print {
   /* Hide all background layout */
-  body * {
+  .printBodyAsteriskFix {
     visibility: hidden;
   }
   #receipt-print-area,

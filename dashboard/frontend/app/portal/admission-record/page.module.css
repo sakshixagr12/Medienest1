@@ -1339,7 +1339,7 @@
 }
 
 @media print {
-  body {
+  .printBodyFix {
     background: #fff !important;
   }
   .page {

@@ -446,7 +446,7 @@
     size: A4;
     margin: 0;
   }
-  :global(body) {
+  .printBodyFix {
     background: #fff;
     margin: 0;
     padding: 0;
@@ -459,11 +459,11 @@
 
   /* FIX: Explicitly hide the navigation and form panel */
   .formPanel, 
-  :global(.ssk-topbar), 
-  :global(.TopBar),
-  :global(.TopBar_container__2x7_T), /* Potential class name variation */
-  :global([class*="TopBar"]),
-  :global(nav) {
+  .printSskFix, 
+  .printTopBarA,
+  .printTopBarB, /* Potential class name variation */
+  .printTopBarFix,
+  .printNavFix {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;

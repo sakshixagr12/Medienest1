@@ -219,10 +219,10 @@
 
 @media print {
   /* Hide everything else */
-  :global(header),
-  :global(aside),
-  :global(nav),
-  :global(footer),
+  .printHeaderFix,
+  .printAsideFix,
+  .printNavFix,
+  .printFooterFix,
   .actionBtns,
   .formPanel,
   .header {

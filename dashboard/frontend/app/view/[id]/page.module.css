@@ -1,6 +1,6 @@
 /* frontend/app/view/[id]/page.module.css */
 
-:root {
+.printRootFix {
   --sidebar-width: 260px;
   --top-nav-height: 80px;
   --primary-deep: #1e0b3e;
@@ -12,7 +12,7 @@
   --white: #ffffff;
 }
 
-body {
+.printBodyFix {
   background: var(--bg-main);
   font-family: "Inter", sans-serif;
 }
