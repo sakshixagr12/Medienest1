@@ -1,18 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  throw new Error(
-    "[Supabase] NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in environment variables.",
-  );
-}
-
 function createMiddlewareSupabase(request: any, response: any) {
-  return createServerClient(SUPABASE_URL!, SUPABASE_KEY!, {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       get(name: string) {
         return request.cookies.get(name)?.value;
@@ -33,6 +26,7 @@ function createMiddlewareSupabase(request: any, response: any) {
     },
   });
 }
+
 
 
 
