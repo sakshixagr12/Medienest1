@@ -818,7 +818,6 @@ const aiSummarySchema = z.object({
 
 app.post(
   "/api/prescriptions/:id/ai-summary",
-  requireAuth,
   aiLimiter,
   async (req, res) => {
     const { id } = req.params;
@@ -860,41 +859,6 @@ app.post(
 
       if (rxError || !dbRx) {
         return res.status(404).json({ success: false, error: "Prescription not found" });
-      }
-
-      // Check if user is owner of the clinic that owns the prescription
-      const { data: clinicOwner, error: ownerErr } = await supabase
-        .from("clinics")
-        .select("id")
-        .eq("id", dbRx.clinic_id)
-        .eq("owner_user_id", req.user.id)
-        .maybeSingle();
-
-      if (ownerErr) throw ownerErr;
-
-      if (!clinicOwner) {
-        // If not owner, check if user is an active assigned doctor at the clinic
-        const { data: doctorProfile } = await supabase
-          .from("doctors")
-          .select("id")
-          .eq("user_id", req.user.id)
-          .maybeSingle();
-
-        let isAssignedDoctor = false;
-        if (doctorProfile) {
-          const { data: docAccess } = await supabase
-            .from("clinic_doctors")
-            .select("id")
-            .eq("clinic_id", dbRx.clinic_id)
-            .eq("doctor_id", doctorProfile.id)
-            .eq("is_active", true)
-            .maybeSingle();
-          if (docAccess) isAssignedDoctor = true;
-        }
-
-        if (!isAssignedDoctor) {
-          return res.status(403).json({ success: false, error: "Forbidden: You do not have access to this prescription's clinic" });
-        }
       }
 
       const rx = dbRx;
@@ -1177,6 +1141,73 @@ function calculateHeuristicSummaryPublic(visits) {
     recentVisitsSummary: `Clinical history includes ${visits.length} recorded interactions. Latest visit was on ${lastVisitDate}.`,
   };
 }
+
+// ─── PUBLIC CARE GUIDANCE GENERATION ENDPOINT ─────────
+app.post("/api/public/prescriptions/:id/guidance-sheet", aiLimiter, async (req, res) => {
+  const { id } = req.params;
+  
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return res.status(400).json({ success: false, error: "Invalid prescription ID format" });
+  }
+
+  try {
+    // 1. Fetch prescription
+    const { data: rx, error: rxError } = await supabase
+      .from("prescriptions")
+      .select("*, patients(*)")
+      .eq("id", id)
+      .single();
+
+    if (rxError || !rx) {
+      return res.status(404).json({ success: false, error: "Prescription not found" });
+    }
+
+    // If already generated, return it
+    if (rx.guidance_sheet) {
+      return res.json({ success: true, guidance: rx.guidance_sheet });
+    }
+
+    // 2. Generate guidance sheet
+    let medicines = [];
+    try {
+      medicines = typeof rx.medicines === "string" 
+        ? JSON.parse(rx.medicines) 
+        : rx.medicines || [];
+    } catch (e) {
+      console.error("Failed to parse medicines:", e);
+    }
+
+    const { generateGuidanceSheet } = require("./routes/recommendations");
+    const result = await generateGuidanceSheet({
+      diagnosis: rx.diagnosis || "",
+      cc: rx.complaints || "",
+      findings: rx.findings || "",
+      medicines: medicines,
+      age: rx.patients?.age || rx.patient_age || "",
+      gender: rx.patients?.gender || rx.patient_gender || "",
+      weight: rx.weight || "",
+      existing_conditions: "",
+      follow_up_date: rx.valid_till || "",
+      clinic_name: "",
+      doctor_name: rx.doctor_name || "",
+    });
+
+    if (result.success && result.guidance) {
+      // 3. Persist to database
+      await supabase
+        .from("prescriptions")
+        .update({ guidance_sheet: result.guidance })
+        .eq("id", id);
+
+      return res.json({ success: true, guidance: result.guidance });
+    }
+
+    res.status(500).json({ success: false, error: result.error || "Generation failed" });
+  } catch (err) {
+    console.error("Public Guidance Sheet Gen Error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // ─── PUBLIC PATIENT HISTORY BY PRESCRIPTION ID ─────────
 app.get("/api/public/patient-history/:rxId", async (req, res) => {

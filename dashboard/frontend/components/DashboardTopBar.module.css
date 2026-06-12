@@ -403,3 +403,48 @@
   border-color: var(--sanctuary-primary);
   box-shadow: 0 4px 12px rgba(23, 3, 55, 0.05);
 }
+
+/* ═══════════════════════════════════════════════════════
+   PHONE OPTIMIZATION — Additive mobile overrides only.
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  .topBar {
+    height: 48px !important;
+    margin: 0.4rem 8px !important;
+    padding: 0 0.8rem !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+  }
+  .actions {
+    gap: 8px !important;
+  }
+  .iconBtn {
+    padding: 6px !important;
+  }
+  .avatarPlaceholder {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .backToPortalBtn {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+    border-radius: 20px !important;
+  }
+  .notifDropdown {
+    top: 56px !important;
+    left: 8px !important;
+    right: 8px !important;
+    border-radius: 16px !important;
+  }
+  .notifItem {
+    padding: 12px 14px !important;
+    gap: 12px !important;
+  }
+  .notifIcon {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+  }
+}

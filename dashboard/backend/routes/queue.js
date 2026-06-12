@@ -3,6 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const { supabase } = require("../supabaseClient");
+const { requireAuth, requireClinicAccess } = require("../middleware/authMiddleware");
 
 // ── Validation Helpers ───────────────────────────────────────────────
 const isUUID = (s) =>
@@ -16,7 +17,7 @@ const today = () => new Date().toISOString().split("T")[0];
 // Query: ?clinic_id=&doctor_id=&date=   (date defaults to today)
 // Returns ordered queue for the given clinic/doctor/day
 // ─────────────────────────────────────────────────────────────────────────
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, requireClinicAccess, async (req, res) => {
   const { clinic_id, doctor_id, date } = req.query;
   if (!clinic_id)
     return res
@@ -60,7 +61,7 @@ router.get("/", async (req, res) => {
 // Body: { clinic_id, doctor_id, patient_id, patient_name, priority, notes }
 // Adds patient to today's queue with next token number
 // ─────────────────────────────────────────────────────────────────────────
-router.post("/add", async (req, res) => {
+router.post("/add", requireAuth, requireClinicAccess, async (req, res) => {
   const {
     clinic_id,
     doctor_id,
@@ -68,6 +69,7 @@ router.post("/add", async (req, res) => {
     patient_name,
     priority = "normal",
     notes,
+    date,
   } = req.body;
   if (!clinic_id || !patient_id) {
     return res
@@ -75,7 +77,7 @@ router.post("/add", async (req, res) => {
       .json({ success: false, error: "clinic_id and patient_id are required" });
   }
 
-  const queueDate = today();
+  const queueDate = date || today();
 
   try {
     // Verify patient belongs to this clinic
@@ -100,6 +102,7 @@ router.post("/add", async (req, res) => {
       p_patient_name: patient_name,
       p_priority: priority,
       p_notes: notes || null,
+      p_queue_date: queueDate,
     });
 
     if (error) {
@@ -127,7 +130,7 @@ router.post("/add", async (req, res) => {
 // Body: { status }   ← 'waiting' | 'serving' | 'done' | 'skipped'
 // Also sets serving_started_at or completed_at timestamps
 // ─────────────────────────────────────────────────────────────────────────
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", requireAuth, requireClinicAccess, async (req, res) => {
   const { id } = req.params;
   if (!isUUID(id))
     return res
@@ -180,7 +183,7 @@ router.put("/:id/status", async (req, res) => {
 // PUT /api/queue/:id/priority
 // Body: { priority }  ← 'normal' | 'urgent' | 'elderly'
 // ─────────────────────────────────────────────────────────────────────────
-router.put("/:id/priority", async (req, res) => {
+router.put("/:id/priority", requireAuth, requireClinicAccess, async (req, res) => {
   const { id } = req.params;
   if (!isUUID(id))
     return res
@@ -225,7 +228,7 @@ router.put("/:id/priority", async (req, res) => {
 // DELETE /api/queue/:id
 // Remove a patient from the queue entirely
 // ─────────────────────────────────────────────────────────────────────────
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAuth, requireClinicAccess, async (req, res) => {
   const { id } = req.params;
   if (!isUUID(id))
     return res
@@ -259,14 +262,14 @@ router.delete("/:id", async (req, res) => {
 // Body: { clinic_id, doctor_id }
 // Marks current 'serving' as 'done', promotes next 'waiting' to 'serving'
 // ─────────────────────────────────────────────────────────────────────────
-router.post("/call-next", async (req, res) => {
-  const { clinic_id, doctor_id } = req.body;
+router.post("/call-next", requireAuth, requireClinicAccess, async (req, res) => {
+  const { clinic_id, doctor_id, date } = req.body;
   if (!clinic_id)
     return res
       .status(400)
       .json({ success: false, error: "clinic_id required" });
 
-  const queueDate = today();
+  const queueDate = date || today();
 
   try {
     // 1. Mark current serving as done

@@ -86,7 +86,7 @@ function RecordSearch() {
 
       if (data) {
         setResults(
-          data.map((r) => ({
+          data.map((r: any) => ({
             id: r.id,
             receipt_number: r.receipt_number,
             patient_name: r.patient_name,

@@ -85,7 +85,7 @@ export default function SidebarAnalytics({
       const { data: queueData } = await queueQuery;
 
       const emergency =
-        queueData?.filter((q) => q.priority === "urgent").length || 0;
+        queueData?.filter((q: any) => q.priority === "urgent").length || 0;
       const general = (queueData?.length || 0) - emergency;
 
       // 3. Avg. Consultation Time (Estimate from gap between creations)

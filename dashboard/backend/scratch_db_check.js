@@ -16,7 +16,8 @@ const run = async () => {
     const patients = await client.query("SELECT id, name, clinic_id FROM public.patients;");
     console.log("--- PATIENTS ---", patients.rows);
     const prescriptions = await client.query("SELECT id, clinic_id, doctor_id, patient_id, diagnosis FROM public.prescriptions;");
-    console.log("--- PRESCRIPTIONS ---", prescriptions.rows);
+    const queue = await client.query("SELECT * FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'doctor_queue';");
+    console.log("--- REPLICAS ---", queue.rows);
   } catch (err) {
     console.error(err);
   } finally {

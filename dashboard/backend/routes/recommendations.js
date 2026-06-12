@@ -264,3 +264,5 @@ router.post("/guidance-sheet", async (req, res) => {
 
 module.exports = router;
 module.exports.suggestClinicalPath = suggestClinicalPath;
+module.exports.generateGuidanceSheet = generateGuidanceSheet;
+

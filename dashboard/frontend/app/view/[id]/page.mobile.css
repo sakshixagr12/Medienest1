@@ -1,0 +1,687 @@
+/* ═══════════════════════════════════════════════════
+   MOBILE OPTIMIZATION — view/[id]/page.module.css
+   Phone-first overrides (max-width: 480px)
+   DOES NOT modify any existing styles — additive only.
+   ═══════════════════════════════════════════════════ */
+
+/* ── PHONE BREAKPOINT (≤480px) ── */
+@media (max-width: 480px) {
+
+  /* ── TOP NAVIGATION ── */
+  .topNav {
+    padding: 0 12px !important;
+    height: 56px !important;
+  }
+  .brand {
+    font-size: 16px !important;
+  }
+  .navCenter {
+    display: none !important;
+  }
+  .navRight {
+    gap: 8px !important;
+  }
+  .navIconBtn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  .contextNav {
+    display: none !important;
+  }
+  .breadcrumb {
+    display: none !important;
+  }
+
+  /* ── SIDEBAR (Doctor mode) ── */
+  .sidebar {
+    display: none !important;
+  }
+  .mainScroll {
+    margin-left: 0 !important;
+    padding: 16px 12px !important;
+  }
+
+  /* ── LAYOUT WRAPPER ── */
+  .layoutWrapper {
+    padding-top: 56px !important;
+  }
+
+  /* ── PAGE HEADER ── */
+  .pageHeader {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+  .mainTitle {
+    font-size: 22px !important;
+    letter-spacing: -0.3px !important;
+  }
+  .subTitle {
+    font-size: 10px !important;
+  }
+  .headerActions {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .headerBtn {
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* ── HORIZONTAL NAVIGATION (Patient) ── */
+  .horizontalNav {
+    padding: 8px 8px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    top: 56px !important;
+  }
+  .horizontalNav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .horizontalNavItem {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    flex-shrink: 0 !important;
+    gap: 6px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ── PATIENT PROFILE TAB ── */
+  .profileGrid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .patientHero {
+    flex-direction: column !important;
+    padding: 20px !important;
+    gap: 16px !important;
+    border-radius: 20px !important;
+    text-align: center !important;
+  }
+  .heroAvatar {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 24px !important;
+    font-size: 28px !important;
+  }
+  .heroName {
+    font-size: 28px !important;
+    letter-spacing: -1px !important;
+  }
+
+  /* Vital Biometrics */
+  .vitalCard {
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
+  .vitalHeader {
+    font-size: 15px !important;
+    margin-bottom: 20px !important;
+  }
+  .vitalGrid {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    padding-bottom: 20px !important;
+  }
+  .vitalCircle {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  .vitalValue {
+    font-size: 16px !important;
+  }
+  .vitalLabel {
+    font-size: 8px !important;
+  }
+  .contactBanner {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Conditions Card */
+  .conditionsCard {
+    padding: 20px !important;
+    border-radius: 20px !important;
+    gap: 16px !important;
+  }
+  .condHeader {
+    font-size: 15px !important;
+  }
+  .tagsRow {
+    gap: 8px !important;
+  }
+  .tag {
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+  .quoteBox {
+    padding: 16px !important;
+    font-size: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Intel Card */
+  .intelCard {
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
+  .intelHeader {
+    font-size: 14px !important;
+    margin-bottom: 16px !important;
+  }
+  .intelContent {
+    padding: 16px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+  }
+  .intelMeta {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  /* Demographics */
+  .demoCard {
+    padding: 20px !important;
+    border-radius: 20px !important;
+    margin-top: 16px !important;
+  }
+  .demoCard h3 {
+    font-size: 14px !important;
+    margin-bottom: 16px !important;
+  }
+  .demoRow {
+    padding: 8px 0 !important;
+  }
+
+  /* Maintenance Meds */
+  .medsSection {
+    padding: 20px !important;
+    border-radius: 20px !important;
+    margin-top: 16px !important;
+  }
+  .medsHeader {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+  }
+  .medsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .medCard {
+    padding: 16px !important;
+    border-radius: 16px !important;
+    gap: 12px !important;
+  }
+  .medIconBox {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  /* ── CURRENT SCRIPT (Paper Prescription) ── */
+  .paperWrapper {
+    padding: 12px 0 !important;
+    min-height: auto !important;
+  }
+  .paper {
+    padding: 20px 16px !important;
+    min-height: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .clinicHeader {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  .headerLogo {
+    padding: 0 !important;
+    order: -1 !important;
+  }
+  .logoCircle {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .clinicName {
+    font-size: 18px !important;
+  }
+  .doctorInfo {
+    text-align: left !important;
+  }
+  .drName {
+    font-size: 16px !important;
+  }
+  .drQual {
+    font-size: 11px !important;
+  }
+  .patientBar {
+    flex-direction: column !important;
+    padding: 12px !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+  }
+  .meta {
+    font-size: 11px !important;
+  }
+  .dualColumn {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .leftCol {
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 16px !important;
+  }
+  .section {
+    margin-bottom: 16px !important;
+  }
+  .sectionTitle {
+    font-size: 11px !important;
+  }
+  .text {
+    font-size: 13px !important;
+  }
+  .rxIcon {
+    font-size: 28px !important;
+    margin-bottom: 12px !important;
+  }
+  .medsListFinal {
+    gap: 14px !important;
+    min-height: auto !important;
+    margin-bottom: 20px !important;
+  }
+  .medHeaderFinal {
+    flex-direction: column !important;
+    gap: 4px !important;
+    font-size: 14px !important;
+  }
+  .footerFinal {
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin-top: 24px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .watermark {
+    font-size: 80px !important;
+  }
+
+  /* ── AI SUMMARY ── */
+  .aiContainer {
+    gap: 16px !important;
+  }
+  .aiHero {
+    border-radius: 20px !important;
+    padding: 28px 16px !important;
+  }
+  .aiGreeting {
+    font-size: 22px !important;
+    letter-spacing: -0.5px !important;
+  }
+  .aiTagline {
+    font-size: 13px !important;
+  }
+  .langToggle {
+    margin-top: 16px !important;
+  }
+  .langBtn {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  .aiCardMain {
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+  .aiCondition {
+    font-size: 16px !important;
+  }
+  .aiGrid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .medsCard,
+  .careCard,
+  .expectCard,
+  .warningCard {
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+  .cardHeader h3 {
+    font-size: 15px !important;
+  }
+  .medItemAI {
+    gap: 10px !important;
+  }
+  .medNameAI {
+    font-size: 13px !important;
+  }
+  .medPurposeAI {
+    font-size: 12px !important;
+  }
+  .aiLoadingHero {
+    padding: 60px 16px !important;
+    border-radius: 20px !important;
+  }
+  .aiLoadingPulse {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  /* ── PATIENT HISTORY ── */
+  .historyContainer {
+    gap: 20px !important;
+  }
+  .historyHeader h2 {
+    font-size: 18px !important;
+  }
+  .timeline {
+    padding-left: 0 !important;
+  }
+  .timeline::before {
+    left: 16px !important;
+  }
+  .timelineItem {
+    padding-bottom: 24px !important;
+    padding-left: 40px !important;
+  }
+  .timelineDate {
+    position: relative !important;
+    left: 0 !important;
+    width: auto !important;
+    text-align: left !important;
+    padding-right: 0 !important;
+    margin-bottom: 8px !important;
+    font-size: 12px !important;
+  }
+  .timelinePoint {
+    left: 12px !important;
+    top: 4px !important;
+  }
+  .timelineContent {
+    margin-left: 0 !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+  .visitHeader {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+  }
+  .visitBody {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .historyLoading,
+  .emptyHistory {
+    padding: 60px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  /* ── CARE GUIDANCE (6-Section Grid) ── */
+  .dgWrapper {
+    padding: 0 !important;
+    gap: 16px !important;
+  }
+  .dgHeader {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 16px !important;
+    gap: 12px !important;
+    border-radius: 16px !important;
+  }
+  .dgHeaderIcon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    margin: 0 auto !important;
+  }
+  .dgHeaderText h2 {
+    font-size: 17px !important;
+  }
+  .dgHeaderText p {
+    font-size: 12px !important;
+  }
+  .dgGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .dgCard {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+  .dgCardHeader {
+    margin-bottom: 12px !important;
+  }
+  .dgCardIcon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+  .dgCardTitle {
+    font-size: 13px !important;
+  }
+  .dgPointItem {
+    font-size: 12.5px !important;
+    padding-left: 16px !important;
+  }
+  .dgConditionName {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+  }
+  .dgCallout {
+    font-size: 11.5px !important;
+    padding: 8px 10px !important;
+  }
+  .dgAvoidItem {
+    padding: 10px !important;
+  }
+  .dgAvoidHeader {
+    font-size: 12.5px !important;
+  }
+  .dgAvoidReason {
+    font-size: 11.5px !important;
+    padding-left: 16px !important;
+  }
+  .dgRedFlagItem {
+    font-size: 12.5px !important;
+    padding-left: 16px !important;
+  }
+  .dgGeneralTipsBanner {
+    padding: 16px !important;
+    border-radius: 16px !important;
+    margin-top: 8px !important;
+  }
+  .dgGeneralTipsTitle {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+  }
+  .dgGeneralTipsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .dgGeneralTipItem {
+    padding: 10px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ── MODALS ── */
+  .langModal {
+    width: 95% !important;
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+  }
+  .langModal h2 {
+    font-size: 20px !important;
+  }
+  .langGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .langCard {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  /* ── TTS / LISTEN BUTTON ── */
+  .ttsControls {
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+  .listenButton {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .speechPopup {
+    font-size: 11px !important;
+    padding: 8px 14px !important;
+  }
+
+  /* ── PATIENT HUB (REDESIGNED) ── */
+  .patientHubBg {
+    padding: 80px 12px 40px 12px !important;
+  }
+  .patientHubBg .navbar {
+    width: 96% !important;
+    height: 48px !important;
+    padding: 0 12px !important;
+    border-radius: 100px !important;
+    top: 0.75rem !important;
+  }
+  .patientHubBg .brandName {
+    font-size: 0.9rem !important;
+  }
+  .patientHubBg .titleArea h1 {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+  .patientHubBg .titleArea p {
+    font-size: 12px !important;
+  }
+  .patientHubBg .successBadge {
+    font-size: 10px !important;
+    padding: 3px 10px !important;
+  }
+  .patientHubBg .horizontalNav {
+    gap: 6px !important;
+    padding: 4px 0 !important;
+    margin-bottom: 16px !important;
+  }
+  .patientHubBg .horizontalNavItem {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+  .patientHubBg .patientCard {
+    padding: 16px !important;
+    border-radius: 18px !important;
+    margin-bottom: 16px !important;
+  }
+  .patientHubBg .patientAvatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 18px !important;
+  }
+  .patientHubBg .trustGridContainer {
+    padding: 16px !important;
+    gap: 16px !important;
+    border-radius: 14px !important;
+  }
+  .patientHubBg .trustItem {
+    gap: 10px !important;
+  }
+  .patientHubBg .trustIconWrap {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+  .patientHubBg .trustTextWrap h4 {
+    font-size: 11px !important;
+  }
+  .patientHubBg .trustTextWrap p {
+    font-size: 10px !important;
+  }
+
+  /* ── PLACEHOLDER VIEWS ── */
+  .placeholderView {
+    padding: 40px 16px !important;
+    text-align: center !important;
+  }
+  .placeholderView h2 {
+    font-size: 18px !important;
+  }
+  .placeholderView p {
+    font-size: 13px !important;
+  }
+
+  /* ── CLINIC NAME (Final View) ── */
+  .clinicNameFinal {
+    font-size: 28px !important;
+    letter-spacing: -1px !important;
+  }
+  .doctorNameTop {
+    font-size: 14px !important;
+  }
+
+  /* ── GUIDANCE SHEET (Print Page 2) ── */
+  .guidanceGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
+  }
+  .guidanceSection {
+    padding: 12px !important;
+  }
+  .guidanceSectionTitle {
+    font-size: 12px !important;
+  }
+}
+
+/* ── SMALL PHONE BREAKPOINT (≤360px) ── */
+@media (max-width: 360px) {
+  .aiGreeting {
+    font-size: 18px !important;
+  }
+  .heroName {
+    font-size: 22px !important;
+  }
+  .mainTitle {
+    font-size: 18px !important;
+  }
+  .patientHubBg .titleArea h1 {
+    font-size: 18px !important;
+  }
+  .dgHeaderText h2 {
+    font-size: 15px !important;
+  }
+  .patientHubBg .horizontalNavItem {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+  .vitalCircle {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  .vitalValue {
+    font-size: 14px !important;
+  }
+  .langGrid {
+    grid-template-columns: 1fr !important;
+  }
+}

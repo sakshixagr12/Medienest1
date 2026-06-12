@@ -214,7 +214,7 @@ export function ClinicProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes to sync state instantly
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange((event: any) => {
       console.log("ClinicContext: Auth Event:", event);
       if (
         [

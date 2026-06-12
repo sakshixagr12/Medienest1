@@ -100,17 +100,19 @@ const navItems = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const prefix = pathname?.startsWith("/demo1") ? "/demo1" : pathname?.startsWith("/demo") ? "/demo" : "";
 
   return (
     <nav className={styles.bottomNav}>
       {navItems.map((item) => {
+        const fullHref = item.href.startsWith("#") ? item.href : `${prefix}${item.href}`;
         const isActive = item.exact
-          ? pathname === item.href
-          : pathname.startsWith(item.href);
+          ? pathname === fullHref
+          : pathname.startsWith(fullHref);
         return (
           <Link
             key={item.label}
-            href={item.href}
+            href={fullHref}
             className={`${styles.navItem} ${isActive ? styles.active : ""}`}
           >
             <div className={styles.iconWrap}>{item.icon}</div>

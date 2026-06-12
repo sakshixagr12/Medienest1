@@ -65,9 +65,12 @@ export default function DashboardSidebar({
   const activeDoctorName = activeDoctor?.name || "Doctor";
   const activeDoctorId = activeDoctor?.doctor_id || activeDoctor?.id || "";
 
+  const prefix = pathname?.startsWith("/demo1") ? "/demo1" : pathname?.startsWith("/demo") ? "/demo" : "";
+
   const buildDoctorUrl = (baseHref: string) => {
-    if (!activeDoctorId) return baseHref;
-    const url = new URL(baseHref, "http://localhost"); // dummy base
+    const prefixedHref = `${prefix}${baseHref}`;
+    if (!activeDoctorId) return prefixedHref;
+    const url = new URL(prefixedHref, "http://localhost"); // dummy base
     url.searchParams.set("doctorId", activeDoctorId);
     url.searchParams.set("doctorName", activeDoctorName);
     return `${url.pathname}${url.search}`;
@@ -321,9 +324,9 @@ export default function DashboardSidebar({
               </div>
 
               <Link
-                href="/store"
+                href={`${prefix}/store`}
                 onClick={handleNavClick}
-                className={`${styles.navLink} ${pathname === "/store" ? styles.activeLink : ""}`}
+                className={`${styles.navLink} ${(pathname === "/store" || pathname === `${prefix}/store`) ? styles.activeLink : ""}`}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="3" width="7" height="7"></rect>
@@ -335,9 +338,9 @@ export default function DashboardSidebar({
               </Link>
 
               <Link
-                href="/store/billing-receipts"
+                href={`${prefix}/store/billing-receipts`}
                 onClick={handleNavClick}
-                className={`${styles.deskAction} ${pathname?.startsWith("/store/billing-receipts") ? styles.activeLink : ""}`}
+                className={`${styles.deskAction} ${(pathname?.startsWith("/store/billing-receipts") || pathname?.startsWith(`${prefix}/store/billing-receipts`)) ? styles.activeLink : ""}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="2" y="5" width="20" height="14" rx="2"></rect>
@@ -347,9 +350,9 @@ export default function DashboardSidebar({
               </Link>
 
               <Link
-                href="/store/day-summary"
+                href={`${prefix}/store/day-summary`}
                 onClick={handleNavClick}
-                className={`${styles.deskAction} ${pathname?.startsWith("/store/day-summary") ? styles.activeLink : ""}`}
+                className={`${styles.deskAction} ${(pathname?.startsWith("/store/day-summary") || pathname?.startsWith(`${prefix}/store/day-summary`)) ? styles.activeLink : ""}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -360,9 +363,9 @@ export default function DashboardSidebar({
               </Link>
 
               <Link
-                href="/store/clinic-settings"
+                href={`${prefix}/store/clinic-settings`}
                 onClick={handleNavClick}
-                className={`${styles.deskAction} ${pathname?.startsWith("/store/clinic-settings") ? styles.activeLink : ""}`}
+                className={`${styles.deskAction} ${(pathname?.startsWith("/store/clinic-settings") || pathname?.startsWith(`${prefix}/store/clinic-settings`)) ? styles.activeLink : ""}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="3"></circle>
@@ -408,11 +411,13 @@ export default function DashboardSidebar({
 
                 if (!isReceptionist && item.label === "Dashboard") {
                   dynamicHref = buildDoctorUrl(item.href);
+                } else {
+                  dynamicHref = `${prefix}${item.href}`;
                 }
 
                 const isActive = isReceptionist
-                  ? pathname === "/portal/front-desk"
-                  : pathname === item.href;
+                  ? (pathname === "/portal/front-desk" || pathname === `${prefix}/portal/front-desk`)
+                  : (pathname === item.href || pathname === `${prefix}${item.href}`);
                 return (
                   <Link
                     key={item.label}
@@ -431,7 +436,7 @@ export default function DashboardSidebar({
                 frontDeskActions.map((action) => (
                   <Link
                     key={action.label}
-                    href={action.href}
+                    href={`${prefix}${action.href}`}
                     onClick={handleNavClick}
                     className={styles.deskAction}
                   >
@@ -459,7 +464,7 @@ export default function DashboardSidebar({
           )}
 
           <Link
-            href={clinic?.clinic_type === "store" ? "/store" : "/portal"}
+            href={clinic?.clinic_type === "store" ? `${prefix}/store` : `${prefix}/portal`}
             onClick={handleNavClick}
             className={styles.portalButton}
           >

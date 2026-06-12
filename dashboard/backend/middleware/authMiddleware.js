@@ -32,17 +32,18 @@ const requireAuth = async (req, res, next) => {
         .json({ success: false, error: "Unauthorized: Token expired" });
     }
 
-    // Ensure email is verified
-    if (!user.email_confirmed_at && !(user.app_metadata && user.app_metadata.email_verified)) {
-      return res
-        .status(403)
-        .json({ success: false, error: "Email not verified" });
-    }
     if (error || !user) {
       console.error("Auth Error:", error?.message);
       return res
         .status(401)
         .json({ success: false, error: "Unauthorized: Invalid token" });
+    }
+
+    // Ensure email is verified
+    if (!user.email_confirmed_at && !(user.app_metadata && user.app_metadata.email_verified)) {
+      return res
+        .status(403)
+        .json({ success: false, error: "Email not verified" });
     }
 
     req.user = user;
@@ -69,34 +70,69 @@ const requireClinicAccess = async (req, res, next) => {
   }
 
   try {
-    // We confirm this user owns the given clinic.
-    // If you have a 'clinic_doctors' map for doctors who aren't owners,
-    // you would check that table here as well. For now, strictly owner scoped.
-    const { data: clinic, error } = await supabase
+    // 1. Check if the user is the clinic owner
+    const { data: clinic, error: clinicError } = await supabase
       .from("clinics")
       .select("id")
       .eq("id", clinic_id)
       .eq("owner_user_id", req.user.id)
       .maybeSingle();
 
-    if (error) {
-      console.error("Clinic Access Check Error:", error.message);
+    if (clinicError) {
+      console.error("Clinic Access Check Error:", clinicError.message);
       return res
         .status(500)
         .json({ success: false, error: "Database check failed" });
     }
 
-    if (!clinic) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          error: "Forbidden: You do not have access to this clinic",
-        });
+    if (clinic) {
+      // User is the owner, access granted
+      return next();
     }
 
-    // Access granted
-    next();
+    // 2. Fallback: Check if user is a doctor mapped to this clinic in clinic_doctors
+    const { data: doctor, error: docError } = await supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", req.user.id)
+      .maybeSingle();
+
+    if (docError) {
+      console.error("Doctor lookup error:", docError.message);
+      return res
+        .status(500)
+        .json({ success: false, error: "Database check failed" });
+    }
+
+    if (doctor) {
+      const { data: clinicDoctor, error: junctionError } = await supabase
+        .from("clinic_doctors")
+        .select("id")
+        .eq("clinic_id", clinic_id)
+        .eq("doctor_id", doctor.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (junctionError) {
+        console.error("Clinic-Doctor junction error:", junctionError.message);
+        return res
+          .status(500)
+          .json({ success: false, error: "Database check failed" });
+      }
+
+      if (clinicDoctor) {
+        // User is an active doctor in this clinic, access granted
+        return next();
+      }
+    }
+
+    // Neither owner nor active staff doctor
+    return res
+      .status(403)
+      .json({
+        success: false,
+        error: "Forbidden: You do not have access to this clinic",
+      });
   } catch (err) {
     console.error("Middleware Clinic Error:", err);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -104,3 +140,4 @@ const requireClinicAccess = async (req, res, next) => {
 };
 
 module.exports = { requireAuth, requireClinicAccess };
+// Trigger reload 3

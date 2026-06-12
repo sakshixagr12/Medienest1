@@ -33,3 +33,17 @@ CREATE POLICY "Public Select Discharge Summaries Policy" ON public.discharge_sum
     FOR SELECT
     TO anon, authenticated
     USING (true);
+
+-- 3. Enable realtime for prescriptions table
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'prescriptions'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.prescriptions;
+    END IF;
+END $$;
+

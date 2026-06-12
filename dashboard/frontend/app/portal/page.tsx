@@ -204,9 +204,9 @@ export default function PortalPage() {
           .gte("valid_till", yesterday);
 
         const rev =
-          receipts?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+          receipts?.reduce((sum: number, r: any) => sum + (r.total_amount || 0), 0) || 0;
         const revYesterday =
-          receiptsYesterday?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+          receiptsYesterday?.reduce((sum: number, r: any) => sum + (r.total_amount || 0), 0) || 0;
 
         const calculateTrend = (todayVal: number, yesterdayVal: number) => {
           if (!yesterdayVal || yesterdayVal === 0) {
@@ -236,7 +236,7 @@ export default function PortalPage() {
           .limit(4);
 
         if (recentRx) {
-          const acts = recentRx.map((rx) => ({
+          const acts = recentRx.map((rx: any) => ({
             id: rx.id,
             type: "prescription",
             text: `Prescription created for ${(Array.isArray(rx.patients) ? rx.patients[0]?.name : (rx.patients as any)?.name) || "Patient"}`,

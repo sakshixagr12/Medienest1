@@ -83,6 +83,7 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 110px;
 }
 
 body {
@@ -396,7 +397,7 @@ img {
 /* ==========================================================================
    Thin Black Borders for Dashboard Cards / Rectangles (Outer Edges Only)
    ========================================================================== */
-[class*="card" i]:not([class*="Title"]):not([class*="Header"]):not([class*="Body"]):not([class*="Content"]):not([class*="Text"]):not([class*="Row"]):not([class*="Right"]):not([class*="Avatar"]):not([class*="Meta"]):not([class*="Link"]):not([class*="Btn"]):not([class*="Input"]):not([class*="Field"]):not([class*="Brief"]):not([class*="Info"]):not([class*="Icon"]):not([class*="Dot"]):not([class*="Divider"]):not([class*="Badge"]):not([class*="Trend"]):not([class*="Value"]):not([class*="Active"]):not([class*="Triage"]):not([class*="Action"]):not([class*="Arrow"]):not([class*="Illustration"]):not([class*="Overlay"]):not([class*="Close"]):not([class*="FormField"]):not([class*="Actions"]):not([class*="Footer"]):not([class*="Notice"]):not([class*="Pill"]):not([class*="Toggle"]):not([class*="List"]):not([class*="Item"]):not([class*="Section"]):not([class*="Label"]):not([class*="wrapper" i]):not([class*="Wrapper"]):not([class*="container" i]):not([class*="Container"]):not([class*="col" i]):not([class*="Col"]):not([class*="metricCard" i]):not([class*="queueCard" i]):not([class*="nowServingCard" i]):not([class*="waitCard" i]):not([class*="emptyCard" i]):not([class*="statsCard" i]):not([class*="quickLinksCard" i]):not([class*="Name"]),
+[class*="card" i]:not([class*="welcome" i]):not([class*="Title"]):not([class*="Header"]):not([class*="Body"]):not([class*="Content"]):not([class*="Text"]):not([class*="Row"]):not([class*="Right"]):not([class*="Avatar"]):not([class*="Meta"]):not([class*="Link"]):not([class*="Btn"]):not([class*="Input"]):not([class*="Field"]):not([class*="Brief"]):not([class*="Info"]):not([class*="Icon"]):not([class*="Dot"]):not([class*="Divider"]):not([class*="Badge"]):not([class*="Trend"]):not([class*="Value"]):not([class*="Active"]):not([class*="Triage"]):not([class*="Action"]):not([class*="Arrow"]):not([class*="Illustration"]):not([class*="Overlay"]):not([class*="Close"]):not([class*="FormField"]):not([class*="Actions"]):not([class*="Footer"]):not([class*="Notice"]):not([class*="Pill"]):not([class*="Toggle"]):not([class*="List"]):not([class*="Item"]):not([class*="Section"]):not([class*="Label"]):not([class*="wrapper" i]):not([class*="Wrapper"]):not([class*="container" i]):not([class*="Container"]):not([class*="col" i]):not([class*="Col"]):not([class*="metricCard" i]):not([class*="queueCard" i]):not([class*="nowServingCard" i]):not([class*="waitCard" i]):not([class*="emptyCard" i]):not([class*="statsCard" i]):not([class*="quickLinksCard" i]):not([class*="Name"]):not([class*="Heading"]):not([class*="Subtext"]):not([class*="Corner"]):not([class*="onboarding"]):not([class*="pricing"]):not([class*="verifying"]),
 [class*="metricsGrid"],
 [class*="sectionBox"],
 [class*="clinicalDesk"],

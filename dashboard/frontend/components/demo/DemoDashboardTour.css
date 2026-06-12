@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════════════
+   DEMO DASHBOARD TOUR - Extra styles
+   ═══════════════════════════════════════════════════ */
+
+/* CTA callout for "click patient" step */
+.dash-tour-cta-callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.04));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  animation: dash-cta-glow 2s ease-in-out infinite;
+}
+
+@keyframes dash-cta-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.05);
+  }
+}
+
+.dash-tour-cta-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+  animation: dash-pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes dash-pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.6; }
+}
+
+.dash-tour-cta-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #059669;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Tooltip transition state */
+.tour-tooltip.transitioning {
+  opacity: 0.4;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
+}
+
+/* Write Prescription CTA button — final step */
+.dash-tour-rx-btn {
+  padding: 11px 22px !important;
+  font-size: 0.9rem !important;
+  gap: 8px !important;
+  border-radius: 14px !important;
+  position: relative;
+  overflow: hidden;
+  animation: dash-rx-btn-glow 2s ease-in-out infinite;
+}
+
+.dash-tour-rx-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: dash-rx-shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes dash-rx-shimmer {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+@keyframes dash-rx-btn-glow {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+  }
+}
+

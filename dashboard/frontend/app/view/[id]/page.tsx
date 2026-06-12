@@ -10,6 +10,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { CheckCircle2, ShieldCheck, Lock, Headphones, AlertTriangle } from "lucide-react";
 import styles from "./page.module.css";
+import DemoViewTour from "@/components/demo/DemoViewTour";
 
 // ── CUSTOM SVG LEAVES FOR BACKGROUND ──
 function LeavesBackground({ className }: { className?: string }) {
@@ -334,6 +335,29 @@ export default function ViewPrescription({
   }, [activeTab, !!activeSummary, isSpeaking, showLangModal]);
 
   async function fetchHistory() {
+    if (id === "ae1163db-5002-4341-9cfe-535860ce2593") {
+      setHistory({
+        summary: {
+          keyConditions: ["Seasonal Asthma", "Dust Allergy"],
+          currentMedications: ["Inhaler Budecort 200 (1 puff SOS)", "Tab. Cetirizine 10mg (1hs)"],
+          allergies: ["Penicillin"],
+          recentVisitsSummary: "Patient complains of persistent dry cough, moderate wheezing, and fever (102F) since 3 days."
+        },
+        visits: [
+          {
+            visit_date: "2026-05-10T10:00:00.000Z",
+            doctor: "Dr. Gopal Shukla",
+            complaints: "Mild dry cough, runny nose, seasonal asthma flare-up due to high pollen levels."
+          },
+          {
+            visit_date: "2026-03-15T09:45:00.000Z",
+            doctor: "Dr. Gopal Shukla",
+            complaints: "Routine health checkup, asthma symptoms well-controlled, Cetirizine refilled."
+          }
+        ]
+      });
+      return;
+    }
     setLoadingHistory(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/public/patient-history/${id}`);
@@ -467,17 +491,32 @@ export default function ViewPrescription({
           .single();
         if (cData) setClinic(cData);
       }
-      // Fetch doctor profile via backend API (bypasses RLS)
-      try {
-        const docRes = await fetch(
-          `${API_BASE_URL}/api/doctor-profile-by-rx/${id}`,
-        );
-        if (docRes.ok) {
-          const docJson = await docRes.json();
-          if (docJson.success && docJson.doctor) setDoctor(docJson.doctor);
+      if (id === "ae1163db-5002-4341-9cfe-535860ce2593") {
+        setDoctor({
+          id: "demo-doc-gopal",
+          doctor_id: "demo-doc-gopal",
+          user_id: "demo-user-gopal",
+          name: "Gopal Shukla",
+          qualification: "MBBS, MD (General Medicine)",
+          specialty: "General Medicine",
+          contact: "+91 73805 20394",
+          email: "shuklagopal1244@gmail.com",
+          is_active: true,
+          display_order: 1
+        });
+      } else {
+        // Fetch doctor profile via backend API (bypasses RLS)
+        try {
+          const docRes = await fetch(
+            `${API_BASE_URL}/api/doctor-profile-by-rx/${id}`,
+          );
+          if (docRes.ok) {
+            const docJson = await docRes.json();
+            if (docJson.success && docJson.doctor) setDoctor(docJson.doctor);
+          }
+        } catch (docErr) {
+          console.warn("️ Could not fetch doctor profile:", docErr);
         }
-      } catch (docErr) {
-        console.warn("️ Could not fetch doctor profile:", docErr);
       }
     } catch (err: any) {
       console.error("Fetch error:", err);
@@ -666,25 +705,27 @@ export default function ViewPrescription({
         ),
       }
     ] : []),
-    {
-      name: "AI Summary",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-        >
-          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-          <path d="M5 3v4" />
-          <path d="M19 17v4" />
-          <path d="M3 5h4" />
-          <path d="M17 19h4" />
-        </svg>
-      ),
-    },
+    ...(id !== "ae1163db-5002-4341-9cfe-535860ce2593" ? [
+      {
+        name: "AI Summary",
+        icon: (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+            <path d="M5 3v4" />
+            <path d="M19 17v4" />
+            <path d="M3 5h4" />
+            <path d="M17 19h4" />
+          </svg>
+        ),
+      }
+    ] : []),
     {
       name: "Patient History",
       icon: (
@@ -703,7 +744,7 @@ export default function ViewPrescription({
     },
   ];
 
-  if (!user) {
+  if (!user || id === "ae1163db-5002-4341-9cfe-535860ce2593") {
     return (
       <div className={styles.patientHubBg}>
         {/* Background decorations */}
@@ -791,6 +832,7 @@ export default function ViewPrescription({
                     key={item.name}
                     className={`${styles.horizontalNavItem} ${activeTab === item.name ? styles.horizontalNavItemActive : ""}`}
                     onClick={() => setActiveTab(item.name as any)}
+                    data-tour={`view-tab-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <span className={styles.sideIcon} style={{ marginRight: 6 }}>{item.icon}</span>
                     <span className={styles.sideLabel}>
@@ -1556,6 +1598,9 @@ export default function ViewPrescription({
               </button>
             </div>
           </div>
+        )}
+        {id === "ae1163db-5002-4341-9cfe-535860ce2593" && (
+          <DemoViewTour activeTab={activeTab} setActiveTab={setActiveTab} />
         )}
       </div>
     );

@@ -98,7 +98,7 @@ function PatientHistoryContent() {
 
       if (vData) {
         setVisits(
-          vData.map((v) => ({
+          vData.map((v: any) => ({
             visit_date: v.created_at,
             notes: v.advice,
             prescription: v,

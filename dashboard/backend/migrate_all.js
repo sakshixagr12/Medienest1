@@ -21,6 +21,8 @@ const migrationFiles = [
   "v2_clean/40_fix_doctor_rls.sql",
   "v2_clean/41_add_trial_claims.sql",
   "v2_clean/42_harden_rls_policies.sql",
+  "v2_clean/43_add_ai_columns.sql",
+  "v2_clean/44_add_queue_date_param.sql",
 ];
 
 

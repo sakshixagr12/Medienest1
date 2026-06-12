@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { supabase } = require("../supabaseClient");
 const { askLLM } = require("../utils/llmRotation");
+const { requireAuth, requireClinicAccess } = require("../middleware/authMiddleware");
 
 // Helper: generate patient snapshot via AI (Priority-based comprehensive summary)
 async function generatePatientSummary(patient, prescriptions) {
@@ -165,7 +166,7 @@ function calculateHeuristicSummary(visits) {
 
 
 // GET patient history
-router.get("/:patientId", async (req, res) => {
+router.get("/:patientId", requireAuth, requireClinicAccess, async (req, res) => {
   const { patientId } = req.params;
   const clinic_id = req.query.clinic_id || req.body.clinic_id;
 

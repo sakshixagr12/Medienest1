@@ -9,6 +9,11 @@ export async function middleware(request: NextRequest) {
     },
   });
 
+  // Bypass all authentication/redirection checks if Demo Mode is active
+  if (pathname.startsWith("/demo")) {
+    return response;
+  }
+
   const supabase = createMiddlewareSupabase(request, response);
 
   // 1. Verify User Session

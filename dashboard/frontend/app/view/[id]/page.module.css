@@ -306,6 +306,7 @@ body {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
+  scroll-padding-top: 110px !important;
 }
 
 .pageHeader {
@@ -1565,6 +1566,7 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
+  scroll-margin-top: 110px !important;
 }
 
 .horizontalNavItemActive {

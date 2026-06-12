@@ -1,0 +1,9 @@
+.btnHeroGoogle {
+  background: #fff; color: var(--ink);
+  padding: 14px 28px; border-radius: 12px;
+  font-size: 16px; font-weight: 700; border: 1px solid #e2e8f0;
+  cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.05);
+  text-decoration: none;
+}
+.btnHeroGoogle:hover { background: #f8fafc; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.1); border-color: #cbd5e1; }

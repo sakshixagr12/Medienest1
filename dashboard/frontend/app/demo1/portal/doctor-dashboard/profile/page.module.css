@@ -1,0 +1,266 @@
+.page {
+  min-height: 100vh;
+  background: var(--sanctuary-gray-low, #f9f9f5);
+}
+
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header Card Redesign */
+.headerCard {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(23, 3, 55, 0.06);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(23, 3, 55, 0.03);
+}
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 32px 24px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: linear-gradient(
+    135deg,
+    var(--sanctuary-lavender, #ebdcff) 0%,
+    #d8c4fa 100%
+  );
+  color: var(--sanctuary-primary, #170337);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 950;
+  box-shadow: 0 8px 16px rgba(186, 150, 255, 0.15);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doctorName {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--sanctuary-primary, #170337);
+}
+
+.verifiedIcon {
+  color: #6366f1;
+}
+
+.doctorRole {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sanctuary-ink-l, #7a7a9a);
+}
+
+/* Tab Navigation */
+.tabNav {
+  display: flex;
+  padding: 0 32px;
+  gap: 32px;
+  border-top: 1px solid rgba(23, 3, 55, 0.04);
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  padding: 16px 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--sanctuary-ink-l, #7a7a9a);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  color: var(--sanctuary-primary, #170337);
+}
+
+.tabActive {
+  color: var(--sanctuary-primary, #170337);
+}
+
+.tabActive::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--sanctuary-primary, #170337);
+  border-radius: 3px 3px 0 0;
+}
+
+/* Content Area */
+.contentArea {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid rgba(23, 3, 55, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 4px 20px rgba(23, 3, 55, 0.03);
+}
+
+.cardTitle {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--sanctuary-ink-l, #7a7a9a);
+  margin-bottom: 4px;
+}
+
+.cardSubtitle {
+  font-size: 13px;
+  color: var(--sanctuary-ink-l, #7a7a9a);
+  margin-top: -16px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+/* Fields & Inputs */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--sanctuary-ink-l, #7a7a9a);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field input,
+.select {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(23, 3, 55, 0.1);
+  background: #fafafb;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sanctuary-primary, #170337);
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.field input:focus,
+.select:focus {
+  border-color: var(--sanctuary-primary, #170337);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(23, 3, 55, 0.04);
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Footer / Save Section */
+.footer {
+  margin-top: 12px;
+}
+
+.saveBtn {
+  width: 100%;
+  padding: 18px;
+  background: var(--sanctuary-primary, #170337);
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 24px rgba(23, 3, 55, 0.18);
+}
+
+.saveBtn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 32px rgba(23, 3, 55, 0.25);
+  background: #1e0445;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saveBtnSuccess {
+  background: #10b981;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.25);
+}
+
+@media (max-width: 640px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+  .avatarSection {
+    padding: 24px;
+    gap: 16px;
+  }
+  .avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+  .doctorName {
+    font-size: 20px;
+  }
+  .tabNav {
+    gap: 16px;
+    padding: 0 24px;
+  }
+  .tabBtn span {
+    display: none;
+  }
+  .card {
+    padding: 24px;
+  }
+}

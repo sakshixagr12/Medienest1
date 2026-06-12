@@ -62,6 +62,14 @@ export default function GoogleOneTap() {
     const initializeGsi = async () => {
       if (!window.google || !window.google.accounts) return;
 
+      // Disable Google One Tap on localhost to prevent Authorized Origins 403 errors
+      // and FedCM console warnings during local development.
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      if (isLocal) {
+        console.log("GoogleOneTap: Bypassed on localhost to prevent console origins noise.");
+        return;
+      }
+
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
       if (!clientId) return;
 
@@ -75,6 +83,7 @@ export default function GoogleOneTap() {
         callback: handleCredentialResponse,
         nonce: hashedNonce,
         auto_select: false, // Turn off auto_select to avoid FedCM conflicts
+        use_fedcm_for_prompt: false, // Fall back to older popup window to avoid FedCM NetworkError
         cancel_on_tap_outside: true,
       });
 

@@ -75,10 +75,10 @@ function DaySummary() {
       }
 
       const receipts = billData || [];
-      const totalRevenue = receipts.reduce((sum, r) => sum + r.total_amount, 0);
+      const totalRevenue = receipts.reduce((sum: number, r: any) => sum + r.total_amount, 0);
       const cashRevenue = receipts
-        .filter((r) => r.payment_mode === "Cash")
-        .reduce((sum, r) => sum + r.total_amount, 0);
+        .filter((r: any) => r.payment_mode === "Cash")
+        .reduce((sum: number, r: any) => sum + r.total_amount, 0);
       const onlineRevenue = totalRevenue - cashRevenue;
 
       setStats({

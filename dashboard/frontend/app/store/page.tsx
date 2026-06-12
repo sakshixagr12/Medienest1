@@ -51,9 +51,9 @@ export default function StorePage() {
           .eq("clinic_id", clinic.id);
 
         const rev =
-          receipts?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+          receipts?.reduce((sum: number, r: any) => sum + (r.total_amount || 0), 0) || 0;
         const revYesterday =
-          receiptsYesterday?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0;
+          receiptsYesterday?.reduce((sum: number, r: any) => sum + (r.total_amount || 0), 0) || 0;
 
         const calculateTrend = (todayVal: number, yesterdayVal: number) => {
           if (!yesterdayVal || yesterdayVal === 0) {
@@ -79,7 +79,7 @@ export default function StorePage() {
           .limit(4);
 
         if (recentReceipts) {
-          const acts = recentReceipts.map((r) => ({
+          const acts = recentReceipts.map((r: any) => ({
             id: r.id,
             type: "receipt",
             text: `Invoice of ₹${r.total_amount} created for ${r.patient_name || "Walk-in Customer"}`,

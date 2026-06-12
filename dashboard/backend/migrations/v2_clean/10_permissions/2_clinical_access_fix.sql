@@ -24,6 +24,14 @@ GRANT ALL ON TABLE receipts TO service_role;
 GRANT ALL ON TABLE medicines TO authenticated;
 GRANT ALL ON TABLE medicines TO service_role;
 
+-- 5a. Discharge Summaries Grants
+GRANT ALL ON TABLE discharge_summaries TO authenticated;
+GRANT ALL ON TABLE discharge_summaries TO service_role;
+
+-- 5b. Admission Records Grants
+GRANT ALL ON TABLE admission_records TO authenticated;
+GRANT ALL ON TABLE admission_records TO service_role;
+
 -- 6. Ensure schema usage is allowed
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
