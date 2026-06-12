@@ -31,152 +31,158 @@ function createMiddlewareSupabase(request: any, response: any) {
 
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  // Bypass all authentication/redirection checks if Demo Mode is active
-  if (pathname.startsWith("/demo")) {
-    return response;
-  }
-
-  const supabase = createMiddlewareSupabase(request, response);
-
-  // 1. Verify User Session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // 2. Protected Routes (Portal, Onboarding, Pending)
-  const isProtectedRoute =
-    pathname.startsWith("/portal") ||
-    pathname.startsWith("/store") ||
-    pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/pending");
-
-  // 3. Auth Routes (Login/Register)
-  const isAuthRoute = pathname.startsWith("/auth");
-  const isLandingRoute = pathname === "/";
-
-  const handleRedirect = (destUrl: string) => {
-    const redirectResponse = NextResponse.redirect(new URL(destUrl, request.url));
-    response.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, {
-        path: cookie.path,
-        domain: cookie.domain,
-        maxAge: cookie.maxAge,
-        expires: cookie.expires,
-        secure: cookie.secure,
-        httpOnly: cookie.httpOnly,
-        sameSite: cookie.sameSite,
-      });
+  try {
+    const { pathname } = request.nextUrl;
+    let response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
     });
-    return redirectResponse;
-  };
 
-  // --- LOGIC FOR LOGGED-OUT USERS ---
-  if (!user) {
-    if (isProtectedRoute) {
-      return handleRedirect("/auth");
+    // Bypass all authentication/redirection checks if Demo Mode is active
+    if (pathname.startsWith("/demo")) {
+      return response;
     }
-    return response;
-  }
 
-  // --- LOGIC FOR LOGGED-IN USERS ---
+    const supabase = createMiddlewareSupabase(request, response);
 
-  // If user is logged in, we need to know their clinic status for routing decisions
-  // We only fetch this if they are hitting /auth or / or a protected route
-  // to minimize DB load on every static asset request (handled by matcher though)
+    // 1. Verify User Session
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  // 1. Get clinics owned by the user
-  const { data: ownedClinics } = await supabase
-    .from("clinics")
-    .select("id, status, created_at, clinic_type")
-    .eq("owner_user_id", user.id);
+    // 2. Protected Routes (Portal, Onboarding, Pending)
+    const isProtectedRoute =
+      pathname.startsWith("/portal") ||
+      pathname.startsWith("/store") ||
+      pathname.startsWith("/onboarding") ||
+      pathname.startsWith("/pending");
 
-  // 2. Get clinics where user is an assigned doctor
-  const { data: doctorProfile } = await supabase
-    .from("doctors")
-    .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    // 3. Auth Routes (Login/Register)
+    const isAuthRoute = pathname.startsWith("/auth");
+    const isLandingRoute = pathname === "/";
 
-  let assignedClinics: any[] = [];
-  if (doctorProfile) {
-    const { data: doctorClinics } = await supabase
-      .from("clinic_doctors")
-      .select("clinic_id, clinics(id, status, created_at, clinic_type)")
-      .eq("doctor_id", doctorProfile.id)
-      .eq("is_active", true);
+    const handleRedirect = (destUrl: string) => {
+      const redirectResponse = NextResponse.redirect(new URL(destUrl, request.url));
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, {
+          path: cookie.path,
+          domain: cookie.domain,
+          maxAge: cookie.maxAge,
+          expires: cookie.expires,
+          secure: cookie.secure,
+          httpOnly: cookie.httpOnly,
+          sameSite: cookie.sameSite,
+        });
+      });
+      return redirectResponse;
+    };
 
-    if (doctorClinics) {
-      assignedClinics = doctorClinics
-        .map((dc: any) => dc.clinics)
-        .filter(Boolean);
+    // --- LOGIC FOR LOGGED-OUT USERS ---
+    if (!user) {
+      if (isProtectedRoute) {
+        return handleRedirect("/auth");
+      }
+      return response;
     }
-  }
 
-  const clinics = [...(ownedClinics || []), ...assignedClinics];
+    // --- LOGIC FOR LOGGED-IN USERS ---
 
-  let clinicStatus: string | null = null;
-  let activeClinic: any = null;
+    // If user is logged in, we need to know their clinic status for routing decisions
+    // We only fetch this if they are hitting /auth or / or a protected route
+    // to minimize DB load on every static asset request (handled by matcher though)
 
-  if (clinics && clinics.length > 0) {
-    activeClinic =
-      clinics.find((c) => c.status === "active") ||
-      clinics.find((c) => c.status === "pending") ||
-      clinics[0];
-    clinicStatus = activeClinic.status || null;
-  }
+    // 1. Get clinics owned by the user
+    const { data: ownedClinics } = await supabase
+      .from("clinics")
+      .select("id, status, created_at, clinic_type")
+      .eq("owner_user_id", user.id);
 
-  const clinicType = activeClinic?.clinic_type || "clinic";
+    // 2. Get clinics where user is an assigned doctor
+    const { data: doctorProfile } = await supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  // Case A: Trying to hit Login or Landing while already logged in
-  if (isAuthRoute || isLandingRoute) {
-    if (!clinicStatus)
-      return handleRedirect("/onboarding");
-    if (clinicStatus === "pending")
-      return handleRedirect("/pending");
-    if (clinicStatus === "inactive")
-      return handleRedirect("/pending?expired=true");
-    const dest = clinicType === "store" ? "/store" : "/portal";
-    return handleRedirect(dest);
-  }
+    let assignedClinics: any[] = [];
+    if (doctorProfile) {
+      const { data: doctorClinics } = await supabase
+        .from("clinic_doctors")
+        .select("clinic_id, clinics(id, status, created_at, clinic_type)")
+        .eq("doctor_id", doctorProfile.id)
+        .eq("is_active", true);
 
-  // Case B: Accessing Portal/Store/Onboarding/Pending - ensure they are in the right sub-page
-  if (isProtectedRoute) {
-    if (!clinicStatus && !pathname.startsWith("/onboarding")) {
-      return handleRedirect("/onboarding");
+      if (doctorClinics) {
+        assignedClinics = doctorClinics
+          .map((dc: any) => dc.clinics)
+          .filter(Boolean);
+      }
     }
-    if (clinicStatus === "pending" && !pathname.startsWith("/pending")) {
-      return handleRedirect("/pending");
+
+    const clinics = [...(ownedClinics || []), ...assignedClinics];
+
+    let clinicStatus: string | null = null;
+    let activeClinic: any = null;
+
+    if (clinics && clinics.length > 0) {
+      activeClinic =
+        clinics.find((c) => c.status === "active") ||
+        clinics.find((c) => c.status === "pending") ||
+        clinics[0];
+      clinicStatus = activeClinic.status || null;
     }
-    if (clinicStatus === "inactive" && !pathname.startsWith("/pending")) {
-      return handleRedirect("/pending?expired=true");
-    }
-    if (
-      clinicStatus === "active" &&
-      (pathname.startsWith("/onboarding") || pathname.startsWith("/pending"))
-    ) {
+
+    const clinicType = activeClinic?.clinic_type || "clinic";
+
+    // Case A: Trying to hit Login or Landing while already logged in
+    if (isAuthRoute || isLandingRoute) {
+      if (!clinicStatus)
+        return handleRedirect("/onboarding");
+      if (clinicStatus === "pending")
+        return handleRedirect("/pending");
+      if (clinicStatus === "inactive")
+        return handleRedirect("/pending?expired=true");
       const dest = clinicType === "store" ? "/store" : "/portal";
       return handleRedirect(dest);
     }
-  }
 
-  // Prevent Cross-Access for Active Users
-  if (clinicStatus === "active") {
-    if (clinicType === "store" && pathname.startsWith("/portal")) {
-      return handleRedirect("/store");
+    // Case B: Accessing Portal/Store/Onboarding/Pending - ensure they are in the right sub-page
+    if (isProtectedRoute) {
+      if (!clinicStatus && !pathname.startsWith("/onboarding")) {
+        return handleRedirect("/onboarding");
+      }
+      if (clinicStatus === "pending" && !pathname.startsWith("/pending")) {
+        return handleRedirect("/pending");
+      }
+      if (clinicStatus === "inactive" && !pathname.startsWith("/pending")) {
+        return handleRedirect("/pending?expired=true");
+      }
+      if (
+        clinicStatus === "active" &&
+        (pathname.startsWith("/onboarding") || pathname.startsWith("/pending"))
+      ) {
+        const dest = clinicType === "store" ? "/store" : "/portal";
+        return handleRedirect(dest);
+      }
     }
-    if (clinicType === "clinic" && pathname.startsWith("/store")) {
-      return handleRedirect("/portal");
-    }
-  }
 
-  return response;
+    // Prevent Cross-Access for Active Users
+    if (clinicStatus === "active") {
+      if (clinicType === "store" && pathname.startsWith("/portal")) {
+        return handleRedirect("/store");
+      }
+      if (clinicType === "clinic" && pathname.startsWith("/store")) {
+        return handleRedirect("/portal");
+      }
+    }
+
+    return response;
+  } catch (error) {
+    console.error("[Middleware Error]", error);
+    // Don't crash — let the request through so the page can handle errors
+    return NextResponse.next();
+  }
 }
 
 export const config = {
