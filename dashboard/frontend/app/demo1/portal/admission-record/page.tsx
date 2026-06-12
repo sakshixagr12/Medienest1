@@ -1435,9 +1435,12 @@ function AdmissionRecordRedesign() {
           {renderWizardProgress()}
           <div
             className={`${styles.layout} ${isQuickMode ? styles.quickModeLayout : ""}`}
+            style={!isQuickMode && step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}}
           >
-            {!isQuickMode && (
+            {!isQuickMode && (step === 1 || step === 2) && (
               <section className={styles.leftColumn}>
+                {step === 1 && (
+                  <>
                 {/* --- Clinical Readiness Progress --- */}
                 {(() => {
                   const { percentage, missing } = calculateProgress();
@@ -1605,6 +1608,45 @@ function AdmissionRecordRedesign() {
                     ))}
                   </div>
                 </div>
+                  </>
+                )}
+                {step === 2 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {renderClinicalCard(
+                      "Complaints",
+                      "complaints",
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>,
+                      "Add patient complaints (e.g. Fever, Cough)...",
+                    )}
+                    {renderClinicalCard(
+                      "Findings",
+                      "findings",
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>,
+                        "Enter objective clinical findings...",
+                    )}
+                  </div>
+                )}
               </section>
             )}
 
@@ -2280,41 +2322,7 @@ function AdmissionRecordRedesign() {
                         ))}
                       </div>
 
-                      <div className={styles.clinicalSplit}>
-                        {renderClinicalCard(
-                          "Complaints",
-                          "complaints",
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                          >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                          </svg>,
-                          "Add patient complaints (e.g. Fever, Cough)...",
-                        )}
-                        {renderClinicalCard(
-                          "Findings",
-                          "findings",
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                          >
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                          </svg>,
-                          "Enter objective clinical findings...",
-                        )}
-                      </div>
+
                     </div>
                   )}
 
