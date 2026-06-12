@@ -1,34 +1,76 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
-function createMiddlewareSupabase(request: any, response: any) {
+function getAccessToken(request: NextRequest) {
+  const cookiePrefix = 'sb-sbbinqrgczoynwizmnwc-auth-token';
+  const cookies = request.cookies.getAll();
+  
+  const chunks = cookies
+    .filter(c => c.name.startsWith(cookiePrefix + '.'))
+    .sort((a, b) => {
+      const aIdx = parseInt(a.name.replace(cookiePrefix + '.', ''), 10) || 0;
+      const bIdx = parseInt(b.name.replace(cookiePrefix + '.', ''), 10) || 0;
+      return aIdx - bIdx;
+    })
+    .map(c => c.value);
+
+  if (chunks.length === 0) {
+    const single = request.cookies.get(cookiePrefix);
+    if (single) chunks.push(single.value);
+  }
+
+  if (chunks.length === 0) return null;
+
+  try {
+    const jsonStr = chunks.join('');
+    const parsed = JSON.parse(jsonStr);
+    return parsed?.access_token || parsed?.[0] || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchUser(token: string) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  return createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        request.cookies.set({ name, value, ...options });
-        response = response || {};
-        if (response.cookies) {
-          response.cookies.set({ name, value, ...options });
-        }
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({ name, value: "", ...options });
-        if (response.cookies) {
-          response.cookies.set({ name, value: "", ...options });
-        }
-      },
+  const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: supabaseKey,
     },
   });
+
+  if (!res.ok) return null;
+  return await res.json();
 }
 
+async function fetchUserClinics(userId: string, supabaseUrl: string, supabaseKey: string) {
+  // 1. Get owned clinics
+  const ownedRes = await fetch(`${supabaseUrl}/rest/v1/clinics?owner_user_id=eq.${userId}&select=id,status,created_at,clinic_type`, {
+    headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+  });
+  const ownedClinics = ownedRes.ok ? await ownedRes.json() : [];
 
+  // 2. Get doctor profile
+  const docRes = await fetch(`${supabaseUrl}/rest/v1/doctors?user_id=eq.${userId}&select=id`, {
+    headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+  });
+  const docData = docRes.ok ? await docRes.json() : [];
+  const doctorProfile = docData.length > 0 ? docData[0] : null;
 
+  let assignedClinics: any[] = [];
+  if (doctorProfile) {
+    const docClinicsRes = await fetch(`${supabaseUrl}/rest/v1/clinic_doctors?doctor_id=eq.${doctorProfile.id}&is_active=eq.true&select=clinic_id,clinics(id,status,created_at,clinic_type)`, {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+    });
+    if (docClinicsRes.ok) {
+      const docClinicsData = await docClinicsRes.json();
+      assignedClinics = docClinicsData.map((dc: any) => dc.clinics).filter(Boolean);
+    }
+  }
+
+  return [...ownedClinics, ...assignedClinics];
+}
 
 export async function middleware(request: NextRequest) {
   try {
@@ -44,12 +86,13 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    const supabase = createMiddlewareSupabase(request, response);
+    const token = getAccessToken(request);
 
     // 1. Verify User Session
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let user = null;
+    if (token) {
+      user = await fetchUser(token);
+    }
 
     // 2. Protected Routes (Portal, Onboarding, Pending)
     const isProtectedRoute =
@@ -92,35 +135,9 @@ export async function middleware(request: NextRequest) {
     // We only fetch this if they are hitting /auth or / or a protected route
     // to minimize DB load on every static asset request (handled by matcher though)
 
-    // 1. Get clinics owned by the user
-    const { data: ownedClinics } = await supabase
-      .from("clinics")
-      .select("id, status, created_at, clinic_type")
-      .eq("owner_user_id", user.id);
-
-    // 2. Get clinics where user is an assigned doctor
-    const { data: doctorProfile } = await supabase
-      .from("doctors")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    let assignedClinics: any[] = [];
-    if (doctorProfile) {
-      const { data: doctorClinics } = await supabase
-        .from("clinic_doctors")
-        .select("clinic_id, clinics(id, status, created_at, clinic_type)")
-        .eq("doctor_id", doctorProfile.id)
-        .eq("is_active", true);
-
-      if (doctorClinics) {
-        assignedClinics = doctorClinics
-          .map((dc: any) => dc.clinics)
-          .filter(Boolean);
-      }
-    }
-
-    const clinics = [...(ownedClinics || []), ...assignedClinics];
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const clinics = await fetchUserClinics(user.id, supabaseUrl, supabaseKey);
 
     let clinicStatus: string | null = null;
     let activeClinic: any = null;
