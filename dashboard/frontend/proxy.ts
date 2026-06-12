@@ -30,7 +30,7 @@ function createMiddlewareSupabase(request: any, response: any) {
 
 
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     let response = NextResponse.next({
