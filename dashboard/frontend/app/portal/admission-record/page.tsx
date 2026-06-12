@@ -1503,7 +1503,7 @@ function AdmissionRecordRedesign() {
                         { label: "Doctor Assigned", value: summary.doctor },
                         { label: "Ward", value: summary.ward },
                         { label: "Bed", value: summary.bed },
-                        { label: "Complaints", value: summary.complaints?.length > 0 ? summary.complaints[0] : "" },
+                        { label: "Chief Complaints", value: summary.complaints?.length > 0 ? summary.complaints[0] : "" },
                       ];
                       const completed = admissionChecklist.filter((f) => !!f.value).length;
                       const total = admissionChecklist.length;
@@ -1746,7 +1746,7 @@ function AdmissionRecordRedesign() {
                 {step === 2 && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     {renderClinicalCard(
-                      "Complaints",
+                      "Chief Complaints",
                       "complaints",
                       <svg
                         width="18"
@@ -1760,7 +1760,7 @@ function AdmissionRecordRedesign() {
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                       </svg>,
-                      "Add patient complaints (e.g. Fever, Cough)...",
+                      "Add patient chief complaints (e.g. Fever, Cough)...",
                     )}
                     {renderClinicalCard(
                       "Findings",
@@ -1837,14 +1837,14 @@ function AdmissionRecordRedesign() {
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                           </svg>
-                          Main Complaints
+                          Chief Complaints
                         </div>
                       </div>
                       <ChipInputEditor
                         field="complaints"
                         items={summary.complaints}
                         updateField={updateField}
-                        placeholder="Add major symptoms..."
+                        placeholder="Add chief complaints..."
                       />
                     </div>
 
