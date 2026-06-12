@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -45,6 +46,7 @@ export default function PrescriptionPage() {
   const [ptSuggestions, setPtSuggestions] = useState<any[]>([]);
   const [isLoadingPts, setIsLoadingPts] = useState(false);
   const [ptSnapshot, setPtSnapshot] = useState<any>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   // Premium Custom Alert Modal State
   const [modalConfig, setModalConfig] = useState<{
@@ -94,33 +96,17 @@ export default function PrescriptionPage() {
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   if (!supabaseRef.current) supabaseRef.current = createClient();
   const supabase = supabaseRef.current;
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [pendingAiMeds, setPendingAiMeds] = useState<any[]>([]);
-  const [aiValidationFlags, setAiValidationFlags] = useState<string[]>([]);
-  const [aiDiagnosis, setAiDiagnosis] = useState("");
-  const [aiDifferentials, setAiDifferentials] = useState<string[]>([]);
-  const [primaryInvestigations, setPrimaryInvestigations] = useState<string[]>(
-    [],
-  );
-  const [secondaryInvestigations, setSecondaryInvestigations] = useState<
-    string[]
-  >([]);
-  const [aiConfidence, setAiConfidence] = useState(0);
-  const [aiSeverity, setAiSeverity] = useState(""); // 'mild', 'moderate', 'emergency'
-  const [aiIntent, setAiIntent] = useState("");
-  const [aiStage, setAiStage] = useState("");
-  const [aiStatus, setAiStatus] = useState(""); // 'analyzing', 'ready', 'error', or ''
-  const [aiError, setAiError] = useState("");
-  const [aiWarnings, setAiWarnings] = useState<string[]>([]);
-  const [isAutoAiEnabled, setIsAutoAiEnabled] = useState(false);
-  const [adviceApproved, setAdviceApproved] = useState(true);
-  const [ptConditions, setPtConditions] = useState("");
-  const [ptDiet, setPtDiet] = useState("Veg");
-  const [ptLifestyle, setPtLifestyle] = useState("");
-  const [aiLifestyleAdvice, setAiLifestyleAdvice] = useState("");
+  const guidancePaperRef = useRef<HTMLDivElement>(null);
+  // Guidance Sheet State
 
-  // Smart Trigger Tracking
-  const lastAiHashRef = useRef("");
+  const [guidanceSheet, setGuidanceSheet] = useState<any>(null);
+  const [guidanceStatus, setGuidanceStatus] = useState<{ [key: string]: 'pending' | 'accepted' | 'rejected' | 'editing' }>({});
+  const [guidanceEditedTexts, setGuidanceEditedTexts] = useState<{ [key: string]: string }>({});
+  const [isGeneratingGuidance, setIsGeneratingGuidance] = useState(false);
+  const [guidanceError, setGuidanceError] = useState("");
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [guidanceApproved, setGuidanceApproved] = useState(false);
+
 
   // Draft Persistence (Cache) Logic
   useEffect(() => {
@@ -128,6 +114,7 @@ export default function PrescriptionPage() {
     const draftKey = `medienest care_rx_draft_${pId}`;
     const savedDraft = localStorage.getItem(draftKey);
     if (savedDraft) {
+      setSelectedPatientId(pId === "unlinked" ? null : pId);
       try {
         const draft = JSON.parse(savedDraft);
         setPtName(draft.ptName || "");
@@ -149,12 +136,6 @@ export default function PrescriptionPage() {
         setMNote(draft.mNote || "");
         setAdvice(draft.advice || "");
         setFollowUp(draft.followUp || "");
-        setPendingAiMeds(draft.pendingAiMeds || []);
-        if (draft.adviceApproved !== undefined) {
-          setAdviceApproved(draft.adviceApproved);
-        } else {
-          setAdviceApproved(true);
-        }
         console.log("Draft restored from cache for patient:", pId);
       } catch (e) {
         console.error("Failed to restore draft:", e);
@@ -181,21 +162,13 @@ export default function PrescriptionPage() {
         setMNote("");
         setAdvice("");
         setFollowUp("");
-        setPendingAiMeds([]);
-        setAdviceApproved(true);
         setPtSnapshot(null);
+        setSelectedPatientId(searchParams.get("patientId"));
+      } else {
+        setSelectedPatientId(null);
       }
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const autoAi = localStorage.getItem("medienest care_auto_ai");
-    if (autoAi !== null) setIsAutoAiEnabled(JSON.parse(autoAi));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("medienest care_auto_ai", JSON.stringify(isAutoAiEnabled));
-  }, [isAutoAiEnabled]);
 
   // 'Zero Latency' Auto-Fill from Deep-Link Params
   useEffect(() => {
@@ -224,6 +197,7 @@ export default function PrescriptionPage() {
           .single();
 
         if (!error && data) {
+          setSelectedPatientId(data.id);
           // Sync with DB values if they differ or weren't provided in URL
           if (!pName) setPtName(data.name || "");
           if (!pPhone) setPtPhone(data.contact || "");
@@ -259,17 +233,14 @@ export default function PrescriptionPage() {
     fetchPatientById();
   }, [searchParams, supabase, clinic?.id]);
 
-  // AI Auto-Trigger Effect (Smart Persistence)
+  // Guidance Sheet Auto-Trigger Effect
   useEffect(() => {
-    if (activeTab === "rx" && isAutoAiEnabled) {
-      const currentHash = `${cc}|${findings}`;
-
-      // Trigger if we have data AND it's different from our last successful run
-      if ((cc || findings) && currentHash !== lastAiHashRef.current) {
-        handleAiSuggest();
+    if (activeTab === "rx") {
+      if ((diagnosis || cc) && !guidanceSheet && !isGeneratingGuidance && !guidanceApproved) {
+        generateGuidance();
       }
     }
-  }, [activeTab, isAutoAiEnabled, cc, findings]);
+  }, [activeTab, diagnosis, cc, meds.length]);
 
   useEffect(() => {
     // If we've already officially saved this prescription to the DB, stop updating the draft.
@@ -295,8 +266,6 @@ export default function PrescriptionPage() {
       mNote,
       advice,
       followUp,
-      pendingAiMeds,
-      adviceApproved,
     };
     const pId = searchParams.get("patientId") || "unlinked";
     const draftKey = `medienest care_rx_draft_${pId}`;
@@ -321,8 +290,6 @@ export default function PrescriptionPage() {
     mNote,
     advice,
     followUp,
-    pendingAiMeds,
-    adviceApproved,
     savedRxId,
     searchParams,
   ]);
@@ -349,113 +316,8 @@ export default function PrescriptionPage() {
       setMeds([]);
       setAdvice("");
       setFollowUp("");
-      setAiDiagnosis("");
       setPtSnapshot(null);
-      lastAiHashRef.current = ""; // Reset AI memory
     }
-  };
-
-  const handleAiSuggest = async () => {
-    if (!cc && !findings) return;
-    const currentHash = `${cc}|${findings}`;
-    setIsAiLoading(true);
-    setAiStatus("analyzing");
-    setAiError("");
-    setAiDiagnosis("");
-    setAiDifferentials([]);
-    setPrimaryInvestigations([]);
-    setSecondaryInvestigations([]);
-    setAiConfidence(0);
-    setAiSeverity("");
-    setAiValidationFlags([]);
-    try {
-      console.log("[Clinical AI Engine] Running production inference...");
-      const res = await authenticatedFetch(
-        `${API_BASE_URL}/api/recommendations/suggest`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cc,
-            findings,
-            age: ptAge,
-            gender: ptSex.toLowerCase(),
-            specialty: doctors?.[0]?.specialty || "General Practitioner",
-            diagnosis,
-            medicines: meds,
-            weight: ptWeight,
-            existing_conditions: ptSnapshot ? (ptSnapshot.keyConditions?.join(", ") || "") : "",
-            lifestyle: ptSnapshot ? (ptSnapshot.currentMedications?.join(", ") || "") : "",
-          }),
-        },
-      );
-
-      const data = await res.json();
-
-      if (data.success && data.suggestions && !data.suggestions.error) {
-        const {
-          recommendations,
-          advice: suggestedAdvice,
-          probable_diagnosis,
-        } = data.suggestions;
-
-        // Set recommendations for the Guidance Cards
-        if (recommendations && Array.isArray(recommendations)) {
-          setPendingAiMeds(recommendations);
-          if (recommendations.length === 0 && !probable_diagnosis)
-            setAiStatus("no_suggestions");
-          else setAiStatus("ready");
-        }
-
-        if (probable_diagnosis) setAiDiagnosis(probable_diagnosis);
-        if (data.suggestions.differentials)
-          setAiDifferentials(data.suggestions.differentials);
-        if (data.suggestions.investigations) {
-          setPrimaryInvestigations(
-            data.suggestions.investigations.primary || [],
-          );
-          setSecondaryInvestigations(
-            data.suggestions.investigations.secondary || [],
-          );
-        }
-        if (data.suggestions.severity) setAiSeverity(data.suggestions.severity);
-        if (data.suggestions.confidence)
-          setAiConfidence(data.suggestions.confidence);
-
-        if (suggestedAdvice) {
-          setAdvice(suggestedAdvice);
-          setAdviceApproved(false);
-        }
-
-        lastAiHashRef.current = currentHash;
-      } else {
-        setAiStatus("error");
-        setAiError(data.suggestions?.error || "Service Unavailable");
-      }
-    } catch (err) {
-      setAiStatus("error");
-      setAiError("Connection failure");
-      console.error("[AI] Communication failure:", err);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
-  const handleApproveSuggestedMed = (med: any) => {
-    // 1. Fill manual writing section
-    skipSearchRef.current = true; // Prevent DB search from triggering on auto-fill
-    setMName(med.name);
-    setMType(med.type || med.dosage_form || "Tab");
-    setMDose(med.dose || med.pack_size || "");
-    setMNote("");
-
-    // Remaining details left for doctor
-    setMFreq("");
-    setMDur("");
-    setMInst("");
-
-    // UI Feedback: Focus on Frequency for faster typing
-    console.log("[UI] Auto-filled brand:", med.name);
   };
 
   // Real-time Patient Lookup
@@ -526,6 +388,7 @@ export default function PrescriptionPage() {
     setMeds([]);
     setPtSnapshot(null);
     setPtSuggestions([]);
+    setSelectedPatientId(null);
   };
 
   const handleSelectPatient = async (p: any) => {
@@ -539,6 +402,7 @@ export default function PrescriptionPage() {
     setPtSex(p.gender || "Male");
     setPtBloodGroup(p.blood_group || "");
     setPtSuggestions([]);
+    setSelectedPatientId(p.id);
 
     // Fetch AI Snapshot for selected patient
     try {
@@ -651,15 +515,13 @@ export default function PrescriptionPage() {
     setMeds(meds.filter((m) => m.id !== id));
   };
 
-  const handleSave = async () => {
-    // Safety check for unapproved AI suggestions
-    if (!adviceApproved) {
-      const confirmResult = await window.confirm(
-        "The Clinical Advice box contains AI-generated content that hasn't been approved. Proceed and Save anyway?",
-      );
-      if (!confirmResult) return;
+  const handleSave = async (overrideGuidance: any = false) => {
+    const isOverride = overrideGuidance === true;
+    // If guidance exists but isn't approved, prompt doctor to review/approve first
+    if (guidanceSheet && !guidanceApproved && !isOverride) {
+      setIsReviewModalOpen(true);
+      return;
     }
-
     if (!ptName || !ptPhone) {
       showAlert("Please enter patient name and contact details.", "warning", "Validation Warning");
       return;
@@ -758,6 +620,61 @@ export default function PrescriptionPage() {
             clinic_id: clinic?.id,
             doctor_name: selectedDoctorObj?.name || "Dr. Consultant",
             valid_till: followUp || null,
+            guidance_sheet: guidanceApproved && guidanceSheet ? {
+              understanding_condition: {
+                title: guidanceSheet.understanding_condition?.title || "Understanding Your Condition",
+                disease_name: guidanceSheet.understanding_condition?.disease_name || diagnosis,
+                points: guidanceStatus.understanding_condition === 'accepted'
+                  ? (guidanceEditedTexts.understanding_condition 
+                      ? guidanceEditedTexts.understanding_condition.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:"))
+                      : [])
+                  : []
+              },
+              diet_nutrition: {
+                title: guidanceSheet.diet_nutrition?.title || "Diet & Nutrition",
+                points: guidanceStatus.diet_nutrition === 'accepted'
+                  ? (guidanceEditedTexts.diet_nutrition ? guidanceEditedTexts.diet_nutrition.split("\n").filter(Boolean) : [])
+                  : []
+              },
+              hydration: {
+                title: guidanceSheet.hydration?.title || "Water & Hydration",
+                points: guidanceStatus.hydration === 'accepted'
+                  ? (guidanceEditedTexts.hydration ? guidanceEditedTexts.hydration.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                  : [],
+                tip: guidanceSheet.hydration?.tip || ""
+              },
+              activity_exercise: {
+                title: guidanceSheet.activity_exercise?.title || "Activity & Exercise",
+                points: guidanceStatus.activity_exercise === 'accepted'
+                  ? (guidanceEditedTexts.activity_exercise ? guidanceEditedTexts.activity_exercise.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                  : [],
+                tip: guidanceSheet.activity_exercise?.tip || ""
+              },
+              things_to_avoid: {
+                title: guidanceSheet.things_to_avoid?.title || "Things To Avoid",
+                items: guidanceStatus.things_to_avoid === 'accepted'
+                  ? (guidanceEditedTexts.things_to_avoid
+                      ? guidanceEditedTexts.things_to_avoid.split("\n").filter(Boolean).map((line: string) => {
+                          const parts = line.split(":");
+                          return {
+                            text: parts[0]?.replace(/^-\s*/, '')?.trim() || "",
+                            reason: parts.slice(1).join(":")?.trim() || ""
+                          };
+                        })
+                      : [])
+                  : []
+              },
+              warning_signs: {
+                title: guidanceSheet.warning_signs?.title || "Warning Signs & Follow-up",
+                red_flags: guidanceStatus.warning_signs === 'accepted'
+                  ? (guidanceEditedTexts.warning_signs ? guidanceEditedTexts.warning_signs.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:") && !l.toLowerCase().includes("red flags:")) : [])
+                  : [],
+                follow_up: guidanceStatus.warning_signs === 'accepted'
+                  ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up || "")
+                  : ""
+              },
+              general_tips: guidanceSheet.general_tips || []
+            } : null
           },
         ])
         .select("id")
@@ -801,6 +718,97 @@ export default function PrescriptionPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const generateGuidance = async () => {
+    if (isGeneratingGuidance || guidanceApproved) return;
+    setIsGeneratingGuidance(true);
+    setGuidanceError("");
+    try {
+      const treatmentText = meds.length > 0
+        ? meds.map(m => `${m.type || 'Tab'}. ${m.name} ${m.dose || ''} (${m.freq || ''}, ${m.duration || ''})`).join('; ')
+        : "None prescribed yet";
+
+      const res = await authenticatedFetch(
+        `${API_BASE_URL}/api/recommendations/guidance-sheet`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            diagnosis,
+            cc,
+            findings,
+            medicines: meds,
+            age: ptAge,
+            gender: ptSex,
+            weight: ptWeight,
+            existing_conditions: ptSnapshot ? [
+              ...(ptSnapshot.keyConditions || []),
+              ...(ptSnapshot.chronicFlags || []).map((f: string) => `[CHRONIC] ${f}`),
+            ].join(", ") : "",
+            follow_up_date: followUp,
+            clinic_name: clinic?.name || "",
+            doctor_name: selectedDoctorObj?.name || "",
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (data.success && data.guidance) {
+        setGuidanceSheet(data.guidance);
+        const initialStatus: { [key: string]: 'pending' | 'accepted' | 'rejected' | 'editing' } = {};
+        const initialTexts: { [key: string]: string } = {};
+
+        const sections = [
+          'understanding_condition',
+          'diet_nutrition',
+          'hydration',
+          'activity_exercise',
+          'things_to_avoid',
+          'warning_signs'
+        ];
+
+        sections.forEach(sec => {
+          initialStatus[sec] = 'pending';
+          if (sec === 'understanding_condition') {
+            const disease = data.guidance.understanding_condition.disease_name || diagnosis || "Condition";
+            const pts = (data.guidance.understanding_condition.points || []).join("\n");
+            initialTexts[sec] = `Diagnosis: ${disease}\n\n${pts}`;
+          } else if (sec === 'things_to_avoid') {
+            const items = (data.guidance.things_to_avoid.items || []).map((i: any) => `- ${i.text}: ${i.reason}`).join("\n");
+            initialTexts[sec] = items;
+          } else if (sec === 'warning_signs') {
+            const redFlags = (data.guidance.warning_signs.red_flags || []).join("\n");
+            const followUpTxt = data.guidance.warning_signs.follow_up || "";
+            initialTexts[sec] = `Red Flags:\n${redFlags}\n\nFollow-up:\n${followUpTxt}`;
+          } else {
+            const pts = (data.guidance[sec].points || []).join("\n");
+            const tip = data.guidance[sec].tip ? `\n\nTip: ${data.guidance[sec].tip}` : "";
+            initialTexts[sec] = pts + tip;
+          }
+        });
+
+        setGuidanceStatus(initialStatus);
+        setGuidanceEditedTexts(initialTexts);
+      } else {
+        setGuidanceError(data.error || "Failed to generate patient guidance.");
+      }
+    } catch (err: any) {
+      console.error("Guidance Sheet generation error:", err);
+      setGuidanceError(err.message || "Failed to connect to AI server.");
+    } finally {
+      setIsGeneratingGuidance(false);
+    }
+  };
+
+  const handleConfirmAndSaveGuidance = async (approvedGuidanceData: any) => {
+    setGuidanceApproved(true);
+    setIsReviewModalOpen(false);
+    
+    // Auto-save: Trigger handleSave immediately after setting guidance state.
+    setTimeout(() => {
+      handleSave(true);
+    }, 100);
   };
 
   const shareWhatsApp = () => {
@@ -854,14 +862,30 @@ export default function PrescriptionPage() {
 
   const downloadPDF = async () => {
     if (!rxPaperRef.current) return;
-    const canvas = await html2canvas(rxPaperRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Prescription_${ptName}_${date}.pdf`);
+    setIsSaving(true);
+    try {
+      const canvas1 = await html2canvas(rxPaperRef.current, { scale: 2 });
+      const imgData1 = canvas1.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      pdf.addImage(imgData1, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      if (guidanceSheet && guidanceApproved && guidancePaperRef.current) {
+        pdf.addPage();
+        const canvas2 = await html2canvas(guidancePaperRef.current, { scale: 2 });
+        const imgData2 = canvas2.toDataURL("image/png");
+        pdf.addImage(imgData2, "PNG", 0, 0, pdfWidth, pdfHeight);
+      }
+      
+      pdf.save(`Prescription_${ptName}_${date}.pdf`);
+    } catch (pdfErr) {
+      console.error("PDF generation failed:", pdfErr);
+      showAlert("Could not generate PDF document.", "error", "Export Error");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const quickAdd = (setter: any, val: string) => {
@@ -1088,24 +1112,74 @@ export default function PrescriptionPage() {
                   {ptSnapshot && (
                     <div className={styles.aiSnapshotBox}>
                       <div className={styles.snapshotHeader}>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                        >
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                        </svg>
-                        Clinical Profile Snapshot
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          >
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                          </svg>
+                          Clinical Profile Snapshot
+                          {ptSnapshot.totalVisits > 0 && (
+                            <span className={styles.snapshotBadge}>{ptSnapshot.totalVisits} visit{ptSnapshot.totalVisits > 1 ? "s" : ""}</span>
+                          )}
+                        </div>
+                        {selectedPatientId && (
+                          <Link
+                            href={`/portal/doctor-dashboard/patients/${selectedPatientId}`}
+                            target="_blank"
+                            className={styles.viewProfileBtn}
+                          >
+                            See Patient Profile →
+                          </Link>
+                        )}
                       </div>
-                      <div className={styles.snapshotData}>
-                        <strong>Recent Conditions:</strong>{" "}
-                        {ptSnapshot.keyConditions?.join(", ")}
-                        <br />
-                        <strong>Maintenance Meds:</strong>{" "}
-                        {ptSnapshot.currentMedications?.join(", ")}
+                      <div className={styles.snapshotGrid}>
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>🩺 Conditions</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.keyConditions?.map((c: string, i: number) => (
+                              <span key={i} className={styles.conditionTag}>{c}</span>
+                            ))}
+                          </span>
+                        </div>
+                        {ptSnapshot.chronicFlags?.length > 0 && (
+                          <div className={styles.snapshotRow}>
+                            <span className={styles.snapshotLabel}>⚠️ Chronic</span>
+                            <span className={styles.snapshotValue}>
+                              {ptSnapshot.chronicFlags.map((f: string, i: number) => (
+                                <span key={i} className={styles.chronicTag}>{f}</span>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>💊 Medications</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.currentMedications?.map((m: string, i: number) => (
+                              <span key={i} className={styles.medTag}>{m}</span>
+                            ))}
+                          </span>
+                        </div>
+                        {ptSnapshot.allergies?.length > 0 && (
+                          <div className={styles.snapshotRow}>
+                            <span className={styles.snapshotLabel}>🚫 Allergies</span>
+                            <span className={styles.snapshotValue}>
+                              {ptSnapshot.allergies.map((a: string, i: number) => (
+                                <span key={i} className={styles.allergyTag}>{a}</span>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        {ptSnapshot.recentVisitsSummary && (
+                          <div className={styles.snapshotSummary}>
+                            {ptSnapshot.recentVisitsSummary}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1243,24 +1317,74 @@ export default function PrescriptionPage() {
                     style={{ marginBottom: 20 }}
                   >
                     <div className={styles.snapshotHeader}>
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                      >
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                      </svg>
-                      Clinical Profile Snapshot
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                        >
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                        Clinical Profile Snapshot
+                        {ptSnapshot.totalVisits > 0 && (
+                          <span className={styles.snapshotBadge}>{ptSnapshot.totalVisits} visit{ptSnapshot.totalVisits > 1 ? "s" : ""}</span>
+                        )}
+                      </div>
+                      {selectedPatientId && (
+                        <Link
+                          href={`/portal/doctor-dashboard/patients/${selectedPatientId}`}
+                          target="_blank"
+                          className={styles.viewProfileBtn}
+                        >
+                          See Patient Profile →
+                        </Link>
+                      )}
                     </div>
-                    <div className={styles.snapshotData}>
-                      <strong>Recent Conditions:</strong>{" "}
-                      {ptSnapshot.keyConditions?.join(", ")}
-                      <br />
-                      <strong>Maintenance Meds:</strong>{" "}
-                      {ptSnapshot.currentMedications?.join(", ")}
+                    <div className={styles.snapshotGrid}>
+                      <div className={styles.snapshotRow}>
+                        <span className={styles.snapshotLabel}>🩺 Conditions</span>
+                        <span className={styles.snapshotValue}>
+                          {ptSnapshot.keyConditions?.map((c: string, i: number) => (
+                            <span key={i} className={styles.conditionTag}>{c}</span>
+                          ))}
+                        </span>
+                      </div>
+                      {ptSnapshot.chronicFlags?.length > 0 && (
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>⚠️ Chronic</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.chronicFlags.map((f: string, i: number) => (
+                              <span key={i} className={styles.chronicTag}>{f}</span>
+                            ))}
+                          </span>
+                        </div>
+                      )}
+                      <div className={styles.snapshotRow}>
+                        <span className={styles.snapshotLabel}>💊 Medications</span>
+                        <span className={styles.snapshotValue}>
+                          {ptSnapshot.currentMedications?.map((m: string, i: number) => (
+                            <span key={i} className={styles.medTag}>{m}</span>
+                          ))}
+                        </span>
+                      </div>
+                      {ptSnapshot.allergies?.length > 0 && (
+                        <div className={styles.snapshotRow}>
+                          <span className={styles.snapshotLabel}>🚫 Allergies</span>
+                          <span className={styles.snapshotValue}>
+                            {ptSnapshot.allergies.map((a: string, i: number) => (
+                              <span key={i} className={styles.allergyTag}>{a}</span>
+                            ))}
+                          </span>
+                        </div>
+                      )}
+                      {ptSnapshot.recentVisitsSummary && (
+                        <div className={styles.snapshotSummary}>
+                          {ptSnapshot.recentVisitsSummary}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1280,41 +1404,6 @@ export default function PrescriptionPage() {
                     >
                       Prescribe Medicine
                     </h3>
-                    <div className={styles.aiControlArea}>
-                      <span className={styles.aiStatusLabel}>
-                        {isAiLoading && (
-                          <span className={styles.aiLoadingText}>
-                            Analyzing...
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "ready" && (
-                          <span style={{ color: "#10b981" }}>
-                            Suggestions Ready
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "no_suggestions" && (
-                          <span style={{ color: "#94a3b8" }}>
-                            No suggestions found
-                          </span>
-                        )}
-                        {!isAiLoading && aiStatus === "error" && (
-                          <span style={{ color: "#ef4444" }}>
-                            ️ AI Error: {aiError}
-                          </span>
-                        )}
-                        {!isAiLoading && !aiStatus && "AI Auto-Suggest"}
-                      </span>
-                      <label className={styles.switch}>
-                        <input
-                          type="checkbox"
-                          checked={isAutoAiEnabled}
-                          onChange={(e) => setIsAutoAiEnabled(e.target.checked)}
-                        />
-                        <span
-                          className={`${styles.slider} ${isAiLoading ? styles.sliderLoading : ""}`}
-                        ></span>
-                      </label>
-                    </div>
                   </div>
                   <div
                     style={{
@@ -1543,682 +1632,72 @@ export default function PrescriptionPage() {
                   )}
                 </div>
 
-                {(isAiLoading ||
-                  pendingAiMeds.length > 0 ||
-                  (advice && !adviceApproved)) &&
-                  isAutoAiEnabled && (
-                    <div
-                      className={styles.auditContainer}
-                      style={{
-                        background: "#ffffff",
-                        border: "1px solid #cbd5e1",
-                        color: "#0f172a",
-                        padding: "16px",
-                        borderRadius: "12px",
-                      }}
+                {guidanceApproved ? (
+                  <div className={styles.exportRow}>
+                    <button
+                      className={styles.btnEx}
+                      onClick={handleSave}
+                      title="Save to Database"
+                      disabled={isSaving}
+                      style={{ opacity: isSaving ? 0.5 : 1 }}
                     >
-                      {aiDiagnosis && (
-                        <div
-                          className={styles.diagnosisArea}
-                          style={{
-                            background: "#eff6ff",
-                            border: "1px solid #bfdbfe",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: "11px",
-                                  color: "#1d4ed8",
-                                  fontWeight: 800,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.05em",
-                                }}
-                              >
-                                Probable Diagnosis
-                              </p>
-                              {aiSeverity && (
-                                <span
-                                  style={{
-                                    fontSize: "9px",
-                                    background:
-                                      aiSeverity === "emergency"
-                                        ? "#fee2e2"
-                                        : aiSeverity === "moderate"
-                                          ? "#fef9c3"
-                                          : "#dcfce7",
-                                    color:
-                                      aiSeverity === "emergency"
-                                        ? "#991b1b"
-                                        : aiSeverity === "moderate"
-                                          ? "#854d0e"
-                                          : "#166534",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    fontWeight: 800,
-                                    textTransform: "uppercase",
-                                    border: "1px solid",
-                                  }}
-                                >
-                                  {aiSeverity}
-                                </span>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => setDiagnosis(aiDiagnosis)}
-                              style={{
-                                fontSize: "10px",
-                                background: "#3b82f6",
-                                color: "white",
-                                border: "none",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                fontWeight: 800,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Apply
-                            </button>
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: "13px",
-                                color: "#1e3a8a",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {aiDiagnosis}
-                            </p>
-                            {aiConfidence > 0 && (
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: "10px",
-                                  color: "#60a5fa",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {Math.round(aiConfidence * 100)}% Confidence
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {aiDifferentials.length > 0 && (
-                        <div
-                          style={{
-                            background: "#fff",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: "0 0 8px 0",
-                              fontSize: "11px",
-                              color: "#64748b",
-                              fontWeight: 800,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                            }}
-                          >
-                            ️ Differential Diagnoses
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "6px",
-                            }}
-                          >
-                            {aiDifferentials.map((diff, idx) => (
-                              <span
-                                key={idx}
-                                style={{
-                                  fontSize: "11px",
-                                  background: "#f8fafc",
-                                  color: "#475569",
-                                  padding: "3px 8px",
-                                  borderRadius: "6px",
-                                  border: "1px solid #cbd5e1",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {diff}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {(primaryInvestigations.length > 0 ||
-                        secondaryInvestigations.length > 0) && (
-                        <div
-                          style={{
-                            background: "#f5f3ff",
-                            border: "1px solid #ddd6fe",
-                            borderRadius: "12px",
-                            padding: "12px",
-                            marginBottom: "16px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: "0 0 12px 0",
-                              fontSize: "11px",
-                              color: "#6d28d9",
-                              fontWeight: 800,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                            }}
-                          >
-                            Suggested Investigations
-                          </p>
-
-                          {primaryInvestigations.length > 0 && (
-                            <div
-                              style={{
-                                marginBottom:
-                                  secondaryInvestigations.length > 0
-                                    ? "12px"
-                                    : 0,
-                              }}
-                            >
-                              <p
-                                style={{
-                                  margin: "0 0 6px 0",
-                                  fontSize: "10px",
-                                  color: "#7c3aed",
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                }}
-                              >
-                                Essential (Primary)
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "4px",
-                                }}
-                              >
-                                {primaryInvestigations.map((test, idx) => (
-                                  <div
-                                    key={idx}
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#5b21b6",
-                                      fontWeight: 600,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    <span style={{ color: "#a78bfa" }}>•</span>{" "}
-                                    {test}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {secondaryInvestigations.length > 0 && (
-                            <div>
-                              <p
-                                style={{
-                                  margin: "0 0 6px 0",
-                                  fontSize: "10px",
-                                  color: "#94a3b8",
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                }}
-                              >
-                                Further Workup (Secondary)
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "4px",
-                                }}
-                              >
-                                {secondaryInvestigations.map((test, idx) => (
-                                  <div
-                                    key={idx}
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#64748b",
-                                      fontWeight: 500,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    <span style={{ color: "#cbd5e1" }}>•</span>{" "}
-                                    {test}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {pendingAiMeds.length > 0 && (
-                        <div
-                          className={styles.suggestedMedsArea}
-                          style={{ marginBottom: advice ? "24px" : 0 }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: 12,
-                            }}
-                          >
-                            <p
-                              style={{
-                                margin: 0,
-                                fontSize: "11px",
-                                color: "#6366f1",
-                                fontWeight: 800,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.05em",
-                              }}
-                            >
-                              Clinical Guidance Cards
-                            </p>
-                            <button
-                              onClick={() => setPendingAiMeds([])}
-                              className={styles.btnClearAudit}
-                              style={{
-                                fontSize: "10px",
-                                background: "none",
-                                border: "none",
-                                color: "#94a3b8",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Clear All
-                            </button>
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "12px",
-                            }}
-                          >
-                            {pendingAiMeds.map((rec) => (
-                              <div
-                                key={rec.drug}
-                                className={styles.guidanceCard}
-                                style={{
-                                  background: "#f8fafc",
-                                  border: "1px solid #e2e8f0",
-                                  borderRadius: "12px",
-                                  padding: "12px",
-                                }}
-                              >
-                                <div style={{ marginBottom: "8px" }}>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px",
-                                      marginBottom: "2px",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        fontWeight: 800,
-                                        color: "#1e293b",
-                                      }}
-                                    >
-                                      {rec.drug}
-                                    </span>
-                                    <span
-                                      style={{
-                                        fontSize: "9px",
-                                        background: "#e0e7ff",
-                                        color: "#4338ca",
-                                        padding: "1px 6px",
-                                        borderRadius: "4px",
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      GENERIC
-                                    </span>
-                                  </div>
-                                  <p
-                                    style={{
-                                      margin: 0,
-                                      fontSize: "11.5px",
-                                      color: "#64748b",
-                                      lineHeight: 1.4,
-                                    }}
-                                  >
-                                    {rec.reason}
-                                  </p>
-                                </div>
-
-                                {rec.brands && rec.brands.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexWrap: "wrap",
-                                      gap: "6px",
-                                    }}
-                                  >
-                                    {rec.brands.map((brand: any) => (
-                                      <button
-                                        key={brand.id}
-                                        onClick={() =>
-                                          handleApproveSuggestedMed({
-                                            ...brand,
-                                            type: brand.dosage_form || "Tab",
-                                            dose: brand.pack_size || "",
-                                          })
-                                        }
-                                        style={{
-                                          padding: "5px 10px",
-                                          background: "#ffffff",
-                                          border: "1px solid #cbd5e1",
-                                          borderRadius: "6px",
-                                          fontSize: "11px",
-                                          fontWeight: 700,
-                                          color: "#334155",
-                                          cursor: "pointer",
-                                          display: "flex",
-                                          alignItems: "center",
-                                          gap: "4px",
-                                          transition: "0.2s",
-                                        }}
-                                        onMouseOver={(e) => {
-                                          e.currentTarget.style.borderColor =
-                                            "#6366f1";
-                                          e.currentTarget.style.color =
-                                            "#6366f1";
-                                        }}
-                                        onMouseOut={(e) => {
-                                          e.currentTarget.style.borderColor =
-                                            "#cbd5e1";
-                                          e.currentTarget.style.color =
-                                            "#334155";
-                                        }}
-                                      >
-                                        <span>{brand.emoji || ""}</span>{" "}
-                                        {brand.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div
-                                    style={{
-                                      fontSize: "10px",
-                                      color: "#94a3b8",
-                                      fontStyle: "italic",
-                                    }}
-                                  >
-                                    No matches in inventory.
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {advice && !adviceApproved && (
-                        <div
-                          className={styles.adviceDraftArea}
-                          style={{
-                            background: "#f8fafc",
-                            padding: "16px",
-                            borderRadius: "12px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "8px",
-                            }}
-                          >
-                            <p
-                              style={{
-                                fontSize: "11px",
-                                color: "#6366f1",
-                                fontWeight: 800,
-                                margin: 0,
-                              }}
-                            >
-                              AI CLINICAL GUIDANCE
-                            </p>
-                            <span
-                              style={{
-                                fontSize: "9px",
-                                background: "#e0e7ff",
-                                color: "#4338ca",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontWeight: 700,
-                              }}
-                            >
-                              DRAFT
-                            </span>
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "13px",
-                              whiteSpace: "pre-line",
-                              color: "#334155",
-                              lineHeight: 1.5,
-                              marginBottom: "12px",
-                            }}
-                          >
-                            {advice}
-                          </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              onClick={() => setAdviceApproved(true)}
-                              style={{
-                                flex: 1,
-                                padding: "8px",
-                                background: "#10b981",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Accept Advice
-                            </button>
-                            <button
-                              onClick={() => {
-                                setAdvice("");
-                                setAdviceApproved(true);
-                              }}
-                              style={{
-                                padding: "8px 12px",
-                                background: "#f1f5f9",
-                                color: "#64748b",
-                                border: "none",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                <div className={styles.panelBlock}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <h3 className={styles.blockTitle} style={{ margin: 0 }}>
-                      Final Advice & Follow-up
-                    </h3>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M17,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V7L17,3M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M15,9H5V5H15V9Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={downloadPDF}
+                      title="Download PDF"
                     >
-                      {!adviceApproved && (
-                        <>
-                          <button
-                            onClick={() => setAdviceApproved(true)}
-                            className={styles.btnApprove}
-                          >
-                            Approve AI Advice
-                          </button>
-                          <button
-                            onClick={() => {
-                              setAdvice("");
-                              setAdviceApproved(true);
-                            }}
-                            className={styles.btnReject}
-                            style={{
-                              background: "#fee2e2",
-                              color: "#dc2626",
-                              border: "1px solid #fecaca",
-                            }}
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                    </div>
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M10,18V12H12V18H10M13,18V12H15V18H13M16,18V12H18V18H16Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={downloadImage}
+                      title="Save Image"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M5,5H19V19H5V5Z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={shareWhatsApp}
+                      title="WhatsApp Share"
+                      style={{ background: "#25d366" }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M12.04,2C6.58,2,2.13,6.45,2.13,11.91c0,1.75,0.45,3.45,1.32,4.95L2,22l5.25-1.38c1.45,0.79,3.08,1.21,4.74,1.21c5.44,0,9.89-4.45,9.89-9.91C21.89,6.45,17.5,2,12.04,2z M16.59,16.27c-0.27,0.76-1.58,1.39-2.16,1.47c-0.58,0.08-1.13,0.01-1.78-0.2c-0.43-0.14-1.01-0.34-1.74-0.66c-3.1-1.36-5.11-4.52-5.26-4.73c-0.15-0.21-1.25-1.63-1.25-3.11c0-1.48,0.73-2.21,1-2.52c0.27-0.3,0.6-0.38,0.79-0.38c0.19,0,0.38,0,0.54,0.01c0.17,0.01,0.39-0.06,0.61,0.46c0.23,0.54,0.79,1.91,0.85,2.04c0.06,0.13,0.11,0.28,0.02,0.46c-0.08,0.18-0.13,0.29-0.26,0.44c-0.13,0.15-0.27,0.34-0.39,0.46c-0.13,0.13-0.28,0.28-0.12,0.54c0.16,0.27,0.7,1.15,1.49,1.85c1.02,0.91,1.88,1.2,2.16,1.32c0.28,0.11,0.44,0.1,0.61-0.09c0.17-0.19,0.73-0.85,0.93-1.14c0.2-0.29,0.39-0.24,0.66-0.15c0.27,0.09,1.7,0.8,2,0.94c0.3,0.14,0.5,0.22,0.57,0.34C17.09,14.88,16.86,15.51,16.59,16.27z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={styles.btnEx}
+                      onClick={() => window.print()}
+                      title="Print"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20">
+                        <path d="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 19,10A1,1 0 0,1 20,11A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="field">
-                    <textarea
-                      rows={5}
-                      value={advice}
-                      onChange={(e) => {
-                        setAdvice(e.target.value);
-                        // If user manual edits it after AI fill, we consider it their version or at least seen
-                        if (!adviceApproved) setAdviceApproved(true);
-                      }}
-                      placeholder="Advice..."
-                      className={!adviceApproved ? styles.unapprovedAdvice : ""}
-                    />
-                    {!adviceApproved && (
-                      <div
-                        className={styles.auditVerdict}
-                        style={{ marginTop: 8, padding: "8px 12px" }}
-                      >
-                        ️ AI Generated Advice - Please verify before saving.
-                      </div>
-                    )}
+                ) : (
+                  <div className={styles.exportRow}>
+                    <button
+                      className={styles.adviceRecommendBtn}
+                      onClick={() => setIsReviewModalOpen(true)}
+                      type="button"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 8 }}>
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      <span>Advice & Recommendation</span>
+                    </button>
                   </div>
-                  <div className="field">
-                    <label>Specific Follow-up Date</label>
-                    <input
-                      type="date"
-                      value={followUp}
-                      onChange={(e) => setFollowUp(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className={styles.exportRow}>
-                  <button
-                    className={styles.btnEx}
-                    onClick={handleSave}
-                    title="Save to Database"
-                    disabled={isSaving}
-                    style={{ opacity: isSaving ? 0.5 : 1 }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M17,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V7L17,3M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M15,9H5V5H15V9Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={downloadPDF}
-                    title="Download PDF"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M10,18V12H12V18H10M13,18V12H15V18H13M16,18V12H18V18H16Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={downloadImage}
-                    title="Save Image"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M5,5H19V19H5V5Z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={shareWhatsApp}
-                    title="WhatsApp Share"
-                    style={{ background: "#25d366" }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M12.04,2C6.58,2,2.13,6.45,2.13,11.91c0,1.75,0.45,3.45,1.32,4.95L2,22l5.25-1.38c1.45,0.79,3.08,1.21,4.74,1.21c5.44,0,9.89-4.45,9.89-9.91C21.89,6.45,17.5,2,12.04,2z M16.59,16.27c-0.27,0.76-1.58,1.39-2.16,1.47c-0.58,0.08-1.13,0.01-1.78-0.2c-0.43-0.14-1.01-0.34-1.74-0.66c-3.1-1.36-5.11-4.52-5.26-4.73c-0.15-0.21-1.25-1.63-1.25-3.11c0-1.48,0.73-2.21,1-2.52c0.27-0.3,0.6-0.38,0.79-0.38c0.19,0,0.38,0,0.54,0.01c0.17,0.01,0.39-0.06,0.61,0.46c0.23,0.54,0.79,1.91,0.85,2.04c0.06,0.13,0.11,0.28,0.02,0.46c-0.08,0.18-0.13,0.29-0.26,0.44c-0.13,0.15-0.27,0.34-0.39,0.46c-0.13,0.13-0.28,0.28-0.12,0.54c0.16,0.27,0.7,1.15,1.49,1.85c1.02,0.91,1.88,1.2,2.16,1.32c0.28,0.11,0.44,0.1,0.61-0.09c0.17-0.19,0.73-0.85,0.93-1.14c0.2-0.29,0.39-0.24,0.66-0.15c0.27,0.09,1.7,0.8,2,0.94c0.3,0.14,0.5,0.22,0.57,0.34C17.09,14.88,16.86,15.51,16.59,16.27z" />
-                    </svg>
-                  </button>
-                  <button
-                    className={styles.btnEx}
-                    onClick={() => window.print()}
-                    title="Print"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20">
-                      <path d="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 19,10A1,1 0 0,1 20,11A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" />
-                    </svg>
-                  </button>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -2427,6 +1906,269 @@ export default function PrescriptionPage() {
                 </div>
               </div>
             </div>
+
+            {/* Page 2: Patient Guidance Sheet (if generated) */}
+            {guidanceSheet && (
+              <div 
+                className={styles.guidanceCard} 
+                ref={guidancePaperRef} 
+                id="guidance-preview"
+                style={{ position: 'relative' }}
+              >
+                {/* Overlay for pending review */}
+                {!guidanceApproved && (
+                  <div className={styles.guidanceOverlay}>
+                    <div className={styles.overlayTitle}>Patient Guidance Sheet Ready</div>
+                    <div className={styles.overlayText}>
+                      An AI-generated lifestyle, diet, and care guidance sheet is ready based on your diagnosis and medicines.
+                    </div>
+                    <button 
+                      className={styles.overlayBtn}
+                      onClick={() => setIsReviewModalOpen(true)}
+                    >
+                      Review & Approve Guidance Sheet
+                    </button>
+                  </div>
+                )}
+
+                {/* 1. Header (matching rxCard header) */}
+                <div className={styles.guidanceHeader}>
+                  <div className={styles.headerColumn}>
+                    <div className={styles.drName}>
+                      Dr. {selectedDoctorObj?.name || "Consultant Name"}
+                    </div>
+                    <div className={styles.drQual}>
+                      {selectedDoctorObj?.qualification || "M.B.B.S., M.D."}
+                    </div>
+                    <div className={styles.drSmall}>
+                      {selectedDoctorObj?.specialty || "General Consultant"}
+                    </div>
+                  </div>
+                  <div className={styles.headerLogo}>
+                    <div className={styles.logoCircle}>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className={styles.headerColumn} style={{ textAlign: "right" }}>
+                    <div className={styles.hospName}>
+                      {clinic?.name || "HOSPITAL NAME"}
+                    </div>
+                    <div className={styles.hospSlogan}>
+                      {clinic?.tagline || "Advanced Healthcare Solutions"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.guidanceTitleArea}>
+                  <div className={styles.guidanceBadge}>Patient Guidance Sheet</div>
+                  <div className={styles.guidanceSubtitle}>Custom Care Plan & Advice</div>
+                </div>
+
+                {/* 2-column Grid Layout for Sections */}
+                <div className={styles.guidanceGrid}>
+                  {/* Section 1: Understanding Condition */}
+                  {guidanceStatus.understanding_condition !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Understanding Condition</span>
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
+                        {guidanceSheet.understanding_condition?.disease_name || diagnosis || "Condition"}
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.understanding_condition === 'accepted' 
+                          ? (guidanceEditedTexts.understanding_condition ? guidanceEditedTexts.understanding_condition.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:")) : [])
+                          : (guidanceSheet.understanding_condition?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Section 2: Diet & Nutrition */}
+                  {guidanceStatus.diet_nutrition !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M12 2A10 10 0 0 0 2 12a9.9 9.9 0 0 0 .5 3.2l-1.5 5.3a1 1 0 0 0 1.2 1.2l5.3-1.5a10 10 0 1 0 4.5-20.2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Diet & Nutrition</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.diet_nutrition === 'accepted'
+                          ? (guidanceEditedTexts.diet_nutrition ? guidanceEditedTexts.diet_nutrition.split("\n").filter(Boolean) : [])
+                          : (guidanceSheet.diet_nutrition?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Section 3: Hydration */}
+                  {guidanceStatus.hydration !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Water & Hydration</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.hydration === 'accepted'
+                          ? (guidanceEditedTexts.hydration ? guidanceEditedTexts.hydration.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                          : (guidanceSheet.hydration?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {guidanceSheet.hydration?.tip && (
+                        <div className={styles.guidanceCallout}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>{guidanceSheet.hydration.tip}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Section 4: Activity & Exercise */}
+                  {guidanceStatus.activity_exercise !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h1a4 4 0 0 0 0 8H2M6 12h12M6 8v8M18 8v8" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Activity & Exercise</span>
+                      </div>
+                      <ul className={styles.guidancePointsList}>
+                        {(guidanceStatus.activity_exercise === 'accepted'
+                          ? (guidanceEditedTexts.activity_exercise ? guidanceEditedTexts.activity_exercise.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:")) : [])
+                          : (guidanceSheet.activity_exercise?.points || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {guidanceSheet.activity_exercise?.tip && (
+                        <div className={styles.guidanceCallout}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>{guidanceSheet.activity_exercise.tip}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Section 5: Things To Avoid */}
+                  {guidanceStatus.things_to_avoid !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Things To Avoid</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {(guidanceStatus.things_to_avoid === 'accepted'
+                          ? (guidanceEditedTexts.things_to_avoid
+                              ? guidanceEditedTexts.things_to_avoid.split("\n").filter(Boolean).map((line: string) => {
+                                  const parts = line.split(":");
+                                  return {
+                                    text: parts[0]?.replace(/^-\s*/, '')?.trim() || "",
+                                    reason: parts.slice(1).join(":")?.trim() || ""
+                                  };
+                                })
+                              : [])
+                          : (guidanceSheet.things_to_avoid?.items || [])
+                        ).map((item: any, idx: number) => (
+                          <div key={idx} className={styles.guidanceAvoidItem}>
+                            <div className={styles.guidanceAvoidTitle}>
+                              <span style={{ color: '#ef4444' }}>❌</span>
+                              <span>{item.text}</span>
+                            </div>
+                            {item.reason && <div className={styles.guidanceAvoidReason}>{item.reason}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Section 6: Warning Signs */}
+                  {guidanceStatus.warning_signs !== 'rejected' && (
+                    <div className={styles.guidanceSection}>
+                      <div className={styles.guidanceSectionHeader}>
+                        <div className={styles.guidanceSectionIcon}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                          </svg>
+                        </div>
+                        <span className={styles.guidanceSectionTitle}>Warning Signs</span>
+                      </div>
+                      <ul className={styles.guidancePointsList} style={{ marginBottom: '12px' }}>
+                        {(guidanceStatus.warning_signs === 'accepted'
+                          ? (guidanceEditedTexts.warning_signs ? guidanceEditedTexts.warning_signs.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:") && !l.toLowerCase().includes("red flags:")) : [])
+                          : (guidanceSheet.warning_signs?.red_flags || [])
+                        ).map((pt: string, idx: number) => (
+                          <li key={idx} className={styles.guidanceRedFlagItem}>{pt}</li>
+                        ))}
+                      </ul>
+                      {(guidanceStatus.warning_signs === 'accepted'
+                        ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up)
+                        : (guidanceSheet.warning_signs?.follow_up)
+                      ) && (
+                        <div className={styles.guidanceCallout} style={{ background: '#fff5f5', borderColor: '#ef4444', color: '#b91c1c' }}>
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                          </svg>
+                          <span>
+                            {guidanceStatus.warning_signs === 'accepted'
+                              ? (guidanceEditedTexts.warning_signs?.split("\n").find((l: string) => l.toLowerCase().includes("follow-up:"))?.replace(/^follow-up:\s*/i, '') || guidanceSheet.warning_signs?.follow_up)
+                              : (guidanceSheet.warning_signs?.follow_up)
+                            }
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. General Care Tips Footer */}
+                {guidanceSheet.general_tips && guidanceSheet.general_tips.length > 0 && (
+                  <div className={styles.guidanceFooter}>
+                    <div className={styles.guidanceFooterTips}>
+                      {(guidanceSheet.general_tips || []).slice(0, 3).map((tip: string, idx: number) => (
+                        <div key={idx} className={styles.guidanceFooterTip}>
+                          <span>🛡️</span>
+                          <span>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -2475,6 +2217,315 @@ export default function PrescriptionPage() {
               >
                 Okay
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isReviewModalOpen && guidanceSheet && (
+        <div className={styles.reviewModalOverlay}>
+          <div className={styles.reviewModal}>
+            <div className={styles.reviewHeader}>
+              <div>
+                <div className={styles.reviewHeaderTitle}>Review Patient Guidance Sheet</div>
+                <div className={styles.reviewHeaderSubtitle}>Accept, edit, or reject each section before finalizing the prescription.</div>
+              </div>
+              <button className={styles.reviewCloseBtn} onClick={() => setIsReviewModalOpen(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.reviewBody}>
+              {/* Card 1: Understanding Condition */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.understanding_condition]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>1. Understanding Condition</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.understanding_condition]}`}>
+                    {guidanceStatus.understanding_condition}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.understanding_condition === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.understanding_condition}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        understanding_condition: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <strong>Condition:</strong> {guidanceSheet.understanding_condition?.disease_name || diagnosis || "Condition"}
+                      <ul>
+                        {(guidanceStatus.understanding_condition === 'accepted'
+                          ? guidanceEditedTexts.understanding_condition?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("diagnosis:"))
+                          : guidanceSheet.understanding_condition?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.understanding_condition === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, understanding_condition: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 2: Diet & Nutrition */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.diet_nutrition]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>2. Diet & Nutrition</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.diet_nutrition]}`}>
+                    {guidanceStatus.diet_nutrition}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.diet_nutrition === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.diet_nutrition}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        diet_nutrition: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <ul>
+                      {(guidanceStatus.diet_nutrition === 'accepted'
+                        ? guidanceEditedTexts.diet_nutrition?.split("\n").filter(Boolean)
+                        : guidanceSheet.diet_nutrition?.points || []
+                      ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                    </ul>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.diet_nutrition === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, diet_nutrition: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 3: Water & Hydration */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.hydration]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>3. Water & Hydration</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.hydration]}`}>
+                    {guidanceStatus.hydration}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.hydration === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.hydration}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        hydration: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.hydration === 'accepted'
+                          ? guidanceEditedTexts.hydration?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:"))
+                          : guidanceSheet.hydration?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.hydration?.tip && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#0d6e56' }}>
+                          Tip: {guidanceSheet.hydration.tip}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.hydration === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, hydration: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 4: Activity & Exercise */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.activity_exercise]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>4. Activity & Exercise</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.activity_exercise]}`}>
+                    {guidanceStatus.activity_exercise}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.activity_exercise === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.activity_exercise}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        activity_exercise: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.activity_exercise === 'accepted'
+                          ? guidanceEditedTexts.activity_exercise?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("tip:"))
+                          : guidanceSheet.activity_exercise?.points || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.activity_exercise?.tip && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#0d6e56' }}>
+                          Tip: {guidanceSheet.activity_exercise.tip}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.activity_exercise === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, activity_exercise: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 5: Things To Avoid */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.things_to_avoid]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>5. Things To Avoid</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.things_to_avoid]}`}>
+                    {guidanceStatus.things_to_avoid}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.things_to_avoid === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.things_to_avoid}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        things_to_avoid: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <ul>
+                      {(guidanceStatus.things_to_avoid === 'accepted'
+                        ? guidanceEditedTexts.things_to_avoid?.split("\n").filter(Boolean)
+                        : (guidanceSheet.things_to_avoid?.items || []).map((item: any) => `${item.text}: ${item.reason}`)
+                      ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                    </ul>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.things_to_avoid === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, things_to_avoid: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 6: Warning Signs */}
+              <div className={`${styles.reviewSectionCard} ${styles[guidanceStatus.warning_signs]}`}>
+                <div className={styles.reviewSectionTop}>
+                  <span className={styles.reviewSectionTitle}>6. Warning Signs & Follow-up</span>
+                  <span className={`${styles.reviewSectionBadge} ${styles[guidanceStatus.warning_signs]}`}>
+                    {guidanceStatus.warning_signs}
+                  </span>
+                </div>
+                <div className={styles.reviewSectionContent}>
+                  {guidanceStatus.warning_signs === 'editing' ? (
+                    <textarea 
+                      value={guidanceEditedTexts.warning_signs}
+                      onChange={(e) => setGuidanceEditedTexts({
+                        ...guidanceEditedTexts,
+                        warning_signs: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <div>
+                      <ul>
+                        {(guidanceStatus.warning_signs === 'accepted'
+                          ? guidanceEditedTexts.warning_signs?.split("\n").filter(Boolean).filter((l: string) => !l.toLowerCase().includes("follow-up:"))
+                          : guidanceSheet.warning_signs?.red_flags || []
+                        ).map((p: string, i: number) => <li key={i}>{p}</li>)}
+                      </ul>
+                      {guidanceSheet.warning_signs?.follow_up && (
+                        <div style={{ marginTop: 8, fontStyle: 'italic', color: '#b91c1c' }}>
+                          Follow-up: {guidanceSheet.warning_signs.follow_up}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.reviewSectionActions}>
+                  {guidanceStatus.warning_signs === 'editing' ? (
+                    <button className={`${styles.actionBtn} ${styles.save}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'accepted'})}>Save</button>
+                  ) : (
+                    <>
+                      <button className={`${styles.actionBtn} ${styles.accept}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'accepted'})}>Accept</button>
+                      <button className={styles.actionBtn} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'editing'})}>Edit</button>
+                      <button className={`${styles.actionBtn} ${styles.reject}`} onClick={() => setGuidanceStatus({...guidanceStatus, warning_signs: 'rejected'})}>Reject</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.reviewFooter}>
+              <div className={styles.reviewProgressText}>
+                {Object.values(guidanceStatus).filter(s => s === 'accepted').length} of 6 sections approved
+              </div>
+              <div className={styles.reviewFooterActions}>
+                <button 
+                  className={styles.footerBtn} 
+                  onClick={() => {
+                    const nextStatus = { ...guidanceStatus };
+                    Object.keys(nextStatus).forEach(k => {
+                      if (nextStatus[k] === 'pending') nextStatus[k] = 'accepted';
+                    });
+                    setGuidanceStatus(nextStatus);
+                  }}
+                >
+                  Accept All
+                </button>
+                <button 
+                  className={`${styles.footerBtn} ${styles.primary}`}
+                  onClick={() => {
+                    const approvedData = { ...guidanceSheet };
+                    handleConfirmAndSaveGuidance(approvedData);
+                  }}
+                  disabled={Object.values(guidanceStatus).some(s => s === 'pending' || s === 'editing')}
+                >
+                  Confirm & Save Prescription
+                </button>
+              </div>
             </div>
           </div>
         </div>

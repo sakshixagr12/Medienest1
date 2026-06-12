@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
@@ -17,8 +17,28 @@ export default function DashboardTopBar({
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const doctorNameParam = searchParams.get("doctorName");
   const { doctors, clinic } = useClinic();
+
+  const isDoctorOrPrescription = pathname?.includes("/portal/doctor-dashboard") ||
+                                 pathname?.includes("/portal/digital-prescription");
+  const showClinicInfo = !isDoctorOrPrescription;
+
+  const getRole = () => {
+    if (pathname?.startsWith("/store")) return "Pharmacy Store";
+    if (
+      pathname?.includes("/portal/front-desk") ||
+      pathname?.includes("/portal/billing-receipts") ||
+      pathname?.includes("/portal/day-summary") ||
+      pathname?.includes("/portal/record-search") ||
+      pathname?.includes("/portal/admission-record") ||
+      pathname?.includes("/portal/discharge-summary")
+    ) {
+      return "Front Desk Admin";
+    }
+    return "Clinic Administrator";
+  };
 
   // Search State
   const [query, setQuery] = useState("");
@@ -123,13 +143,13 @@ export default function DashboardTopBar({
     (doctorNameParam && doctors.find((d) => d.name === doctorNameParam)) ||
     (doctors && doctors.length > 0 ? doctors[0] : null);
 
-  const displayName = showBackToPortal && clinic?.name
-    ? clinic.name
+  const displayName = showClinicInfo
+    ? (clinic?.name || "Clinic")
     : currentDoctor
       ? displayDoctorName(currentDoctor.name)
       : "Dr. Consultant";
-  const displayQual = showBackToPortal && clinic
-    ? "Clinic Administrator"
+  const displayQual = showClinicInfo
+    ? getRole()
     : (currentDoctor?.qualification || "Medical Professional");
 
   return (

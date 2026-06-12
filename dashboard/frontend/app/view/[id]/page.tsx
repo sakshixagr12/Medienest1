@@ -43,6 +43,7 @@ interface Prescription {
   clinic_id: string;
   diagnosis?: string;
   ai_summary: any;
+  guidance_sheet?: any;
 }
 
 interface Patient {
@@ -94,6 +95,7 @@ export default function ViewPrescription({
   const [activeTab, setActiveTab] = useState<
     | "Patient Profile"
     | "Current Script"
+    | "Care Guidance"
     | "AI Summary"
     | "Patient History"
     | "Drug Interaction"
@@ -117,6 +119,7 @@ export default function ViewPrescription({
       summary: "एआई सारांश",
       history: "रोगी का इतिहास",
       timelineView: "टाइमलाइन दृश्य",
+      guidance: "देखभाल मार्गदर्शन",
 
       // Top Actions
       exportPdf: "पीडीएफ निर्यात करें",
@@ -206,6 +209,7 @@ export default function ViewPrescription({
       summary: "AI Summary",
       history: "Patient History",
       timelineView: "Timeline View",
+      guidance: "Care Guidance",
       exportPdf: "Export PDF",
       doctorInfo: "Doctor Info",
       printRecord: "Print Record",
@@ -643,6 +647,25 @@ export default function ViewPrescription({
         </svg>
       ),
     },
+    ...(rx?.guidance_sheet ? [
+      {
+        name: "Care Guidance",
+        icon: (
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+            <path d="M12 7v10" />
+            <path d="M8 11h8" />
+          </svg>
+        ),
+      }
+    ] : []),
     {
       name: "AI Summary",
       icon: (
@@ -779,7 +802,9 @@ export default function ViewPrescription({
                             ? t.summary
                             : item.name === "Patient History"
                               ? t.history
-                              : item.name}
+                              : item.name === "Care Guidance"
+                                ? t.guidance
+                                : item.name}
                     </span>
                   </button>
                 ))}
@@ -937,6 +962,215 @@ export default function ViewPrescription({
                       <div>{clinic?.address || "Clinical Facility Address"} • Ph: {clinic?.phone}</div>
                       <div>Digital Clinical Record</div>
                     </div>
+
+                    {/* Page 2 Guidance Sheet for Mobile */}
+                    {rx?.guidance_sheet && (
+                      <div className={styles.guidanceCard} id="guidance-sheet-view-mobile">
+                        {/* 1. Header */}
+                        <div className={styles.guidanceHeader}>
+                          <div className={styles.headerColumn || ""}>
+                            <div className={styles.drName || ""} style={{ fontSize: "26px", fontWeight: 900, color: "#0d6e56" }}>
+                              Dr. {rx.doctor_name || "Consultant"}
+                            </div>
+                            <div className={styles.drSmall || ""} style={{ fontSize: "11px", color: "#64748b" }}>
+                              Physician
+                            </div>
+                          </div>
+                          <div className={styles.headerLogo || ""} style={{ width: "80px", display: "flex", justifyContent: "center" }}>
+                            <div className={styles.logoCircle || ""} style={{ width: "62px", height: "62px", border: "3px solid #0d6e56", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#0d6e56" }}>
+                              <svg viewBox="0 0 24 24" fill="currentColor" width="28">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className={styles.headerColumn || ""} style={{ textAlign: "right" }}>
+                            <div className={styles.hospName || ""} style={{ fontSize: "22px", fontWeight: 900, color: "#0d6e56" }}>
+                              {clinic?.name || hospitalName}
+                            </div>
+                            <div className={styles.hospSlogan || ""} style={{ fontSize: "13px", color: "#64748b" }}>
+                              {clinic?.tagline || "Advanced Clinical Care"}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.guidanceTitleArea}>
+                          <div className={styles.guidanceBadge}>Patient Guidance Sheet</div>
+                          <div className={styles.guidanceSubtitle}>Custom Care Plan & Advice</div>
+                        </div>
+
+                        {/* 2. 2-column Grid */}
+                        <div className={styles.guidanceGrid}>
+                          {/* Section 1: Understanding Condition */}
+                          {rx.guidance_sheet.understanding_condition?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Understanding Condition</span>
+                              </div>
+                              {rx.guidance_sheet.understanding_condition.disease_name && (
+                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
+                                  {rx.guidance_sheet.understanding_condition.disease_name}
+                                </div>
+                              )}
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.understanding_condition.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Section 2: Diet & Nutrition */}
+                          {rx.guidance_sheet.diet_nutrition?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M12 2A10 10 0 0 0 2 12a9.9 9.9 0 0 0 .5 3.2l-1.5 5.3a1 1 0 0 0 1.2 1.2l5.3-1.5a10 10 0 1 0 4.5-20.2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Diet & Nutrition</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.diet_nutrition.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Section 3: Water & Hydration */}
+                          {rx.guidance_sheet.hydration?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Water & Hydration</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.hydration.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                              {rx.guidance_sheet.hydration.tip && (
+                                <div className={styles.guidanceCallout}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.hydration.tip}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Section 4: Activity & Exercise */}
+                          {rx.guidance_sheet.activity_exercise?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h1a4 4 0 0 0 0 8H2M6 12h12M6 8v8M18 8v8" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Activity & Exercise</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.activity_exercise.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                              {rx.guidance_sheet.activity_exercise.tip && (
+                                <div className={styles.guidanceCallout}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.activity_exercise.tip}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Section 5: Things To Avoid */}
+                          {rx.guidance_sheet.things_to_avoid?.items?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Things To Avoid</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(rx.guidance_sheet.things_to_avoid.items || []).map((item: any, idx: number) => (
+                                  <div key={idx} className={styles.guidanceAvoidItem}>
+                                    <div className={styles.guidanceAvoidTitle}>
+                                      <span style={{ color: '#ef4444' }}>❌</span>
+                                      <span>{item.text}</span>
+                                    </div>
+                                    {item.reason && <div className={styles.guidanceAvoidReason}>{item.reason}</div>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Section 6: Warning Signs & Follow-up */}
+                          {(rx.guidance_sheet.warning_signs?.red_flags?.length > 0 || rx.guidance_sheet.warning_signs?.follow_up) && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Warning Signs</span>
+                              </div>
+                              {rx.guidance_sheet.warning_signs.red_flags?.length > 0 && (
+                                <ul className={styles.guidancePointsList} style={{ marginBottom: '12px' }}>
+                                  {(rx.guidance_sheet.warning_signs.red_flags || []).map((pt: string, idx: number) => (
+                                    <li key={idx} className={styles.guidanceRedFlagItem}>{pt}</li>
+                                  ))}
+                                </ul>
+                              )}
+                              {rx.guidance_sheet.warning_signs.follow_up && (
+                                <div className={styles.guidanceCallout} style={{ background: '#fff5f5', borderColor: '#ef4444', color: '#b91c1c' }}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.warning_signs.follow_up}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 3. General Care Tips Footer */}
+                        {rx.guidance_sheet.general_tips?.length > 0 && (
+                          <div className={styles.guidanceFooter}>
+                            <div className={styles.guidanceFooterTips}>
+                              {(rx.guidance_sheet.general_tips || []).slice(0, 3).map((tip: string, idx: number) => (
+                                <div key={idx} className={styles.guidanceFooterTip}>
+                                  <span>🛡️</span>
+                                  <span>{tip}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1024,6 +1258,197 @@ export default function ViewPrescription({
                         <p style={{ color: "#6B7280", fontWeight: 600 }}>{t.aiPreparing}</p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {activeTab === "Care Guidance" && rx?.guidance_sheet && (
+                  <div className={styles.tabContent}>
+                    <div className={styles.dgWrapper}>
+                      {/* Header */}
+                      <div className={styles.dgHeader}>
+                        <div className={styles.dgHeaderIcon}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+                            <path d="M12 7v10" />
+                            <path d="M8 11h8" />
+                          </svg>
+                        </div>
+                        <div className={styles.dgHeaderText}>
+                          <h2>Personalized Care Plan & Advice</h2>
+                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {rx.doctor_name || "Consulting Physician"}</p>
+                        </div>
+                      </div>
+
+                      {/* 6 Core Components Grid */}
+                      <div className={styles.dgGrid}>
+                        
+                        {/* 1. Understanding Condition */}
+                        {rx.guidance_sheet.understanding_condition && (rx.guidance_sheet.understanding_condition.disease_name || rx.guidance_sheet.understanding_condition.points?.length > 0) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardCondition}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <path d="M12 16v-4" />
+                                  <path d="M12 8h.01" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Understanding Condition</span>
+                            </div>
+                            {rx.guidance_sheet.understanding_condition.disease_name && (
+                              <div className={styles.dgConditionName}>
+                                {rx.guidance_sheet.understanding_condition.disease_name}
+                              </div>
+                            )}
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.understanding_condition.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* 2. Diet & Nutrition */}
+                        {rx.guidance_sheet.diet_nutrition && rx.guidance_sheet.diet_nutrition.points?.length > 0 && (
+                          <div className={`${styles.dgCard} ${styles.dgCardDiet}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Diet & Nutrition</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.diet_nutrition.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* 3. Hydration */}
+                        {rx.guidance_sheet.hydration && (rx.guidance_sheet.hydration.points?.length > 0 || rx.guidance_sheet.hydration.tip) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardHydration}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Water & Hydration</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.hydration.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.hydration.tip && (
+                              <div className={styles.dgCallout}>
+                                <span>💡</span>
+                                <span>{rx.guidance_sheet.hydration.tip}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 4. Activity & Exercise */}
+                        {rx.guidance_sheet.activity_exercise && (rx.guidance_sheet.activity_exercise.points?.length > 0 || rx.guidance_sheet.activity_exercise.tip) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardActivity}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Activity & Exercise</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.activity_exercise.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.activity_exercise.tip && (
+                              <div className={styles.dgCallout}>
+                                <span>🏃‍♂️</span>
+                                <span>{rx.guidance_sheet.activity_exercise.tip}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 5. Things to Avoid */}
+                        {rx.guidance_sheet.things_to_avoid && rx.guidance_sheet.things_to_avoid.items?.length > 0 && (
+                          <div className={`${styles.dgCard} ${styles.dgCardAvoid}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Things to Avoid</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              {(rx.guidance_sheet.things_to_avoid.items || []).map((item: any, idx: number) => (
+                                <div key={idx} className={styles.dgAvoidItem}>
+                                  <div className={styles.dgAvoidHeader}>
+                                    <span>❌</span>
+                                    <span>{item.text}</span>
+                                  </div>
+                                  {item.reason && <div className={styles.dgAvoidReason}>{item.reason}</div>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 6. Warning Signs */}
+                        {rx.guidance_sheet.warning_signs && (rx.guidance_sheet.warning_signs.red_flags?.length > 0 || rx.guidance_sheet.warning_signs.follow_up) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardWarning}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                  <line x1="12" y1="9" x2="12" y2="13" />
+                                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Warning Signs</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.warning_signs.red_flags || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgRedFlagItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.warning_signs.follow_up && (
+                              <div className={styles.dgCallout}>
+                                <span>🚨</span>
+                                <span><strong>Follow-up:</strong> {rx.guidance_sheet.warning_signs.follow_up}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* General Tips Banner */}
+                      {rx.guidance_sheet.general_tips && rx.guidance_sheet.general_tips.length > 0 && (
+                        <div className={styles.dgGeneralTipsBanner}>
+                          <div className={styles.dgGeneralTipsTitle}>
+                            <span>🛡️</span> General Health Tips & Wellness Guidelines
+                          </div>
+                          <div className={styles.dgGeneralTipsGrid}>
+                            {rx.guidance_sheet.general_tips.map((tip: string, idx: number) => (
+                              <div key={idx} className={styles.dgGeneralTipItem}>
+                                <span className={styles.dgGeneralTipIcon}>✨</span>
+                                <div>{tip}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1155,7 +1580,9 @@ export default function ViewPrescription({
                     ? t.summary
                     : activeTab === "Patient History"
                       ? t.history
-                      : activeTab}
+                      : activeTab === "Care Guidance"
+                        ? t.guidance
+                        : activeTab}
             </span>
           </div>
 
@@ -1304,7 +1731,9 @@ export default function ViewPrescription({
                       ? t.summary
                       : item.name === "Patient History"
                         ? t.history
-                        : item.name}
+                        : item.name === "Care Guidance"
+                          ? t.guidance
+                          : item.name}
               </span>
             </button>
           ))}
@@ -1855,6 +2284,215 @@ export default function ViewPrescription({
                         </div>
                       </footer>
                     </div>
+
+                    {/* Page 2 Guidance Sheet for Desktop */}
+                    {rx?.guidance_sheet && (
+                      <div className={styles.guidanceCard} id="guidance-sheet-view-desktop">
+                        {/* 1. Header */}
+                        <div className={styles.guidanceHeader}>
+                          <div className={styles.headerColumn || ""}>
+                            <div className={styles.drName || ""} style={{ fontSize: "26px", fontWeight: 900, color: "#0d6e56" }}>
+                              Dr. {rx.doctor_name || "Consultant"}
+                            </div>
+                            <div className={styles.drSmall || ""} style={{ fontSize: "11px", color: "#64748b" }}>
+                              Physician
+                            </div>
+                          </div>
+                          <div className={styles.headerLogo || ""} style={{ width: "80px", display: "flex", justifyContent: "center" }}>
+                            <div className={styles.logoCircle || ""} style={{ width: "62px", height: "62px", border: "3px solid #0d6e56", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#0d6e56" }}>
+                              <svg viewBox="0 0 24 24" fill="currentColor" width="28">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className={styles.headerColumn || ""} style={{ textAlign: "right" }}>
+                            <div className={styles.hospName || ""} style={{ fontSize: "22px", fontWeight: 900, color: "#0d6e56" }}>
+                              {clinic?.name || hospitalName}
+                            </div>
+                            <div className={styles.hospSlogan || ""} style={{ fontSize: "13px", color: "#64748b" }}>
+                              {clinic?.tagline || "Advanced Clinical Care"}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.guidanceTitleArea}>
+                          <div className={styles.guidanceBadge}>Patient Guidance Sheet</div>
+                          <div className={styles.guidanceSubtitle}>Custom Care Plan & Advice</div>
+                        </div>
+
+                        {/* 2. 2-column Grid */}
+                        <div className={styles.guidanceGrid}>
+                          {/* Section 1: Understanding Condition */}
+                          {rx.guidance_sheet.understanding_condition?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Understanding Condition</span>
+                              </div>
+                              {rx.guidance_sheet.understanding_condition.disease_name && (
+                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
+                                  {rx.guidance_sheet.understanding_condition.disease_name}
+                                </div>
+                              )}
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.understanding_condition.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Section 2: Diet & Nutrition */}
+                          {rx.guidance_sheet.diet_nutrition?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M12 2A10 10 0 0 0 2 12a9.9 9.9 0 0 0 .5 3.2l-1.5 5.3a1 1 0 0 0 1.2 1.2l5.3-1.5a10 10 0 1 0 4.5-20.2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Diet & Nutrition</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.diet_nutrition.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Section 3: Water & Hydration */}
+                          {rx.guidance_sheet.hydration?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Water & Hydration</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.hydration.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                              {rx.guidance_sheet.hydration.tip && (
+                                <div className={styles.guidanceCallout}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.hydration.tip}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Section 4: Activity & Exercise */}
+                          {rx.guidance_sheet.activity_exercise?.points?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h1a4 4 0 0 0 0 8H2M6 12h12M6 8v8M18 8v8" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Activity & Exercise</span>
+                              </div>
+                              <ul className={styles.guidancePointsList}>
+                                {(rx.guidance_sheet.activity_exercise.points || []).map((pt: string, idx: number) => (
+                                  <li key={idx} className={styles.guidancePointItem}>{pt}</li>
+                                ))}
+                              </ul>
+                              {rx.guidance_sheet.activity_exercise.tip && (
+                                <div className={styles.guidanceCallout}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.activity_exercise.tip}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Section 5: Things To Avoid */}
+                          {rx.guidance_sheet.things_to_avoid?.items?.length > 0 && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Things To Avoid</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(rx.guidance_sheet.things_to_avoid.items || []).map((item: any, idx: number) => (
+                                  <div key={idx} className={styles.guidanceAvoidItem}>
+                                    <div className={styles.guidanceAvoidTitle}>
+                                      <span style={{ color: '#ef4444' }}>❌</span>
+                                      <span>{item.text}</span>
+                                    </div>
+                                    {item.reason && <div className={styles.guidanceAvoidReason}>{item.reason}</div>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Section 6: Warning Signs & Follow-up */}
+                          {(rx.guidance_sheet.warning_signs?.red_flags?.length > 0 || rx.guidance_sheet.warning_signs?.follow_up) && (
+                            <div className={styles.guidanceSection}>
+                              <div className={styles.guidanceSectionHeader}>
+                                <div className={styles.guidanceSectionIcon}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                  </svg>
+                                </div>
+                                <span className={styles.guidanceSectionTitle}>Warning Signs</span>
+                              </div>
+                              {rx.guidance_sheet.warning_signs.red_flags?.length > 0 && (
+                                <ul className={styles.guidancePointsList} style={{ marginBottom: '12px' }}>
+                                  {(rx.guidance_sheet.warning_signs.red_flags || []).map((pt: string, idx: number) => (
+                                    <li key={idx} className={styles.guidanceRedFlagItem}>{pt}</li>
+                                  ))}
+                                </ul>
+                              )}
+                              {rx.guidance_sheet.warning_signs.follow_up && (
+                                <div className={styles.guidanceCallout} style={{ background: '#fff5f5', borderColor: '#ef4444', color: '#b91c1c' }}>
+                                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8z" />
+                                  </svg>
+                                  <span>{rx.guidance_sheet.warning_signs.follow_up}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 3. General Care Tips Footer */}
+                        {rx.guidance_sheet.general_tips?.length > 0 && (
+                          <div className={styles.guidanceFooter}>
+                            <div className={styles.guidanceFooterTips}>
+                              {(rx.guidance_sheet.general_tips || []).slice(0, 3).map((tip: string, idx: number) => (
+                                <div key={idx} className={styles.guidanceFooterTip}>
+                                  <span>🛡️</span>
+                                  <span>{tip}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -2069,6 +2707,197 @@ export default function ViewPrescription({
                       </div>
                     )}
                   </>
+                )}
+
+                {activeTab === "Care Guidance" && rx?.guidance_sheet && (
+                  <div className={styles.tabContent}>
+                    <div className={styles.dgWrapper}>
+                      {/* Header */}
+                      <div className={styles.dgHeader}>
+                        <div className={styles.dgHeaderIcon}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+                            <path d="M12 7v10" />
+                            <path d="M8 11h8" />
+                          </svg>
+                        </div>
+                        <div className={styles.dgHeaderText}>
+                          <h2>Personalized Care Plan & Advice</h2>
+                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {rx.doctor_name || "Consulting Physician"}</p>
+                        </div>
+                      </div>
+
+                      {/* 6 Core Components Grid */}
+                      <div className={styles.dgGrid}>
+                        
+                        {/* 1. Understanding Condition */}
+                        {rx.guidance_sheet.understanding_condition && (rx.guidance_sheet.understanding_condition.disease_name || rx.guidance_sheet.understanding_condition.points?.length > 0) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardCondition}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <path d="M12 16v-4" />
+                                  <path d="M12 8h.01" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Understanding Condition</span>
+                            </div>
+                            {rx.guidance_sheet.understanding_condition.disease_name && (
+                              <div className={styles.dgConditionName}>
+                                {rx.guidance_sheet.understanding_condition.disease_name}
+                              </div>
+                            )}
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.understanding_condition.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* 2. Diet & Nutrition */}
+                        {rx.guidance_sheet.diet_nutrition && rx.guidance_sheet.diet_nutrition.points?.length > 0 && (
+                          <div className={`${styles.dgCard} ${styles.dgCardDiet}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Diet & Nutrition</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.diet_nutrition.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* 3. Hydration */}
+                        {rx.guidance_sheet.hydration && (rx.guidance_sheet.hydration.points?.length > 0 || rx.guidance_sheet.hydration.tip) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardHydration}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Water & Hydration</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.hydration.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.hydration.tip && (
+                              <div className={styles.dgCallout}>
+                                <span>💡</span>
+                                <span>{rx.guidance_sheet.hydration.tip}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 4. Activity & Exercise */}
+                        {rx.guidance_sheet.activity_exercise && (rx.guidance_sheet.activity_exercise.points?.length > 0 || rx.guidance_sheet.activity_exercise.tip) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardActivity}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Activity & Exercise</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.activity_exercise.points || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgPointItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.activity_exercise.tip && (
+                              <div className={styles.dgCallout}>
+                                <span>🏃‍♂️</span>
+                                <span>{rx.guidance_sheet.activity_exercise.tip}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 5. Things to Avoid */}
+                        {rx.guidance_sheet.things_to_avoid && rx.guidance_sheet.things_to_avoid.items?.length > 0 && (
+                          <div className={`${styles.dgCard} ${styles.dgCardAvoid}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Things to Avoid</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              {(rx.guidance_sheet.things_to_avoid.items || []).map((item: any, idx: number) => (
+                                <div key={idx} className={styles.dgAvoidItem}>
+                                  <div className={styles.dgAvoidHeader}>
+                                    <span>❌</span>
+                                    <span>{item.text}</span>
+                                  </div>
+                                  {item.reason && <div className={styles.dgAvoidReason}>{item.reason}</div>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 6. Warning Signs */}
+                        {rx.guidance_sheet.warning_signs && (rx.guidance_sheet.warning_signs.red_flags?.length > 0 || rx.guidance_sheet.warning_signs.follow_up) && (
+                          <div className={`${styles.dgCard} ${styles.dgCardWarning}`}>
+                            <div className={styles.dgCardHeader}>
+                              <div className={styles.dgCardIcon}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                  <line x1="12" y1="9" x2="12" y2="13" />
+                                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                              </div>
+                              <span className={styles.dgCardTitle}>Warning Signs</span>
+                            </div>
+                            <ul className={styles.dgPointsList}>
+                              {(rx.guidance_sheet.warning_signs.red_flags || []).map((pt: string, idx: number) => (
+                                <li key={idx} className={styles.dgRedFlagItem}>{pt}</li>
+                              ))}
+                            </ul>
+                            {rx.guidance_sheet.warning_signs.follow_up && (
+                              <div className={styles.dgCallout}>
+                                <span>🚨</span>
+                                <span><strong>Follow-up:</strong> {rx.guidance_sheet.warning_signs.follow_up}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* General Tips Banner */}
+                      {rx.guidance_sheet.general_tips && rx.guidance_sheet.general_tips.length > 0 && (
+                        <div className={styles.dgGeneralTipsBanner}>
+                          <div className={styles.dgGeneralTipsTitle}>
+                            <span>🛡️</span> General Health Tips & Wellness Guidelines
+                          </div>
+                          <div className={styles.dgGeneralTipsGrid}>
+                            {rx.guidance_sheet.general_tips.map((tip: string, idx: number) => (
+                              <div key={idx} className={styles.dgGeneralTipItem}>
+                                <span className={styles.dgGeneralTipIcon}>✨</span>
+                                <div>{tip}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {activeTab === "Patient History" && (

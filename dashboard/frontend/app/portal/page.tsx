@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
-import { displayDoctorName, normalizeDoctorName } from "@/lib/utils";
+import { getLocalTodayStr, displayDoctorName, normalizeDoctorName } from "@/lib/utils";
 import PortalNavbar from "@/components/PortalNavbar";
 import styles from "./page.module.css";
 
@@ -147,34 +147,47 @@ export default function PortalPage() {
 
     const fetchData = async () => {
       const supabase = createClient();
-      const today = new Date().toISOString().split("T")[0];
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const startOfTodayStr = startOfToday.toISOString();
+
+      const startOfYesterday = new Date();
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      startOfYesterday.setHours(0, 0, 0, 0);
+      const startOfYesterdayStr = startOfYesterday.toISOString();
+
+      const today = getLocalTodayStr();
       const yesterdayDate = new Date();
       yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-      const yesterday = yesterdayDate.toISOString().split("T")[0];
+      const year = yesterdayDate.getFullYear();
+      const month = String(yesterdayDate.getMonth() + 1).padStart(2, "0");
+      const day = String(yesterdayDate.getDate()).padStart(2, "0");
+      const yesterday = `${year}-${month}-${day}`;
 
       try {
         // 1. Fetch Metrics (Total Clinic)
         const { count: pCount } = await supabase
           .from("prescriptions")
           .select("*", { count: "exact", head: true })
-          .eq("date", today)
+          .gte("created_at", startOfTodayStr)
           .eq("clinic_id", clinic.id);
         const { count: pCountYesterday } = await supabase
           .from("prescriptions")
           .select("*", { count: "exact", head: true })
-          .eq("date", yesterday)
+          .gte("created_at", startOfYesterdayStr)
+          .lt("created_at", startOfTodayStr)
           .eq("clinic_id", clinic.id);
 
         const { data: receipts } = await supabase
           .from("receipts")
           .select("total_amount")
-          .gte("printed_at", today)
+          .gte("printed_at", startOfTodayStr)
           .eq("clinic_id", clinic.id);
         const { data: receiptsYesterday } = await supabase
           .from("receipts")
           .select("total_amount")
-          .gte("printed_at", yesterday)
-          .lt("printed_at", today)
+          .gte("printed_at", startOfYesterdayStr)
+          .lt("printed_at", startOfTodayStr)
           .eq("clinic_id", clinic.id);
 
         const { count: followupCount } = await supabase
