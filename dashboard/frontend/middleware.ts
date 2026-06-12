@@ -1,36 +1,49 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
-function createMiddlewareSupabase(request: any, response: any) {
+function getAccessToken(request: NextRequest) {
+  const cookiePrefix = 'sb-sbbinqrgczoynwizmnwc-auth-token';
+  const cookies = request.cookies.getAll();
+  
+  const chunks = cookies
+    .filter(c => c.name.startsWith(cookiePrefix + '.'))
+    .sort((a, b) => {
+      const aIdx = parseInt(a.name.replace(cookiePrefix + '.', ''), 10) || 0;
+      const bIdx = parseInt(b.name.replace(cookiePrefix + '.', ''), 10) || 0;
+      return aIdx - bIdx;
+    })
+    .map(c => c.value);
+
+  if (chunks.length === 0) {
+    const single = request.cookies.get(cookiePrefix);
+    if (single) chunks.push(single.value);
+  }
+
+  if (chunks.length === 0) return null;
+
+  try {
+    const jsonStr = chunks.join('');
+    const parsed = JSON.parse(jsonStr);
+    return parsed?.access_token || parsed?.[0] || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function createMiddlewareSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  return createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        request.cookies.set({ name, value, ...options });
-        response = response || {};
-        if (response.cookies) {
-          response.cookies.set({ name, value, ...options });
-        }
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({ name, value: "", ...options });
-        if (response.cookies) {
-          response.cookies.set({ name, value: "", ...options });
-        }
-      },
-    },
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: { persistSession: false },
   });
 }
 
 
 
 
-export async function proxy(request: NextRequest) {
+
+export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     let response = NextResponse.next({
@@ -44,12 +57,15 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
-    const supabase = createMiddlewareSupabase(request, response);
+    const supabase = createMiddlewareSupabase();
+    const token = getAccessToken(request);
 
     // 1. Verify User Session
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let user = null;
+    if (token) {
+      const { data } = await supabase.auth.getUser(token);
+      user = data?.user;
+    }
 
     // 2. Protected Routes (Portal, Onboarding, Pending)
     const isProtectedRoute =
