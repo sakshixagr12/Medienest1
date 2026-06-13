@@ -14,6 +14,7 @@ interface TourStep {
   icon: string;
   ctaLabel?: string;
   scrollIntoView?: boolean;
+  scrollPosition?: "top" | "center";
   isCustomAction?: boolean;
   customActionLabel?: string;
 }
@@ -75,6 +76,15 @@ const TOUR_STEPS: TourStep[] = [
     customActionLabel: "Generate AI Care Sheet",
   },
   {
+    selector: "[data-tour='export-actions']",
+    title: "Save & Share Toolbar",
+    description:
+      "Save the digital prescription directly to the clinic's database, download it as a print-ready PDF or image, or share the patient view link instantly via WhatsApp.",
+    placement: "top",
+    accent: "#3b82f6",
+    icon: "📤",
+  },
+  {
     selector: "[data-tour='rx-preview']",
     title: "Page 1: Digital Prescription",
     description:
@@ -82,6 +92,7 @@ const TOUR_STEPS: TourStep[] = [
     placement: "left",
     accent: "#0d6e56",
     icon: "📄",
+    scrollPosition: "top",
   },
   {
     selector: "[data-tour='guidance-preview']",
@@ -91,15 +102,7 @@ const TOUR_STEPS: TourStep[] = [
     placement: "left",
     accent: "#10b981",
     icon: "🛡️",
-  },
-  {
-    selector: "[data-tour='export-actions']",
-    title: "Save & Share Toolbar",
-    description:
-      "Save the digital prescription directly to the clinic's database, download it as a print-ready PDF or image, or share the patient view link instantly via WhatsApp.",
-    placement: "top",
-    accent: "#3b82f6",
-    icon: "📤",
+    scrollPosition: "top",
   },
 ];
 
@@ -241,16 +244,11 @@ export default function DemoPrescriptionTour({
   const goToStepDirect = (idx: number) => {
     setIsTransitioning(true);
     setCurrentStep(idx);
-  };
-
-  const goToStep = (idx: number) => {
-    setIsTransitioning(true);
     
-    // Smoothly scroll target element into view IMMEDIATELY when transition starts
     const nextStep = TOUR_STEPS[idx];
     if (nextStep) {
-      if (idx === 6) {
-        // Special dual scroll for Step 7: scroll left panel to bottom, right panel to top
+      if (idx === 4) {
+        // Special dual scroll for Step 5: scroll left panel to bottom, right panel to top
         const formPanel = document.querySelector('[class*="formPanel"]');
         const previewPanel = document.querySelector('[class*="previewPanel"]');
         if (formPanel) {
@@ -262,7 +260,60 @@ export default function DemoPrescriptionTour({
       } else {
         const el = document.querySelector(nextStep.selector);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          const container = el.closest('[class*="formPanel"]') || el.closest('[class*="previewPanel"]') || document.documentElement;
+          if (container && container !== document.documentElement) {
+            const containerRect = container.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            
+            let scrollTop = 0;
+            if (nextStep.scrollPosition === "top") {
+              scrollTop = container.scrollTop + (elRect.top - containerRect.top) - 24;
+            } else {
+              scrollTop = container.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+            }
+            container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+          } else {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      }
+    }
+  };
+
+  const goToStep = (idx: number) => {
+    setIsTransitioning(true);
+    
+    // Smoothly scroll target element into view IMMEDIATELY when transition starts
+    const nextStep = TOUR_STEPS[idx];
+    if (nextStep) {
+      if (idx === 4) {
+        // Special dual scroll for Step 5: scroll left panel to bottom, right panel to top
+        const formPanel = document.querySelector('[class*="formPanel"]');
+        const previewPanel = document.querySelector('[class*="previewPanel"]');
+        if (formPanel) {
+          formPanel.scrollTo({ top: formPanel.scrollHeight, behavior: 'smooth' });
+        }
+        if (previewPanel) {
+          previewPanel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        const el = document.querySelector(nextStep.selector);
+        if (el) {
+          const container = el.closest('[class*="formPanel"]') || el.closest('[class*="previewPanel"]') || document.documentElement;
+          if (container && container !== document.documentElement) {
+            const containerRect = container.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            
+            let scrollTop = 0;
+            if (nextStep.scrollPosition === "top") {
+              scrollTop = container.scrollTop + (elRect.top - containerRect.top) - 24;
+            } else {
+              scrollTop = container.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+            }
+            container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+          } else {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
         }
       }
     }
@@ -607,10 +658,10 @@ export default function DemoPrescriptionTour({
                   setVisible(false);
                   setDismissed(true);
                   setShowPatientHubPopup(false);
-                  router.push("/demo/portal/doctor-dashboard");
+                  router.push("/demo/portal?showPresentation=true");
                 }}
               >
-                Skip, go to Doctor Dashboard →
+                Skip, End Demo & View Project Summary →
               </button>
             </div>
           </div>
