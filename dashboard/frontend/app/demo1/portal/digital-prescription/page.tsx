@@ -839,7 +839,7 @@ export default function PrescriptionPage() {
       `*${clinic?.name || "MedieNest Clinic"}*\n` +
       `━━━━━━━━━━━━━━━\n` +
       `Hello *${ptName}*,\n\n` +
-      `Your digital prescription from *Dr. ${selectedDoctorObj?.name || "Medical Officer"}* is ready. You can view it here:\n` +
+      `Your digital prescription from *Dr. ${(selectedDoctorObj?.name || "Medical Officer").replace(/^(Dr\.\s*|Dr\s+)/i, "")}* is ready. You can view it here:\n` +
       `${shareUrl}\n\n` +
       `*Follow-up Date:* ${displayFollowUp}\n` +
       `━━━━━━━━━━━━━━━\n` +
@@ -1709,7 +1709,7 @@ export default function PrescriptionPage() {
               <div className={styles.rxHeader}>
                 <div className={styles.headerColumn}>
                   <div className={styles.drName}>
-                    Dr. {selectedDoctorObj?.name || "Consultant Name"}
+                    Dr. {(selectedDoctorObj?.name || "Consultant Name").replace(/^(Dr\.\s*|Dr\s+)/i, "")}
                   </div>
                   <div className={styles.drQual}>
                     {selectedDoctorObj?.qualification || "M.B.B.S., M.D."}
@@ -1935,7 +1935,7 @@ export default function PrescriptionPage() {
                 <div className={styles.guidanceHeader}>
                   <div className={styles.headerColumn}>
                     <div className={styles.drName}>
-                      Dr. {selectedDoctorObj?.name || "Consultant Name"}
+                      Dr. {(selectedDoctorObj?.name || "Consultant Name").replace(/^(Dr\.\s*|Dr\s+)/i, "")}
                     </div>
                     <div className={styles.drQual}>
                       {selectedDoctorObj?.qualification || "M.B.B.S., M.D."}

@@ -953,7 +953,7 @@ export default function ViewPrescription({
                         <div className={styles.guidanceHeader}>
                           <div className={styles.headerColumn || ""}>
                             <div className={styles.drName || ""} style={{ fontSize: "26px", fontWeight: 900, color: "#0d6e56" }}>
-                              Dr. {rx.doctor_name || "Consultant"}
+                              Dr. {(rx.doctor_name || "Consultant").replace(/^(Dr\.\s*|Dr\s+)/i, "")}
                             </div>
                             <div className={styles.drSmall || ""} style={{ fontSize: "11px", color: "#64748b" }}>
                               Physician
@@ -1171,7 +1171,7 @@ export default function ViewPrescription({
                         </div>
                         <div className={styles.dgHeaderText}>
                           <h2>Personalized Care Plan & Advice</h2>
-                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {rx.doctor_name || "Consulting Physician"}</p>
+                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {(rx.doctor_name || "Consulting Physician").replace(/^(Dr\.\s*|Dr\s+)/i, "")}</p>
                         </div>
                       </div>
 
@@ -2189,7 +2189,7 @@ export default function ViewPrescription({
                         <div className={styles.guidanceHeader}>
                           <div className={styles.headerColumn || ""}>
                             <div className={styles.drName || ""} style={{ fontSize: "26px", fontWeight: 900, color: "#0d6e56" }}>
-                              Dr. {rx.doctor_name || "Consultant"}
+                              Dr. {(rx.doctor_name || "Consultant").replace(/^(Dr\.\s*|Dr\s+)/i, "")}
                             </div>
                             <div className={styles.drSmall || ""} style={{ fontSize: "11px", color: "#64748b" }}>
                               Physician
@@ -2620,7 +2620,7 @@ export default function ViewPrescription({
                         </div>
                         <div className={styles.dgHeaderText}>
                           <h2>Personalized Care Plan & Advice</h2>
-                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {rx.doctor_name || "Consulting Physician"}</p>
+                          <p>AI-generated care guidance tailored to your condition, approved by Dr. {(rx.doctor_name || "Consulting Physician").replace(/^(Dr\.\s*|Dr\s+)/i, "")}</p>
                         </div>
                       </div>
 
