@@ -177,6 +177,9 @@ export default function RecruiterPresentation({ onClose }: RecruiterPresentation
                   <a href="https://www.linkedin.com/in/utkarsh-shukla-66825a31a/" target="_blank" rel="noopener noreferrer" className="profile-btn-link linkedin">
                     🔗 LinkedIn
                   </a>
+                  <a href="https://drive.google.com/file/d/1UdaagXzFzmYuiYZDaxgNpRN-fZBlzHYu/view?usp=sharing&utm_source=chatgpt.com" target="_blank" rel="noopener noreferrer" className="profile-btn-link resume">
+                    📄 Resume
+                  </a>
                 </div>
               </div>
 

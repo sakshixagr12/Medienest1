@@ -330,6 +330,16 @@
   transform: translateY(-1px);
 }
 
+.profile-btn-link.resume {
+  background: #2563eb;
+  color: white;
+}
+
+.profile-btn-link.resume:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
 .profile-info {
   padding: 16px 24px 24px 24px;
 }
