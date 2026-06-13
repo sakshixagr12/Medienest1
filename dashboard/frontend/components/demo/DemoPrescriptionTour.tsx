@@ -249,9 +249,21 @@ export default function DemoPrescriptionTour({
     // Smoothly scroll target element into view IMMEDIATELY when transition starts
     const nextStep = TOUR_STEPS[idx];
     if (nextStep) {
-      const el = document.querySelector(nextStep.selector);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (idx === 6) {
+        // Special dual scroll for Step 7: scroll left panel to bottom, right panel to top
+        const formPanel = document.querySelector('[class*="formPanel"]');
+        const previewPanel = document.querySelector('[class*="previewPanel"]');
+        if (formPanel) {
+          formPanel.scrollTo({ top: formPanel.scrollHeight, behavior: 'smooth' });
+        }
+        if (previewPanel) {
+          previewPanel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        const el = document.querySelector(nextStep.selector);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     }
 
