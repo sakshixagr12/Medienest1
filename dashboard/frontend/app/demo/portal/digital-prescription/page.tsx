@@ -113,7 +113,8 @@ export default function PrescriptionPage() {
   useEffect(() => {
     const pId = searchParams.get("patientId") || "unlinked";
     const draftKey = `medienest care_rx_draft_${pId}`;
-    const savedDraft = localStorage.getItem(draftKey);
+    localStorage.removeItem(draftKey); // Clear any old cached draft for demo walkthrough
+    const savedDraft = null; // Ignore any draft on mount for demo
     if (savedDraft) {
       setSelectedPatientId(pId === "unlinked" ? null : pId);
       try {
