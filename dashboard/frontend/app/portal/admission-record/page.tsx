@@ -73,8 +73,11 @@ interface SummaryData {
   diagnosis: string;
   final_diagnosis: string;
   investigations: Investigation[];
-  treatment_plan: string[];
+  treatment_plan: any[];
   additional_notes: string;
+  diet_instructions: string;
+  activity_restrictions: string;
+  nursing_instructions: string;
 }
 
 interface Suggestion {
@@ -725,6 +728,9 @@ function AdmissionRecordRedesign() {
     investigations: [],
     treatment_plan: [],
     additional_notes: "",
+    diet_instructions: "",
+    activity_restrictions: "",
+    nursing_instructions: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -750,17 +756,19 @@ function AdmissionRecordRedesign() {
     if (nextStep !== step) {
       setStep(nextStep);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
     localStorage.setItem("admission_draft_step", step.toString());
     const currentUrlStep = searchParams.get("step");
     if (currentUrlStep !== step.toString()) {
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(searchParams.toString());
       params.set("step", step.toString());
-      router.push(`?${params.toString()}`, { scroll: false });
+      router.replace(`?${params.toString()}`, { scroll: false });
     }
-  }, [step, router, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const handleSetStep = useCallback((newStepVal: number | ((s: number) => number)) => {
     setStep((prev) => {
@@ -837,6 +845,9 @@ function AdmissionRecordRedesign() {
               )
             : [],
           additional_notes: draft.additional_notes || "",
+          diet_instructions: draft.diet_instructions || "",
+          activity_restrictions: draft.activity_restrictions || "",
+          nursing_instructions: draft.nursing_instructions || "",
         }));
       } catch (e) {
         console.error("Failed to parse draft", e);
@@ -1172,6 +1183,13 @@ function AdmissionRecordRedesign() {
         }
       }
 
+      const combinedObservations = [
+        summary.doctor_observations,
+        summary.diet_instructions ? `Diet: ${summary.diet_instructions}` : "",
+        summary.activity_restrictions ? `Activity: ${summary.activity_restrictions}` : "",
+        summary.nursing_instructions ? `Nursing: ${summary.nursing_instructions}` : ""
+      ].filter(Boolean).join("\n\n");
+
       const { error } = await supabase.from("admission_records").insert([
         {
           patient_name: summary.patientName,
@@ -1184,7 +1202,7 @@ function AdmissionRecordRedesign() {
           date_admission: summary.date_admission,
           severity: summary.severity,
           admission_type: summary.admission_type,
-          doctor_observations: summary.doctor_observations,
+          doctor_observations: combinedObservations,
           attachments: summary.attachments,
           vitals: summary.vitals,
           vitals_bp_sys: summary.vitals_bp_sys
@@ -1279,6 +1297,9 @@ function AdmissionRecordRedesign() {
         findings: [],
         investigations: [],
         treatment_plan: [],
+        diet_instructions: "",
+        activity_restrictions: "",
+        nursing_instructions: "",
       });
       localStorage.removeItem("admission_draft");
       localStorage.removeItem("admission_draft_step");
@@ -1532,23 +1553,7 @@ function AdmissionRecordRedesign() {
   };
 
   const handleNextStep = () => {
-    if (step === 2) {
-      const missing = [];
-      if (!summary.chief_complaints_extended || summary.chief_complaints_extended.length === 0) missing.push("Chief Complaint");
-      if (!summary.vitals_temp) missing.push("Temperature");
-      if (!summary.vitals_bp_sys || !summary.vitals_bp_dia) missing.push("Blood Pressure");
-      if (!summary.vitals_pulse) missing.push("Pulse");
-      if (!summary.vitals_resp_rate) missing.push("Respiratory Rate");
-      if (!summary.vitals_spo2) missing.push("SpO₂");
-      if (!summary.vitals_weight) missing.push("Weight");
-      if (!summary.vitals_height) missing.push("Height");
-      if (!summary.provisional_diagnosis) missing.push("Provisional Diagnosis");
-      
-      if (missing.length > 0) {
-        setToast(`Please fill required fields: ${missing.join(", ")}`);
-        return;
-      }
-    }
+    // Validation removed as per user request to not make fields mandatory for next step
     handleSetStep((s) => s + 1);
   };
 
@@ -2687,127 +2692,147 @@ function AdmissionRecordRedesign() {
                   )}
 
                   {step === 3 && (
-                    <div className={styles.stepFadeIn}>
-                      <div
-                        className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
-                        style={{
-                          borderBottom: "4px solid var(--sanctuary-primary)",
-                        }}
-                      >
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <circle cx="12" cy="12" r="10"></circle>
-                              <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            Final Diagnosis
-                          </div>
-                          <div
-                            className={`${styles.statusDot} ${getStatus(summary.final_diagnosis)}`}
-                          />
-                        </div>
-                        <input
-                          className={styles.bulletInput}
-                          value={summary.final_diagnosis || ""}
-                          onChange={(e) =>
-                            updateField("final_diagnosis", e.target.value)
-                          }
-                          placeholder="Enter final diagnosis (if confirmed)..."
-                        />
-                      </div>
-
-                      <div
-                        className={styles.summaryCard}
-                        style={{ borderLeft: "4px solid #8b5cf6" }}
-                      >
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                            </svg>
-                            Doctor Observations
-                          </div>
-                          <div
-                            className={`${styles.statusDot} ${getStatus(summary.doctor_observations)}`}
-                          />
-                        </div>
-                        <textarea
-                          value={summary.doctor_observations || ""}
-                          onChange={(e) =>
-                            updateField("doctor_observations", e.target.value)
-                          }
-                          placeholder="Enter additional monitoring requirements or clinical observations..."
+                    <div className={styles.stepFadeIn} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                      
+                      {/* --- Diagnosis & Observations --- */}
+                      <div className={styles.gridSideBySide}>
+                        <div
+                          className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
                           style={{
-                            width: "100%",
-                            minHeight: 100,
-                            border: "none",
-                            resize: "vertical",
-                            background: "#f5f3ff",
-                            padding: 12,
-                            borderRadius: 8,
-                            outline: "none",
-                            fontSize: 14,
-                            color: "#4c1d95",
+                            borderBottom: "4px solid var(--sanctuary-primary)",
+                            display: "flex",
+                            flexDirection: "column"
                           }}
-                        ></textarea>
+                        >
+                          <div className={styles.cardHeader}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                              Final Diagnosis
+                            </div>
+                            <div className={styles.cardHeaderRequired}>Required</div>
+                          </div>
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                            <textarea
+                              className={styles.bulletInput}
+                              value={summary.final_diagnosis || ""}
+                              onChange={(e) => updateField("final_diagnosis", e.target.value)}
+                              placeholder="Enter final diagnosis..."
+                              style={{ flex: 1, minHeight: 80, resize: "none", fontSize: 15, fontWeight: 500, padding: 16 }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className={styles.summaryCard} style={{ borderLeft: "4px solid #8b5cf6", display: "flex", flexDirection: "column" }}>
+                          <div className={styles.cardHeader}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                              Doctor Observations
+                            </div>
+                            <div className={`${styles.statusDot} ${getStatus(summary.doctor_observations)}`} />
+                          </div>
+                          <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
+                            <textarea
+                              value={summary.doctor_observations || ""}
+                              onChange={(e) => updateField("doctor_observations", e.target.value)}
+                              placeholder="Clinical observations, rationale..."
+                              style={{
+                                flex: 1,
+                                width: "100%",
+                                minHeight: 100,
+                                border: "none",
+                                resize: "none",
+                                background: "#f5f3ff",
+                                padding: 16,
+                                borderRadius: 8,
+                                outline: "none",
+                                fontSize: 14,
+                                color: "#4c1d95",
+                                boxSizing: "border-box"
+                              }}
+                            ></textarea>
+                            <div style={{ position: "absolute", bottom: 8, right: 12, fontSize: 11, color: "#8b5cf6", fontWeight: 600 }}>
+                              {(summary.doctor_observations || "").length} chars
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr",
-                          gap: 24,
-                        }}
-                      >
-                        {renderClinicalCard(
-                          "Investigations Advised",
-                          "investigations",
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                          >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                          </svg>,
-                          "Order lab tests or imaging...",
-                        )}
-                        {renderClinicalCard(
-                          "Initial Treatment Plan",
-                          "treatment_plan",
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                          >
-                            <path d="m4.83 6.74 4.58 9.15a3 3 0 1 1-5.36 2.68L4.83 6.74ZM12 22a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm9-9a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm0-9-4.58 9.15a3 3 0 1 1 5.36-2.68L21 4Z"></path>
-                          </svg>,
-                          "Outline medication or management plan...",
-                        )}
+                      {/* --- Investigations & Treatment Plan --- */}
+                      <div className={styles.gridSideBySide}>
+                        <div className={styles.summaryCard} style={{ display: "flex", flexDirection: "column" }}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              Investigations Advised
+                            </div>
+                          </div>
+                          <InvestigationEditor field="investigations" items={summary.investigations} updateField={updateField} />
+                        </div>
+
+                        <div className={styles.summaryCard} style={{ display: "flex", flexDirection: "column" }}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="m4.83 6.74 4.58 9.15a3 3 0 1 1-5.36 2.68L4.83 6.74ZM12 22a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm9-9a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm0-9-4.58 9.15a3 3 0 1 1 5.36-2.68L21 4Z"></path></svg>
+                              Treatment Plan
+                            </div>
+                          </div>
+                          <MedicationRepeater items={summary.treatment_plan || []} onChange={(val: any) => updateField("treatment_plan", val)} />
+                        </div>
                       </div>
+
+                      {/* --- Admission Orders --- */}
+                      <div className={styles.summaryCard}>
+                        <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                          <div className={styles.cardTitle}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            Admission Orders
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <label style={{ fontSize: 12, fontWeight: 700, color: "#475569" }}>Diet Instructions</label>
+                            <select
+                              className={styles.iconInput}
+                              value={summary.diet_instructions}
+                              onChange={(e) => updateField("diet_instructions", e.target.value)}
+                              style={{ width: "100%" }}
+                            >
+                              <option value="">Select Diet...</option>
+                              <option value="Regular Diet">Regular Diet</option>
+                              <option value="NPO (Nothing by Mouth)">NPO (Nothing by Mouth)</option>
+                              <option value="Clear Liquid">Clear Liquid</option>
+                              <option value="Diabetic / Low Sugar">Diabetic / Low Sugar</option>
+                              <option value="Low Sodium">Low Sodium</option>
+                            </select>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <label style={{ fontSize: 12, fontWeight: 700, color: "#475569" }}>Activity Restrictions</label>
+                            <select
+                              className={styles.iconInput}
+                              value={summary.activity_restrictions}
+                              onChange={(e) => updateField("activity_restrictions", e.target.value)}
+                              style={{ width: "100%" }}
+                            >
+                              <option value="">Select Activity...</option>
+                              <option value="Ad Lib (As Desired)">Ad Lib (As Desired)</option>
+                              <option value="Bed Rest">Bed Rest</option>
+                              <option value="Bed Rest with Bathroom Privileges">Bed Rest with BRP</option>
+                              <option value="Ambulate with Assistance">Ambulate with Assistance</option>
+                            </select>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <label style={{ fontSize: 12, fontWeight: 700, color: "#475569" }}>Nursing Instructions</label>
+                            <input
+                              className={styles.iconInput}
+                              value={summary.nursing_instructions}
+                              onChange={(e) => updateField("nursing_instructions", e.target.value)}
+                              placeholder="e.g. Vitals q4h, Strict I/O"
+                              style={{ width: "100%" }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
                   )}
                 </>
