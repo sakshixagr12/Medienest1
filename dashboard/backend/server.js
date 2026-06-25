@@ -104,6 +104,7 @@ app.use("/api/analytics", requireAuth, requireClinicAccess, analyticsRouter);
 app.use(
   "/api/notifications",
   requireAuth,
+  requireClinicAccess,
   notificationsRouter,
 );
 
