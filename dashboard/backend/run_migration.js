@@ -13,7 +13,7 @@ async function runMigration() {
     await client.connect();
     console.log("Connected to PostgreSQL DB");
 
-    const sqlFile = path.join(__dirname, 'migrations', 'v2_clean', '35_queue_optimizations.sql');
+    const sqlFile = path.join(__dirname, 'migrations', 'v2_clean', '45_fix_patients_rls.sql');
     const sql = fs.readFileSync(sqlFile, 'utf8');
 
     console.log("Running migration...");
