@@ -104,7 +104,9 @@ app.use("/api/analytics", requireAuth, requireClinicAccess, analyticsRouter);
 app.use(
   "/api/notifications",
   requireAuth,
-  requireClinicAccess,
+  notificationsRouter,
+);
+
 // ─── CASHFREE PAYMENT & SUBSCRIPTION ENDPOINTS ────────────────────────────────
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
