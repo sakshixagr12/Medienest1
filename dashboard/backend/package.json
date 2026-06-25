@@ -1,7 +1,6 @@
 {
   "name": "mnm-backend",
   "version": "1.0.0",
-  "description": "Backend for Sishu Swasthya Kendra Clinic Management",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

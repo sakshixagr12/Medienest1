@@ -1319,8 +1319,6 @@ function AdmissionRecordRedesign() {
           bed: summary.bed,
           department: summary.department,
           date_admission: summary.date_admission,
-          admissionDateTime: summary.date_admission,
-          recordCreatedAt: new Date().toISOString(),
           severity: summary.severity,
           admission_type: summary.admission_type,
           doctor_observations: combinedObservations,
