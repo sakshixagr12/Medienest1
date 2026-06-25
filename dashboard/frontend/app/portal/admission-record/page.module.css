@@ -1935,7 +1935,7 @@
 }
 .gridSideBySide6040 {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 6fr 4fr;
   gap: 24px;
 }
 .gridSideBySide5050 {
