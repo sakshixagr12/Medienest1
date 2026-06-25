@@ -991,16 +991,64 @@ function DischargeSummaryRedesign() {
         className={styles.page}
         style={{ display: activeSection || isMedEditorOpen ? "none" : "block" }}
       >
-        <TopBar
-          title="Discharge Summary"
-          backHref={`/portal/doctor-dashboard${
-            searchParams.get("doctorId")
-              ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
-                  searchParams.get("doctorName") || ""
-                )}`
-              : ""
-          }`}
-        />
+        <header className={styles.workspaceHeader}>
+          <div className={styles.headerLeft}>
+            <button
+              className={styles.btnBack}
+              onClick={() => {
+                const docId = searchParams.get("doctorId");
+                const docName = searchParams.get("doctorName");
+                const href = `/portal/doctor-dashboard${docId ? `?doctorId=${docId}&doctorName=${encodeURIComponent(docName || "")}` : ""}`;
+                router.push(href);
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Back
+            </button>
+            <div className={styles.headerTitles}>
+              <h1>Discharge Summary Builder</h1>
+              <p>Create and manage patient discharge documentation</p>
+            </div>
+          </div>
+          <div className={styles.headerRight}>
+            <div className={styles.headerMeta}>
+              <div className={styles.draftStatus}>
+                <div className={`${styles.statusDot} ${lastSaved ? styles.dotGreen : styles.dotYellow}`} />
+                {lastSaved ? "Draft Saved" : "Unsaved Changes"}
+              </div>
+              <div className={styles.lastSync}>
+                Last sync: {lastSaved ? lastSaved.toLocaleTimeString() : "--"}
+              </div>
+            </div>
+            <button
+              className="btn-secondary"
+              style={{ padding: "10px 20px", fontWeight: 700 }}
+              onClick={() => {
+                if (autoSaveStatus !== 'saved') {
+                  saveDraft(summary);
+                }
+                showToast("Draft saved successfully");
+              }}
+            >
+              Save Draft
+            </button>
+            <button
+              className="btn-primary"
+              style={{
+                padding: "10px 24px",
+                background: "var(--sanctuary-primary)",
+                color: "#fff",
+                fontWeight: 800
+              }}
+              onClick={() => setShowFullScreenPreview(true)}
+            >
+              Preview Discharge Summary
+            </button>
+          </div>
+        </header>
         <main className={styles.main}>
           <div className={styles.layout}>
             <section className={styles.leftColumn}>
@@ -1330,46 +1378,6 @@ function DischargeSummaryRedesign() {
           </div>
         </main>
         
-        {/* --- Bottom Action Bar --- */}
-        <div className={styles.bottomActionBar}>
-          <button
-            className="btn-secondary"
-            style={{
-              padding: "12px 24px",
-              color: "#ef4444",
-              borderColor: "#fecaca",
-              background: "#fef2f2",
-              marginRight: "auto"
-            }}
-            onClick={handleClear}
-          >
-            ️ Clear Records
-          </button>
-          <button
-            className="btn-secondary"
-            style={{ padding: "12px 24px", fontWeight: 700 }}
-            onClick={() => {
-              if (autoSaveStatus !== 'saved') {
-                saveDraft(summary);
-              }
-              showToast("Draft saved successfully");
-            }}
-          >
-            Save Draft
-          </button>
-          <button
-            className="btn-primary"
-            style={{
-              padding: "12px 32px",
-              background: "var(--sanctuary-primary)",
-              color: "#fff",
-              fontWeight: 800
-            }}
-            onClick={() => setShowFullScreenPreview(true)}
-          >
-            Preview Discharge Summary
-          </button>
-        </div>
       </div>
       
       {/* --- Full Screen Preview Modal --- */}
