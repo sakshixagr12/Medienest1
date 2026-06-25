@@ -835,6 +835,7 @@ function AdmissionRecordRedesign() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [clinicLoading, setClinicLoading] = useState(true);
   const [step, setStep] = useState(1);
+  const [showDraftModal, setShowDraftModal] = useState(false);
 
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -1381,7 +1382,45 @@ function AdmissionRecordRedesign() {
   const handleSaveDraft = () => {
     localStorage.setItem("admission_draft", JSON.stringify(summary));
     localStorage.setItem("admission_draft_step", step.toString());
-    alert("Draft saved successfully! You can safely leave this page and resume later.");
+    setShowDraftModal(true);
+  };
+
+  const handleDraftContinue = () => {
+    setShowDraftModal(false);
+  };
+
+  const handleDraftDashboard = () => {
+    const params = new URLSearchParams();
+    const dId = searchParams.get("doctorId");
+    const dName = searchParams.get("doctorName") || searchParams.get("docName");
+    if (dId) params.set("doctorId", dId);
+    if (dName) params.set("doctorName", dName);
+    const qs = params.toString();
+    router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
+  };
+
+  const handleDraftStartNew = () => {
+    const draftId = Date.now();
+    localStorage.setItem(`admission_draft_${draftId}`, JSON.stringify(summary));
+    
+    // Clear current active draft
+    localStorage.removeItem("admission_draft");
+    localStorage.removeItem("admission_draft_step");
+    
+    // Reset state
+    setSummary({
+      patientName: "", phone: "", age: "", sex: "Male", doctor: "", ward: "", bed: "", department: "",
+      date_admission: new Date().toISOString().slice(0, 16), severity: "Mild", admission_type: "OPD",
+      has_diabetes: false, has_hypertension: false, has_thyroid: false, past_surgeries: "", allergies: "",
+      doctor_observations: "", attachments: [], vitals: "", vitals_bp_sys: "", vitals_bp_dia: "",
+      vitals_pulse: "", vitals_temp: "", vitals_spo2: "", vitals_resp_rate: "", vitals_weight: "", vitals_height: "",
+      diagnosis: "", provisional_diagnosis: "", final_diagnosis: "", hpi: "", complaints: [], chief_complaints_extended: [],
+      medical_history: [], current_medications: [], allergy_details: [], examination_findings: "", risk_flags: [],
+      infection_control: "None", findings: [], investigations: [], treatment_plan: [], additional_notes: "",
+      diet_instructions: "", activity_restrictions: "", nursing_instructions: "",
+    });
+    setStep(1);
+    setShowDraftModal(false);
   };
 
   const handleClear = async () => {
