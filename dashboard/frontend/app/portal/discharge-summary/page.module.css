@@ -772,6 +772,42 @@
   gap: 16px;
 }
 
+.btnSave, .btnPrint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSave {
+  background: transparent;
+  color: var(--sanctuary-primary);
+  border: 1.5px solid var(--border);
+}
+
+.btnSave:hover {
+  background: var(--sanctuary-gray-low);
+  border-color: var(--sanctuary-primary);
+}
+
+.btnPrint {
+  background: var(--sanctuary-primary);
+  color: #fff;
+  border: 1.5px solid var(--sanctuary-primary);
+}
+
+.btnPrint:hover {
+  background: var(--sanctuary-ink);
+  border-color: var(--sanctuary-ink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.15);
+}
+
 .bottomActionBar {
   position: fixed;
   bottom: 0;
