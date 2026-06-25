@@ -593,19 +593,31 @@
     background: #fff !important;
   }
   .page {
+    display: none !important;
+  }
+  .fullScreenPreviewOverlay {
+    position: absolute !important;
+    inset: 0 !important;
     background: #fff !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  .previewTopBar {
+    display: none !important;
+  }
+  .previewDocWrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
   }
   .previewDoc {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
     width: 100% !important;
-    max-height: none !important; /* Force full height on print */
+    max-height: none !important;
     overflow: visible !important;
-  }
-  .previewFade,
-  .btnTogglePreview {
-    display: none !important;
+    display: block !important;
   }
 }
 
