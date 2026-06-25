@@ -460,10 +460,12 @@ export default function AdmissionRecordView() {
                   </div>
                   <div className={styles.previewSection}>
                     <h4>Initial Treatment Plan</h4>
-                    <ul style={{ paddingLeft: 20 }}>
+                    <ul className={styles.bulletList}>
                       {Array.isArray(record.treatment_plan) &&
-                        record.treatment_plan.map((t: string, i: number) => (
-                          <li key={i}>{t}</li>
+                        record.treatment_plan.map((t: any, i: number) => (
+                          <li key={i}>
+                            {typeof t === 'string' ? t : `${t.name} ${t.dosage ? `- ${t.dosage}` : ''} ${t.frequency ? `(${t.frequency})` : ''}`}
+                          </li>
                         ))}
                     </ul>
                   </div>

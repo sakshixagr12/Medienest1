@@ -409,8 +409,10 @@ export default function AdmissionSummaryPage() {
           <div className={styles.section}>
             <div className={styles.sectionTitle}>Treatment Plan</div>
             <ul className={styles.bulletList}>
-              {data.treatment_plan.map((t: string, i: number) => (
-                <li key={i}>{t}</li>
+              {data.treatment_plan.map((t: any, i: number) => (
+                <li key={i}>
+                  {typeof t === 'string' ? t : `${t.name} ${t.dosage ? `- ${t.dosage}` : ''} ${t.frequency ? `(${t.frequency})` : ''}`}
+                </li>
               ))}
             </ul>
           </div>
