@@ -2423,6 +2423,9 @@
   .gridSideBySide4060 {
     grid-template-columns: 1fr;
   }
+  .gridSideBySide6040 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .iconInput {
