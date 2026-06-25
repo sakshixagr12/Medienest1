@@ -123,10 +123,65 @@
 .cardTitle {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 15px;
+  gap: 12px;
+  font-size: 18px;
   font-weight: 800;
-  color: var(--sanctuary-primary);
+  color: var(--sanctuary-ink);
+  letter-spacing: 0px;
+}
+
+.cardSubtitle {
+  font-size: 13px;
+  color: var(--sanctuary-ink-l);
+  margin-top: 4px;
+}
+
+.patientProfileHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.avatarPlaceholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--teal-l);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(45, 212, 191, 0.2);
+}
+
+.patientNameHeading {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sanctuary-ink);
+  margin: 0 0 12px 0;
+}
+
+.patientBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--sanctuary-gray-low);
+  color: var(--sanctuary-ink-l);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -154,21 +209,27 @@
 .patientBrief {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .briefItem {
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
+  flex-direction: column;
+  gap: 6px;
 }
+
 .briefItem label {
   color: var(--sanctuary-ink-l);
-  font-weight: 600;
-}
-.briefItem span {
+  font-size: 12px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.briefItem span {
+  font-weight: 600;
   color: var(--sanctuary-ink);
+  font-size: 14px;
 }
 
 .diagnosisHighlight {
