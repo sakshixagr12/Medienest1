@@ -2296,16 +2296,10 @@
 
 .quickActionBtn:hover {
   border-color: var(--sanctuary-primary);
-  color: var(--sanctuary-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-}
-
-.treatmentAddMenu {
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 0;
-  margin-bottom: 8px;
+  margin-top: 8px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -2349,13 +2343,23 @@
   transition: all 0.2s;
 }
 
+.chipAddCustom {
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s;
+}
+
 .chipAddCustom:hover {
   border-color: #94a3b8;
   color: #475569;
   background: #f8fafc;
 }
-
-
 
 .bulletInput {
   width: 100%;
