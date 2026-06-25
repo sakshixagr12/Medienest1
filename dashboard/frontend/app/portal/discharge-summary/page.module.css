@@ -799,27 +799,49 @@
   border-collapse: collapse;
 }
 
+.medTableWrapper {
+  margin-top: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.medTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
 .medTable th {
   background: var(--sanctuary-gray-low);
-  padding: 10px 12px;
+  padding: 12px 16px;
   text-align: left;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--sanctuary-ink-l);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .medTable td {
-  padding: 8px 12px;
+  padding: 12px 16px;
   border-top: 1px solid var(--border);
+  vertical-align: middle;
 }
 
 .medInput {
   background: transparent !important;
   border: none !important;
-  padding: 4px !important;
-  font-size: 13px !important;
+  padding: 8px !important;
+  font-size: 14px !important;
   box-shadow: none !important;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.medInput:focus {
+  background: var(--sanctuary-gray-low) !important;
+  border-radius: 8px;
+  outline: none;
 }
 
 .btnRemoveMed {
@@ -827,29 +849,37 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   opacity: 0.6;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 .btnRemoveMed:hover {
   opacity: 1;
+  background: #fee2e2;
 }
 
 .btnAddMed {
-  width: 100%;
-  padding: 12px;
-  background: transparent;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--sanctuary-gray-low);
   color: var(--sanctuary-primary);
-  border: 1.5px dashed var(--border);
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  margin-top: 16px;
-  transition: 0.2s;
+  margin-top: 24px;
+  transition: all 0.2s ease;
 }
+
 .btnAddMed:hover {
   border-color: var(--sanctuary-primary);
-  background: #fdfcff;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.05);
 }
 
 /* --- Preview Styles --- */
