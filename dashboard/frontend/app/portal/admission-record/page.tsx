@@ -965,8 +965,23 @@ function AdmissionRecordRedesign() {
             findings: safeParse(data.findings),
             investigations: safeParse(data.investigations),
             treatment_plan: safeParse(data.treatment_plan),
+            vitals_resp_rate: "",
+            vitals_weight: "",
+            vitals_height: "",
+            provisional_diagnosis: "",
+            chief_complaints_extended: [],
+            medical_history: [],
+            current_medications: [],
+            allergy_details: [],
+            examination_findings: "",
+            risk_flags: [],
+            infection_control: "None",
+            additional_notes: "",
+            diet_instructions: "",
+            activity_restrictions: "",
+            nursing_instructions: "",
           };
-          setSummary(newSummary);
+          setSummary((prev) => ({ ...prev, ...newSummary }));
         }
       };
       fetchDraft();
