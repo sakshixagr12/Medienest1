@@ -678,24 +678,9 @@ const AllergyRepeater = ({ items, onChange }: any) => {
 };
 
 const TreatmentPlanRepeater = ({ items, onChange }: any) => {
-  const [showAddMenu, setShowAddMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowAddMenu(false);
-      }
-    };
-    if (showAddMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showAddMenu]);
-
-  const addMedication = () => { onChange([...items, { name: "", dosage: "", frequency: "" }]); setShowAddMenu(false); };
-  const addIVFluid = () => { onChange([...items, { name: "IV Fluid (e.g. Normal Saline)", dosage: "500ml", frequency: "Stat" }]); setShowAddMenu(false); };
-  const addMonitoring = () => { onChange([...items, { name: "Monitor Vitals", dosage: "N/A", frequency: "Every 4 hours" }]); setShowAddMenu(false); };
+  const addMedication = () => { onChange([...items, { name: "", dosage: "", frequency: "" }]); };
+  const addIVFluid = () => { onChange([...items, { name: "IV Fluid (e.g. Normal Saline)", dosage: "500ml", frequency: "Stat" }]); };
+  const addMonitoring = () => { onChange([...items, { name: "Monitor Vitals", dosage: "N/A", frequency: "Every 4 hours" }]); };
   
   const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
   const updateMed = (idx: number, field: string, val: string) => {
