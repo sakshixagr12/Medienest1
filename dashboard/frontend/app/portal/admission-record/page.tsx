@@ -2100,13 +2100,13 @@ function AdmissionRecordRedesign() {
                         </div>
                         <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                           <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>BP (mmHg)</label>
-                          <div className={styles.iconInputWrapper} style={{ display: "flex", gap: 4 }}>
+                          <div style={{ display: "flex", gap: 4, width: "100%", alignItems: "center" }}>
                             <div className={styles.iconInputWrapper} style={{ flex: 1 }}>
                               <div className={styles.iconInputIcon} style={{ color: "#ef4444" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-                              <input className={styles.iconInput} placeholder="Sys" value={summary.vitals_bp_sys} onChange={e => updateField("vitals_bp_sys", e.target.value)} style={{ paddingRight: 4 }} />
+                              <input type="number" className={styles.iconInput} placeholder="Sys" value={summary.vitals_bp_sys} onChange={e => updateField("vitals_bp_sys", e.target.value)} style={{ paddingRight: 4 }} />
                             </div>
-                            <span style={{ color: "#cbd5e1", alignSelf: "center", fontWeight: "bold" }}>/</span>
-                            <input className={styles.iconInput} placeholder="Dia" value={summary.vitals_bp_dia} onChange={e => updateField("vitals_bp_dia", e.target.value)} style={{ flex: 1, paddingLeft: 8, paddingRight: 4 }} />
+                            <span style={{ color: "#cbd5e1", fontWeight: "bold" }}>/</span>
+                            <input type="number" className={styles.iconInput} placeholder="Dia" value={summary.vitals_bp_dia} onChange={e => updateField("vitals_bp_dia", e.target.value)} style={{ flex: 1, paddingLeft: 8, paddingRight: 4 }} />
                           </div>
                         </div>
                         <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
