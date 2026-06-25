@@ -736,35 +736,37 @@ function AdmissionRecordRedesign() {
     const urlStep = searchParams.get("step");
     const localStep = localStorage.getItem("admission_draft_step");
     
-    setStep((currentStep) => {
-      let nextStep = currentStep;
+    let nextStep = step;
 
-      if (urlStep && !isNaN(parseInt(urlStep))) {
-        nextStep = parseInt(urlStep);
-        localStorage.setItem("admission_draft_step", nextStep.toString());
-      } else if (localStep && !isNaN(parseInt(localStep))) {
-        nextStep = parseInt(localStep);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("step", nextStep.toString());
-        router.replace(`?${params.toString()}`, { scroll: false });
-      }
+    if (urlStep && !isNaN(parseInt(urlStep))) {
+      nextStep = parseInt(urlStep);
+    } else if (localStep && !isNaN(parseInt(localStep))) {
+      nextStep = parseInt(localStep);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("step", nextStep.toString());
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
 
-      return nextStep;
-    });
-  }, [searchParams, router]);
+    if (nextStep !== step) {
+      setStep(nextStep);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    localStorage.setItem("admission_draft_step", step.toString());
+    const currentUrlStep = searchParams.get("step");
+    if (currentUrlStep !== step.toString()) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("step", step.toString());
+      router.push(`?${params.toString()}`, { scroll: false });
+    }
+  }, [step, router, searchParams]);
 
   const handleSetStep = useCallback((newStepVal: number | ((s: number) => number)) => {
     setStep((prev) => {
-      const nextStep = typeof newStepVal === "function" ? newStepVal(prev) : newStepVal;
-      if (nextStep !== prev) {
-        localStorage.setItem("admission_draft_step", nextStep.toString());
-        const params = new URLSearchParams(window.location.search);
-        params.set("step", nextStep.toString());
-        router.push(`?${params.toString()}`, { scroll: false });
-      }
-      return nextStep;
+      return typeof newStepVal === "function" ? newStepVal(prev) : newStepVal;
     });
-  }, [router]);
+  }, []);
   const [isQuickMode, setIsQuickMode] = useState(false);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [activeSuggestion, setActiveSuggestion] = useState<Suggestion | null>(
