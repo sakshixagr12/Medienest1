@@ -1449,13 +1449,37 @@ function AdmissionRecordRedesign() {
       // Also save to database if we have enough patient context
       let patientId: string | null = searchParams.get("patientId");
       if (!patientId && clinic?.id) {
+        let existingPatient = null;
         if (summary.phone) {
           const { data } = await supabase.from("patients").select("id").eq("contact", summary.phone).eq("clinic_id", clinic.id).maybeSingle();
-          if (data) patientId = data.id;
+          if (data) existingPatient = data;
         }
-        if (!patientId && summary.patientName) {
+        if (!existingPatient && summary.patientName) {
           const { data } = await supabase.from("patients").select("id").eq("name", summary.patientName).eq("clinic_id", clinic.id).limit(1).maybeSingle();
-          if (data) patientId = data.id;
+          if (data) existingPatient = data;
+        }
+
+        if (existingPatient?.id) {
+          patientId = existingPatient.id;
+        } else if (summary.patientName) {
+          // Create patient stub so they appear in Patient Directory and Hub
+          const { data: newPatient } = await supabase
+            .from("patients")
+            .insert({
+              name: summary.patientName,
+              contact: summary.phone || "0000000000",
+              age: parseInt(summary.age) || null,
+              gender: summary.sex,
+              clinic_id: clinic.id,
+              has_diabetes: summary.has_diabetes,
+              has_hypertension: summary.has_hypertension,
+              has_thyroid: summary.has_thyroid,
+              allergies: summary.allergies,
+              past_surgeries: summary.past_surgeries,
+            })
+            .select("id")
+            .single();
+          if (newPatient?.id) patientId = newPatient.id;
         }
       }
 
