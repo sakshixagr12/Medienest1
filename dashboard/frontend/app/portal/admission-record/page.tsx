@@ -3031,6 +3031,7 @@ function AdmissionRecordRedesign() {
             <div style={{ display: "flex", gap: 12 }}>
               {!isQuickMode && step > 1 && (
                 <button
+                  type="button"
                   className={styles.btnSecondarySticky}
                   onClick={() => handleSetStep((s) => s - 1)}
                 >
@@ -3039,6 +3040,7 @@ function AdmissionRecordRedesign() {
               )}
 
               <button
+                type="button"
                 className={styles.btnSecondarySticky}
                 onClick={handleSaveDraft}
                 disabled={isSaving}
@@ -3112,9 +3114,9 @@ function AdmissionRecordRedesign() {
             <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--sanctuary-ink)", marginBottom: 8 }}>Draft Saved Successfully</h3>
             <p style={{ fontSize: 14, color: "#64748b", marginBottom: 28 }}>Your progress has been safely stored. What would you like to do next?</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <button onClick={handleDraftContinue} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>Continue Editing</button>
-              <button onClick={handleDraftDashboard} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
-              <button onClick={handleDraftStartNew} style={{ width: "100%", padding: "12px", background: "transparent", color: "#64748b", borderRadius: 12, fontWeight: 600, border: "1px dashed #cbd5e1", cursor: "pointer" }}>Start New Admission Record</button>
+              <button type="button" onClick={handleDraftContinue} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>Continue Editing</button>
+              <button type="button" onClick={handleDraftDashboard} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
+              <button type="button" onClick={handleDraftStartNew} style={{ width: "100%", padding: "12px", background: "transparent", color: "#64748b", borderRadius: 12, fontWeight: 600, border: "1px dashed #cbd5e1", cursor: "pointer" }}>Start New Admission Record</button>
             </div>
           </div>
         </div>
