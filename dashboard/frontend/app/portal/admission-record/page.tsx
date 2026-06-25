@@ -678,9 +678,24 @@ const AllergyRepeater = ({ items, onChange }: any) => {
 };
 
 const TreatmentPlanRepeater = ({ items, onChange }: any) => {
-  const addMedication = () => onChange([...items, { name: "", dosage: "", frequency: "" }]);
-  const addIVFluid = () => onChange([...items, { name: "IV Fluid (e.g. Normal Saline)", dosage: "500ml", frequency: "Stat" }]);
-  const addMonitoring = () => onChange([...items, { name: "Monitor Vitals", dosage: "N/A", frequency: "Every 4 hours" }]);
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowAddMenu(false);
+      }
+    };
+    if (showAddMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showAddMenu]);
+
+  const addMedication = () => { onChange([...items, { name: "", dosage: "", frequency: "" }]); setShowAddMenu(false); };
+  const addIVFluid = () => { onChange([...items, { name: "IV Fluid (e.g. Normal Saline)", dosage: "500ml", frequency: "Stat" }]); setShowAddMenu(false); };
+  const addMonitoring = () => { onChange([...items, { name: "Monitor Vitals", dosage: "N/A", frequency: "Every 4 hours" }]); setShowAddMenu(false); };
   
   const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
   const updateMed = (idx: number, field: string, val: string) => {
@@ -734,10 +749,29 @@ const TreatmentPlanRepeater = ({ items, onChange }: any) => {
           <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
         </div>
       ))}
-      <button onClick={addMedication} className={styles.btnActionAddMed} style={{ alignSelf: "flex-start", marginTop: 4 }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Treatment Item
-      </button>
+      <div style={{ position: "relative", alignSelf: "flex-start", marginTop: 4 }} ref={menuRef}>
+        <button onClick={() => setShowAddMenu(!showAddMenu)} className={styles.btnActionAddMed}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Treatment Item
+        </button>
+        {showAddMenu && (
+          <div className={styles.treatmentAddMenu}>
+            <div className={styles.treatmentAddMenuHeader}>Select Type</div>
+            <button className={styles.treatmentAddMenuItem} onClick={addMedication}>
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>
+               Medication
+            </button>
+            <button className={styles.treatmentAddMenuItem} onClick={addIVFluid}>
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+               IV Fluid
+            </button>
+            <button className={styles.treatmentAddMenuItem} onClick={addMonitoring}>
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+               Monitoring
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
