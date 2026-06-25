@@ -183,12 +183,10 @@
 .badge {
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 500;
   background: var(--sanctuary-gray-low);
   color: var(--sanctuary-ink-l);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* --- Specific Components --- */
@@ -226,13 +224,11 @@
 .briefItem label {
   color: var(--sanctuary-ink-l);
   font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .briefItem span {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--sanctuary-ink);
   font-size: 14px;
 }
