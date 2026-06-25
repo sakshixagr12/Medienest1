@@ -673,18 +673,16 @@ function DischargeSummaryRedesign() {
         onClick={() => setActiveSection(field)}
         style={{ cursor: "pointer" }}
       >
-        <div className={styles.cardHeader}>
+        <div className={styles.cardHeader} style={{ marginBottom: 12, paddingBottom: 8 }}>
           <div className={styles.cardTitleRow}>
             <div className={styles.cardTitle}>
-              {icon}
               {title}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div className={`${styles.statusDot} ${getStatus(items)}`} />
-              <button className={styles.btnEditMini}>Edit Details</button>
+              <button className={styles.btnEditMini}>Edit</button>
             </div>
           </div>
-          <div className={styles.cardSubtitle}>{subtitle}</div>
         </div>
         <div className={styles.previewContent}>
           {value || (
