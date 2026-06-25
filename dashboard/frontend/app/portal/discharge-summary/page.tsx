@@ -1327,8 +1327,6 @@ function DischargeSummaryRedesign() {
                 "Rest, diet, lifestyle changes...",
               )}
             </section>
-
-            </section>
           </div>
         </main>
         
