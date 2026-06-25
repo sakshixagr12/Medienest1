@@ -2137,24 +2137,6 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--sanctuary-ink);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
-}
-
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* --- Responsiveness --- */
-.chipAddCustom {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
