@@ -80,38 +80,34 @@
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 40px;
-  align-items: flex-start;
-}
-
-/* --- Left Column: Context --- */
-.leftColumn {
-  position: sticky;
-  top: 100px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* --- Center Column: WorkArea --- */
-.centerColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* --- Right Column: Removed --- */
-
-/* --- Card Base --- */
-.summaryCard {
+/* --- Group Cards --- */
+.summaryGroupCard {
   background: #fff;
   border-radius: var(--radius-lg);
-  border: 1.5px solid var(--border);
-  padding: 24px;
-  transition: 0.3s;
-  box-shadow: var(--ambient-glow);
+  border: 1px solid var(--border);
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.summaryGroupCard + .summaryGroupCard {
+  margin-top: 32px;
+}
+
+.summaryCard {
+  /* Removed borders/shadows for internal sections to reduce visual noise */
+  background: transparent;
+  padding: 0;
+  margin-bottom: 32px;
+}
+.summaryCard:last-child {
+  margin-bottom: 0;
 }
 
 .cardHeader {
@@ -146,43 +142,53 @@
   margin-top: 8px;
 }
 
-.patientProfileHeader {
+.patientHeaderGroup {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 24px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.patientProfileLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.patientDemographicsGrid {
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
 
 .avatarPlaceholder {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: var(--teal-l);
   color: var(--teal);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(45, 212, 191, 0.2);
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .patientNameHeading {
   font-size: 22px;
   font-weight: 700;
   color: var(--sanctuary-ink);
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   letter-spacing: -0.3px;
 }
 
 .patientBadges {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
   gap: 8px;
 }
 
@@ -215,16 +221,10 @@
   box-shadow: 0 0 10px rgba(22, 163, 74, 0.4);
 }
 
-.patientBrief {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .briefItem {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .briefItem label {
@@ -233,21 +233,27 @@
   font-weight: 600;
 }
 
-.briefItem span {
+.compactInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 4px 0;
+  font-size: 14px;
   font-weight: 500;
   color: var(--sanctuary-ink);
-  font-size: 14px;
+  width: 120px;
+  transition: border-color 0.2s;
+  outline: none;
 }
-
-.diagnosisHighlight {
-  border-left: 4px solid var(--sanctuary-primary);
-  background: linear-gradient(to right, var(--sanctuary-gray-low), #fff);
+.compactInput:focus {
+  border-bottom-color: var(--sanctuary-primary);
 }
 
 .clinicalSplit {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 32px;
+
 }
 
 .aiAssistBtn {
