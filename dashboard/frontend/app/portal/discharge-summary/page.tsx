@@ -1092,9 +1092,6 @@ function DischargeSummaryRedesign() {
                     </svg>
                     Patient Information
                   </div>
-                  <div
-                    className={`${styles.statusDot} ${getStatus(summary.patientName)}`}
-                  />
                 </div>
                 <div className="field">
                   <label>Full Name</label>
