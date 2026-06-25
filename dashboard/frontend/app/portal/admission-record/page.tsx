@@ -693,7 +693,11 @@ function AdmissionRecordRedesign() {
     ward: "",
     bed: "",
     department: "",
-    date_admission: new Date().toISOString().slice(0, 16),
+    date_admission: (() => {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0, 16);
+    })(),
     severity: "Mild",
     admission_type: "OPD",
     has_diabetes: false,
@@ -1053,7 +1057,7 @@ function AdmissionRecordRedesign() {
   };
 
   const calculateProgress = () => {
-    let required = ["patientName", "doctor", "ward", "bed"];
+    let required = ["patientName", "doctor", "ward", "bed", "date_admission"];
     let clinical = [
       "complaints",
       "findings",
@@ -1200,6 +1204,8 @@ function AdmissionRecordRedesign() {
           bed: summary.bed,
           department: summary.department,
           date_admission: summary.date_admission,
+          admissionDateTime: summary.date_admission,
+          recordCreatedAt: new Date().toISOString(),
           severity: summary.severity,
           admission_type: summary.admission_type,
           doctor_observations: combinedObservations,
@@ -2530,14 +2536,42 @@ function AdmissionRecordRedesign() {
                             </div>
                           </div>
                           <div className="field">
-                            <label>Adm. Date & Time</label>
-                            <input
-                              type="datetime-local"
-                              value={summary.date_admission || ""}
-                              onChange={(e) =>
-                                updateField("date_admission", e.target.value)
-                              }
-                            />
+                            <label>
+                              Adm. Date & Time{" "}
+                              {!summary.date_admission && (
+                                <span className={styles.requiredDot} />
+                              )}
+                            </label>
+                            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                              <input
+                                type="datetime-local"
+                                value={summary.date_admission || ""}
+                                onChange={(e) =>
+                                  updateField("date_admission", e.target.value)
+                                }
+                                style={{ flex: 1 }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const d = new Date();
+                                  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                                  updateField("date_admission", d.toISOString().slice(0, 16));
+                                }}
+                                style={{
+                                  padding: "8px 12px",
+                                  fontSize: "12px",
+                                  fontWeight: 700,
+                                  background: "#f1f5f9",
+                                  border: "1px solid #cbd5e1",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  color: "#334155"
+                                }}
+                              >
+                                Now
+                              </button>
+                            </div>
                           </div>
                           <div className="field">
                             <label>
