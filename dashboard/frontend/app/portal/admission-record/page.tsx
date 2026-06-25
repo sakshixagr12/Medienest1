@@ -677,6 +677,71 @@ const AllergyRepeater = ({ items, onChange }: any) => {
   );
 };
 
+const TreatmentPlanRepeater = ({ items, onChange }: any) => {
+  const addMedication = () => onChange([...items, { name: "", dosage: "", frequency: "" }]);
+  const addIVFluid = () => onChange([...items, { name: "IV Fluid (e.g. Normal Saline)", dosage: "500ml", frequency: "Stat" }]);
+  const addMonitoring = () => onChange([...items, { name: "Monitor Vitals", dosage: "N/A", frequency: "Every 4 hours" }]);
+  
+  const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
+  const updateMed = (idx: number, field: string, val: string) => {
+    const next = [...items];
+    next[idx][field] = val;
+    onChange(next);
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className={styles.emptyTreatmentState}>
+        <div className={styles.emptyTreatmentIcon}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <div className={styles.emptyTreatmentMessage}>No treatment items added yet</div>
+        <div className={styles.emptyTreatmentSub}>Select a quick action to start building the treatment plan.</div>
+        <div className={styles.quickActionGrid}>
+          <button onClick={addMedication} className={styles.quickActionBtn}>
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>
+             Add Medication
+          </button>
+          <button onClick={addIVFluid} className={styles.quickActionBtn}>
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+             Add IV Fluid
+          </button>
+          <button onClick={addMonitoring} className={styles.quickActionBtn}>
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+             Add Monitoring
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.repeaterTable}>
+      <div className={styles.repeaterHeaderRow}>
+        <div>Treatment Item</div>
+        <div>Dosage / Details</div>
+        <div>Frequency</div>
+        <div></div>
+      </div>
+      {items.map((med: any, i: number) => (
+        <div key={i} className={styles.repeaterTableRow}>
+          <div className={styles.iconInputWrapper}>
+            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg></div>
+            <input className={styles.iconInput} placeholder="e.g. Paracetamol" value={med.name} onChange={(e) => updateMed(i, "name", e.target.value)} />
+          </div>
+          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="500mg" value={med.dosage} onChange={(e) => updateMed(i, "dosage", e.target.value)} />
+          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="BID" value={med.frequency} onChange={(e) => updateMed(i, "frequency", e.target.value)} />
+          <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={addMedication} className={styles.btnActionAddMed} style={{ alignSelf: "flex-start", marginTop: 4 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Treatment Item
+      </button>
+    </div>
+  );
+};
+
 function AdmissionRecordRedesign() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2843,7 +2908,7 @@ function AdmissionRecordRedesign() {
                               Treatment Plan
                             </div>
                           </div>
-                          <MedicationRepeater items={summary.treatment_plan || []} onChange={(val: any) => updateField("treatment_plan", val)} />
+                          <TreatmentPlanRepeater items={summary.treatment_plan || []} onChange={(val: any) => updateField("treatment_plan", val)} />
                         </div>
                       </div>
 
