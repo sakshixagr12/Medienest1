@@ -20,17 +20,6 @@ const requireAuth = async (req, res, next) => {
       error,
     } = await supabase.auth.getUser(token);
 
-    // Verify token expiration if available via JWT claims (Supabase embeds exp claim)
-    // Decode JWT payload without verification (safe for expiration check only)
-    const jwtPayload = token.split('.')[1];
-    const decoded = Buffer.from(jwtPayload, 'base64').toString('utf8');
-    const payloadObj = JSON.parse(decoded);
-    const nowSec = Math.floor(Date.now() / 1000);
-    if (payloadObj.exp && payloadObj.exp < nowSec) {
-      return res
-        .status(401)
-        .json({ success: false, error: "Unauthorized: Token expired" });
-    }
 
     if (error || !user) {
       console.error("Auth Error:", error?.message);
