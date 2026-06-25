@@ -1853,40 +1853,6 @@ function AdmissionRecordRedesign() {
 
               {/* Right: Quick Actions */}
               <div className={styles.stickyQuickActions}>
-                <button
-                  className={styles.btnQuickSave}
-                  onClick={handleFinalSubmit}
-                  disabled={isSaving}
-                  title="Save admission record"
-                >
-                  {isSaving ? (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      style={{ animation: "spin 1s linear infinite" }}
-                    >
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    >
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                      <polyline points="17 21 17 13 7 13 7 21" />
-                      <polyline points="7 3 7 8 15 8" />
-                    </svg>
-                  )}
-                  {isSaving ? "Saving…" : "Save"}
-                </button>
 
                 <button
                   className={styles.btnQuickSummary}
