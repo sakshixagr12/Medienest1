@@ -2102,21 +2102,23 @@ function AdmissionRecordRedesign() {
                           <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>BP (mmHg)</label>
                           <div style={{ display: "flex", gap: 8, width: "100%", alignItems: "center" }}>
                             <input 
-                              type="number" 
+                              type="text" 
+                              inputMode="numeric"
                               className={styles.iconInput} 
                               placeholder="Sys" 
                               value={summary.vitals_bp_sys} 
                               onChange={e => updateField("vitals_bp_sys", e.target.value)} 
-                              style={{ flex: 1, minWidth: 0, paddingLeft: 12, paddingRight: 4, boxSizing: "border-box" }} 
+                              style={{ flex: 1, minWidth: 0, padding: "10px", textAlign: "center", boxSizing: "border-box" }} 
                             />
                             <span style={{ color: "#cbd5e1", fontWeight: "bold", flexShrink: 0, fontSize: 16 }}>/</span>
                             <input 
-                              type="number" 
+                              type="text" 
+                              inputMode="numeric"
                               className={styles.iconInput} 
                               placeholder="Dia" 
                               value={summary.vitals_bp_dia} 
                               onChange={e => updateField("vitals_bp_dia", e.target.value)} 
-                              style={{ flex: 1, minWidth: 0, paddingLeft: 12, paddingRight: 4, boxSizing: "border-box" }} 
+                              style={{ flex: 1, minWidth: 0, padding: "10px", textAlign: "center", boxSizing: "border-box" }} 
                             />
                           </div>
                         </div>
