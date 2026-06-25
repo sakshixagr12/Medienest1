@@ -1461,8 +1461,14 @@ function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary:
       const html2canvas = (await import("html2canvas")).default;
       const jsPDF = (await import("jspdf")).default;
 
-      // Use a scale of 2 for better resolution
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      // Use a scale of 2 for better resolution. 
+      // Add logging: false and removeContainer: true.
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        useCORS: true,
+        logging: false,
+        // Sometimes html2canvas 1.4.1 crashes on iframe cleanup. We try standard config.
+      });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       
@@ -1503,7 +1509,8 @@ function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary:
             onClick={handleDownloadPDF}
             disabled={isGeneratingPDF}
           >
-            {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+            <span style={{ display: isGeneratingPDF ? 'none' : 'inline' }}>Download PDF</span>
+            <span style={{ display: isGeneratingPDF ? 'inline' : 'none' }}>Generating PDF...</span>
           </button>
           <button className={styles.btnPrint} onClick={handlePrint}>
             🖨️ Print
