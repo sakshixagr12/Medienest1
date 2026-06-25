@@ -2176,29 +2176,6 @@
 }
 .chipSelected {
   background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #334155;
-  box-shadow: inset 0 0 0 1px #cbd5e1;
-}
-
-.cardHeaderRequired {
-  display: inline-flex;
-  align-items: center;
-  background: #dcfce7;
-  color: #166534;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  margin-left: auto;
-}
-.bmiNormal {
-  background: #dcfce7;
-  color: #166534;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
 }
