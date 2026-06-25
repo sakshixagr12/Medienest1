@@ -851,19 +851,19 @@ function AdmissionRecordRedesign() {
     let resolvedStep = 1;
     if (urlStep && !isNaN(parseInt(urlStep))) {
       resolvedStep = parseInt(urlStep);
-      localStorage.setItem("admission_draft_step", resolvedStep.toString());
     } else if (localStep && !isNaN(parseInt(localStep))) {
       resolvedStep = parseInt(localStep);
-      const params = new URLSearchParams(searchParams.toString());
+    }
+
+    setStep(resolvedStep);
+    localStorage.setItem("admission_draft_step", resolvedStep.toString());
+    setIsInitialized(true);
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (params.get("step") !== resolvedStep.toString()) {
       params.set("step", resolvedStep.toString());
       router.replace(`?${params.toString()}`, { scroll: false });
     }
-
-    if (resolvedStep !== step) {
-      setStep(resolvedStep);
-    }
-    setIsInitialized(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run ONLY on mount
 
   // 2. Sync URL changes to State (e.g. Browser Back/Forward)
@@ -872,12 +872,14 @@ function AdmissionRecordRedesign() {
     const urlStep = searchParams.get("step");
     if (urlStep && !isNaN(parseInt(urlStep))) {
       const parsed = parseInt(urlStep);
-      if (parsed !== step) {
-        setStep(parsed);
-        localStorage.setItem("admission_draft_step", parsed.toString());
-      }
+      setStep(prev => {
+        if (prev !== parsed) {
+          localStorage.setItem("admission_draft_step", parsed.toString());
+          return parsed;
+        }
+        return prev;
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, isInitialized]);
 
   // 3. Sync State changes to URL and LocalStorage (e.g. Next/Prev buttons)
@@ -890,8 +892,7 @@ function AdmissionRecordRedesign() {
       params.set("step", step.toString());
       router.replace(`?${params.toString()}`, { scroll: false });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, isInitialized]);
+  }, [step, isInitialized, router, searchParams]);
 
   const handleSetStep = useCallback((newStepVal: number | ((s: number) => number)) => {
     setStep((prev) => {
