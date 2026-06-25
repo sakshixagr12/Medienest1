@@ -674,17 +674,17 @@ function DischargeSummaryRedesign() {
         style={{ cursor: "pointer" }}
       >
         <div className={styles.cardHeader}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className={styles.cardTitleRow}>
             <div className={styles.cardTitle}>
               {icon}
               {title}
             </div>
-            <div className={styles.cardSubtitle}>{subtitle}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className={`${styles.statusDot} ${getStatus(items)}`} />
+              <button className={styles.btnEditMini}>Edit Details</button>
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div className={`${styles.statusDot} ${getStatus(items)}`} />
-            <button className={styles.btnEditMini}>Edit Details</button>
-          </div>
+          <div className={styles.cardSubtitle}>{subtitle}</div>
         </div>
         <div className={styles.previewContent}>
           {value || (
@@ -1213,7 +1213,7 @@ function DischargeSummaryRedesign() {
                 className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
               >
                 <div className={styles.cardHeader}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className={styles.cardTitleRow}>
                     <div className={styles.cardTitle}>
                       <svg
                         width="20"
@@ -1227,8 +1227,8 @@ function DischargeSummaryRedesign() {
                       </svg>
                       Diagnosis
                     </div>
-                    <div className={styles.cardSubtitle}>Record final diagnosis and primary conditions</div>
                   </div>
+                  <div className={styles.cardSubtitle}>Record final diagnosis and primary conditions</div>
                 </div>
                 <input
                   className={styles.bulletInput}
@@ -1280,45 +1280,48 @@ function DischargeSummaryRedesign() {
               )}
               <div className={styles.summaryCard}>
                 <div className={styles.cardHeader}>
-                  <div className={styles.cardTitle}>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    >
-                      <path d="M10.5 3.5a2.121 2.121 0 0 1 3 3L7 13l-4 1 1-4 6.5-6.5z" />
-                    </svg>
-                    Medications{" "}
-                    {summary.medicines.length > 7 && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          background: "var(--sanctuary-gray-low)",
-                          padding: "2px 8px",
-                          borderRadius: 10,
-                          marginLeft: 8,
-                        }}
+                  <div className={styles.cardTitleRow}>
+                    <div className={styles.cardTitle}>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
                       >
-                        {summary.medicines.length} ITEMS
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 12 }}
-                  >
+                        <path d="M10.5 3.5a2.121 2.121 0 0 1 3 3L7 13l-4 1 1-4 6.5-6.5z" />
+                      </svg>
+                      Medications{" "}
+                      {summary.medicines.length > 7 && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            background: "var(--sanctuary-gray-low)",
+                            padding: "2px 8px",
+                            borderRadius: 10,
+                            marginLeft: 8,
+                          }}
+                        >
+                          {summary.medicines.length} ITEMS
+                        </span>
+                      )}
+                    </div>
                     <div
-                      className={`${styles.statusDot} ${getStatus(summary.medicines)}`}
-                    />
-                    <button
-                      className={styles.btnEditMini}
-                      onClick={() => setIsMedEditorOpen(true)}
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
                     >
-                      Edit Full List
-                    </button>
+                      <div
+                        className={`${styles.statusDot} ${getStatus(summary.medicines)}`}
+                      />
+                      <button
+                        className={styles.btnEditMini}
+                        onClick={() => setIsMedEditorOpen(true)}
+                      >
+                        Edit Full List
+                      </button>
+                    </div>
                   </div>
+                  <div className={styles.cardSubtitle}>Prescribed medications upon discharge</div>
                 </div>
                 <div className={styles.medTableWrapper}>
                   <table className={styles.medTable}>
