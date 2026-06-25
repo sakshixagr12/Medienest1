@@ -660,6 +660,7 @@ function DischargeSummaryRedesign() {
 
   const renderClinicalCard = (
     title: string,
+    subtitle: string,
     field: keyof SummaryData,
     icon: React.ReactNode,
     placeholder: string,
@@ -673,13 +674,16 @@ function DischargeSummaryRedesign() {
         style={{ cursor: "pointer" }}
       >
         <div className={styles.cardHeader}>
-          <div className={styles.cardTitle}>
-            {icon}
-            {title}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className={styles.cardTitle}>
+              {icon}
+              {title}
+            </div>
+            <div className={styles.cardSubtitle}>{subtitle}</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div className={`${styles.statusDot} ${getStatus(items)}`} />
-            <button className={styles.btnEditMini}>Edit</button>
+            <button className={styles.btnEditMini}>Edit Details</button>
           </div>
         </div>
         <div className={styles.previewContent}>
@@ -1209,18 +1213,21 @@ function DischargeSummaryRedesign() {
                 className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
               >
                 <div className={styles.cardHeader}>
-                  <div className={styles.cardTitle}>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    >
-                      <path d="m3 21 1.9-1.9A11.5 11.5 0 0 1 12 21a11.5 11.5 0 0 1 0-23 11.5 11.5 0 0 1 7.1 18.9l1.9 1.9" />
-                    </svg>
-                    Diagnosis
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className={styles.cardTitle}>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <path d="m3 21 1.9-1.9A11.5 11.5 0 0 1 12 21a11.5 11.5 0 0 1 0-23 11.5 11.5 0 0 1 7.1 18.9l1.9 1.9" />
+                      </svg>
+                      Diagnosis
+                    </div>
+                    <div className={styles.cardSubtitle}>Record final diagnosis and primary conditions</div>
                   </div>
                 </div>
                 <input
@@ -1233,23 +1240,35 @@ function DischargeSummaryRedesign() {
               <div className={styles.clinicalSplit}>
                 {renderClinicalCard(
                   "Complaints",
+                  "Chief complaints & patient history",
                   "complaints",
-                  null,
-                  "Chief complaints & history...",
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>,
+                  "Add presenting complaints...",
                 )}
                 {renderClinicalCard(
                   "Findings",
+                  "Physical findings & vitals",
                   "findings",
-                  null,
-                  "Physical findings & investigations...",
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>,
+                  "Record examination findings...",
                 )}
               </div>
               {renderClinicalCard(
                 "Treatment Given",
+                "Procedures and treatment provided",
                 "treatment",
                 <svg
-                  width="18"
-                  height="18"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -1257,7 +1276,7 @@ function DischargeSummaryRedesign() {
                 >
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>,
-                "Procedures...",
+                "Add treatment details...",
               )}
               <div className={styles.summaryCard}>
                 <div className={styles.cardHeader}>
