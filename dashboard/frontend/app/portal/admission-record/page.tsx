@@ -3098,6 +3098,23 @@ function AdmissionRecordRedesign() {
           </div>
         </div>
       </div>
+
+      {showDraftModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.2s ease-out" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 400, width: "100%", textAlign: "center", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}>
+            <div style={{ width: 64, height: 64, background: "#d1fae5", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--sanctuary-ink)", marginBottom: 8 }}>Draft Saved Successfully</h3>
+            <p style={{ fontSize: 14, color: "#64748b", marginBottom: 28 }}>Your progress has been safely stored. What would you like to do next?</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <button onClick={handleDraftContinue} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>Continue Editing</button>
+              <button onClick={handleDraftDashboard} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
+              <button onClick={handleDraftStartNew} style={{ width: "100%", padding: "12px", background: "transparent", color: "#64748b", borderRadius: 12, fontWeight: 600, border: "1px dashed #cbd5e1", cursor: "pointer" }}>Start New Admission Record</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
