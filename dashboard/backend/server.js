@@ -108,6 +108,21 @@ app.use(
   notificationsRouter,
 );
 
+// TEMPORARY DB MIGRATION ENDPOINT
+app.get("/api/migrate-db", async (req, res) => {
+  const { Client } = require("pg");
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  try {
+    await client.connect();
+    await client.query(`ALTER TABLE admission_records ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Admitted';`);
+    res.json({ success: true, message: "Migration applied" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  } finally {
+    await client.end();
+  }
+});
+
 // ─── CASHFREE PAYMENT & SUBSCRIPTION ENDPOINTS ────────────────────────────────
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
