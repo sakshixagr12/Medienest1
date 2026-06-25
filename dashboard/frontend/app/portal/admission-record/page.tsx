@@ -734,28 +734,20 @@ const TreatmentPlanRepeater = ({ items, onChange }: any) => {
           <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
         </div>
       ))}
-      <div style={{ position: "relative", alignSelf: "flex-start", marginTop: 4 }} ref={menuRef}>
-        <button onClick={() => setShowAddMenu(!showAddMenu)} className={styles.btnActionAddMed}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Treatment Item
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, flexWrap: "wrap", paddingLeft: 4 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 4 }}>Quick Add</span>
+        <button onClick={addMedication} className={styles.quickActionBtn} style={{ padding: "6px 14px", fontSize: 12, borderRadius: 100, border: "1.5px solid #e2e8f0" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>
+          Medication
         </button>
-        {showAddMenu && (
-          <div className={styles.treatmentAddMenu}>
-            <div className={styles.treatmentAddMenuHeader}>Select Type</div>
-            <button className={styles.treatmentAddMenuItem} onClick={addMedication}>
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>
-               Medication
-            </button>
-            <button className={styles.treatmentAddMenuItem} onClick={addIVFluid}>
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-               IV Fluid
-            </button>
-            <button className={styles.treatmentAddMenuItem} onClick={addMonitoring}>
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-               Monitoring
-            </button>
-          </div>
-        )}
+        <button onClick={addIVFluid} className={styles.quickActionBtn} style={{ padding: "6px 14px", fontSize: 12, borderRadius: 100, border: "1.5px solid #e2e8f0" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          IV Fluid
+        </button>
+        <button onClick={addMonitoring} className={styles.quickActionBtn} style={{ padding: "6px 14px", fontSize: 12, borderRadius: 100, border: "1.5px solid #e2e8f0" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Monitoring
+        </button>
       </div>
     </div>
   );
