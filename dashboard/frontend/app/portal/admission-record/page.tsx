@@ -254,12 +254,30 @@ const InvestigationEditor = ({ items, updateField, field }: any) => {
                 </span>
               </div>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <button
+                <select
                   className={`${styles.statusBadge} ${test.status === "Pending" ? styles.statusPending : styles.statusCompleted}`}
-                  onClick={() => toggleStatus(idx)}
+                  value={test.status}
+                  onChange={(e) => {
+                    const next = [...items];
+                    next[idx].status = e.target.value;
+                    updateField(field, next);
+                  }}
+                  style={{
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    cursor: "pointer",
+                    outline: "none",
+                    paddingRight: "20px",
+                    backgroundImage: `url("data:image/svg+xml;utf8,<svg fill='${test.status === "Pending" ? "%2392400e" : "%23065f46"}' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 2px center",
+                    backgroundSize: "16px 16px",
+                  }}
                 >
-                  {test.status}
-                </button>
+                  <option value="Pending">Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
                 <button
                   style={{
                     background: "transparent",
