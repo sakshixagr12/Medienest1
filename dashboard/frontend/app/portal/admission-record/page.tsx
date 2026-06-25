@@ -1380,8 +1380,12 @@ function AdmissionRecordRedesign() {
   };
 
   const handleSaveDraft = () => {
-    localStorage.setItem("admission_draft", JSON.stringify(summary));
-    localStorage.setItem("admission_draft_step", step.toString());
+    try {
+      localStorage.setItem("admission_draft", JSON.stringify(summary));
+      localStorage.setItem("admission_draft_step", step.toString());
+    } catch (e) {
+      console.error("Failed to save draft locally", e);
+    }
     setShowDraftModal(true);
   };
 
