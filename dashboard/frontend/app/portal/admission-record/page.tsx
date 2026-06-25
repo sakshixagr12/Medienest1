@@ -836,6 +836,8 @@ function AdmissionRecordRedesign() {
   const [clinicLoading, setClinicLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [showDraftModal, setShowDraftModal] = useState(false);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [finalizePatientId, setFinalizePatientId] = useState<string | null>(null);
 
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -1359,19 +1361,8 @@ function AdmissionRecordRedesign() {
       if (error) throw error;
       localStorage.removeItem("admission_draft");
       localStorage.removeItem("admission_draft_step");
-      await alert("Admission Record finalized and linked to patient!");
-      const params = new URLSearchParams();
-
-      const dId = searchParams.get("doctorId");
-      const dName = searchParams.get("doctorName") || searchParams.get("docName");
-      if (dId) params.set("doctorId", dId);
-      if (dName) params.set("doctorName", dName);
-      const qs = params.toString();
-      if (patientId) {
-        router.push(`/portal/doctor-dashboard/patients/${patientId}${qs ? `?${qs}` : ""}`);
-      } else {
-        router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
-      }
+      setFinalizePatientId(patientId);
+      setShowFinalizeModal(true);
     } catch (e: any) {
       alert("Error saving: " + e.message);
     } finally {
@@ -3117,6 +3108,45 @@ function AdmissionRecordRedesign() {
               <button type="button" onClick={handleDraftContinue} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>Continue Editing</button>
               <button type="button" onClick={handleDraftDashboard} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
               <button type="button" onClick={handleDraftStartNew} style={{ width: "100%", padding: "12px", background: "transparent", color: "#64748b", borderRadius: 12, fontWeight: 600, border: "1px dashed #cbd5e1", cursor: "pointer" }}>Start New Admission Record</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showFinalizeModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.2s ease-out" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 400, width: "100%", textAlign: "center", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}>
+            <div style={{ width: 64, height: 64, background: "#d1fae5", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--sanctuary-ink)", marginBottom: 8 }}>Admission Record Finalized</h3>
+            <p style={{ fontSize: 14, color: "#64748b", marginBottom: 28 }}>The admission record has been successfully saved and linked to the patient. What would you like to do next?</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <button type="button" onClick={() => {
+                const params = new URLSearchParams();
+                const dId = searchParams.get("doctorId");
+                const dName = searchParams.get("doctorName") || searchParams.get("docName");
+                if (dId) params.set("doctorId", dId);
+                if (dName) params.set("doctorName", dName);
+                const qs = params.toString();
+                if (finalizePatientId) {
+                  router.push(`/portal/doctor-dashboard/patients/${finalizePatientId}${qs ? `?${qs}` : ""}`);
+                } else {
+                  router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
+                }
+              }} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>View Patient Profile</button>
+              <button type="button" onClick={() => {
+                const params = new URLSearchParams();
+                const dId = searchParams.get("doctorId");
+                const dName = searchParams.get("doctorName") || searchParams.get("docName");
+                if (dId) params.set("doctorId", dId);
+                if (dName) params.set("doctorName", dName);
+                const qs = params.toString();
+                router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
+              }} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
+              <button type="button" onClick={() => {
+                handleDraftStartNew();
+                setShowFinalizeModal(false);
+              }} style={{ width: "100%", padding: "12px", background: "transparent", color: "#64748b", borderRadius: 12, fontWeight: 600, border: "1px dashed #cbd5e1", cursor: "pointer" }}>Start New Admission Record</button>
             </div>
           </div>
         </div>
