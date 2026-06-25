@@ -1053,11 +1053,31 @@ function DischargeSummaryRedesign() {
           <div className={styles.layout}>
             <section className={styles.leftColumn}>
               <div className={styles.summaryCard}>
-                <div className={styles.cardHeader}>
+                <div className={styles.patientProfileHeader}>
+                  <div className={styles.avatarPlaceholder}>
+                    {summary.patientName ? summary.patientName.charAt(0).toUpperCase() : "P"}
+                  </div>
+                  <h2 className={styles.patientNameHeading}>
+                    {summary.patientName || "New Patient"}
+                  </h2>
+                  <div className={styles.patientBadges}>
+                    <span className={styles.badge} style={{ background: "var(--teal-l)", color: "var(--teal)" }}>
+                      {summary.sex}
+                    </span>
+                    <span className={styles.badge} style={{ background: "var(--gold-l)", color: "var(--gold)" }}>
+                      {summary.age ? `${summary.age} Years` : "Age -"}
+                    </span>
+                    <span className={styles.badge}>
+                      IPD: {summary.regNo || "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.cardHeader} style={{ border: 'none', padding: 0, marginBottom: 16 }}>
                   <div className={styles.cardTitle}>
                     <svg
-                      width="18"
-                      height="18"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -1066,7 +1086,7 @@ function DischargeSummaryRedesign() {
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    Patient Context
+                    Patient Information
                   </div>
                   <div
                     className={`${styles.statusDot} ${getStatus(summary.patientName)}`}
