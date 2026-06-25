@@ -2296,6 +2296,12 @@
 
 .quickActionBtn:hover {
   border-color: var(--sanctuary-primary);
+  color: var(--sanctuary-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.treatmentAddMenu {
   position: absolute;
   top: 100%;
   left: 0;
@@ -2332,13 +2338,6 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--sanctuary-ink);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  background: transparent;
-  border: 1px dashed #cbd5e1;
-  color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
 }
