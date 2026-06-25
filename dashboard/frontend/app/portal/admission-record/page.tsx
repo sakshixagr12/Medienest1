@@ -1034,7 +1034,7 @@ function AdmissionRecordRedesign() {
       }
     }
     setClinicLoading(false);
-  }, [docNameParam, doctors]);
+  }, [docNameParam, doctors, searchParams]);
 
   const saveDraft = useCallback((data: SummaryData) => {
     try {
