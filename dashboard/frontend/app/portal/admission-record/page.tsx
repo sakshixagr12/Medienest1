@@ -742,28 +742,48 @@ function AdmissionRecordRedesign() {
   const [clinicLoading, setClinicLoading] = useState(true);
   const [step, setStep] = useState(1);
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // 1. Initial Load: Restore from URL or LocalStorage
   useEffect(() => {
     const urlStep = searchParams.get("step");
     const localStep = localStorage.getItem("admission_draft_step");
     
-    let nextStep = step;
-
+    let resolvedStep = 1;
     if (urlStep && !isNaN(parseInt(urlStep))) {
-      nextStep = parseInt(urlStep);
+      resolvedStep = parseInt(urlStep);
+      localStorage.setItem("admission_draft_step", resolvedStep.toString());
     } else if (localStep && !isNaN(parseInt(localStep))) {
-      nextStep = parseInt(localStep);
+      resolvedStep = parseInt(localStep);
       const params = new URLSearchParams(searchParams.toString());
-      params.set("step", nextStep.toString());
+      params.set("step", resolvedStep.toString());
       router.replace(`?${params.toString()}`, { scroll: false });
     }
 
-    if (nextStep !== step) {
-      setStep(nextStep);
+    if (resolvedStep !== step) {
+      setStep(resolvedStep);
+    }
+    setIsInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run ONLY on mount
+
+  // 2. Sync URL changes to State (e.g. Browser Back/Forward)
+  useEffect(() => {
+    if (!isInitialized) return;
+    const urlStep = searchParams.get("step");
+    if (urlStep && !isNaN(parseInt(urlStep))) {
+      const parsed = parseInt(urlStep);
+      if (parsed !== step) {
+        setStep(parsed);
+        localStorage.setItem("admission_draft_step", parsed.toString());
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, isInitialized]);
 
+  // 3. Sync State changes to URL and LocalStorage (e.g. Next/Prev buttons)
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("admission_draft_step", step.toString());
     const currentUrlStep = searchParams.get("step");
     if (currentUrlStep !== step.toString()) {
@@ -772,7 +792,7 @@ function AdmissionRecordRedesign() {
       router.replace(`?${params.toString()}`, { scroll: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, isInitialized]);
 
   const handleSetStep = useCallback((newStepVal: number | ((s: number) => number)) => {
     setStep((prev) => {
