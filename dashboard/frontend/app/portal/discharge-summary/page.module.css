@@ -2,6 +2,7 @@
   min-height: 100vh;
   background: var(--sanctuary-bg);
   color: var(--sanctuary-ink);
+  font-family: "Inter", sans-serif;
 }
 
 .main {
@@ -37,10 +38,11 @@
 }
 
 .headerTitles h1 {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--sanctuary-ink);
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .headerTitles p {
@@ -63,8 +65,8 @@
 }
 
 .draftStatus {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--success);
   display: flex;
   align-items: center;
@@ -72,7 +74,8 @@
 }
 
 .lastSync {
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--sanctuary-ink-l);
 }
 
@@ -125,14 +128,15 @@
   align-items: center;
   gap: 12px;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--sanctuary-ink);
-  letter-spacing: 0px;
+  letter-spacing: -0.2px;
 }
 
 .cardSubtitle {
   font-size: 13px;
-  color: var(--sanctuary-ink-l);
+  font-weight: 400;
+  color: #64748b; /* Neutral gray */
   margin-top: 4px;
 }
 
@@ -162,10 +166,11 @@
 }
 
 .patientNameHeading {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--sanctuary-ink);
   margin: 0 0 12px 0;
+  letter-spacing: -0.3px;
 }
 
 .patientBadges {
