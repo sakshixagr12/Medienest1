@@ -1378,6 +1378,12 @@ function AdmissionRecordRedesign() {
     }
   };
 
+  const handleSaveDraft = () => {
+    localStorage.setItem("admission_draft", JSON.stringify(summary));
+    localStorage.setItem("admission_draft_step", step.toString());
+    alert("Draft saved successfully! You can safely leave this page and resume later.");
+  };
+
   const handleClear = async () => {
     if (
       await confirm(
