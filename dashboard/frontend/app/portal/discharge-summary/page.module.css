@@ -996,12 +996,12 @@
 }
 
 .previewDoc h2 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 900;
   margin-bottom: 4px;
 }
 .previewDoc p {
-  font-size: 12px;
+  font-size: 11px;
   color: #444;
 }
 
@@ -1009,7 +1009,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px 16px;
-  font-size: 12px;
+  font-size: 11px;
   margin-bottom: 24px;
 }
 
@@ -1018,7 +1018,7 @@
 }
 
 .previewSection h4 {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   color: #222;
   text-transform: uppercase;
@@ -1028,7 +1028,7 @@
 }
 
 .previewSection p {
-  font-size: 13px;
+  font-size: 12px;
   white-space: pre-wrap;
 }
 
