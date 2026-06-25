@@ -2227,6 +2227,201 @@
   outline: none;
 }
 
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.emptyTreatmentIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e0e7ff;
+  color: var(--sanctuary-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.emptyTreatmentMessage {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sanctuary-ink);
+  margin-bottom: 4px;
+}
+
+.emptyTreatmentSub {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 24px;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.quickActionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.quickActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sanctuary-ink);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.quickActionBtn:hover {
+  border-color: var(--sanctuary-primary);
+  color: var(--sanctuary-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.treatmentAddMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  min-width: 180px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.treatmentAddMenuHeader {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  padding: 4px 8px 8px 8px;
+  letter-spacing: 0.05em;
+}
+
+.treatmentAddMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chipAddCustom:hover {
+  border-color: #94a3b8;
+  color: #475569;
+  background: #f8fafc;
+}
+
+
+
+.bulletInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  font-family: inherit;
+  color: #334155;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+
+.bulletInput:focus {
+  border-color: var(--sanctuary-primary);
+  box-shadow: 0 0 0 4px rgba(23, 3, 55, 0.05);
+}
+
+.bulletInput::placeholder {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@media (max-width: 1400px) {
+  .layout {
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .leftColumn {
+    position: static;
+  }
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gridSideBySide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .gridSideBySide {
+    grid-template-columns: 1fr;
+  }
+}
+
+.iconInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  background: #fff;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
 .iconInput:focus {
   border-color: var(--sanctuary-primary);
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
@@ -2241,4 +2436,26 @@
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid #fee2e2;
+}
+
+.cardHeaderOptional {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.cardHeaderCompleted {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #166534;
+  background: #dcfce7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
 }
