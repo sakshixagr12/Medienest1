@@ -116,11 +116,17 @@
 
 .cardHeader {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardTitleRow {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  width: 100%;
 }
 
 .cardTitle {
@@ -137,7 +143,7 @@
   font-size: 13px;
   font-weight: 400;
   color: #64748b; /* Neutral gray */
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .patientProfileHeader {
