@@ -1053,12 +1053,14 @@ function DischargeSummaryRedesign() {
         </header>
         <main className={styles.main}>
           <div className={styles.layout}>
-            <section className={styles.leftColumn}>
-              <div className={styles.summaryCard}>
-                <div className={styles.patientProfileHeader}>
-                  <div className={styles.avatarPlaceholder}>
-                    {summary.patientName ? summary.patientName.charAt(0).toUpperCase() : "P"}
-                  </div>
+            
+            {/* Patient Header Group */}
+            <section className={styles.patientHeaderGroup}>
+              <div className={styles.patientProfileLeft}>
+                <div className={styles.avatarPlaceholder}>
+                  {summary.patientName ? summary.patientName.charAt(0).toUpperCase() : "P"}
+                </div>
+                <div>
                   <h2 className={styles.patientNameHeading}>
                     {summary.patientName || "New Patient"}
                   </h2>
@@ -1074,156 +1076,87 @@ function DischargeSummaryRedesign() {
                     </span>
                   </div>
                 </div>
-
-                <div className={styles.cardHeader} style={{ border: 'none', padding: 0, marginBottom: 16 }}>
-                  <div className={styles.cardTitle}>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                    >
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    Patient Information
-                  </div>
-                </div>
-                <div className="field">
+              </div>
+              <div className={styles.patientDemographicsGrid}>
+                <div className={styles.briefItem}>
                   <label>Full Name</label>
                   <input
                     type="text"
+                    className={styles.compactInput}
                     value={summary.patientName}
                     onChange={(e) => updateField("patientName", e.target.value)}
                     placeholder="Amit Sharma"
                   />
                 </div>
-                <div className={styles.patientBrief}>
-                  <div className={styles.briefItem}>
-                    <div className="field" style={{ flex: 1 }}>
-                      <label>Age</label>
-                      <input
-                        type="text"
-                        value={summary.age}
-                        onChange={(e) => updateField("age", e.target.value)}
-                      />
-                    </div>
-                    <div className="field" style={{ flex: 1, marginLeft: 10 }}>
-                      <label>Sex</label>
-                      <select
-                        value={summary.sex}
-                        onChange={(e) => updateField("sex", e.target.value)}
-                      >
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="field">
-                    <label>Phone Number (WhatsApp)</label>
-                    <input
-                      type="tel"
-                      value={summary.phone || ""}
-                      onChange={(e) => updateField("phone", e.target.value)}
-                      placeholder="e.g. 9876543210"
-                    />
-                  </div>
-                  <div className="field">
-                    <label>Registration / IPD ID</label>
-                    <input
-                      type="text"
-                      value={summary.regNo}
-                      onChange={(e) => updateField("regNo", e.target.value)}
-                    />
-                  </div>
-                  <div className="field">
-                    <label>Adm. Date</label>
-                    <input
-                      type="datetime-local"
-                      value={summary.doa}
-                      onChange={(e) => updateField("doa", e.target.value)}
-                    />
-                  </div>
-                  <div className="field">
-                    <label>Dis. Date</label>
-                    <input
-                      type="datetime-local"
-                      value={summary.dod}
-                      onChange={(e) => updateField("dod", e.target.value)}
-                    />
-                  </div>
-                  <div className="field">
-                    <label>Admitting Doctor</label>
-                    <select
-                      value={summary.doctor}
-                      onChange={(e) => updateField("doctor", e.target.value)}
-                    >
-                      <option value="">Select Doctor...</option>
-                      {doctors?.map((d: any) => (
-                        <option key={d.id} value={d.name}>
-                          Dr. {d.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div className={styles.briefItem}>
+                  <label>Age</label>
+                  <input
+                    type="text"
+                    className={styles.compactInput}
+                    value={summary.age}
+                    onChange={(e) => updateField("age", e.target.value)}
+                    style={{ width: 60 }}
+                  />
                 </div>
-              </div>
-              <div
-                className={styles.summaryCard}
-                style={{ background: "var(--sanctuary-gray-low)" }}
-              >
-                <div
-                  className={styles.cardTitle}
-                  style={{ fontSize: 11, color: "var(--sanctuary-ink-l)" }}
-                >
-                  STATUS OVERVIEW
+                <div className={styles.briefItem}>
+                  <label>Sex</label>
+                  <select
+                    className={styles.compactInput}
+                    value={summary.sex}
+                    onChange={(e) => updateField("sex", e.target.value)}
+                    style={{ width: 90 }}
+                  >
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
                 </div>
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                  }}
-                >
-                  <div className={styles.briefItem}>
-                    <label>Draft Status</label>{" "}
-                    <span>{lastSaved ? "Saved Locally" : "Not Saved"}</span>
-                  </div>
-                  <div className={styles.briefItem}>
-                    <label>Last Sync</label>{" "}
-                    <span>
-                      {lastSaved ? lastSaved.toLocaleTimeString() : "--"}
-                    </span>
-                  </div>
+                <div className={styles.briefItem}>
+                  <label>Phone</label>
+                  <input
+                    type="tel"
+                    className={styles.compactInput}
+                    value={summary.phone || ""}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    placeholder="9876543210"
+                    style={{ width: 100 }}
+                  />
+                </div>
+                <div className={styles.briefItem}>
+                  <label>IPD ID</label>
+                  <input
+                    type="text"
+                    className={styles.compactInput}
+                    value={summary.regNo}
+                    onChange={(e) => updateField("regNo", e.target.value)}
+                    style={{ width: 100 }}
+                  />
                 </div>
               </div>
             </section>
 
-            <section className={styles.centerColumn}>
-              <div
-                className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
-              >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardTitleRow}>
-                    <div className={styles.cardTitle}>
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <path d="m3 21 1.9-1.9A11.5 11.5 0 0 1 12 21a11.5 11.5 0 0 1 0-23 11.5 11.5 0 0 1 7.1 18.9l1.9 1.9" />
-                      </svg>
-                      Diagnosis
-                    </div>
+            {/* Block 1: Clinical Assessment */}
+            <section className={styles.summaryGroupCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitleRow}>
+                  <div className={styles.cardTitle} style={{ fontSize: 22 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Clinical Assessment
                   </div>
-                  <div className={styles.cardSubtitle}>Record final diagnosis and primary conditions</div>
+                </div>
+              </div>
+              
+              <div className={styles.summaryCard}>
+                <div className={styles.cardHeader} style={{ marginBottom: 12, paddingBottom: 8 }}>
+                  <div className={styles.cardTitleRow}>
+                    <div className={styles.cardTitle}>Final Diagnosis</div>
+                  </div>
                 </div>
                 <input
                   className={styles.bulletInput}
@@ -1232,62 +1165,33 @@ function DischargeSummaryRedesign() {
                   placeholder="Final Clinical Diagnosis..."
                 />
               </div>
+
               <div className={styles.clinicalSplit}>
-                {renderClinicalCard(
-                  "Complaints",
-                  "Chief complaints & patient history",
-                  "complaints",
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>,
-                  "Add presenting complaints...",
-                )}
-                {renderClinicalCard(
-                  "Findings",
-                  "Physical findings & vitals",
-                  "findings",
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>,
-                  "Record examination findings...",
-                )}
+                {renderClinicalCard("Complaints", "", "complaints", null, "Add presenting complaints...")}
+                {renderClinicalCard("Findings", "", "findings", null, "Record examination findings...")}
               </div>
-              {renderClinicalCard(
-                "Treatment Given",
-                "Procedures and treatment provided",
-                "treatment",
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>,
-                "Add treatment details...",
-              )}
-              <div className={styles.summaryCard}>
-                <div className={styles.cardHeader}>
+            </section>
+
+            {/* Block 2: Treatment & Medications */}
+            <section className={styles.summaryGroupCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitleRow}>
+                  <div className={styles.cardTitle} style={{ fontSize: 22 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    Treatment & Medications
+                  </div>
+                </div>
+              </div>
+
+              {renderClinicalCard("Treatment Given", "", "treatment", null, "Add treatment details...")}
+
+              <div className={styles.summaryCard} style={{ marginTop: 32 }}>
+                <div className={styles.cardHeader} style={{ marginBottom: 12, paddingBottom: 8 }}>
                   <div className={styles.cardTitleRow}>
                     <div className={styles.cardTitle}>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <path d="M10.5 3.5a2.121 2.121 0 0 1 3 3L7 13l-4 1 1-4 6.5-6.5z" />
-                      </svg>
-                      Medications{" "}
+                      Prescribed Medications
                       {summary.medicines.length > 7 && (
                         <span
                           style={{
@@ -1302,21 +1206,13 @@ function DischargeSummaryRedesign() {
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 12 }}
-                    >
-                      <div
-                        className={`${styles.statusDot} ${getStatus(summary.medicines)}`}
-                      />
-                      <button
-                        className={styles.btnEditMini}
-                        onClick={() => setIsMedEditorOpen(true)}
-                      >
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div className={`${styles.statusDot} ${getStatus(summary.medicines)}`} />
+                      <button className={styles.btnEditMini} onClick={() => setIsMedEditorOpen(true)}>
                         Edit Full List
                       </button>
                     </div>
                   </div>
-                  <div className={styles.cardSubtitle}>Prescribed medications upon discharge</div>
                 </div>
                 <div className={styles.medTableWrapper}>
                   <table className={styles.medTable}>
@@ -1337,13 +1233,7 @@ function DischargeSummaryRedesign() {
                             <input
                               className={styles.medInput}
                               value={m.name}
-                              onChange={(e) =>
-                                handleMedicineChange(
-                                  m.id,
-                                  "name",
-                                  e.target.value,
-                                )
-                              }
+                              onChange={(e) => handleMedicineChange(m.id, "name", e.target.value)}
                               placeholder="Medicine name..."
                             />
                           </td>
@@ -1351,33 +1241,18 @@ function DischargeSummaryRedesign() {
                             <input
                               className={styles.medInput}
                               value={m.frequency}
-                              onChange={(e) =>
-                                handleMedicineChange(
-                                  m.id,
-                                  "frequency",
-                                  e.target.value,
-                                )
-                              }
+                              onChange={(e) => handleMedicineChange(m.id, "frequency", e.target.value)}
                             />
                           </td>
                           <td>
                             <input
                               className={styles.medInput}
                               value={m.duration}
-                              onChange={(e) =>
-                                handleMedicineChange(
-                                  m.id,
-                                  "duration",
-                                  e.target.value,
-                                )
-                              }
+                              onChange={(e) => handleMedicineChange(m.id, "duration", e.target.value)}
                             />
                           </td>
                           <td>
-                            <button
-                              className={styles.btnRemoveMed}
-                              onClick={() => removeMedicine(m.id)}
-                            >
+                            <button className={styles.btnRemoveMed} onClick={() => removeMedicine(m.id)}>
                               ×
                             </button>
                           </td>
@@ -1389,37 +1264,35 @@ function DischargeSummaryRedesign() {
                 {summary.medicines.length > 7 ? (
                   <button
                     className={styles.btnAddMed}
-                    style={{
-                      background: "var(--sanctuary-primary)",
-                      color: "#fff",
-                      border: "none",
-                    }}
+                    style={{ background: "var(--sanctuary-primary)", color: "#fff", border: "none" }}
                     onClick={() => setIsMedEditorOpen(true)}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M12 5v14M5 12h14"></path>
-                    </svg>
                     View / Add More Medicines ({summary.medicines.length - 7} more)
                   </button>
                 ) : (
                   <button className={styles.btnAddMed} onClick={addMedicine}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M12 5v14M5 12h14"></path>
-                    </svg>
-                    Add Medication Item
+                    + Add Medication Item
                   </button>
                 )}
               </div>
-              {renderClinicalCard(
-                "Advice & Follow-up",
-                "Post-discharge instructions and follow-up plan",
-                "advice",
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>,
-                "Rest, diet, lifestyle changes...",
-              )}
             </section>
+
+            {/* Block 3: Discharge Planning */}
+            <section className={styles.summaryGroupCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitleRow}>
+                  <div className={styles.cardTitle} style={{ fontSize: 22 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    Discharge Planning
+                  </div>
+                </div>
+              </div>
+              
+              {renderClinicalCard("Advice & Follow-up", "", "advice", null, "Rest, diet, lifestyle changes...")}
+            </section>
+
           </div>
         </main>
         
