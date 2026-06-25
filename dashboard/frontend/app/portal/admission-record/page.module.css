@@ -2226,9 +2226,15 @@
   transition: all 0.2s ease;
   outline: none;
 }
+.iconInput:focus {
+  border-color: var(--sanctuary-primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
 
+.emptyTreatment {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 40px 20px;
   background: #f8fafc;
   border: 1.5px dashed #cbd5e1;
