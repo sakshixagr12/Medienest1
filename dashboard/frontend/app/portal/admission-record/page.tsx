@@ -14,6 +14,23 @@ interface Investigation {
   status: "Pending" | "Completed";
 }
 
+interface ChiefComplaint {
+  complaint: string;
+  duration: string;
+}
+
+interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+}
+
+interface Allergy {
+  name: string;
+  type: "Drug" | "Food" | "Environmental";
+  severity: "Mild" | "Moderate" | "Severe";
+}
+
 interface SummaryData {
   patientName: string;
   phone: string;
@@ -39,13 +56,25 @@ interface SummaryData {
   vitals_pulse: string;
   vitals_temp: string;
   vitals_spo2: string;
-  complaints: string[];
+  vitals_resp_rate: string;
+  vitals_weight: string;
+  vitals_height: string;
+  chief_complaints_extended: ChiefComplaint[];
+  complaints: string[]; // Keep for legacy
   hpi: string;
+  medical_history: string[];
+  current_medications: Medication[];
+  allergy_details: Allergy[];
+  examination_findings: string;
+  provisional_diagnosis: string;
+  risk_flags: string[];
+  infection_control: string;
   findings: string[];
   diagnosis: string;
   final_diagnosis: string;
   investigations: Investigation[];
   treatment_plan: string[];
+  additional_notes: string;
 }
 
 interface Suggestion {
@@ -440,6 +469,211 @@ const BulletListEditor = ({
   );
 };
 
+const calculateBMI = (weight: string, height: string): string => {
+  const w = parseFloat(weight);
+  const h = parseFloat(height) / 100; // cm to m
+  if (w > 0 && h > 0) {
+    return (w / (h * h)).toFixed(1);
+  }
+  return "";
+};
+
+const MultiSelectChips = ({ options, selected, onChange, allowCustom = false, customLabel = "Add custom...", activeColor = "#f1f5f9", activeTextColor = "#334155", activeBorderColor = "#cbd5e1" }: any) => {
+  const [customVal, setCustomVal] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const toggle = (opt: string) => {
+    if (selected.includes(opt)) onChange(selected.filter((o: string) => o !== opt));
+    else onChange([...selected, opt]);
+  };
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {options.map((opt: string) => {
+        const isSelected = selected.includes(opt);
+        return (
+          <button
+            key={opt}
+            onClick={() => toggle(opt)}
+            className={`${styles.chipSelectable}`}
+            style={isSelected ? { 
+              background: activeColor, 
+              color: activeTextColor, 
+              borderColor: activeBorderColor, 
+              boxShadow: `inset 0 0 0 1px ${activeBorderColor}` 
+            } : {}}
+          >
+            {opt}
+          </button>
+        );
+      })}
+      {allowCustom && selected.filter((o: string) => !options.includes(o)).map((opt: string) => (
+         <button
+          key={opt}
+          onClick={() => toggle(opt)}
+          className={`${styles.chipSelectable}`}
+          style={{ 
+            background: activeColor, 
+            color: activeTextColor, 
+            borderColor: activeBorderColor, 
+            boxShadow: `inset 0 0 0 1px ${activeBorderColor}` 
+          }}
+        >
+          {opt} ✕
+        </button>
+      ))}
+      {allowCustom && !isAdding && (
+        <button 
+          className={styles.chipAddCustom}
+          onClick={() => {
+            setIsAdding(true);
+            setTimeout(() => inputRef.current?.focus(), 50);
+          }}
+        >
+          {customLabel}
+        </button>
+      )}
+      {allowCustom && isAdding && (
+        <input
+          ref={inputRef}
+          placeholder="Type and press Enter..."
+          value={customVal}
+          onChange={(e) => setCustomVal(e.target.value)}
+          onBlur={() => {
+            if (!customVal.trim()) setIsAdding(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && customVal.trim()) {
+              e.preventDefault();
+              if (!selected.includes(customVal.trim())) onChange([...selected, customVal.trim()]);
+              setCustomVal("");
+              setIsAdding(false);
+            } else if (e.key === "Escape") {
+              setCustomVal("");
+              setIsAdding(false);
+            }
+          }}
+          style={{ padding: "6px 12px", borderRadius: 20, border: "1px dashed #cbd5e1", fontSize: 13, outline: "none", width: 180, boxSizing: "border-box" }}
+        />
+      )}
+    </div>
+  );
+};
+
+const MedicationRepeater = ({ items, onChange }: any) => {
+  const addMed = () => onChange([...items, { name: "", dosage: "", frequency: "" }]);
+  const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
+  const updateMed = (idx: number, field: string, val: string) => {
+    const next = [...items];
+    next[idx][field] = val;
+    onChange(next);
+  };
+  return (
+    <div className={styles.repeaterTable}>
+      {items.length > 0 && (
+        <div className={styles.repeaterHeaderRow}>
+          <div>Medication Name</div>
+          <div>Dosage</div>
+          <div>Frequency</div>
+          <div></div>
+        </div>
+      )}
+      {items.map((med: any, i: number) => (
+        <div key={i} className={styles.repeaterTableRow}>
+          <div className={styles.iconInputWrapper}>
+            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg></div>
+            <input className={styles.iconInput} placeholder="e.g. Paracetamol" value={med.name} onChange={(e) => updateMed(i, "name", e.target.value)} />
+          </div>
+          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="500mg" value={med.dosage} onChange={(e) => updateMed(i, "dosage", e.target.value)} />
+          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="BID" value={med.frequency} onChange={(e) => updateMed(i, "frequency", e.target.value)} />
+          <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={addMed} className={styles.btnActionAddMed} style={{ alignSelf: "flex-start", marginTop: 4 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Medication
+      </button>
+    </div>
+  );
+};
+
+const ChiefComplaintRepeater = ({ items, onChange }: any) => {
+  const addCC = () => onChange([...items, { complaint: "", duration: "" }]);
+  const removeCC = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
+  const updateCC = (idx: number, field: string, val: string) => {
+    const next = [...items];
+    next[idx][field] = val;
+    onChange(next);
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {items.map((cc: any, i: number) => (
+        <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div className={styles.iconInputWrapper} style={{ flex: 2 }}>
+            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <input className={styles.iconInput} placeholder="Chief Complaint (e.g. Fever)" value={cc.complaint} onChange={(e) => updateCC(i, "complaint", e.target.value)} />
+          </div>
+          <div className={styles.iconInputWrapper} style={{ flex: 1 }}>
+            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <input className={styles.iconInput} placeholder="Duration (e.g. 5 days)" value={cc.duration} onChange={(e) => updateCC(i, "duration", e.target.value)} />
+          </div>
+          <button onClick={() => removeCC(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px", width: 40 }}>✕</button>
+        </div>
+      ))}
+      <button onClick={addCC} className={styles.btnActionAddMed} style={{ color: "#6366f1", alignSelf: "flex-start", marginTop: 4 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Complaint
+      </button>
+    </div>
+  );
+};
+
+const AllergyRepeater = ({ items, onChange }: any) => {
+  const addAllergy = () => onChange([...items, { name: "", type: "Drug", severity: "Mild" }]);
+  const removeAllergy = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
+  const updateAllergy = (idx: number, field: string, val: string) => {
+    const next = [...items];
+    next[idx][field] = val;
+    onChange(next);
+  };
+  return (
+    <div className={styles.repeaterTable}>
+      {items.length > 0 && (
+        <div className={styles.repeaterHeaderRowAllergy}>
+          <div>Allergen</div>
+          <div>Type</div>
+          <div>Severity</div>
+          <div></div>
+        </div>
+      )}
+      {items.map((al: any, i: number) => (
+        <div key={i} className={styles.repeaterTableRowAllergy}>
+          <div className={styles.iconInputWrapper}>
+            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <input className={styles.iconInput} placeholder="e.g. Penicillin" value={al.name} onChange={(e) => updateAllergy(i, "name", e.target.value)} />
+          </div>
+          <select className={styles.iconInput} style={{ paddingLeft: 12 }} value={al.type} onChange={(e) => updateAllergy(i, "type", e.target.value)}>
+            <option value="Drug">Drug</option>
+            <option value="Food">Food</option>
+            <option value="Environmental">Env.</option>
+          </select>
+          <select className={styles.iconInput} style={{ paddingLeft: 12 }} value={al.severity} onChange={(e) => updateAllergy(i, "severity", e.target.value)}>
+            <option value="Mild">Mild</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Severe">Severe</option>
+          </select>
+          <button onClick={() => removeAllergy(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={addAllergy} className={styles.btnActionAddAllergy} style={{ alignSelf: "flex-start", marginTop: 4 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Allergy
+      </button>
+    </div>
+  );
+};
+
 function AdmissionRecordRedesign() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -472,19 +706,65 @@ function AdmissionRecordRedesign() {
     vitals_pulse: "",
     vitals_temp: "",
     vitals_spo2: "",
+    vitals_resp_rate: "",
+    vitals_weight: "",
+    vitals_height: "",
     diagnosis: "",
+    provisional_diagnosis: "",
     final_diagnosis: "",
     hpi: "",
     complaints: [],
+    chief_complaints_extended: [],
+    medical_history: [],
+    current_medications: [],
+    allergy_details: [],
+    examination_findings: "",
+    risk_flags: [],
+    infection_control: "None",
     findings: [],
     investigations: [],
     treatment_plan: [],
+    additional_notes: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [clinicLoading, setClinicLoading] = useState(true);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const urlStep = searchParams.get("step");
+    const localStep = localStorage.getItem("admission_draft_step");
+    
+    setStep((currentStep) => {
+      let nextStep = currentStep;
+
+      if (urlStep && !isNaN(parseInt(urlStep))) {
+        nextStep = parseInt(urlStep);
+        localStorage.setItem("admission_draft_step", nextStep.toString());
+      } else if (localStep && !isNaN(parseInt(localStep))) {
+        nextStep = parseInt(localStep);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("step", nextStep.toString());
+        router.replace(`?${params.toString()}`, { scroll: false });
+      }
+
+      return nextStep;
+    });
+  }, [searchParams, router]);
+
+  const handleSetStep = useCallback((newStepVal: number | ((s: number) => number)) => {
+    setStep((prev) => {
+      const nextStep = typeof newStepVal === "function" ? newStepVal(prev) : newStepVal;
+      if (nextStep !== prev) {
+        localStorage.setItem("admission_draft_step", nextStep.toString());
+        const params = new URLSearchParams(window.location.search);
+        params.set("step", nextStep.toString());
+        router.push(`?${params.toString()}`, { scroll: false });
+      }
+      return nextStep;
+    });
+  }, [router]);
   const [isQuickMode, setIsQuickMode] = useState(false);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [activeSuggestion, setActiveSuggestion] = useState<Suggestion | null>(
@@ -536,6 +816,17 @@ function AdmissionRecordRedesign() {
           vitals_pulse: draft.vitals_pulse || "",
           vitals_temp: draft.vitals_temp || "",
           final_diagnosis: draft.final_diagnosis || "",
+          provisional_diagnosis: draft.provisional_diagnosis || "",
+          vitals_resp_rate: draft.vitals_resp_rate || "",
+          vitals_weight: draft.vitals_weight || "",
+          vitals_height: draft.vitals_height || "",
+          chief_complaints_extended: draft.chief_complaints_extended || [],
+          medical_history: draft.medical_history || [],
+          current_medications: draft.current_medications || [],
+          allergy_details: draft.allergy_details || [],
+          examination_findings: draft.examination_findings || "",
+          risk_flags: draft.risk_flags || [],
+          infection_control: draft.infection_control || "None",
           investigations: Array.isArray(draft.investigations)
             ? draft.investigations.map((inv: any) =>
                 typeof inv === "string"
@@ -543,6 +834,7 @@ function AdmissionRecordRedesign() {
                   : inv,
               )
             : [],
+          additional_notes: draft.additional_notes || "",
         }));
       } catch (e) {
         console.error("Failed to parse draft", e);
@@ -926,6 +1218,7 @@ function AdmissionRecordRedesign() {
       ]);
       if (error) throw error;
       localStorage.removeItem("admission_draft");
+      localStorage.removeItem("admission_draft_step");
       await alert("Admission Record finalized and linked to patient!");
       const params = new URLSearchParams();
 
@@ -986,8 +1279,10 @@ function AdmissionRecordRedesign() {
         treatment_plan: [],
       });
       localStorage.removeItem("admission_draft");
+      localStorage.removeItem("admission_draft_step");
       setLastSaved(null);
       showToast("Records cleared");
+      handleSetStep(1);
     }
   };
 
@@ -1108,7 +1403,7 @@ function AdmissionRecordRedesign() {
               <React.Fragment key={s.id}>
                 <div
                   className={`${styles.wizardStep} ${step === s.id ? styles.wizardStepActive : step > s.id ? styles.wizardStepCompleted : ""}`}
-                  onClick={() => step > s.id && setStep(s.id)}
+                  onClick={() => step > s.id && handleSetStep(s.id)}
                   style={{ cursor: step > s.id ? "pointer" : "default" }}
                 >
                   <div className={styles.wizardStepIcon}>{s.icon}</div>
@@ -1232,6 +1527,27 @@ function AdmissionRecordRedesign() {
         )}
       </div>
     );
+  };
+
+  const handleNextStep = () => {
+    if (step === 2) {
+      const missing = [];
+      if (!summary.chief_complaints_extended || summary.chief_complaints_extended.length === 0) missing.push("Chief Complaint");
+      if (!summary.vitals_temp) missing.push("Temperature");
+      if (!summary.vitals_bp_sys || !summary.vitals_bp_dia) missing.push("Blood Pressure");
+      if (!summary.vitals_pulse) missing.push("Pulse");
+      if (!summary.vitals_resp_rate) missing.push("Respiratory Rate");
+      if (!summary.vitals_spo2) missing.push("SpO₂");
+      if (!summary.vitals_weight) missing.push("Weight");
+      if (!summary.vitals_height) missing.push("Height");
+      if (!summary.provisional_diagnosis) missing.push("Provisional Diagnosis");
+      
+      if (missing.length > 0) {
+        setToast(`Please fill required fields: ${missing.join(", ")}`);
+        return;
+      }
+    }
+    handleSetStep((s) => s + 1);
   };
 
   if (clinicLoading) return null;
@@ -1496,14 +1812,22 @@ function AdmissionRecordRedesign() {
                   <>
                     {/* --- Smart Admission Assistant Panel --- */}
                     {(() => {
-                      const admissionChecklist = [
+                      const admissionChecklist = step === 1 ? [
                         { label: "Name", value: summary.patientName },
                         { label: "Age", value: summary.age },
                         { label: "Phone Number", value: summary.phone },
                         { label: "Doctor Assigned", value: summary.doctor },
                         { label: "Ward", value: summary.ward },
-                        { label: "Bed", value: summary.bed },
-                        { label: "Chief Complaints", value: summary.complaints?.length > 0 ? summary.complaints[0] : "" },
+                        { label: "Bed", value: summary.bed }
+                      ] : step === 2 ? [
+                        { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "" },
+                        { label: "Vitals (Temp)", value: summary.vitals_temp },
+                        { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "" },
+                        { label: "Vitals (Pulse)", value: summary.vitals_pulse },
+                        { label: "Provisional Diagnosis", value: summary.provisional_diagnosis }
+                      ] : [
+                        { label: "Final Diagnosis", value: summary.final_diagnosis },
+                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? summary.treatment_plan[0] : "" }
                       ];
                       const completed = admissionChecklist.filter((f) => !!f.value).length;
                       const total = admissionChecklist.length;
@@ -1745,39 +2069,124 @@ function AdmissionRecordRedesign() {
                 )}
                 {step === 2 && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    {renderClinicalCard(
-                      "Chief Complaints",
-                      "complaints",
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                      </svg>,
-                      "Add patient chief complaints (e.g. Fever, Cough)...",
-                    )}
-                    {renderClinicalCard(
-                      "Findings",
-                      "findings",
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      </svg>,
-                      "Enter objective clinical findings...",
-                    )}
+                    <div className={styles.summaryCard}>
+                      <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                        <div className={styles.cardTitle}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                          3. VITAL SIGNS
+                        </div>
+                        <div className={styles.cardHeaderRequired}>Required</div>
+                      </div>
+                      <div className={styles.vitalGrid}>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>Temp (°C)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_temp} onChange={e => updateField("vitals_temp", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>BP (mmHg)</label>
+                          <div className={styles.iconInputWrapper} style={{ display: "flex", gap: 4 }}>
+                            <div className={styles.iconInputWrapper} style={{ flex: 1 }}>
+                              <div className={styles.iconInputIcon} style={{ color: "#ef4444" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                              <input className={styles.iconInput} placeholder="Sys" value={summary.vitals_bp_sys} onChange={e => updateField("vitals_bp_sys", e.target.value)} style={{ paddingRight: 4 }} />
+                            </div>
+                            <span style={{ color: "#cbd5e1", alignSelf: "center", fontWeight: "bold" }}>/</span>
+                            <input className={styles.iconInput} placeholder="Dia" value={summary.vitals_bp_dia} onChange={e => updateField("vitals_bp_dia", e.target.value)} style={{ flex: 1, paddingLeft: 8, paddingRight: 4 }} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>Pulse (bpm)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon} style={{ color: "#10b981" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_pulse} onChange={e => updateField("vitals_pulse", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>Resp. Rate (/min)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon} style={{ color: "#6366f1" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_resp_rate} onChange={e => updateField("vitals_resp_rate", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>SpO₂ (%)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon} style={{ color: "#0ea5e9" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_spo2} onChange={e => updateField("vitals_spo2", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>Weight (kg)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon} style={{ color: "#3b82f6" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 3v2M18 3v2M4 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7z"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_weight} onChange={e => updateField("vitals_weight", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>Height (cm)</label>
+                          <div className={styles.iconInputWrapper}>
+                            <div className={styles.iconInputIcon} style={{ color: "#3b82f6" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 3L3 21M21 3l-6 6M3 21l6-6M15 9l-6 6"/></svg></div>
+                            <input className={styles.iconInput} value={summary.vitals_height} onChange={e => updateField("vitals_height", e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>BMI (kg/m²)</label>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8fafc", padding: "8px 12px", borderRadius: 8, border: "1px solid #e2e8f0", minHeight: 38, boxSizing: "border-box" }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: "#334155" }}>{calculateBMI(summary.vitals_weight || "", summary.vitals_height || "") || "--"}</span>
+                            {(() => {
+                              const bmi = parseFloat(calculateBMI(summary.vitals_weight || "", summary.vitals_height || ""));
+                              if (!isNaN(bmi)) {
+                                if (bmi < 18.5) return <span className={styles.bmiAbnormal}>Underweight</span>;
+                                if (bmi >= 18.5 && bmi < 25) return <span className={styles.bmiNormal}>Normal</span>;
+                                if (bmi >= 25 && bmi < 30) return <span className={styles.bmiAbnormal}>Overweight</span>;
+                                return <span className={styles.bmiAbnormal}>Obese</span>;
+                              }
+                              return null;
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.summaryCard}>
+                      <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                        <div className={styles.cardTitle}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                          4. MEDICAL HISTORY
+                        </div>
+                      </div>
+                      <MultiSelectChips 
+                        options={["Diabetes", "Hypertension", "Asthma", "COPD", "Heart Disease", "Kidney Disease", "Liver Disease", "Stroke", "Thyroid Disorder"]} 
+                        selected={summary.medical_history || []} 
+                        onChange={(val: any) => updateField("medical_history", val)} 
+                        allowCustom={true} 
+                        customLabel="+ Add Custom Condition"
+                        activeColor="#eff6ff"
+                        activeTextColor="#1d4ed8"
+                        activeBorderColor="#bfdbfe"
+                      />
+                    </div>
+
+                    <div className={styles.summaryCard}>
+                      <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                        <div className={styles.cardTitle}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                          9. RISK FLAGS
+                        </div>
+                      </div>
+                      <MultiSelectChips 
+                        options={["Fall Risk", "Aspiration", "Bleeding", "DVT", "Seizure"]} 
+                        selected={summary.risk_flags || []} 
+                        onChange={(val: any) => updateField("risk_flags", val)} 
+                        allowCustom={true}
+                        customLabel="+ Add Custom Risk"
+                        activeColor="#fef2f2"
+                        activeTextColor="#dc2626"
+                        activeBorderColor="#fecaca"
+                      />
+                    </div>
                   </div>
                 )}
               </section>
@@ -2150,37 +2559,128 @@ function AdmissionRecordRedesign() {
                   )}
 
                   {step === 2 && (
-                    <div className={styles.stepFadeIn}>
-                      <div
-                        className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}
-                      >
-                        <div className={styles.cardHeader}>
+                    <div className={styles.stepFadeIn} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                      
+                      <div className={styles.summaryCard}>
+                        <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
                           <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path>
-                              <path d="M8 15v1a6 6 0 0 0 6 6h2a2 2 0 0 0 2-2v-3"></path>
-                              <circle cx="16" cy="11" r="2"></circle>
-                            </svg>
-                            Provisional Diagnosis
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            1. CHIEF COMPLAINT
                           </div>
-                          <div
-                            className={`${styles.statusDot} ${getStatus(summary.diagnosis)}`}
-                          />
+                          <div className={styles.cardHeaderRequired}>Required</div>
                         </div>
-                        <input
+                        <ChiefComplaintRepeater items={summary.chief_complaints_extended || []} onChange={(val: any) => updateField("chief_complaints_extended", val)} />
+                      </div>
+
+                      <div className={styles.summaryCard}>
+                        <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                          <div className={styles.cardTitle}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            2. HISTORY OF PRESENT ILLNESS
+                          </div>
+                        </div>
+                        <textarea
                           className={styles.bulletInput}
-                          value={summary.diagnosis || ""}
-                          onChange={(e) => updateField("diagnosis", e.target.value)}
-                          placeholder="Enter provisional diagnosis..."
+                          value={summary.hpi || ""}
+                          onChange={(e) => updateField("hpi", e.target.value)}
+                          placeholder="Detailed present illness notes..."
+                          rows={4}
+                          style={{ minHeight: 80 }}
                         />
                       </div>
+
+                      <div className={styles.gridSideBySide}>
+                        <div className={styles.summaryCard}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>
+                              5. CURRENT MEDICATIONS
+                            </div>
+                          </div>
+                          <MedicationRepeater items={summary.current_medications || []} onChange={(val: any) => updateField("current_medications", val)} />
+                        </div>
+
+                        <div className={styles.summaryCard}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                              6. ALLERGIES
+                            </div>
+                          </div>
+                          <AllergyRepeater items={summary.allergy_details || []} onChange={(val: any) => updateField("allergy_details", val)} />
+                        </div>
+                      </div>
+
+                      <div className={styles.gridSideBySide6040}>
+                        <div className={styles.summaryCard}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                              7. CLINICAL EXAMINATION
+                            </div>
+                          </div>
+                          <textarea
+                            className={styles.bulletInput}
+                            value={summary.examination_findings || ""}
+                            onChange={(e) => updateField("examination_findings", e.target.value)}
+                            placeholder="General and systemic examination findings..."
+                            rows={3}
+                            style={{ minHeight: 60 }}
+                          />
+                        </div>
+
+                        <div className={`${styles.summaryCard} ${styles.diagnosisHighlight}`}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                              8. PROVISIONAL DIAGNOSIS
+                            </div>
+                          </div>
+                          <input
+                            className={styles.bulletInput}
+                            value={summary.provisional_diagnosis || ""}
+                            onChange={(e) => updateField("provisional_diagnosis", e.target.value)}
+                            placeholder="Enter provisional diagnosis..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.gridSideBySide5050}>
+                        <div className={styles.summaryCard}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                              10. INFECTION CONTROL
+                            </div>
+                          </div>
+                          <select
+                            className={styles.bulletInput}
+                            value={summary.infection_control || "None"}
+                            onChange={(e) => updateField("infection_control", e.target.value)}
+                          >
+                            <option value="None">Standard Precautions (None)</option>
+                            <option value="Contact">Contact Precautions</option>
+                            <option value="Droplet">Droplet Precautions</option>
+                            <option value="Airborne">Airborne Precautions</option>
+                          </select>
+                        </div>
+                        
+                        <div className={styles.summaryCard}>
+                          <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
+                            <div className={styles.cardTitle}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                              ADDITIONAL NOTES
+                            </div>
+                          </div>
+                          <input
+                            className={styles.bulletInput}
+                            value={summary.additional_notes || ""}
+                            onChange={(e) => updateField("additional_notes", e.target.value)}
+                            placeholder="Any other clinical notes..."
+                          />
+                        </div>
+                      </div>
+
                     </div>
                   )}
 
@@ -2326,7 +2826,7 @@ function AdmissionRecordRedesign() {
               {!isQuickMode && step > 1 && (
                 <button
                   className={styles.btnSecondarySticky}
-                  onClick={() => setStep((s) => s - 1)}
+                  onClick={() => handleSetStep((s) => s - 1)}
                 >
                   ← Previous Step
                 </button>
@@ -2343,7 +2843,7 @@ function AdmissionRecordRedesign() {
               ) : step < 3 ? (
                 <button
                   className={styles.btnSaveSticky}
-                  onClick={() => setStep((s) => s + 1)}
+                  onClick={handleNextStep}
                 >
                   Next Step: {step === 1 ? "Clinical Info" : "Management Plan"}{" "}
                   →
