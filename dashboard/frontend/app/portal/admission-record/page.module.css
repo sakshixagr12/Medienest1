@@ -2100,6 +2100,53 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
 }
 
+.treatmentAddMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  min-width: 180px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.treatmentAddMenuHeader {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  padding: 4px 8px 8px 8px;
+  letter-spacing: 0.05em;
+}
+
+.treatmentAddMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.treatmentAddMenuItem:hover {
+  background: #f8fafc;
+  color: var(--sanctuary-primary);
+}
+
 .chipAddCustom {
   background: transparent;
   border: none;
