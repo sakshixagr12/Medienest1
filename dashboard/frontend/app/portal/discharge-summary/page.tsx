@@ -244,7 +244,7 @@ function DischargeSummaryRedesign() {
     "idle" | "saving" | "saved"
   >("idle");
   const [toast, setToast] = useState<string | null>(null);
-  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
   const [isMedEditorOpen, setIsMedEditorOpen] = useState(false);
 
   // Refs for debounce
@@ -1328,150 +1328,299 @@ function DischargeSummaryRedesign() {
               )}
             </section>
 
-            <section className={styles.rightColumn}>
-              <div
-                className={`${styles.previewDoc} ${isPreviewExpanded ? styles.expandedPreview : styles.collapsedPreview}`}
-              >
-                <table className={styles.printableTable}>
-                  <thead>
-                    <tr>
-                      <td>
-                        <div className={styles.previewHeader}>
-                          <h2>{clinic?.name}</h2>
-                          <p>{clinic?.address}</p>
-                          <div
-                            style={{
-                              marginTop: 12,
-                              fontSize: 14,
-                              fontWeight: 900,
-                              textDecoration: "underline",
-                            }}
-                          >
-                            DISCHARGE SUMMARY
-                          </div>
-                        </div>
-                        <div className={styles.previewInfoGrid}>
-                          <div>
-                            <b>Patient:</b> {summary.patientName}
-                          </div>
-                          <div>
-                            <b>Reg No:</b> {summary.regNo}
-                          </div>
-                          <div>
-                            <b>Age/Sex:</b> {summary.age}/{summary.sex[0]}
-                          </div>
-                          <div>
-                            <b>Contact:</b> {summary.phone || "---"}
-                          </div>
-                          <div>
-                            <b>Consultant:</b> {summary.doctor}
-                          </div>
-                          <div>
-                            <b>DOA:</b> {summary.doa}
-                          </div>
-                          <div>
-                            <b>DOD:</b> {summary.dod}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div className={styles.previewSection}>
-                          <h4>Final Diagnosis</h4>
-                          <p>{summary.diagnosis}</p>
-                        </div>
-                        <div className={styles.previewSection}>
-                          <h4>Complaints</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.complaints.map((c, i) => (
-                              <li key={i}>• {c}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className={styles.previewSection}>
-                          <h4>Findings</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.findings.map((f, i) => (
-                              <li key={i}>• {f}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        {summary.medicines.length > 0 && (
-                          <div
-                            className={`${styles.previewSection} ${styles.medPreviewSection}`}
-                          >
-                            <h4>Medications</h4>
-                            <table
-                              className={styles.medTable}
-                              style={{ fontSize: 11 }}
-                            >
-                              <tbody>
-                                {summary.medicines.map((m) => (
-                                  <tr key={m.id}>
-                                    <td>{m.name}</td>
-                                    <td>{m.frequency}</td>
-                                    <td>{m.duration}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                        <div className={styles.previewSection}>
-                          <h4>Advice</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.advice.map((a, i) => (
-                              <li key={i}>• {a}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                {!isPreviewExpanded && <div className={styles.previewFade} />}
-                <button
-                  className={styles.btnTogglePreview}
-                  onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
-                >
-                  {isPreviewExpanded ? "Show Less" : "Read More"}
-                </button>
-              </div>
-              <div className={styles.actionStack}>
-                <button
-                  className={`${styles.btnAction} btn-primary`}
-                  style={{
-                    padding: "18px",
-                    background: "var(--sanctuary-primary)",
-                    color: "#fff",
-                  }}
-                  onClick={() => router.push("/portal/discharge-summary/view")}
-                >
-                  View & Print Discharge Summary
-                </button>
-                <button
-                  className="btn-secondary"
-                  style={{
-                    width: "100%",
-                    marginTop: 12,
-                    opacity: 0.9,
-                    color: "#ef4444",
-                    borderColor: "#fecaca",
-                    background: "#fef2f2",
-                  }}
-                  onClick={handleClear}
-                >
-                  ️ Clear Records
-                </button>
-              </div>
             </section>
           </div>
         </main>
+        
+        {/* --- Bottom Action Bar --- */}
+        <div className={styles.bottomActionBar}>
+          <button
+            className="btn-secondary"
+            style={{
+              padding: "12px 24px",
+              color: "#ef4444",
+              borderColor: "#fecaca",
+              background: "#fef2f2",
+              marginRight: "auto"
+            }}
+            onClick={handleClear}
+          >
+            ️ Clear Records
+          </button>
+          <button
+            className="btn-secondary"
+            style={{ padding: "12px 24px", fontWeight: 700 }}
+            onClick={() => {
+              if (autoSaveStatus !== 'saved') {
+                saveDraft(summary);
+              }
+              showToast("Draft saved successfully");
+            }}
+          >
+            Save Draft
+          </button>
+          <button
+            className="btn-primary"
+            style={{
+              padding: "12px 32px",
+              background: "var(--sanctuary-primary)",
+              color: "#fff",
+              fontWeight: 800
+            }}
+            onClick={() => setShowFullScreenPreview(true)}
+          >
+            Preview Discharge Summary
+          </button>
+        </div>
       </div>
+      
+      {/* --- Full Screen Preview Modal --- */}
+      {showFullScreenPreview && (
+        <DischargeSummaryPreviewOverlay
+          summary={summary}
+          clinic={clinic}
+          onClose={() => setShowFullScreenPreview(false)}
+        />
+      )}
     </>
+  );
+}
+
+function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary: SummaryData, clinic: any, onClose: () => void }) {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className={styles.fullScreenPreviewOverlay}>
+      <header className={styles.previewTopBar}>
+        <button className={styles.btnBack} onClick={onClose}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Edit
+        </button>
+        <div className={styles.editorTitle}>Document Preview</div>
+        <div className={styles.previewActions}>
+          <button className={styles.btnSave} onClick={() => alert("PDF Download coming soon...")}>
+            Download PDF
+          </button>
+          <button className={styles.btnPrint} onClick={handlePrint}>
+            🖨️ Print
+          </button>
+        </div>
+      </header>
+
+      <div className={styles.previewDocWrapper}>
+        <div className={styles.previewDoc}>
+          <table className={styles.printableTable}>
+            <thead>
+              <tr>
+                <td>
+                  <div className={styles.previewHeader}>
+                    <h2>{clinic?.name || "Clinic Name"}</h2>
+                    <p>{clinic?.address || "Address details..."}</p>
+                    <div
+                      style={{
+                        marginTop: 12,
+                        fontSize: 15,
+                        fontWeight: 900,
+                        textDecoration: "underline",
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      DISCHARGE SUMMARY
+                    </div>
+                  </div>
+
+                  <div className={styles.previewInfoGrid}>
+                    <div>
+                      <b>Patient Name:</b>{" "}
+                      {summary.patientName || (
+                        <span className={styles.emptyPlaceholder}>
+                          [Not Provided]
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <b>Reg / IPD No:</b> {summary.regNo || "---"}
+                    </div>
+                    <div>
+                      <b>Age / Sex:</b> {summary.age}Y / {summary.sex}
+                    </div>
+                    <div>
+                      <b>Consultant:</b> Dr. {summary.doctor || "---"}
+                    </div>
+                    <div>
+                      <b>Date of Admission:</b>{" "}
+                      {summary.doa
+                        ? new Date(summary.doa).toLocaleString()
+                        : "---"}
+                    </div>
+                    <div>
+                      <b>Date of Discharge:</b>{" "}
+                      {summary.dod
+                        ? new Date(summary.dod).toLocaleString()
+                        : "---"}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>
+                  <div className={styles.previewSection}>
+                    <h4>Final Diagnosis</h4>
+                    <p>
+                      {summary.diagnosis || (
+                        <span className={styles.emptyPlaceholder}>
+                          Pending diagnosis...
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className={styles.previewSection}>
+                    <h4>Chief Complaints & History</h4>
+                    {summary.complaints.length > 0 ? (
+                      <ul
+                        style={{ listStyle: "none", padding: 0, margin: 0 }}
+                      >
+                        {summary.complaints.map((c, i) => (
+                          <li key={i} style={{ marginBottom: 6 }}>
+                            • {c}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className={styles.emptyPlaceholder}>
+                        No complaints recorded.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className={styles.previewSection}>
+                    <h4>Physical Findings & Investigations</h4>
+                    {summary.findings.length > 0 ? (
+                      <ul
+                        style={{ listStyle: "none", padding: 0, margin: 0 }}
+                      >
+                        {summary.findings.map((f, i) => (
+                          <li key={i} style={{ marginBottom: 6 }}>
+                            • {f}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className={styles.emptyPlaceholder}>
+                        No findings recorded.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className={styles.previewSection}>
+                    <h4>Treatment & Medications During Stay</h4>
+                    {summary.treatment.length > 0 ? (
+                      <ul
+                        style={{ listStyle: "none", padding: 0, margin: 0 }}
+                      >
+                        {summary.treatment.map((t, i) => (
+                          <li key={i} style={{ marginBottom: 6 }}>
+                            • {t}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Conservative management.</p>
+                    )}
+                  </div>
+
+                  {summary.medicines.length > 0 && (
+                    <div
+                      className={`${styles.previewSection} ${styles.medPreviewSection}`}
+                    >
+                      <h4>Medications Advised on Discharge</h4>
+                      <table className={styles.medTable}>
+                        <thead>
+                          <tr>
+                            <th>Medicine Name</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {summary.medicines.map((m) => (
+                            <tr key={m.id}>
+                              <td>{m.name || "---"}</td>
+                              <td>{m.frequency}</td>
+                              <td>{m.duration}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className={styles.previewSection}>
+                    <h4>Follow-up Advice & Instructions</h4>
+                    {summary.advice.length > 0 ? (
+                      <ul
+                        style={{ listStyle: "none", padding: 0, margin: 0 }}
+                      >
+                        {summary.advice.map((a, i) => (
+                          <li key={i} style={{ marginBottom: 6 }}>
+                            • {a}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>General post-discharge care.</p>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+
+            <tfoot>
+              <tr>
+                <td>
+                  <div
+                    style={{
+                      paddingTop: 60,
+                      textAlign: "right",
+                      borderTop: "1px solid #000",
+                      marginTop: 40,
+                    }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 900 }}>
+                      Dr. {summary.doctor || "(Authorized Signature)"}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#444" }}>
+                      Clinic Consultant / Chief Resident
+                    </div>
+                    <div
+                      style={{ fontSize: 10, color: "#999", marginTop: 8 }}
+                    >
+                      Generated via MedieNest EMR Platform
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
 
