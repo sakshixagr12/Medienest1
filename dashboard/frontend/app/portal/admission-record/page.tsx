@@ -1231,8 +1231,9 @@ function AdmissionRecordRedesign() {
 
     setIsSaving(true);
     try {
-      let patientId: string | null = null;
-      if (clinic?.id) {
+      let patientId: string | null = searchParams.get("patientId");
+
+      if (!patientId && clinic?.id) {
         let existingPatient = null;
         if (summary.phone) {
           const { data } = await supabase
@@ -1243,7 +1244,7 @@ function AdmissionRecordRedesign() {
             .maybeSingle();
           existingPatient = data;
         }
-        if (!existingPatient) {
+        if (!existingPatient && summary.patientName) {
           const { data } = await supabase
             .from("patients")
             .select("*")
@@ -1284,7 +1285,7 @@ function AdmissionRecordRedesign() {
               })
               .eq("id", patientId);
           }
-        } else {
+        } else if (summary.patientName) {
           const { data: newPatient } = await supabase
             .from("patients")
             .insert({
@@ -1356,6 +1357,7 @@ function AdmissionRecordRedesign() {
           treatment_plan: summary.treatment_plan,
           clinic_id: clinic?.id,
           patient_id: patientId,
+          status: 'Admitted'
         },
       ]);
       if (error) throw error;
@@ -1370,14 +1372,77 @@ function AdmissionRecordRedesign() {
     }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
+    setIsSaving(true);
     try {
       localStorage.setItem("admission_draft", JSON.stringify(summary));
       localStorage.setItem("admission_draft_step", step.toString());
+      
+      // Also save to database if we have enough patient context
+      let patientId: string | null = searchParams.get("patientId");
+      if (!patientId && clinic?.id) {
+        if (summary.phone) {
+          const { data } = await supabase.from("patients").select("id").eq("contact", summary.phone).eq("clinic_id", clinic.id).maybeSingle();
+          if (data) patientId = data.id;
+        }
+        if (!patientId && summary.patientName) {
+          const { data } = await supabase.from("patients").select("id").eq("name", summary.patientName).eq("clinic_id", clinic.id).limit(1).maybeSingle();
+          if (data) patientId = data.id;
+        }
+      }
+
+      if (patientId || summary.patientName) {
+        const combinedObservations = [
+          summary.doctor_observations,
+          summary.diet_instructions ? `Diet: ${summary.diet_instructions}` : "",
+          summary.activity_restrictions ? `Activity: ${summary.activity_restrictions}` : "",
+          summary.nursing_instructions ? `Nursing: ${summary.nursing_instructions}` : ""
+        ].filter(Boolean).join("\n\n");
+
+        await supabase.from("admission_records").insert([
+          {
+            patient_name: summary.patientName || "Draft Patient",
+            age_sex: `${summary.age} / ${summary.sex}`,
+            contact: summary.phone,
+            doctor_name: summary.doctor,
+            ward: summary.ward,
+            bed: summary.bed,
+            department: summary.department,
+            date_admission: summary.date_admission,
+            severity: summary.severity,
+            admission_type: summary.admission_type,
+            doctor_observations: combinedObservations,
+            attachments: summary.attachments,
+            vitals: summary.vitals,
+            vitals_bp_sys: summary.vitals_bp_sys ? parseInt(summary.vitals_bp_sys) : null,
+            vitals_bp_dia: summary.vitals_bp_dia ? parseInt(summary.vitals_bp_dia) : null,
+            vitals_pulse: summary.vitals_pulse ? parseInt(summary.vitals_pulse) : null,
+            vitals_temp: summary.vitals_temp ? parseFloat(summary.vitals_temp) : null,
+            vitals_spo2: summary.vitals_spo2 ? parseInt(summary.vitals_spo2) : null,
+            has_diabetes: summary.has_diabetes,
+            has_hypertension: summary.has_hypertension,
+            has_thyroid: summary.has_thyroid,
+            past_surgeries: summary.past_surgeries,
+            allergies: summary.allergies,
+            diagnosis: summary.diagnosis,
+            final_diagnosis: summary.final_diagnosis,
+            hpi: summary.hpi,
+            complaints: summary.complaints,
+            findings: summary.findings,
+            investigations: summary.investigations,
+            treatment_plan: summary.treatment_plan,
+            clinic_id: clinic?.id,
+            patient_id: patientId,
+            status: 'Draft'
+          },
+        ]);
+      }
     } catch (e) {
-      console.error("Failed to save draft locally", e);
+      console.error("Failed to save draft", e);
+    } finally {
+      setIsSaving(false);
+      setShowDraftModal(true);
     }
-    setShowDraftModal(true);
   };
 
   const handleDraftContinue = () => {
