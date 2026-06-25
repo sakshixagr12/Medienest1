@@ -34,6 +34,13 @@ export default function AdmissionRecordView() {
     fetchRecord();
   }, [id, clinic?.id]);
 
+  useEffect(() => {
+    if (record && searchParams?.get("print") === "true") {
+      const timer = setTimeout(() => window.print(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [record, searchParams]);
+
   if (clinicLoading || loading)
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
