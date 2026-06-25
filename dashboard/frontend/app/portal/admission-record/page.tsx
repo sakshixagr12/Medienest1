@@ -919,30 +919,82 @@ function AdmissionRecordRedesign() {
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const draftStr = localStorage.getItem("admission_draft");
-    if (draftStr) {
-      try {
-        const draft = JSON.parse(draftStr);
-        // Merge with initial state to avoid 'undefined' fields for older drafts
-        setSummary((prev) => ({
-          ...prev,
-          ...draft,
-          // Explicitly handle fields that might be missing in older drafts
-          ward: draft.ward || "",
-          bed: draft.bed || "",
-          department: draft.department || "",
-          diagnosis: draft.diagnosis || "",
-          hpi: draft.hpi || "",
-          has_diabetes: !!draft.has_diabetes,
-          has_hypertension: !!draft.has_hypertension,
-          has_thyroid: !!draft.has_thyroid,
-          past_surgeries: draft.past_surgeries || "",
-          allergies: draft.allergies || "",
-          severity: draft.severity || "Mild",
-          admission_type: draft.admission_type || "OPD",
-          doctor_observations: draft.doctor_observations || "",
-          attachments: draft.attachments || [],
-          vitals: draft.vitals || "",
+    const draftId = searchParams.get("draftId");
+    
+    if (draftId) {
+      const fetchDraft = async () => {
+        const { data } = await supabase.from("admission_records").select("*").eq("id", draftId).single();
+        if (data) {
+          // Parse complex fields if they are JSON strings, or use directly if objects
+          const safeParse = (val: any) => {
+            if (typeof val === "string") {
+              try { return JSON.parse(val); } catch (e) { return []; }
+            }
+            return Array.isArray(val) ? val : [];
+          };
+
+          const newSummary = {
+            patientName: data.patient_name || "",
+            age: data.age_sex ? data.age_sex.split(" / ")[0] : "",
+            sex: data.age_sex ? data.age_sex.split(" / ")[1] : "",
+            phone: data.contact || "",
+            doctor: data.doctor_name || "",
+            ward: data.ward || "",
+            bed: data.bed || "",
+            department: data.department || "",
+            date_admission: data.date_admission ? new Date(data.date_admission).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+            severity: data.severity || "Mild",
+            admission_type: data.admission_type || "OPD",
+            doctor_observations: data.doctor_observations || "",
+            attachments: safeParse(data.attachments),
+            vitals: data.vitals || "",
+            vitals_bp_sys: data.vitals_bp_sys ? data.vitals_bp_sys.toString() : "",
+            vitals_bp_dia: data.vitals_bp_dia ? data.vitals_bp_dia.toString() : "",
+            vitals_pulse: data.vitals_pulse ? data.vitals_pulse.toString() : "",
+            vitals_temp: data.vitals_temp ? data.vitals_temp.toString() : "",
+            vitals_spo2: data.vitals_spo2 ? data.vitals_spo2.toString() : "",
+            has_diabetes: !!data.has_diabetes,
+            has_hypertension: !!data.has_hypertension,
+            has_thyroid: !!data.has_thyroid,
+            past_surgeries: data.past_surgeries || "",
+            allergies: data.allergies || "",
+            diagnosis: data.diagnosis || "",
+            final_diagnosis: data.final_diagnosis || "",
+            hpi: data.hpi || "",
+            complaints: safeParse(data.complaints),
+            findings: safeParse(data.findings),
+            investigations: safeParse(data.investigations),
+            treatment_plan: safeParse(data.treatment_plan),
+          };
+          setSummary(newSummary);
+        }
+      };
+      fetchDraft();
+    } else {
+      const draftStr = localStorage.getItem("admission_draft");
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          // Merge with initial state to avoid 'undefined' fields for older drafts
+          setSummary((prev) => ({
+            ...prev,
+            ...draft,
+            // Explicitly handle fields that might be missing in older drafts
+            ward: draft.ward || "",
+            bed: draft.bed || "",
+            department: draft.department || "",
+            diagnosis: draft.diagnosis || "",
+            hpi: draft.hpi || "",
+            has_diabetes: !!draft.has_diabetes,
+            has_hypertension: !!draft.has_hypertension,
+            has_thyroid: !!draft.has_thyroid,
+            past_surgeries: draft.past_surgeries || "",
+            allergies: draft.allergies || "",
+            severity: draft.severity || "Mild",
+            admission_type: draft.admission_type || "OPD",
+            doctor_observations: draft.doctor_observations || "",
+            attachments: draft.attachments || [],
+            vitals: draft.vitals || "",
           vitals_bp_sys: draft.vitals_bp_sys || "",
           vitals_bp_dia: draft.vitals_bp_dia || "",
           vitals_pulse: draft.vitals_pulse || "",
