@@ -1925,7 +1925,7 @@ function AdmissionRecordRedesign() {
                         { label: "Provisional Diagnosis", value: summary.provisional_diagnosis }
                       ] : [
                         { label: "Final Diagnosis", value: summary.final_diagnosis },
-                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? summary.treatment_plan[0] : "" }
+                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "" }
                       ];
                       const completed = admissionChecklist.filter((f) => !!f.value).length;
                       const total = admissionChecklist.length;
