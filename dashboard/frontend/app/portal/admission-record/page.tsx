@@ -2501,8 +2501,10 @@ function AdmissionRecordRedesign() {
                             Patient Context
                           </div>
                           <div
-                            className={`${styles.statusDot} ${getStatus(summary.patientName)}`}
-                          />
+                            className={summary.patientName ? styles.cardHeaderCompleted : styles.cardHeaderRequired}
+                          >
+                            {summary.patientName ? "Completed" : "Required"}
+                          </div>
                         </div>
                         <div className="field">
                           <label>
