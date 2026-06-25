@@ -13,6 +13,7 @@ const migrationFiles = [
   "v2_clean/7_link_discharge_to_patients.sql",
   "v2_clean/29_rebuild_admission_records.sql",
   "v2_clean/30_schema_patch.sql",
+  "v2_clean/31_add_admission_status.sql",
   "v2_clean/35_queue_optimizations.sql",
   "v2_clean/36_doctor_specific_queue.sql",
   "v2_clean/37_unique_clinic_services.sql",
