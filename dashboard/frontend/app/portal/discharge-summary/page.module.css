@@ -272,6 +272,7 @@
   padding: 16px;
   font-family: var(--font-body);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.6;
   resize: vertical;
   background: #fff;
@@ -506,7 +507,8 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px 18px;
-  font-size: 1.1rem;
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--sanctuary-ink);
   outline: none;
@@ -523,8 +525,9 @@
   width: 100%;
   height: 100%;
   padding: 12px 18px;
-  font-size: 1.1rem;
-  line-height: calc(1.6 * 1.1rem); /* Explicit line height to match input */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: calc(1.6 * 14px); /* Explicit line height to match input */
   font-family: var(--font-body);
   color: #94a3b8; /* Ghost gray */
   pointer-events: none;
@@ -816,18 +819,17 @@
   background: var(--sanctuary-gray-low);
   padding: 12px 16px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--sanctuary-ink-l);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .medTable td {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
   vertical-align: middle;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .medInput {
@@ -835,6 +837,7 @@
   border: none !important;
   padding: 8px !important;
   font-size: 14px !important;
+  font-weight: 500 !important;
   box-shadow: none !important;
   width: 100%;
   transition: background 0.2s ease;
