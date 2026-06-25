@@ -1033,6 +1033,7 @@ function AdmissionRecordRedesign() {
         setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
       }
     }
+    }
     setClinicLoading(false);
   }, [docNameParam, doctors, searchParams]);
 
