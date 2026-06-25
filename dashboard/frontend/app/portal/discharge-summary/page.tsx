@@ -1440,8 +1440,40 @@ function DischargeSummaryRedesign() {
 }
 
 function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary: SummaryData, clinic: any, onClose: () => void }) {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+      const element = document.getElementById("discharge-summary-preview");
+      if (!element) {
+        setIsGeneratingPDF(false);
+        return;
+      }
+      
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
+
+      // Use a scale of 2 for better resolution
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Discharge_Summary_${summary.patientName?.replace(/\s+/g, "_") || "Patient"}.pdf`);
+    } catch (err) {
+      console.error("Error generating PDF", err);
+      alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -1463,8 +1495,12 @@ function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary:
         </button>
         <div className={styles.editorTitle}>Document Preview</div>
         <div className={styles.previewActions}>
-          <button className={styles.btnSave} onClick={() => alert("PDF Download coming soon...")}>
-            Download PDF
+          <button 
+            className={styles.btnSave} 
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+          >
+            {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
           </button>
           <button className={styles.btnPrint} onClick={handlePrint}>
             🖨️ Print
@@ -1473,7 +1509,7 @@ function DischargeSummaryPreviewOverlay({ summary, clinic, onClose }: { summary:
       </header>
 
       <div className={styles.previewDocWrapper}>
-        <div className={styles.previewDoc}>
+        <div id="discharge-summary-preview" className={styles.previewDoc}>
           <table className={styles.printableTable}>
             <thead>
               <tr>
