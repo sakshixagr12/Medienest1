@@ -2410,8 +2410,17 @@
   gap: 24px;
 }
 
+.gridSideBySide4060 {
+  display: grid;
+  grid-template-columns: 4fr 6fr;
+  gap: 24px;
+}
+
 @media (max-width: 1024px) {
   .gridSideBySide {
+    grid-template-columns: 1fr;
+  }
+  .gridSideBySide4060 {
     grid-template-columns: 1fr;
   }
 }

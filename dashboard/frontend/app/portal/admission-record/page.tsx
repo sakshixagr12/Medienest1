@@ -2895,7 +2895,7 @@ function AdmissionRecordRedesign() {
                       </div>
 
                       {/* --- Investigations & Treatment Plan --- */}
-                      <div className={styles.gridSideBySide}>
+                      <div className={styles.gridSideBySide4060}>
                         <div className={styles.summaryCard} style={{ display: "flex", flexDirection: "column" }}>
                           <div className={styles.cardHeader} style={{ marginBottom: 16 }}>
                             <div className={styles.cardTitle}>
