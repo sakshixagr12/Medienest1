@@ -329,51 +329,38 @@ function DischargeSummaryRedesign() {
         <TopBar 
           title="Discharge Summary" 
           backHref={`/portal/doctor-dashboard${searchParams.get("doctorId") ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : ""}`}
-          rightActions={
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <button 
-                className={styles.btnActionSecondary} 
-                onClick={() => {
-                  localStorage.setItem("discharge_summary_draft", JSON.stringify(summary));
-                  showToast("Draft saved successfully");
-                }}
-              >
-                Save Draft
-              </button>
-              {step < 3 ? (
-                <button 
-                  className={styles.btnActionPrimary} 
-                  onClick={() => handleSetStep(s => s + 1)}
-                >
-                  Continue to Next Step
-                </button>
-              ) : (
-                <button 
-                  className={styles.btnActionPrimary} 
-                  onClick={handleFinalSubmit} 
-                  disabled={isSaving}
-                >
-                  {isSaving ? "Finalizing..." : "Preview Summary"}
-                </button>
-              )}
-            </div>
-          }
         />
         
-        {renderWizardProgress()}
-
-        {summary.patientName && (
-          <div className={styles.stickyPatientHeader}>
-            <div className={styles.stickyPatientInner}>
-              <div className={styles.stickyPatientPill}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                <span className={styles.stickyPatientName}>{summary.patientName || "—"}</span>
+        <div className={styles.workspaceHeader} style={{ position: "static", borderBottom: "none", padding: "24px 5% 0 5%", background: "transparent", backdropFilter: "none", boxShadow: "none" }}>
+          <div className={styles.headerLeft}>
+            {summary.patientName ? (
+              <div className={styles.stickyPatientHeader} style={{ position: "static", top: "auto", borderBottom: "none", padding: 0, background: "transparent", zIndex: 1 }}>
+                <div className={styles.stickyPatientInner}>
+                  <div className={styles.stickyPatientPill}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    <span className={styles.stickyPatientName}>{summary.patientName || "—"}</span>
+                  </div>
+                  {summary.age && <div className={styles.stickyPatientChip}><span className={styles.stickyChipLabel}>Age</span><span>{summary.age} / {summary.sex || "M"}</span></div>}
+                  {summary.doctor && <div className={styles.stickyPatientChip}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg><span>Dr. {summary.doctor}</span></div>}
+                </div>
               </div>
-              {summary.age && <div className={styles.stickyPatientChip}><span className={styles.stickyChipLabel}>Age</span><span>{summary.age} / {summary.sex || "M"}</span></div>}
-              {summary.doctor && <div className={styles.stickyPatientChip}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg><span>Dr. {summary.doctor}</span></div>}
-            </div>
+            ) : (
+              <div className={styles.headerTitles}>
+                <h1 style={{ fontSize: 24 }}>Discharge Summary</h1>
+              </div>
+            )}
           </div>
-        )}
+          <div className={styles.headerRight}>
+            <button className={styles.btnActionSecondary} onClick={() => { localStorage.setItem("discharge_summary_draft", JSON.stringify(summary)); showToast("Draft saved successfully"); }}>Save Draft</button>
+            {step < 3 ? (
+              <button className={styles.btnActionPrimary} onClick={() => handleSetStep(s => s + 1)}>Continue to Next Step</button>
+            ) : (
+              <button className={styles.btnActionPrimary} onClick={handleFinalSubmit} disabled={isSaving}>{isSaving ? "Finalizing..." : "Preview Summary"}</button>
+            )}
+          </div>
+        </div>
+
+        {renderWizardProgress()}
 
         <main className={styles.main}>
           <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr" } : {}}>
@@ -381,7 +368,7 @@ function DischargeSummaryRedesign() {
               <section className={styles.leftColumn}>
                 {step === 1 && (
                   <div className={styles.stepFadeIn}>
-                    <div className={styles.summaryCard}>
+                    <div className={styles.summaryGroupCard}>
                       <div className={styles.cardHeader}>
                         <div className={styles.cardTitle}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -418,60 +405,30 @@ function DischargeSummaryRedesign() {
                 )}
                 {step === 2 && (
                   <div className={styles.stepFadeIn}>
-                    <div className={styles.summaryCard}>
-                      <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
-                      <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
+                    <div className={styles.summaryGroupCard}>
+                      <div className={styles.summaryCard}>
+                        <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
+                        <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
+                      </div>
+                      {renderClinicalCard("Presenting Complaints", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
+                      {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
                     </div>
-                    {renderClinicalCard("Presenting Complaints", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
-                    {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
                   </div>
                 )}
-              </section>
-            )}
-
-            {(step === 1 || step === 2) && (
-              <section className={styles.rightColumn}>
-                <div className={styles.progressPanel}>
-                  <div className={styles.progressTitle}>Completion Checklist</div>
-                  <div className={styles.progressList}>
-                    <div className={`${styles.progressItem} ${summary.patientName ? styles.completed : ""}`}>
-                      <div className={styles.progressIcon}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
-                      <span>Patient Details</span>
-                    </div>
-                    <div className={`${styles.progressItem} ${summary.regNo && summary.doa ? styles.completed : ""}`}>
-                      <div className={styles.progressIcon}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
-                      <span>Admission Info</span>
-                    </div>
-                    <div className={`${styles.progressItem} ${summary.diagnosis ? styles.completed : ""}`}>
-                      <div className={styles.progressIcon}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
-                      <span>Final Diagnosis</span>
-                    </div>
-                    <div className={`${styles.progressItem} ${summary.medicines.length > 0 && summary.medicines[0].name ? styles.completed : ""}`}>
-                      <div className={styles.progressIcon}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
-                      <span>Discharge Meds</span>
-                    </div>
-                  </div>
-                </div>
               </section>
             )}
 
             {step === 3 && (
               <section className={styles.fullWidthSection}>
                 <div className={styles.stepFadeIn}>
-                  {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
-                  <div className={styles.summaryCard}>
-                    <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
-                    <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
+                  <div className={styles.summaryGroupCard}>
+                    {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
+                    <div className={styles.summaryCard}>
+                      <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
+                      <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
+                    </div>
+                    {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
                   </div>
-                  {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
                 </div>
               </section>
             )}
