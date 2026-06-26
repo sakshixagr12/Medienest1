@@ -94,7 +94,7 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
         <button className={styles.btnAddPoint} onClick={() => updateField(field, [""])}>+ Start adding {field}</button>
       ) : (
         items.map((item, idx) => (
-          <div key={`bullet-${idx}-${item.length}`} className={styles.bulletRow}>
+          <div key={idx} className={styles.bulletRow}>
             <div className={styles.bulletMarker} />
             <div className={styles.inputWrapper}>
               <input ref={(el) => { inputRefs.current[idx] = el; }} className={styles.bulletInput} value={item} onChange={(e) => updateItem(idx, e.target.value)} onKeyDown={(e) => onKeyDown(e, idx)} onBlur={() => setTimeout(() => setActiveSuggestion(null), 200)} placeholder={idx === 0 ? placeholder : "Next point..."} />
