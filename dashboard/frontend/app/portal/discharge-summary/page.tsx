@@ -341,8 +341,9 @@ function DischargeSummaryRedesign() {
           </div>
         )}
 
+        {renderWizardProgress()}
+
         <main className={styles.main}>
-          {renderWizardProgress()}
           <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}}>
             {(step === 1 || step === 2) && (
               <section className={styles.leftColumn}>
