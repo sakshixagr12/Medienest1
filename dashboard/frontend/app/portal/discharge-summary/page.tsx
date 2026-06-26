@@ -365,7 +365,7 @@ function DischargeSummaryRedesign() {
         <main className={styles.main}>
           <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr" } : {}}>
             {(step === 1 || step === 2) && (
-              <section className={styles.leftColumn}>
+              <section className={styles.fullWidthSection}>
                 {step === 1 && (
                   <div className={styles.stepFadeIn}>
                     <div className={styles.premiumCard}>
