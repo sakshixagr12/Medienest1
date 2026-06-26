@@ -376,7 +376,7 @@ function DischargeSummaryRedesign() {
         )}
 
         <main className={styles.main}>
-          <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}}>
+          <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr" } : {}}>
             {(step === 1 || step === 2) && (
               <section className={styles.leftColumn}>
                 {step === 1 && (
@@ -388,32 +388,30 @@ function DischargeSummaryRedesign() {
                           Patient & Admission Details
                         </div>
                       </div>
-                      <div className={styles.patientGrid}>
-                        <div>
-                          <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
-                          <div className={styles.patientBrief} style={{ marginTop: 16 }}>
-                            <div className={styles.briefItem}>
-                              <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
-                              <div className="field">
-                                <label>Sex</label>
-                                <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
-                                  <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                                </select>
-                              </div>
-                            </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
+                        
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                          <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
+                          <div className="field">
+                            <label>Sex</label>
+                            <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
+                              <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+                            </select>
                           </div>
-                          <div className="field" style={{ marginTop: 16 }}><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
                         </div>
-                        <div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                          <div className="field"><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
                           <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
-                          <div className={styles.patientBrief} style={{ marginTop: 16 }}>
-                            <div className={styles.briefItem}>
-                              <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
-                              <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
-                            </div>
-                          </div>
-                          <div className="field" style={{ marginTop: 16 }}><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
                         </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                          <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
+                          <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
+                        </div>
+
+                        <div className="field"><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
                       </div>
                     </div>
                   </div>
