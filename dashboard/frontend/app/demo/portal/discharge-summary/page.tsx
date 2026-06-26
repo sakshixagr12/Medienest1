@@ -1326,137 +1326,38 @@ function DischargeSummaryRedesign() {
                 null,
                 "Rest, diet, lifestyle changes...",
               )}
-            </section>
 
-            <section className={styles.rightColumn}>
-              <div
-                className={`${styles.previewDoc} ${isPreviewExpanded ? styles.expandedPreview : styles.collapsedPreview}`}
-              >
-                <table className={styles.printableTable}>
-                  <thead>
-                    <tr>
-                      <td>
-                        <div className={styles.previewHeader}>
-                          <h2>{clinic?.name}</h2>
-                          <p>{clinic?.address}</p>
-                          <div
-                            style={{
-                              marginTop: 12,
-                              fontSize: 14,
-                              fontWeight: 900,
-                              textDecoration: "underline",
-                            }}
-                          >
-                            DISCHARGE SUMMARY
-                          </div>
-                        </div>
-                        <div className={styles.previewInfoGrid}>
-                          <div>
-                            <b>Patient:</b> {summary.patientName}
-                          </div>
-                          <div>
-                            <b>Reg No:</b> {summary.regNo}
-                          </div>
-                          <div>
-                            <b>Age/Sex:</b> {summary.age}/{summary.sex[0]}
-                          </div>
-                          <div>
-                            <b>Contact:</b> {summary.phone || "---"}
-                          </div>
-                          <div>
-                            <b>Consultant:</b> {summary.doctor}
-                          </div>
-                          <div>
-                            <b>DOA:</b> {summary.doa}
-                          </div>
-                          <div>
-                            <b>DOD:</b> {summary.dod}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div className={styles.previewSection}>
-                          <h4>Final Diagnosis</h4>
-                          <p>{summary.diagnosis}</p>
-                        </div>
-                        <div className={styles.previewSection}>
-                          <h4>Complaints</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.complaints.map((c, i) => (
-                              <li key={i}>• {c}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className={styles.previewSection}>
-                          <h4>Findings</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.findings.map((f, i) => (
-                              <li key={i}>• {f}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        {summary.medicines.length > 0 && (
-                          <div
-                            className={`${styles.previewSection} ${styles.medPreviewSection}`}
-                          >
-                            <h4>Medications</h4>
-                            <table
-                              className={styles.medTable}
-                              style={{ fontSize: 11 }}
-                            >
-                              <tbody>
-                                {summary.medicines.map((m) => (
-                                  <tr key={m.id}>
-                                    <td>{m.name}</td>
-                                    <td>{m.frequency}</td>
-                                    <td>{m.duration}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                        <div className={styles.previewSection}>
-                          <h4>Advice</h4>
-                          <ul style={{ listStyle: "none", padding: 0 }}>
-                            {summary.advice.map((a, i) => (
-                              <li key={i}>• {a}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                {!isPreviewExpanded && <div className={styles.previewFade} />}
-                <button
-                  className={styles.btnTogglePreview}
-                  onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
-                >
-                  {isPreviewExpanded ? "Show Less" : "Read More"}
-                </button>
-              </div>
-              <div className={styles.actionStack}>
+              <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
                 <button
                   className={`${styles.btnAction} btn-primary`}
                   style={{
                     padding: "18px",
                     background: "var(--sanctuary-primary)",
                     color: "#fff",
+                    flex: 2
                   }}
                   onClick={() => router.push("/demo/portal/discharge-summary/view")}
                 >
-                  View & Print Discharge Summary
+                  Preview Discharge Summary
                 </button>
                 <button
                   className="btn-secondary"
                   style={{
-                    width: "100%",
-                    marginTop: 12,
+                    padding: "18px",
+                    flex: 1,
+                    fontWeight: "bold"
+                  }}
+                  onClick={() => {
+                    saveDraft(summary);
+                    showToast("Draft Saved Successfully");
+                  }}
+                >
+                  Save Draft
+                </button>
+                <button
+                  className="btn-secondary"
+                  style={{
+                    padding: "18px",
                     opacity: 0.9,
                     color: "#ef4444",
                     borderColor: "#fecaca",
@@ -1464,7 +1365,7 @@ function DischargeSummaryRedesign() {
                   }}
                   onClick={handleClear}
                 >
-                  ️ Clear Records
+                  Clear Records
                 </button>
               </div>
             </section>
