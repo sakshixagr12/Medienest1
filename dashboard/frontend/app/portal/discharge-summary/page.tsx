@@ -94,7 +94,7 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
         <button className={styles.btnAddPoint} onClick={() => updateField(field, [""])}>+ Start adding {field}</button>
       ) : (
         items.map((item, idx) => (
-          <div key={idx} className={styles.bulletRow}>
+          <div key={`bullet-${idx}-${item.length}`} className={styles.bulletRow}>
             <div className={styles.bulletMarker} />
             <div className={styles.inputWrapper}>
               <input ref={(el) => { inputRefs.current[idx] = el; }} className={styles.bulletInput} value={item} onChange={(e) => updateItem(idx, e.target.value)} onKeyDown={(e) => onKeyDown(e, idx)} onBlur={() => setTimeout(() => setActiveSuggestion(null), 200)} placeholder={idx === 0 ? placeholder : "Next point..."} />
@@ -370,7 +370,7 @@ function DischargeSummaryRedesign() {
             {(step === 1 || step === 2) && (
               <section className={styles.fullWidthSection}>
                 {step === 1 && (
-                  <div className={styles.stepFadeIn}>
+                  <div key="step1" className={styles.stepFadeIn}>
                     <div className={styles.premiumCard}>
                       <div className={styles.cardHeader}>
                         <div className={styles.cardTitle}>
@@ -407,7 +407,7 @@ function DischargeSummaryRedesign() {
                   </div>
                 )}
                 {step === 2 && (
-                  <div className={styles.stepFadeIn}>
+                  <div key="step2" className={styles.stepFadeIn}>
                     <div className={styles.premiumCard}>
                       <div className={styles.summaryCard}>
                         <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
@@ -422,7 +422,7 @@ function DischargeSummaryRedesign() {
             )}
 
             {step === 3 && (
-              <section className={styles.fullWidthSection}>
+              <section key="step3" className={styles.fullWidthSection}>
                 <div className={styles.stepFadeIn}>
                   <div className={styles.premiumCard}>
                     {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}

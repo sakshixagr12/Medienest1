@@ -81,6 +81,13 @@
   width: 100%;
 }
 
+.fullWidthSection {
+  width: 80%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+}
+
 .premiumCard {
   background: #ffffff;
   border-radius: 16px;
