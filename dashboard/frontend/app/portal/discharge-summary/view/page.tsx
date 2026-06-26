@@ -589,50 +589,50 @@ function FullResultPreview() {
                 <tr>
                   <td>
                     <div className={styles.previewHeader}>
-                      <h2>{clinic?.name || "Clinic Name"}</h2>
-                      <p>{clinic?.address || "Address details..."}</p>
-                      <div
-                        style={{
-                          marginTop: 12,
-                          fontSize: 15,
-                          fontWeight: 900,
-                          textDecoration: "underline",
-                          letterSpacing: "1px",
-                        }}
-                      >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ textAlign: "left" }}>
+                          <h2>{clinic?.name || "Hospital Name"}</h2>
+                          <div className={styles.contactInfo}>
+                            {clinic?.address || "Address details..."}<br />
+                            Phone: {clinic?.phone || "Contact details"}
+                          </div>
+                        </div>
+                        {/* Logo Placeholder */}
+                        <div style={{ width: 64, height: 64, background: "#f1f5f9", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 10, fontWeight: 700, border: "1px dashed #cbd5e1" }}>LOGO</div>
+                      </div>
+                      <div className={styles.docTitle}>
                         DISCHARGE SUMMARY
                       </div>
                     </div>
 
                     <div className={styles.previewInfoGrid}>
-                      <div>
-                        <b>Patient Name:</b>{" "}
-                        {summary.patientName || (
-                          <span className={styles.emptyPlaceholder}>
-                            [Not Provided]
-                          </span>
-                        )}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Patient Name:</span>
+                          <span className={styles.infoValue}>{summary.patientName || <span className={styles.emptyPlaceholder}>[Not Provided]</span>}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Age / Sex:</span>
+                          <span className={styles.infoValue}>{summary.age ? `${summary.age}Y` : "---"} / {summary.sex}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Reg / IPD No:</span>
+                          <span className={styles.infoValue}>{summary.regNo || "---"}</span>
+                        </div>
                       </div>
-                      <div>
-                        <b>Reg / IPD No:</b> {summary.regNo || "---"}
-                      </div>
-                      <div>
-                        <b>Age / Sex:</b> {summary.age}Y / {summary.sex}
-                      </div>
-                      <div>
-                        <b>Consultant:</b> Dr. {summary.doctor || "---"}
-                      </div>
-                      <div>
-                        <b>Date of Admission:</b>{" "}
-                        {summary.doa
-                          ? new Date(summary.doa).toLocaleString()
-                          : "---"}
-                      </div>
-                      <div>
-                        <b>Date of Discharge:</b>{" "}
-                        {summary.dod
-                          ? new Date(summary.dod).toLocaleString()
-                          : "---"}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Date of Admission:</span>
+                          <span className={styles.infoValue}>{summary.doa ? new Date(summary.doa).toLocaleString() : "---"}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Date of Discharge:</span>
+                          <span className={styles.infoValue}>{summary.dod ? new Date(summary.dod).toLocaleString() : "---"}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Consultant:</span>
+                          <span className={styles.infoValue}>Dr. {summary.doctor || "---"}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -647,72 +647,44 @@ function FullResultPreview() {
                       <p>
                         {summary.diagnosis || (
                           <span className={styles.emptyPlaceholder}>
-                            Pending diagnosis...
+                            Diagnosis not recorded
                           </span>
                         )}
                       </p>
                     </div>
 
                     <div className={styles.previewSection}>
-                      <h4>Chief Complaints & History</h4>
-                      {summary.complaints.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.complaints.map((c, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {c}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className={styles.emptyPlaceholder}>
-                          No complaints recorded.
-                        </p>
-                      )}
+                      <h4>Clinical Summary</h4>
+                      <div style={{ marginBottom: 16 }}>
+                        <strong style={{ display: "block", marginBottom: 4, color: "#334155" }}>Presenting Complaints:</strong>
+                        {summary.complaints.length > 0 ? (
+                          <p>{summary.complaints.join("; ")}</p>
+                        ) : (
+                          <p className={styles.emptyPlaceholder}>No complaints recorded.</p>
+                        )}
+                      </div>
+                      <div>
+                        <strong style={{ display: "block", marginBottom: 4, color: "#334155" }}>Physical Findings & Hospital Course:</strong>
+                        {summary.findings.length > 0 ? (
+                          <p>{summary.findings.join("; ")}</p>
+                        ) : (
+                          <p className={styles.emptyPlaceholder}>No findings recorded.</p>
+                        )}
+                      </div>
                     </div>
 
                     <div className={styles.previewSection}>
-                      <h4>Physical Findings & Investigations</h4>
-                      {summary.findings.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.findings.map((f, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {f}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className={styles.emptyPlaceholder}>
-                          No findings recorded.
-                        </p>
-                      )}
-                    </div>
-
-                    <div className={styles.previewSection}>
-                      <h4>Treatment & Medications During Stay</h4>
+                      <h4>Treatment Provided</h4>
                       {summary.treatment.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.treatment.map((t, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {t}
-                            </li>
-                          ))}
-                        </ul>
+                        <p>{summary.treatment.join("; ")}</p>
                       ) : (
-                        <p>Conservative management.</p>
+                        <p className={styles.emptyPlaceholder}>Conservative management.</p>
                       )}
                     </div>
 
                     {summary.medicines.length > 0 && (
-                      <div
-                        className={`${styles.previewSection} ${styles.medPreviewSection}`}
-                      >
-                        <h4>Medications Advised on Discharge</h4>
+                      <div className={`${styles.previewSection} ${styles.medPreviewSection}`}>
+                        <h4>Prescribed Medications at Discharge</h4>
                         <table className={styles.medTable}>
                           <thead>
                             <tr>
@@ -722,9 +694,9 @@ function FullResultPreview() {
                             </tr>
                           </thead>
                           <tbody>
-                            {summary.medicines.map((m) => (
-                              <tr key={m.id}>
-                                <td>{m.name || "---"}</td>
+                            {summary.medicines.map((m: any, i: number) => (
+                              <tr key={i}>
+                                <td><strong>{m.name || "---"}</strong></td>
                                 <td>{m.frequency}</td>
                                 <td>{m.duration}</td>
                               </tr>
@@ -735,19 +707,15 @@ function FullResultPreview() {
                     )}
 
                     <div className={styles.previewSection}>
-                      <h4>Follow-up Advice & Instructions</h4>
+                      <h4>Follow-Up Instructions</h4>
                       {summary.advice.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
+                        <ul>
                           {summary.advice.map((a, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {a}
-                            </li>
+                            <li key={i}>{a}</li>
                           ))}
                         </ul>
                       ) : (
-                        <p>General post-discharge care.</p>
+                        <p className={styles.emptyPlaceholder}>No specific follow-up instructions.</p>
                       )}
                     </div>
                   </td>
@@ -757,24 +725,15 @@ function FullResultPreview() {
               <tfoot>
                 <tr>
                   <td>
-                    <div
-                      style={{
-                        paddingTop: 60,
-                        textAlign: "right",
-                        borderTop: "1px solid #000",
-                        marginTop: 40,
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 900 }}>
-                        Dr. {summary.doctor || "(Authorized Signature)"}
+                    <div className={styles.signatures}>
+                      <div className={styles.sigBlock}>
+                         <div className={styles.sigLine}></div>
+                         <div className={styles.sigRole}>Patient / Guardian Signature</div>
                       </div>
-                      <div style={{ fontSize: 11, color: "#444" }}>
-                        Clinic Consultant / Chief Resident
-                      </div>
-                      <div
-                        style={{ fontSize: 10, color: "#999", marginTop: 8 }}
-                      >
-                        Generated via MedieNest EMR Platform
+                      <div className={styles.sigBlock}>
+                         <div className={styles.sigLine}></div>
+                         <div className={styles.sigName}>Dr. {summary.doctor || "Authorized Signatory"}</div>
+                         <div className={styles.sigRole}>Consultant Physician</div>
                       </div>
                     </div>
                   </td>
