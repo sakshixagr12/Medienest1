@@ -11,6 +11,7 @@ interface TopBarProps {
   backLabel?: string;
   showLogout?: boolean;
   showBack?: boolean;
+  rightActions?: React.ReactNode;
 }
 
 export default function TopBar({
@@ -19,6 +20,7 @@ export default function TopBar({
   backLabel = "Back",
   showLogout = true,
   showBack = true,
+  rightActions,
 }: TopBarProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -87,10 +89,14 @@ export default function TopBar({
       </div>
 
       <div className="topbar-spacer-right">
-        {showLogout && (
-          <button className="btn-signout" onClick={handleLogout}>
-            Sign Out
-          </button>
+        {rightActions ? (
+          rightActions
+        ) : (
+          showLogout && (
+            <button className="btn-signout" onClick={handleLogout}>
+              Sign Out
+            </button>
+          )
         )}
       </div>
     </header>
