@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
-import styles from "../admission-record/page.module.css";
+import styles from "./page.module.css";
 
 interface Medicine {
   name: string;
@@ -352,6 +352,9 @@ function DischargeSummaryRedesign() {
           </div>
           <div className={styles.headerRight}>
             <button className={styles.btnActionSecondary} onClick={() => { localStorage.setItem("discharge_summary_draft", JSON.stringify(summary)); showToast("Draft saved successfully"); }}>Save Draft</button>
+            {step > 1 && (
+              <button className={styles.btnActionSecondary} onClick={() => handleSetStep(s => s - 1)}>Back</button>
+            )}
             {step < 3 ? (
               <button className={styles.btnActionPrimary} onClick={() => handleSetStep(s => s + 1)}>Continue to Next Step</button>
             ) : (
