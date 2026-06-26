@@ -6,10 +6,10 @@
 }
 
 .main {
-  width: 85%;
-  max-width: none;
+  width: 90%;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 0 100px 0;
+  padding: 32px 0 100px 0;
 }
 
 .workspaceHeader {
@@ -80,10 +80,9 @@
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
+  display: flex;
+  flex-direction: column;
   gap: 32px;
-  align-items: start;
 }
 
 /* --- Group Cards --- */
@@ -1067,24 +1066,20 @@
   justify-content: center;
 }
 
-/* --- Responsiveness --- */
-@media (max-width: 1400px) {
-  .layout {
-    grid-template-columns: 1fr 280px;
-    gap: 24px;
-  }
+.layout {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin: 0 auto;
 }
 
+/* --- Responsiveness --- */
+@media (max-width: 1400px) {
+}
 @media (max-width: 1200px) {
-  .layout {
-    grid-template-columns: 1fr 260px;
-  }
 }
 
 @media (max-width: 800px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
   .leftColumn {
     position: static;
   }
