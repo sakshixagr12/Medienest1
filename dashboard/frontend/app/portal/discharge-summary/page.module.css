@@ -6,24 +6,19 @@
 }
 
 .main {
-  width: 90%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px 0 100px 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 100px 0;
 }
 
 .workspaceHeader {
-  position: sticky;
-  top: 0;
-  z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 5%;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 20px 5%;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .headerLeft {
@@ -82,19 +77,23 @@
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  align-items: center;
+  width: 100%;
 }
 
-/* --- Group Cards --- */
-.summaryGroupCard {
-  background: #fff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  padding: 32px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+/* --- Premium Cards --- */
+.premiumCard {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 40px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 900px;
+  margin-top: 32px;
 }
 
-.summaryGroupCard + .summaryGroupCard {
+.premiumCard + .premiumCard {
   margin-top: 32px;
 }
 
@@ -1066,12 +1065,7 @@
   justify-content: center;
 }
 
-.layout {
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  margin: 0 auto;
-}
+
 
 /* --- Responsiveness --- */
 @media (max-width: 1400px) {
@@ -1087,14 +1081,10 @@
 
 /* --- Wizard Progress Bar --- */
 .wizardProgress {
-  background: var(--surface, #ffffff);
-  border-top: 1px solid var(--border);
+  background: #fdfdfd;
   border-bottom: 1px solid var(--border);
   padding: 16px 5%;
-  margin-bottom: 32px;
-  position: sticky;
-  top: 70px;
-  z-index: 100;
+  margin-bottom: 0;
   display: flex;
   justify-content: center;
   width: 100%;

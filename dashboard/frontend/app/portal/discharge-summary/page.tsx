@@ -331,7 +331,7 @@ function DischargeSummaryRedesign() {
           backHref={`/portal/doctor-dashboard${searchParams.get("doctorId") ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : ""}`}
         />
         
-        <div className={styles.workspaceHeader} style={{ position: "static", borderBottom: "none", padding: "24px 5% 0 5%", background: "transparent", backdropFilter: "none", boxShadow: "none" }}>
+        <div className={styles.workspaceHeader}>
           <div className={styles.headerLeft}>
             {summary.patientName ? (
               <div className={styles.stickyPatientHeader} style={{ position: "static", top: "auto", borderBottom: "none", padding: 0, background: "transparent", zIndex: 1 }}>
@@ -368,7 +368,7 @@ function DischargeSummaryRedesign() {
               <section className={styles.leftColumn}>
                 {step === 1 && (
                   <div className={styles.stepFadeIn}>
-                    <div className={styles.summaryGroupCard}>
+                    <div className={styles.premiumCard}>
                       <div className={styles.cardHeader}>
                         <div className={styles.cardTitle}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -405,7 +405,7 @@ function DischargeSummaryRedesign() {
                 )}
                 {step === 2 && (
                   <div className={styles.stepFadeIn}>
-                    <div className={styles.summaryGroupCard}>
+                    <div className={styles.premiumCard}>
                       <div className={styles.summaryCard}>
                         <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
                         <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
@@ -421,7 +421,7 @@ function DischargeSummaryRedesign() {
             {step === 3 && (
               <section className={styles.fullWidthSection}>
                 <div className={styles.stepFadeIn}>
-                  <div className={styles.summaryGroupCard}>
+                  <div className={styles.premiumCard}>
                     {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
                     <div className={styles.summaryCard}>
                       <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
