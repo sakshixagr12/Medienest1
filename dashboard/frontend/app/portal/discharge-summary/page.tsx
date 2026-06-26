@@ -367,74 +367,69 @@ function DischargeSummaryRedesign() {
 
         <main className={styles.main}>
           <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr" } : {}}>
-            {(step === 1 || step === 2) && (
-              <section className={styles.fullWidthSection}>
-                {step === 1 && (
-                  <div key="step1" className={styles.stepFadeIn}>
-                    <div className={styles.premiumCard}>
-                      <div className={styles.cardHeader}>
-                        <div className={styles.cardTitle}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                          Patient & Admission Details
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
-                        
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                          <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
-                          <div className="field">
-                            <label>Sex</label>
-                            <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
-                              <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                          <div className="field"><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
-                          <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
-                        </div>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                          <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
-                          <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
-                        </div>
-
-                        <div className="field"><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
-                      </div>
+            <section className={styles.fullWidthSection} style={{ display: step === 1 ? "flex" : "none" }}>
+              <div className={styles.stepFadeIn}>
+                <div className={styles.premiumCard}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitle}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      Patient & Admission Details
                     </div>
                   </div>
-                )}
-                {step === 2 && (
-                  <div key="step2" className={styles.stepFadeIn}>
-                    <div className={styles.premiumCard}>
-                      <div className={styles.summaryCard}>
-                        <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
-                        <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
+                    
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                      <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
+                      <div className="field">
+                        <label>Sex</label>
+                        <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
+                          <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+                        </select>
                       </div>
-                      {renderClinicalCard("Presenting Complaints", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
-                      {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
                     </div>
-                  </div>
-                )}
-              </section>
-            )}
 
-            {step === 3 && (
-              <section key="step3" className={styles.fullWidthSection}>
-                <div className={styles.stepFadeIn}>
-                  <div className={styles.premiumCard}>
-                    {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
-                    <div className={styles.summaryCard}>
-                      <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
-                      <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                      <div className="field"><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
+                      <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
                     </div>
-                    {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                      <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
+                      <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
+                    </div>
+
+                    <div className="field"><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
                   </div>
                 </div>
-              </section>
-            )}
+              </div>
+            </section>
+
+            <section className={styles.fullWidthSection} style={{ display: step === 2 ? "flex" : "none" }}>
+              <div className={styles.stepFadeIn}>
+                <div className={styles.premiumCard}>
+                  <div className={styles.summaryCard}>
+                    <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
+                    <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
+                  </div>
+                  {renderClinicalCard("Presenting Complaints", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
+                  {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
+                </div>
+              </div>
+            </section>
+
+            <section className={styles.fullWidthSection} style={{ display: step === 3 ? "flex" : "none" }}>
+              <div className={styles.stepFadeIn}>
+                <div className={styles.premiumCard}>
+                  {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
+                  <div className={styles.summaryCard}>
+                    <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
+                    <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
+                  </div>
+                  {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
+                </div>
+              </div>
+            </section>
           </div>
         </main>
       </div>
