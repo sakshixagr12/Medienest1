@@ -326,8 +326,42 @@ function DischargeSummaryRedesign() {
     <>
       {toast && <div className={styles.toast} role="alert">{toast}</div>}
       <div className={styles.page}>
-        <TopBar title="Discharge Summary" backHref={`/portal/doctor-dashboard${searchParams.get("doctorId") ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : ""}`} />
+        <TopBar 
+          title="Discharge Summary" 
+          backHref={`/portal/doctor-dashboard${searchParams.get("doctorId") ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : ""}`}
+          rightActions={
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              <button 
+                className={styles.btnActionSecondary} 
+                onClick={() => {
+                  localStorage.setItem("discharge_summary_draft", JSON.stringify(summary));
+                  showToast("Draft saved successfully");
+                }}
+              >
+                Save Draft
+              </button>
+              {step < 3 ? (
+                <button 
+                  className={styles.btnActionPrimary} 
+                  onClick={() => handleSetStep(s => s + 1)}
+                >
+                  Continue to Next Step
+                </button>
+              ) : (
+                <button 
+                  className={styles.btnActionPrimary} 
+                  onClick={handleFinalSubmit} 
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Finalizing..." : "Preview Summary"}
+                </button>
+              )}
+            </div>
+          }
+        />
         
+        {renderWizardProgress()}
+
         {summary.patientName && (
           <div className={styles.stickyPatientHeader}>
             <div className={styles.stickyPatientInner}>
@@ -341,8 +375,6 @@ function DischargeSummaryRedesign() {
           </div>
         )}
 
-        {renderWizardProgress()}
-
         <main className={styles.main}>
           <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}}>
             {(step === 1 || step === 2) && (
@@ -353,39 +385,36 @@ function DischargeSummaryRedesign() {
                       <div className={styles.cardHeader}>
                         <div className={styles.cardTitle}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                          Patient Context
+                          Patient & Admission Details
                         </div>
                       </div>
-                      <div className="field"><label>Full Name</label><input type="text" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
-                      <div className={styles.patientBrief}>
-                        <div className={styles.briefItem}>
-                          <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
-                          <div className="field">
-                            <label>Sex</label>
-                            <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
-                              <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                            </select>
+                      <div className={styles.patientGrid}>
+                        <div>
+                          <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
+                          <div className={styles.patientBrief} style={{ marginTop: 16 }}>
+                            <div className={styles.briefItem}>
+                              <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
+                              <div className="field">
+                                <label>Sex</label>
+                                <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
+                                  <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+                                </select>
+                              </div>
+                            </div>
                           </div>
+                          <div className="field" style={{ marginTop: 16 }}><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
+                        </div>
+                        <div>
+                          <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
+                          <div className={styles.patientBrief} style={{ marginTop: 16 }}>
+                            <div className={styles.briefItem}>
+                              <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
+                              <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
+                            </div>
+                          </div>
+                          <div className="field" style={{ marginTop: 16 }}><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
                         </div>
                       </div>
-                      <div className="field"><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
-                    </div>
-
-                    <div className={styles.summaryCard}>
-                      <div className={styles.cardHeader}>
-                        <div className={styles.cardTitle}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                          Admission Details
-                        </div>
-                      </div>
-                      <div className="field"><label>IPD / Reg No.</label><input type="text" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
-                      <div className={styles.patientBrief}>
-                        <div className={styles.briefItem}>
-                          <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
-                          <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
-                        </div>
-                      </div>
-                      <div className="field"><label>Consultant / Doctor</label><input type="text" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
                     </div>
                   </div>
                 )}
@@ -404,9 +433,34 @@ function DischargeSummaryRedesign() {
 
             {(step === 1 || step === 2) && (
               <section className={styles.rightColumn}>
-                <div className={styles.quickActionCard}>
-                  <div className={styles.cardHeader} style={{ marginBottom: 16 }}><div className={styles.cardTitle}>Quick Complete</div></div>
-                  <button className={styles.btnActionSecondary} onClick={() => handleSetStep(s => s + 1)}>Continue to Next Step</button>
+                <div className={styles.progressPanel}>
+                  <div className={styles.progressTitle}>Completion Checklist</div>
+                  <div className={styles.progressList}>
+                    <div className={`${styles.progressItem} ${summary.patientName ? styles.completed : ""}`}>
+                      <div className={styles.progressIcon}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Patient Details</span>
+                    </div>
+                    <div className={`${styles.progressItem} ${summary.regNo && summary.doa ? styles.completed : ""}`}>
+                      <div className={styles.progressIcon}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Admission Info</span>
+                    </div>
+                    <div className={`${styles.progressItem} ${summary.diagnosis ? styles.completed : ""}`}>
+                      <div className={styles.progressIcon}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Final Diagnosis</span>
+                    </div>
+                    <div className={`${styles.progressItem} ${summary.medicines.length > 0 && summary.medicines[0].name ? styles.completed : ""}`}>
+                      <div className={styles.progressIcon}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Discharge Meds</span>
+                    </div>
+                  </div>
                 </div>
               </section>
             )}
@@ -420,10 +474,6 @@ function DischargeSummaryRedesign() {
                     <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
                   </div>
                   {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
-                  <div style={{ marginTop: 24, display: "flex", justifyContent: "space-between" }}>
-                    <button className={styles.btnActionSecondary} onClick={() => handleSetStep(2)}>Back</button>
-                    <button className={styles.btnActionPrimary} onClick={handleFinalSubmit} disabled={isSaving}>{isSaving ? "Finalizing..." : "Finalize Discharge Summary"}</button>
-                  </div>
                 </div>
               </section>
             )}
