@@ -155,22 +155,21 @@
 }
 
 .viewport {
-  max-width: 900px;
+  width: 210mm;
   margin: 40px auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
 .previewDoc {
   background: #fff;
-  padding: 60px; /* Expansive A4-style margins */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  min-height: 1100px; /* Roughly A4 height */
+  padding: 20mm; /* A4 standard margins */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  min-height: 297mm; /* A4 height */
+  box-sizing: border-box;
   font-family: "Inter", sans-serif;
   color: #000;
   line-height: 1.6;
-  border: 1px solid #eee;
 }
 
 .printableTable {
@@ -180,31 +179,66 @@
 
 .previewHeader {
   text-align: center;
+  padding-bottom: 24px;
   border-bottom: 2px solid #000;
-  padding-bottom: 20px;
   margin-bottom: 32px;
 }
 
 .previewHeader h2 {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+  color: #111;
 }
+
 .previewHeader p {
   font-size: 13px;
   color: #444;
+  margin-bottom: 6px;
+}
+
+.contactInfo {
+  font-size: 12px;
+  color: #555;
+}
+
+.docTitle {
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .previewInfoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 24px;
+  gap: 12px 40px;
   font-size: 13px;
   margin-bottom: 40px;
 }
 
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dotted #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.infoLabel {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-weight: 700;
+  color: #000;
+  text-align: right;
+}
+
 .previewSection {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   page-break-inside: avoid;
   break-inside: avoid;
 }
@@ -215,42 +249,53 @@
 }
 
 .previewSection h4 {
-  font-size: 12px;
-  font-weight: 900;
+  font-size: 14px;
+  font-weight: 800;
   color: #000;
-  text-transform: uppercase;
-  border-bottom: 1px solid #000;
-  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
   margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.previewSection p {
-  font-size: 14px;
-  white-space: pre-wrap;
+.previewSection p, .previewSection li {
+  font-size: 13px;
+  color: #111;
+  line-height: 1.6;
+}
+
+.previewSection ul {
+  padding-left: 20px;
   margin: 0;
+}
+
+.previewSection li {
+  margin-bottom: 6px;
 }
 
 .medTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
+  font-size: 12px;
 }
 
 .medTable th {
   background: #f8fafc !important;
-  color: #000 !important;
-  padding: 8px 12px;
+  color: #334155 !important;
+  padding: 10px 12px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 900;
-  border-bottom: 1px solid #000;
+  font-weight: 800;
+  border-bottom: 2px solid #e2e8f0;
+  border-top: 1px solid #e2e8f0;
   -webkit-print-color-adjust: exact;
 }
 
 .medTable td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #111;
 }
 
 .emptyPlaceholder {
@@ -258,28 +303,58 @@
   font-style: italic;
 }
 
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 60px;
+  page-break-inside: avoid;
+}
+
+.sigBlock {
+  text-align: center;
+  width: 200px;
+}
+
+.sigLine {
+  border-top: 1px dashed #000;
+  margin-bottom: 8px;
+  height: 40px;
+}
+
+.sigName {
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 40px;
+}
+
+.sigRole {
+  font-size: 12px;
+  color: #555;
+}
+
 @page {
   size: A4;
-  margin: 15mm 15mm;
+  margin: 15mm;
 }
 
 @media print {
-  .header {
+  .header, .modalOverlay, .toast {
     display: none !important;
   }
   .page {
-    background: #fff !important;
+    background: transparent !important;
     padding: 0 !important;
-    min-height: auto !important;
+    padding-bottom: 0 !important;
   }
   .viewport {
     margin: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
   }
   .previewDoc {
     box-shadow: none !important;
-    border: none !important;
     padding: 0 !important;
+    border: none !important;
     min-height: auto !important;
   }
   .printableTable thead {
