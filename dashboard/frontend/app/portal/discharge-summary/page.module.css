@@ -88,9 +88,9 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
   padding: 40px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-  width: 100%;
-  max-width: 900px;
-  margin-top: 32px;
+  width: 80%;
+  max-width: 1600px;
+  margin: 40px auto 0 auto;
 }
 
 .premiumCard + .premiumCard {
