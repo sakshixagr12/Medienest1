@@ -1090,3 +1090,96 @@
     position: static;
   }
 }
+
+/* --- Wizard Progress Bar --- */
+.wizardProgress {
+  background: var(--surface, #ffffff);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 5%;
+  margin-bottom: 32px;
+  position: sticky;
+  top: 70px;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.wizardProgressInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 900px;
+}
+
+.wizardStep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.wizardStepIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.wizardStepLabel {
+  display: flex;
+  flex-direction: column;
+}
+
+.wizardStepLabel small {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wizardStepLabel span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.wizardStepActive .wizardStepIcon {
+  background: #fff;
+  border-color: var(--sanctuary-primary);
+  color: var(--sanctuary-primary);
+  box-shadow: 0 0 15px rgba(23, 3, 55, 0.1);
+}
+
+.wizardStepActive .wizardStepLabel span {
+  color: var(--sanctuary-primary);
+}
+
+.wizardStepCompleted .wizardStepIcon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.wizardStepCompleted .wizardStepLabel span {
+  color: #16a34a;
+}
+
+.wizardStepDivider {
+  flex: 1;
+  height: 2px;
+  background: #f1f5f9;
+  margin: 0 16px;
+  border-radius: 1px;
+}
