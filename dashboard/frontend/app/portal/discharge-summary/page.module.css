@@ -6,8 +6,8 @@
 }
 
 .main {
-  width: 95%;
-  max-width: 1500px;
+  width: 85%;
+  max-width: none;
   margin: 0 auto;
   padding: 24px 0 100px 0;
 }
