@@ -363,9 +363,9 @@ function DischargeSummaryRedesign() {
         {renderWizardProgress()}
 
         <main className={styles.main}>
-          <div className={styles.layout} style={step === 3 ? { gridTemplateColumns: "1fr" } : {}}>
+          <div className={styles.layout}>
             {(step === 1 || step === 2) && (
-              <section className={styles.leftColumn}>
+              <section style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 {step === 1 && (
                   <div className={styles.stepFadeIn}>
                     <div className={styles.premiumCard}>
@@ -419,7 +419,7 @@ function DischargeSummaryRedesign() {
             )}
 
             {step === 3 && (
-              <section className={styles.fullWidthSection}>
+              <section style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div className={styles.stepFadeIn}>
                   <div className={styles.premiumCard}>
                     {renderClinicalCard("Treatment Given During Stay", "treatment", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, "e.g. IV fluids started...")}
