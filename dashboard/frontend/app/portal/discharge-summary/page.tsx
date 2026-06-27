@@ -22,6 +22,8 @@ interface SummaryData {
   doa: string;
   dod: string;
   doctor: string;
+  attendingPhysician: string;
+  dischargingNurse: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -166,7 +168,7 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", sex: "Male", regNo: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
+    patientName: "", phone: "", age: "", sex: "Male", regNo: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
   });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -260,6 +262,7 @@ function DischargeSummaryRedesign() {
       const { data: insertedRecord, error } = await supabase.from("discharge_summaries").insert([{
         patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} / ${summary.sex}`,
         doctor_name: summary.doctor, date_admission: summary.doa, date_discharge: summary.dod, diagnosis: summary.diagnosis,
+        attending_physician: summary.attendingPhysician, discharging_nurse: summary.dischargingNurse,
         complaints: JSON.stringify(summary.complaints), findings: JSON.stringify(summary.findings), treatment: JSON.stringify(summary.treatment),
         discharge_condition: JSON.stringify(summary.dischargeCondition),
         medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId
@@ -419,6 +422,14 @@ function DischargeSummaryRedesign() {
                     </div>
 
                     <div className="field"><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
+                    
+                    <div style={{ marginTop: 16 }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: "var(--sanctuary-primary, #6366f1)" }}>Care Team</h3>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: 16 }}>
+                        <div className="field"><label>Primary Attending Physician (Name & Contact)</label><input type="text" placeholder="e.g. Dr. Smith (555-0123)" value={summary.attendingPhysician} onChange={(e) => updateField("attendingPhysician", e.target.value)} /></div>
+                        <div className="field"><label>Discharging Nurse (Name & Contact)</label><input type="text" placeholder="e.g. Nurse Sarah (555-0124)" value={summary.dischargingNurse} onChange={(e) => updateField("dischargingNurse", e.target.value)} /></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
