@@ -500,7 +500,7 @@ function DischargeSummaryRedesign() {
                     <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
                     <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
                   </div>
-                  {renderClinicalCard("Presenting Complaints", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
+                  {renderClinicalCard("Reason for Admission", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
                   {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
                 </div>
               </div>
