@@ -660,6 +660,29 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.pillButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--sanctuary-gray-low);
+  color: var(--sanctuary-ink);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pillButton:hover {
+  background: #fff;
+  border-color: var(--sanctuary-primary);
+  color: var(--sanctuary-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
 .btnSaveBack {
   padding: 16px 48px;
   background: var(--sanctuary-primary);
