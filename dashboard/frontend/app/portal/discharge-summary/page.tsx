@@ -119,14 +119,14 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
       {(items.length > 0 || field === "treatment") && (
         field === "treatment" ? (
         <div style={{ position: "relative", display: "inline-block" }}>
-          <button className={styles.btnAddPoint} onClick={() => setShowTreatmentOptions(!showTreatmentOptions)}>
+          <button type="button" className={styles.btnAddPoint} onClick={(e) => { e.preventDefault(); setShowTreatmentOptions(!showTreatmentOptions); }}>
             + Add Treatment
           </button>
           {showTreatmentOptions && (
-            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "8px", background: "white", border: "1px solid var(--border, #e2e8f0)", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px", zIndex: 10, display: "flex", flexDirection: "column", gap: "4px", width: "200px" }}>
-              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "")}>Blank Point</button>
-              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "Medication given: ")}>Medication given...</button>
-              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "Fluid given: ")}>Fluid given...</button>
+            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "8px", background: "white", border: "1px solid var(--border, #e2e8f0)", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px", zIndex: 50, display: "flex", flexDirection: "column", gap: "4px", width: "200px" }}>
+              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, ""); }}>Blank Point</button>
+              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>Medication given...</button>
+              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>Fluid given...</button>
             </div>
           )}
         </div>
