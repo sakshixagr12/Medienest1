@@ -458,7 +458,7 @@ function DischargeSummaryRedesign() {
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="field"><label>Phone Number</label><input type="text" inputMode="numeric" maxLength={10} placeholder="e.g. 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, '').slice(0, 10))} /></div>
+                      <div className="field"><label>Phone Number</label><input type="text" inputMode="numeric" maxLength={11} placeholder="e.g. 98765 43210" value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, '').slice(0, 10))} /></div>
                       <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
                     </div>
 
