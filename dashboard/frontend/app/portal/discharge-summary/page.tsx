@@ -247,25 +247,8 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", ageUnit: "Years", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: [];
-
-const MEDICATION_OPTIONS = [
-  "Paracetamol",
-  "Ibuprofen",
-  "Amoxicillin",
-  "Azithromycin",
-  "Pantoprazole",
-  "Ondansetron",
-  "Cetirizine",
-  "Metformin",
-  "Amlodipine",
-  "Losartan",
-  "Atorvastatin",
-  "Aspirin",
-  "Clopidogrel",
-  "Ceftriaxone",
-  "Dexamethasone"
-];  });
+    patientName: "", phone: "", age: "", ageUnit: "Years", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
+  });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<string | null>(null);
