@@ -27,6 +27,7 @@ interface SummaryData {
   complaints: string[];
   findings: string[];
   treatment: string[];
+  dischargeCondition: string[];
   advice: string[];
   medicines: Medicine[];
 }
@@ -127,6 +128,7 @@ function FullResultPreview() {
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
             treatment: safeParse(data.treatment),
+            dischargeCondition: safeParse(data.discharge_condition),
             advice: safeParse(data.advice),
             medicines: safeParse(data.medicines),
           });
@@ -169,6 +171,7 @@ function FullResultPreview() {
             complaints: migrate(draft.complaints),
             findings: migrate(draft.findings),
             treatment: migrate(draft.treatment),
+            dischargeCondition: migrate(draft.dischargeCondition),
             advice: migrate(draft.advice),
           });
         } catch (e) {
@@ -299,6 +302,7 @@ function FullResultPreview() {
         complaints: JSON.stringify(summary.complaints),
         findings: JSON.stringify(summary.findings),
         treatment: JSON.stringify(summary.treatment),
+        discharge_condition: JSON.stringify(summary.dischargeCondition),
         medicines: JSON.stringify(summary.medicines),
         advice: JSON.stringify(summary.advice),
         clinic_id: clinic?.id,
@@ -729,6 +733,21 @@ function FullResultPreview() {
                         </table>
                       </div>
                     )}
+
+                    <div className={styles.previewSection}>
+                      <h4>Condition at Discharge</h4>
+                      {summary.dischargeCondition && summary.dischargeCondition.length > 0 ? (
+                        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                          {summary.dischargeCondition.map((c, i) => (
+                            <li key={i} style={{ marginBottom: 6 }}>
+                              • {c}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>Stable</p>
+                      )}
+                    </div>
 
                     <div className={styles.previewSection}>
                       <h4>Follow-up Advice & Instructions</h4>
