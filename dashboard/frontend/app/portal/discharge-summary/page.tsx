@@ -197,7 +197,21 @@ function DischargeSummaryRedesign() {
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<string | null>(null);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [diagnosisOptions] = useState<string[]>([
+    "Pneumonia",
+    "Pneumonitis",
+    "Pulmonary edema",
+    "Bronchitis",
+    "Asthma",
+    "COPD",
+    "Tuberculosis",
+    "Lung cancer",
+    "Acute respiratory distress syndrome",
+    "Pleural effusion"
+  ]);
+  const [filteredDiagnosisOptions, setFilteredDiagnosisOptions] = useState<string[]>(diagnosisOptions);
+  const [showDiagnosisDropdown, setShowDiagnosisDropdown] = useState(false);
+
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
   const [activeSuggestion, setActiveSuggestion] = useState<Suggestion | null>(null);
