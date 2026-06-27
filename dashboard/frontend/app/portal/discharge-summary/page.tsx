@@ -20,6 +20,25 @@ const DIAGNOSIS_OPTIONS = [
   "Pleural effusion"
 ];
 
+const MEDICATION_OPTIONS = [
+  "Paracetamol",
+  "Ibuprofen",
+  "Amoxicillin",
+  "Azithromycin",
+  "Pantoprazole",
+  "Ondansetron",
+  "Cetirizine",
+  "Metformin",
+  "Amlodipine",
+  "Losartan",
+  "Atorvastatin",
+  "Aspirin",
+  "Clopidogrel",
+  "Ceftriaxone",
+  "Dexamethasone"
+];
+
+
 interface Medicine {
   name: string;
   dosage: string;
