@@ -883,6 +883,9 @@ function PatientHubContent({
         }}
       >
         <h3>IPD Discharge Summaries</h3>
+        <Link href={`/portal/discharge-summary?patientId=${patientId}${getDoctorParams().replace('?', '&')}`} className={styles.btnSecondary} style={{ fontSize: "13px", padding: "8px 16px", textDecoration: "none" }}>
+          + Create Summary
+        </Link>
       </div>
       <table className={styles.hubTable}>
         <thead>
@@ -953,13 +956,25 @@ function PatientHubContent({
 
   const renderAdmissions = () => (
     <div className={styles.sectionBox}>
-      <h3>Admission Records</h3>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <h3>Admission Records</h3>
+        <Link href={`/portal/admission-record?patientId=${patientId}${getDoctorParams().replace('?', '&')}`} className={styles.btnSecondary} style={{ fontSize: "13px", padding: "8px 16px", textDecoration: "none" }}>
+          + Create Record
+        </Link>
+      </div>
       <table className={styles.hubTable}>
         <thead>
           <tr>
             <th>Date of Admission</th>
             <th>Bed / Ward</th>
-            <th>Diagnosis</th>
+            <th>Department</th>
             <th>Clinician</th>
             <th>Status</th>
             <th>Actions</th>
@@ -980,7 +995,7 @@ function PatientHubContent({
               <td>
                 {a.ward || "---"} / {a.bed || "---"}
               </td>
-              <td>{a.diagnosis || "---"}</td>
+              <td>{a.department || "---"}</td>
               <td>Dr. {a.doctor_name}</td>
               <td>
                 <span
