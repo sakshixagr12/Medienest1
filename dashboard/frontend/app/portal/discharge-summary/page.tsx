@@ -6,6 +6,7 @@ import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
+import { EXAMINATION_TEMPLATES } from "./constants/examinationTemplates";
 
 const DIAGNOSIS_OPTIONS = [
   "Pneumonia",
@@ -178,6 +179,144 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
 const PREDEFINED_CONDITIONS = [
   "Conscious", "Hemodynamically Stable", "Afebrile", "Ambulatory", "Oxygen Support Required", "Wound Healing Well"
 ];
+
+const ExaminationEditor = ({ items, onChange }: any) => {
+  const [selectedDept, setSelectedDept] = useState("Medicine");
+  
+  const template = EXAMINATION_TEMPLATES.find(t => t.name === selectedDept) || EXAMINATION_TEMPLATES[0];
+  const predefinedInCurrentTemplate = new Set(template.categories.flatMap(c => c.findings));
+  
+  const predefinedSelected = items.filter((i: string) => predefinedInCurrentTemplate.has(i));
+  const customItems = items.filter((i: string) => !predefinedInCurrentTemplate.has(i));
+  
+  const hasRealCustom = customItems.some((i: string) => i !== "");
+  const [showCustom, setShowCustom] = useState(hasRealCustom);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (customItems.some((i: string) => i !== "")) setShowCustom(true);
+  }, [items]);
+  
+  const togglePredefined = (finding: string) => {
+    let next = [...items];
+    if (next.includes(finding)) {
+      next = next.filter((i: string) => i !== finding);
+      if (next.length === 0) next = [""];
+    } else {
+      next.push(finding);
+      next = next.filter((i: string) => i !== "");
+    }
+    onChange(next);
+  };
+
+  const updateCustom = (idx: number, val: string) => {
+    const newCustom = [...customItems];
+    newCustom[idx] = val;
+    onChange([...predefinedSelected, ...newCustom]);
+  };
+  
+  const addCustom = () => {
+    setShowCustom(true);
+    if (customItems.length === 0 || customItems[customItems.length - 1] !== "") {
+      onChange([...items, ""]);
+      setTimeout(() => inputRefs.current[customItems.length]?.focus(), 0);
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent, idx: number, item: string) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCustom();
+    } else if (e.key === "Backspace" && item === "" && customItems.length > 1) {
+      e.preventDefault();
+      removeCustom(idx);
+      setTimeout(() => inputRefs.current[idx - 1]?.focus(), 0);
+    }
+  };
+
+  const removeCustom = (idx: number) => {
+    const newCustom = customItems.filter((_: any, i: number) => i !== idx);
+    let next = [...predefinedSelected, ...newCustom];
+    if (next.length === 0) {
+      next = [""];
+      setShowCustom(false);
+    }
+    onChange(next);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--sanctuary-ink-l)" }}>Template:</span>
+        <select 
+          value={selectedDept} 
+          onChange={e => setSelectedDept(e.target.value)}
+          style={{ padding: "6px 12px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", background: "white", outline: "none", cursor: "pointer" }}
+        >
+          {EXAMINATION_TEMPLATES.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+        </select>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {template.categories.map(cat => (
+          <div key={cat.categoryName}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{cat.categoryName}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {cat.findings.map(finding => {
+                const isSelected = items.includes(finding);
+                return (
+                  <label key={finding} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "6px 12px", borderRadius: "16px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
+                    <input type="checkbox" checked={isSelected} onChange={() => togglePredefined(finding)} style={{ display: "none" }} />
+                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{finding}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className={styles.bulletListContainer}>
+        <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Custom Findings</div>
+        {customItems.map((item: string, idx: number) => {
+          if (!showCustom && item === "") return null;
+
+          return (
+            <div key={idx} className={styles.bulletRow}>
+              <div className={styles.bulletMarker} />
+              <div className={styles.inputWrapper}>
+                <input
+                  ref={(el) => { inputRefs.current[idx] = el; }}
+                  className={styles.bulletInput}
+                  value={item}
+                  onChange={(e) => updateCustom(idx, e.target.value)}
+                  onKeyDown={(e) => onKeyDown(e, idx, item)}
+                  placeholder="e.g. Bilateral basal crepitations"
+                />
+              </div>
+              {customItems.length > 1 && (
+                <button
+                  className={styles.btnRemovePoint}
+                  onClick={() => removeCustom(idx)}
+                  title="Remove custom finding"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              )}
+            </div>
+          );
+        })}
+        
+        <button
+          className={styles.btnAddPoint}
+          onClick={() => { addCustom(); setTimeout(() => inputRefs.current[customItems.length]?.focus(), 0); }}
+        >
+          + Add Custom Finding
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const DischargeConditionEditor = ({ items, onChange }: any) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -823,7 +962,11 @@ function DischargeSummaryRedesign() {
               <div className={styles.stepFadeIn}>
                 <div className={styles.premiumCard}>
                   {renderClinicalCard("Chief Complaints", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
-                  {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
+                  
+                  <div className={styles.summaryCard}>
+                    <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>Examination Findings</div></div>
+                    <ExaminationEditor items={summary.findings} onChange={(val: any) => updateField("findings", val)} />
+                  </div>
                   <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
                     <div className={styles.field}>
