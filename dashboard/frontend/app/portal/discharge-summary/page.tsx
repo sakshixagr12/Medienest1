@@ -123,22 +123,7 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
           </button>
         </div>
       ))}
-      {(items.length > 0 || field === "treatment") && (
-        field === "treatment" ? (
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
-          <button type="button" className={styles.btnAddPoint} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, ""); }}>
-            + Add Treatment
-          </button>
-          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>
-            + Medication
-          </button>
-          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>
-            + Fluid
-          </button>
-        </div>
-      ) : (
-        <button className={styles.btnAddPoint} onClick={() => addItem(items.length - 1)}>+ Add another point</button>
-      ))}
+      )}
     </div>
   );
 };
