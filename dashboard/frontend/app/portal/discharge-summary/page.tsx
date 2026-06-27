@@ -922,24 +922,48 @@ function DischargeSummaryRedesign() {
   };
 
   useEffect(() => {
-    const draft = localStorage.getItem("discharge_summary_draft");
-    if (draft) {
-      try {
-        const parsed = JSON.parse(draft);
-        setSummary(prev => ({ ...prev, ...parsed }));
-        const sStep = localStorage.getItem("discharge_summary_draft_step");
-        if (sStep) setStep(parseInt(sStep));
-      } catch (e) {
-        console.error("Draft error", e);
+    const fetchAdmission = async () => {
+      const admissionId = searchParams.get("admissionId");
+      const draft = localStorage.getItem("discharge_summary_draft");
+      
+      if (draft) {
+        try {
+          const parsed = JSON.parse(draft);
+          setSummary(prev => ({ ...prev, ...parsed }));
+          const sStep = localStorage.getItem("discharge_summary_draft_step");
+          if (sStep) setStep(parseInt(sStep));
+        } catch (e) {
+          console.error("Draft error", e);
+        }
+      } else if (admissionId) {
+        const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
+        if (data && !error) {
+           const [ageStr, sexStr] = data.age_sex ? data.age_sex.split(" / ") : ["", ""];
+           setSummary(prev => ({
+             ...prev,
+             patientName: data.patient_name || prev.patientName,
+             phone: data.contact || prev.phone,
+             age: ageStr || prev.age,
+             sex: sexStr || prev.sex,
+             regNo: data.reg_no || prev.regNo,
+             doa: data.date_admission ? data.date_admission.slice(0, 16) : prev.doa,
+             doctor: data.doctor_name || prev.doctor,
+             diagnosis: data.diagnosis || data.department || prev.diagnosis,
+             complaints: Array.isArray(data.complaints) && data.complaints.length > 0 ? data.complaints : prev.complaints,
+             findings: Array.isArray(data.findings) && data.findings.length > 0 ? data.findings : prev.findings,
+             treatment: Array.isArray(data.treatment_plan) && data.treatment_plan.length > 0 ? data.treatment_plan : prev.treatment,
+           }));
+        }
+      } else {
+        const pName = searchParams.get("patientName");
+        const pId = searchParams.get("patientId");
+        if (pName) setSummary(prev => ({ ...prev, patientName: decodeURIComponent(pName) }));
+        const dName = searchParams.get("doctorName") || searchParams.get("docName");
+        if (dName) setSummary(prev => ({ ...prev, doctor: decodeURIComponent(dName) }));
       }
-    } else {
-      const pName = searchParams.get("patientName");
-      const pId = searchParams.get("patientId");
-      if (pName) setSummary(prev => ({ ...prev, patientName: decodeURIComponent(pName) }));
-      const dName = searchParams.get("doctorName") || searchParams.get("docName");
-      if (dName) setSummary(prev => ({ ...prev, doctor: decodeURIComponent(dName) }));
-    }
-  }, [searchParams]);
+    };
+    fetchAdmission();
+  }, [searchParams, supabase]);
 
   const updateField = (field: keyof SummaryData, value: any) => {
     setSummary((prev) => {
