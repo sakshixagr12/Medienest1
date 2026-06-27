@@ -138,14 +138,17 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
       ))}
       {field === "treatment" && (
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
-          <button type="button" className={styles.btnAddPoint} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, ""); }}>
-            + Add Treatment
+          <button type="button" className={styles.pillButton} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>
+            💊 Medication
           </button>
-          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>
-            + Medication
+          <button type="button" className={styles.pillButton} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Injection given: "); }}>
+            💉 Injection
           </button>
-          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>
-            + Fluid
+          <button type="button" className={styles.pillButton} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>
+            💧 Fluid
+          </button>
+          <button type="button" className={styles.pillButton} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Procedure done: "); }}>
+            🩺 Procedure
           </button>
         </div>
       )}
