@@ -6,7 +6,7 @@ import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
-import { EXAMINATION_TEMPLATES, MUTUALLY_EXCLUSIVE_GROUPS, FINDING_SHORT_LABELS } from "./constants/examinationTemplates";
+import { EXAMINATION_TEMPLATES, MUTUALLY_EXCLUSIVE_GROUPS, FINDING_SHORT_LABELS, NORMAL_FINDINGS, ABNORMAL_FINDINGS } from "./constants/examinationTemplates";
 
 const DIAGNOSIS_OPTIONS = [
   "Pneumonia",
@@ -274,9 +274,36 @@ const ExaminationEditor = ({ items, onChange }: any) => {
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               {chipsToShow.map(finding => {
                 const isSelected = items.includes(finding);
-                const displayLabel = FINDING_SHORT_LABELS[finding] || finding;
+                let displayLabel = FINDING_SHORT_LABELS[finding] || finding;
+                
+                const isNormal = NORMAL_FINDINGS.has(finding);
+                const isAbnormal = ABNORMAL_FINDINGS.has(finding);
+                
+                if (isNormal) displayLabel = "🟢 " + displayLabel;
+                else if (isAbnormal) displayLabel = "🔴 " + displayLabel;
+                
+                let bg = "var(--sanctuary-gray-low)";
+                let borderColor = "var(--border)";
+                let color = "var(--sanctuary-ink)";
+                
+                if (isSelected) {
+                  if (isNormal) {
+                    bg = "#dcfce7";
+                    borderColor = "#22c55e";
+                    color = "#166534";
+                  } else if (isAbnormal) {
+                    bg = "#fee2e2";
+                    borderColor = "#ef4444";
+                    color = "#991b1b";
+                  } else {
+                    bg = "#eff6ff";
+                    borderColor = "#3b82f6";
+                    color = "#1e40af";
+                  }
+                }
+
                 return (
-                  <label key={finding} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "6px 12px", borderRadius: "16px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
+                  <label key={finding} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: bg, padding: "6px 12px", borderRadius: "16px", border: `1px solid ${borderColor}`, color: color, transition: "all 0.2s" }}>
                     <input type="checkbox" checked={isSelected} onChange={() => togglePredefined(finding)} style={{ display: "none" }} />
                     <span style={{ fontSize: "13px", fontWeight: 500 }}>{displayLabel}</span>
                   </label>
