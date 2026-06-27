@@ -505,7 +505,7 @@ function DischargeSummaryRedesign() {
                   <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
                     <div className={styles.field}>
-                      <input
+                        <input
                         type="text"
                         placeholder="e.g. Acute Gastroenteritis with severe dehydration"
                         value={summary.diagnosis}
@@ -518,7 +518,11 @@ function DischargeSummaryRedesign() {
                           setFilteredDiagnosisOptions(filtered);
                           setShowDiagnosisDropdown(true);
                         }}
-                        onFocus={() => setShowDiagnosisDropdown(true)}
+                        onFocus={() => {
+                          setFilteredDiagnosisOptions(DIAGNOSIS_OPTIONS);
+                          setShowDiagnosisDropdown(true);
+                        }}
+                        onBlur={() => setShowDiagnosisDropdown(false)}
                         style={{ fontWeight: 600, fontSize: 16 }}
                       />
                       {showDiagnosisDropdown && filteredDiagnosisOptions.length > 0 && (
