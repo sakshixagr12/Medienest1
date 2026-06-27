@@ -1004,68 +1004,106 @@ function AdmissionRecordRedesign() {
       };
       fetchDraft();
     } else {
-      const draftStr = localStorage.getItem("admission_draft");
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          // Merge with initial state to avoid 'undefined' fields for older drafts
+      const pId = searchParams.get("patientId");
+      
+      const loadDraftOrFresh = async () => {
+        let draftToLoad: any = null;
+        const draftStr = localStorage.getItem("admission_draft");
+        if (draftStr) {
+          try {
+            draftToLoad = JSON.parse(draftStr);
+          } catch (e) {
+            console.error("Failed to parse draft", e);
+          }
+        }
+
+        if (pId) {
+          const { data: patient } = await supabase.from("patients").select("*").eq("id", pId).single();
+          if (patient) {
+            // Check if draft belongs to someone else
+            if (draftToLoad && draftToLoad.patientName && draftToLoad.patientName !== patient.name) {
+               draftToLoad = null;
+               localStorage.removeItem("admission_draft");
+               localStorage.removeItem("admission_draft_step");
+               handleSetStep(1);
+            }
+            
+            setSummary(prev => ({
+              ...prev,
+              ...(draftToLoad || {}),
+              patientName: patient.name,
+              phone: patient.contact || "",
+              age: patient.age ? patient.age.toString() : "",
+              sex: patient.gender || "Male",
+              has_diabetes: !!patient.has_diabetes,
+              has_hypertension: !!patient.has_hypertension,
+              has_thyroid: !!patient.has_thyroid,
+              allergies: patient.allergies || "",
+              past_surgeries: patient.past_surgeries || "",
+              doctor: docNameParam || (doctors && doctors.length > 0 ? doctors[0].name : prev.doctor)
+            }));
+            setClinicLoading(false);
+            return;
+          }
+        }
+
+        // If no patientId or patient fetch failed, use draft or fresh
+        if (draftToLoad) {
           setSummary((prev) => ({
             ...prev,
-            ...draft,
-            // Explicitly handle fields that might be missing in older drafts
-            ward: draft.ward || "",
-            bed: draft.bed || "",
-            department: draft.department || "",
-            diagnosis: draft.diagnosis || "",
-            hpi: draft.hpi || "",
-            has_diabetes: !!draft.has_diabetes,
-            has_hypertension: !!draft.has_hypertension,
-            has_thyroid: !!draft.has_thyroid,
-            past_surgeries: draft.past_surgeries || "",
-            allergies: draft.allergies || "",
-            severity: draft.severity || "Mild",
-            admission_type: draft.admission_type || "OPD",
-            doctor_observations: draft.doctor_observations || "",
-            attachments: draft.attachments || [],
-            vitals: draft.vitals || "",
-          vitals_bp_sys: draft.vitals_bp_sys || "",
-          vitals_bp_dia: draft.vitals_bp_dia || "",
-          vitals_pulse: draft.vitals_pulse || "",
-          vitals_temp: draft.vitals_temp || "",
-          final_diagnosis: draft.final_diagnosis || "",
-          provisional_diagnosis: draft.provisional_diagnosis || "",
-          vitals_resp_rate: draft.vitals_resp_rate || "",
-          vitals_weight: draft.vitals_weight || "",
-          vitals_height: draft.vitals_height || "",
-          chief_complaints_extended: draft.chief_complaints_extended || [],
-          medical_history: draft.medical_history || [],
-          current_medications: draft.current_medications || [],
-          allergy_details: draft.allergy_details || [],
-          examination_findings: draft.examination_findings || "",
-          risk_flags: draft.risk_flags || [],
-          infection_control: draft.infection_control || "None",
-          investigations: Array.isArray(draft.investigations)
-            ? draft.investigations.map((inv: any) =>
-                typeof inv === "string"
-                  ? { name: inv, status: "Pending" }
-                  : inv,
-              )
-            : [],
-          additional_notes: draft.additional_notes || "",
-          diet_instructions: draft.diet_instructions || "",
-          activity_restrictions: draft.activity_restrictions || "",
-          nursing_instructions: draft.nursing_instructions || "",
-        }));
-      } catch (e) {
-        console.error("Failed to parse draft", e);
-      }
-    } else {
-      if (docNameParam) {
-        setSummary((prev) => ({ ...prev, doctor: docNameParam }));
-      } else if (doctors && doctors.length > 0) {
-        setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
-      }
-    }
+            ...draftToLoad,
+            ward: draftToLoad.ward || "",
+            bed: draftToLoad.bed || "",
+            department: draftToLoad.department || "",
+            diagnosis: draftToLoad.diagnosis || "",
+            hpi: draftToLoad.hpi || "",
+            has_diabetes: !!draftToLoad.has_diabetes,
+            has_hypertension: !!draftToLoad.has_hypertension,
+            has_thyroid: !!draftToLoad.has_thyroid,
+            past_surgeries: draftToLoad.past_surgeries || "",
+            allergies: draftToLoad.allergies || "",
+            severity: draftToLoad.severity || "Mild",
+            admission_type: draftToLoad.admission_type || "OPD",
+            doctor_observations: draftToLoad.doctor_observations || "",
+            attachments: draftToLoad.attachments || [],
+            vitals: draftToLoad.vitals || "",
+            vitals_bp_sys: draftToLoad.vitals_bp_sys || "",
+            vitals_bp_dia: draftToLoad.vitals_bp_dia || "",
+            vitals_pulse: draftToLoad.vitals_pulse || "",
+            vitals_temp: draftToLoad.vitals_temp || "",
+            final_diagnosis: draftToLoad.final_diagnosis || "",
+            provisional_diagnosis: draftToLoad.provisional_diagnosis || "",
+            vitals_resp_rate: draftToLoad.vitals_resp_rate || "",
+            vitals_weight: draftToLoad.vitals_weight || "",
+            vitals_height: draftToLoad.vitals_height || "",
+            chief_complaints_extended: draftToLoad.chief_complaints_extended || [],
+            medical_history: draftToLoad.medical_history || [],
+            current_medications: draftToLoad.current_medications || [],
+            allergy_details: draftToLoad.allergy_details || [],
+            examination_findings: draftToLoad.examination_findings || "",
+            risk_flags: draftToLoad.risk_flags || [],
+            infection_control: draftToLoad.infection_control || "None",
+            investigations: Array.isArray(draftToLoad.investigations)
+              ? draftToLoad.investigations.map((inv: any) =>
+                  typeof inv === "string" ? { name: inv, status: "Pending" } : inv
+                )
+              : [],
+            additional_notes: draftToLoad.additional_notes || "",
+            diet_instructions: draftToLoad.diet_instructions || "",
+            activity_restrictions: draftToLoad.activity_restrictions || "",
+            nursing_instructions: draftToLoad.nursing_instructions || "",
+          }));
+        } else {
+          if (docNameParam) {
+            setSummary((prev) => ({ ...prev, doctor: docNameParam }));
+          } else if (doctors && doctors.length > 0) {
+            setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
+          }
+        }
+        setClinicLoading(false);
+      };
+      
+      loadDraftOrFresh();
     }
     setClinicLoading(false);
   }, [docNameParam, doctors, searchParams]);
