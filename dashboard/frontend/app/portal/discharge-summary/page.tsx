@@ -321,6 +321,41 @@ const ExaminationEditor = ({ items, onChange }: any) => {
           </div>
         )})}
       </div>
+
+      {predefinedSelected.length > 0 && (
+        <div style={{ marginTop: "8px", padding: "16px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Selected Findings Preview</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {predefinedSelected.map(finding => {
+              const isNormal = NORMAL_FINDINGS.has(finding);
+              const isAbnormal = ABNORMAL_FINDINGS.has(finding);
+              let displayLabel = FINDING_SHORT_LABELS[finding] || finding;
+              if (isNormal) displayLabel = "🟢 " + displayLabel;
+              else if (isAbnormal) displayLabel = "🔴 " + displayLabel;
+
+              let bg = "#eff6ff";
+              let borderColor = "#3b82f6";
+              let color = "#1e40af";
+              if (isNormal) {
+                bg = "#dcfce7"; borderColor = "#22c55e"; color = "#166534";
+              } else if (isAbnormal) {
+                bg = "#fee2e2"; borderColor = "#ef4444"; color = "#991b1b";
+              }
+
+              return (
+                <button
+                  key={finding}
+                  onClick={() => togglePredefined(finding)}
+                  title="Click to remove"
+                  style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: bg, padding: "6px 12px", borderRadius: "16px", border: `1px solid ${borderColor}`, color: color, fontSize: "13px", fontWeight: 500 }}
+                >
+                  {displayLabel} <span style={{ opacity: 0.6, fontSize: "10px", marginLeft: "2px" }}>✕</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       
       <div className={styles.bulletListContainer}>
         <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Custom Findings</div>
