@@ -26,7 +26,8 @@ interface SummaryData {
   attendingPhysician: string;
   dischargingNurse: string;
   dischargeDestination: string;
-  emergencyContact: string;
+  emergencyContactRelation: string;
+  emergencyContactNumber: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -131,7 +132,8 @@ function FullResultPreview() {
             attendingPhysician: data.attending_physician || "",
             dischargingNurse: data.discharging_nurse || "",
             dischargeDestination: data.discharge_destination || "",
-            emergencyContact: data.emergency_contact || "",
+            emergencyContactRelation: data.emergency_contact_relation || "",
+            emergencyContactNumber: data.emergency_contact_number || "",
             diagnosis: data.diagnosis || "Diagnosis not recorded",
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
@@ -309,7 +311,8 @@ function FullResultPreview() {
         attending_physician: summary.attendingPhysician,
         discharging_nurse: summary.dischargingNurse,
         discharge_destination: summary.dischargeDestination,
-        emergency_contact: summary.emergencyContact,
+        emergency_contact_relation: summary.emergencyContactRelation,
+        emergency_contact_number: summary.emergencyContactNumber,
         diagnosis: summary.diagnosis,
         complaints: JSON.stringify(summary.complaints),
         findings: JSON.stringify(summary.findings),
@@ -655,10 +658,16 @@ function FullResultPreview() {
                             <span className={styles.infoValue}>{summary.dischargeDestination}</span>
                           </div>
                         )}
-                        {summary.emergencyContact && (
+                        {summary.emergencyContactRelation && (
                           <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>Emerg. Contact:</span>
-                            <span className={styles.infoValue}>{summary.emergencyContact}</span>
+                            <span className={styles.infoLabel}>Emerg. Relation:</span>
+                            <span className={styles.infoValue}>{summary.emergencyContactRelation}</span>
+                          </div>
+                        )}
+                        {summary.emergencyContactNumber && (
+                          <div className={styles.infoRow}>
+                            <span className={styles.infoLabel}>Emerg. Number:</span>
+                            <span className={styles.infoValue}>{summary.emergencyContactNumber}</span>
                           </div>
                         )}
                       </div>
