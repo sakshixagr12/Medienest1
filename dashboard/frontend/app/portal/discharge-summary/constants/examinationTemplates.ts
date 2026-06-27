@@ -6,6 +6,33 @@ export type DepartmentTemplate = {
   }[];
 };
 
+export const MUTUALLY_EXCLUSIVE_GROUPS = [
+  ["Afebrile", "Febrile"],
+  ["Conscious", "Lethargic", "Unconscious"],
+  ["Oriented", "Disoriented"],
+  ["No Murmur", "Murmur Present"],
+  ["Tender", "Non-Tender", "Non Tender"],
+  ["No Pedal Edema", "Pedal Edema Present"],
+  ["No Icterus", "Icterus Present"],
+  ["No Pallor", "Pallor Present"],
+  ["No Cyanosis", "Cyanosis Present"],
+  ["Well Hydrated", "Dehydrated", "Signs of Dehydration Present"],
+  ["Abdomen Soft", "Abdomen Distended", "Rigidity Present", "Guarding Present"],
+  ["Bowel Sounds Present", "Bowel Sounds Absent", "Bowel Sounds Sluggish"],
+  ["No Focal Neurological Deficit (FND)", "Focal Neurological Deficit Present"],
+  ["Dressing Clean and Intact", "Dressing Soaked"],
+  ["Wound Healthy", "Wound Gaping"],
+  ["No Active Bleeding", "Bleeding Present", "Active Bleeding"],
+  ["Distal Pulses Palpable", "Distal Pulses Absent"],
+  ["No Neurovascular Deficit", "Neurovascular Deficit Present"],
+  ["Active", "Lethargic", "Irritable"],
+  ["Feeding Well", "Poor Feeding"],
+  ["No Respiratory Distress", "Respiratory Distress Present"],
+  ["Weight Appropriate for Age", "Failure to Thrive"],
+  ["Uterus Relaxed", "Uterus Contracted"],
+  ["Os Closed", "Os Open"]
+];
+
 export const EXAMINATION_TEMPLATES: DepartmentTemplate[] = [
   {
     name: "Medicine",

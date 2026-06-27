@@ -6,7 +6,7 @@ import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
-import { EXAMINATION_TEMPLATES } from "./constants/examinationTemplates";
+import { EXAMINATION_TEMPLATES, MUTUALLY_EXCLUSIVE_GROUPS } from "./constants/examinationTemplates";
 
 const DIAGNOSIS_OPTIONS = [
   "Pneumonia",
@@ -191,6 +191,7 @@ const ExaminationEditor = ({ items, onChange }: any) => {
   
   const hasRealCustom = customItems.some((i: string) => i !== "");
   const [showCustom, setShowCustom] = useState(hasRealCustom);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -203,6 +204,10 @@ const ExaminationEditor = ({ items, onChange }: any) => {
       next = next.filter((i: string) => i !== finding);
       if (next.length === 0) next = [""];
     } else {
+      const group = MUTUALLY_EXCLUSIVE_GROUPS.find(g => g.includes(finding));
+      if (group) {
+        next = next.filter(i => !group.includes(i));
+      }
       next.push(finding);
       next = next.filter((i: string) => i !== "");
     }
@@ -258,11 +263,16 @@ const ExaminationEditor = ({ items, onChange }: any) => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {template.categories.map(cat => (
+        {template.categories.map(cat => {
+          const isExpanded = expandedCategories[cat.categoryName];
+          const chipsToShow = isExpanded ? cat.findings : cat.findings.slice(0, 5);
+          const hasMore = cat.findings.length > 5;
+          
+          return (
           <div key={cat.categoryName}>
             <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{cat.categoryName}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {cat.findings.map(finding => {
+              {chipsToShow.map(finding => {
                 const isSelected = items.includes(finding);
                 return (
                   <label key={finding} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "6px 12px", borderRadius: "16px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
@@ -271,9 +281,17 @@ const ExaminationEditor = ({ items, onChange }: any) => {
                   </label>
                 );
               })}
+              {hasMore && (
+                <button 
+                  onClick={() => setExpandedCategories(p => ({ ...p, [cat.categoryName]: !p[cat.categoryName] }))}
+                  style={{ background: "none", border: "1px dashed #cbd5e1", borderRadius: "16px", padding: "6px 12px", fontSize: "13px", fontWeight: 600, color: "#64748b", cursor: "pointer", transition: "all 0.2s" }}
+                >
+                  {isExpanded ? "Show Less" : `+ More ${cat.categoryName}`}
+                </button>
+              )}
             </div>
           </div>
-        ))}
+        )})}
       </div>
       
       <div className={styles.bulletListContainer}>
