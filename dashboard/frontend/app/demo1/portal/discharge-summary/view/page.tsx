@@ -593,50 +593,58 @@ function FullResultPreview() {
                 <tr>
                   <td>
                     <div className={styles.previewHeader}>
-                      <h2>{clinic?.name || "Clinic Name"}</h2>
-                      <p>{clinic?.address || "Address details..."}</p>
-                      <div
-                        style={{
-                          marginTop: 12,
-                          fontSize: 15,
-                          fontWeight: 900,
-                          textDecoration: "underline",
-                          letterSpacing: "1px",
-                        }}
-                      >
-                        DISCHARGE SUMMARY
+                      <div className={styles.headerLeft}>
+                        <h2>{clinic?.name?.toLowerCase() || "daddy hospital"}</h2>
+                        <p>{clinic?.address || "bhapar road, basti"}</p>
+                        <p>Phone: {summary.phone || "7301018207"}</p>
                       </div>
+                      <div className={styles.logoBox}>Logo</div>
+                    </div>
+                    
+                    <div className={styles.titleStrip}>
+                        DISCHARGE SUMMARY
                     </div>
 
                     <div className={styles.previewInfoGrid}>
                       <div>
-                        <b>Patient Name:</b>{" "}
-                        {summary.patientName || (
-                          <span className={styles.emptyPlaceholder}>
-                            [Not Provided]
-                          </span>
-                        )}
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Patient Name</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.patientName || <span className={styles.emptyPlaceholder}>[Not Provided]</span>}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Age / Sex</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.age} Years / {summary.sex}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Reg. / IPD No.</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.regNo || "---"}</span>
+                        </div>
                       </div>
+                      
                       <div>
-                        <b>Reg / IPD No:</b> {summary.regNo || "---"}
-                      </div>
-                      <div>
-                        <b>Age / Sex:</b> {summary.age}Y / {summary.sex}
-                      </div>
-                      <div>
-                        <b>Consultant:</b> Dr. {summary.doctor || "---"}
-                      </div>
-                      <div>
-                        <b>Date of Admission:</b>{" "}
-                        {summary.doa
-                          ? new Date(summary.doa).toLocaleString()
-                          : "---"}
-                      </div>
-                      <div>
-                        <b>Date of Discharge:</b>{" "}
-                        {summary.dod
-                          ? new Date(summary.dod).toLocaleString()
-                          : "---"}
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Date of Admission</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.doa ? new Date(summary.doa).toLocaleString() : "---"}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Date of Discharge</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.dod ? new Date(summary.dod).toLocaleString() : "---"}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Consultant</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>Dr. {summary.doctor || "A"}</span>
+                        </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Discharge To</span>
+                          <span className={styles.infoColon}>:</span>
+                          <span className={styles.infoValue}>{summary.dischargeDestination || "basti, up"}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -646,69 +654,42 @@ function FullResultPreview() {
               <tbody>
                 <tr>
                   <td>
+                    <div className={styles.previewSection} style={{ borderTop: "none", paddingTop: 0 }}>
+                      <h4>Final Diagnosis</h4>
+                      {summary.diagnosis ? (
+                        <p>{summary.diagnosis}</p>
+                      ) : (
+                        <p className={styles.emptyPlaceholder}>Diagnosis not recorded</p>
+                      )}
+                    </div>
+                    
                     <div className={styles.previewSection}>
-                      <h4>Chief Complaints & History</h4>
+                      <h4>Clinical Summary</h4>
                       {summary.complaints.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.complaints.map((c, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {c}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className={styles.emptyPlaceholder}>
-                          No complaints recorded.
-                        </p>
-                      )}
-                    </div>
-
-                    <div className={styles.previewSection}>
-                      <h4>Examination Findings</h4>
+                        <div style={{ marginBottom: "12px" }}>
+                          <strong style={{ display: "block", color: "#1e293b", fontSize: "13px", marginBottom: "4px" }}>Chief Complaints:</strong>
+                          <p>{summary.complaints.join("; ")}</p>
+                        </div>
+                      ) : null}
+                      
                       {summary.findings.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.findings.map((f, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {f}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className={styles.emptyPlaceholder}>
-                          No findings recorded.
-                        </p>
+                        <div>
+                          <strong style={{ display: "block", color: "#1e293b", fontSize: "13px", marginBottom: "4px" }}>Physical Findings & Hospital Course:</strong>
+                          <p>{summary.findings.join("; ")}</p>
+                        </div>
+                      ) : null}
+                      
+                      {summary.complaints.length === 0 && summary.findings.length === 0 && (
+                        <p className={styles.emptyPlaceholder}>No clinical summary recorded.</p>
                       )}
                     </div>
 
-                    <div className={styles.previewSection} style={{ backgroundColor: "#fef2f2", padding: "16px", borderRadius: "8px", borderLeft: "4px solid #ef4444", margin: "24px 0" }}>
-                      <h4 style={{ color: "#b91c1c", fontSize: "16px", borderBottom: "1px solid #fecaca", paddingBottom: "8px", marginBottom: "12px", textTransform: "uppercase" }}>🩺 Final Diagnosis</h4>
-                      <p style={{ fontWeight: 700, fontSize: "15px", color: "#7f1d1d" }}>
-                        {summary.diagnosis || (
-                          <span className={styles.emptyPlaceholder}>
-                            Pending diagnosis...
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
                     <div className={styles.previewSection}>
-                      <h4>Treatment & Medications During Stay</h4>
+                      <h4>Treatment Provided</h4>
                       {summary.treatment.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.treatment.map((t, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {t}
-                            </li>
-                          ))}
-                        </ul>
+                        <p>{summary.treatment.join("; ")}</p>
                       ) : (
-                        <p>Conservative management.</p>
+                        <p className={styles.emptyPlaceholder}>Conservative management.</p>
                       )}
                     </div>
 
@@ -754,9 +735,9 @@ function FullResultPreview() {
                     </div>
 
                     <div className={styles.previewSection}>
-                      <h4>Follow-up Advice & Instructions</h4>
+                      <h4>Follow-up Instructions</h4>
                       {summary.advice.length > 0 ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginLeft: "16px" }}>
                           {(() => {
                             const grouped: Record<string, string[]> = {};
                             const custom: string[] = [];
@@ -789,21 +770,27 @@ function FullResultPreview() {
                             for (const cat in grouped) {
                                const label = catLabels[cat] || cat;
                                sections.push(
-                                  <div key={cat} style={{ marginBottom: "8px" }}>
-                                    <strong style={{ display: "block", color: "#334155", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>{label} {cat !== "FOLLOW-UP" ? "Advice" : ""}</strong>
-                                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                                       {grouped[cat].map((text, i) => <li key={i} style={{ marginBottom: "4px", color: "#475569", marginLeft: "8px" }}>• {text}</li>)}
-                                    </ul>
+                                  <div key={cat} style={{ display: "flex", gap: "6px" }}>
+                                    <span style={{ color: "#000" }}>•</span>
+                                    <div>
+                                      <strong style={{ color: "#1e293b", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}:</strong>
+                                      <div style={{ marginTop: "4px" }}>
+                                        {grouped[cat].map((text, i) => <div key={i} style={{ color: "#000", fontSize: "13px" }}>{label === "Follow-up" ? "" : `${label}: `}{text}</div>)}
+                                      </div>
+                                    </div>
                                   </div>
                                );
                             }
 
                             if (custom.length > 0) {
                                sections.push(
-                                  <div key="custom" style={{ marginBottom: "8px" }}>
-                                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                                       {custom.map((text, i) => <li key={i} style={{ marginBottom: "4px", color: "#475569", marginLeft: "8px" }}>• {text}</li>)}
-                                    </ul>
+                                  <div key="custom">
+                                     {custom.map((text, i) => (
+                                       <div key={i} style={{ display: "flex", gap: "6px", marginBottom: "8px" }}>
+                                         <span style={{ color: "#000" }}>•</span>
+                                         <div style={{ color: "#000", fontSize: "13px" }}>{text}</div>
+                                       </div>
+                                     ))}
                                   </div>
                                );
                             }
@@ -812,7 +799,7 @@ function FullResultPreview() {
                           })()}
                         </div>
                       ) : (
-                        <p>General post-discharge care.</p>
+                        <p className={styles.emptyPlaceholder}>General post-discharge care.</p>
                       )}
                     </div>
                   </td>
@@ -822,12 +809,6 @@ function FullResultPreview() {
               <tfoot>
                 <tr>
                   <td>
-                    <div
-                      style={{
-                        paddingTop: 60,
-                        textAlign: "right",
-                        borderTop: "1px solid #000",
-                        marginTop: 40,
                       }}
                     >
                       <div style={{ fontSize: 13, fontWeight: 900 }}>
