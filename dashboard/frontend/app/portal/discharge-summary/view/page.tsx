@@ -645,6 +645,9 @@ function FullResultPreview() {
                           <span className={styles.infoLabel}>Date of Discharge:</span>
                           <span className={styles.infoValue}>{summary.dod ? new Date(summary.dod).toLocaleString() : "---"}</span>
                         </div>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>Consultant:</span>
+                          <span className={styles.infoValue}>Dr. {summary.doctor || "---"}</span>
                         </div>
                         {summary.dischargeDestination && (
                           <div className={styles.infoRow}>
