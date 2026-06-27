@@ -1048,9 +1048,9 @@ function DischargeSummaryRedesign() {
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>Examination Findings</div></div>
                     <ExaminationEditor items={summary.findings} onChange={(val: any) => updateField("findings", val)} />
                   </div>
-                  <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
-                    <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
-                    <div className={styles.field}>
+                  <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444', backgroundColor: '#fef2f2', padding: '16px', borderRadius: '12px' }}>
+                    <div className={styles.cardHeader}><div className={styles.cardTitle} style={{ color: '#b91c1c', fontWeight: 800, fontSize: '18px' }}><span style={{ fontSize: '20px', marginRight: '8px' }}>🩺</span>Final Diagnosis</div></div>
+                    <div className={styles.field} style={{ marginTop: '8px' }}>
                         <input
                         type="text"
                         placeholder="e.g. Acute Gastroenteritis with severe dehydration"
