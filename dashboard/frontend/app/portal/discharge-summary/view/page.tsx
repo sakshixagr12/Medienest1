@@ -23,6 +23,8 @@ interface SummaryData {
   doa: string;
   dod: string;
   doctor: string;
+  attendingPhysician: string;
+  dischargingNurse: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -124,6 +126,8 @@ function FullResultPreview() {
             doa: data.date_admission || "---",
             dod: data.date_discharge || "---",
             doctor: data.doctor_name || "---",
+            attendingPhysician: data.attending_physician || "",
+            dischargingNurse: data.discharging_nurse || "",
             diagnosis: data.diagnosis || "Diagnosis not recorded",
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
@@ -298,6 +302,8 @@ function FullResultPreview() {
         doctor_name: summary.doctor,
         date_admission: summary.doa,
         date_discharge: summary.dod,
+        attending_physician: summary.attendingPhysician,
+        discharging_nurse: summary.dischargingNurse,
         diagnosis: summary.diagnosis,
         complaints: JSON.stringify(summary.complaints),
         findings: JSON.stringify(summary.findings),
@@ -637,6 +643,18 @@ function FullResultPreview() {
                           <span className={styles.infoLabel}>Consultant:</span>
                           <span className={styles.infoValue}>Dr. {summary.doctor || "---"}</span>
                         </div>
+                        {summary.attendingPhysician && (
+                          <div className={styles.infoRow}>
+                            <span className={styles.infoLabel}>Attending Phys:</span>
+                            <span className={styles.infoValue}>{summary.attendingPhysician}</span>
+                          </div>
+                        )}
+                        {summary.dischargingNurse && (
+                          <div className={styles.infoRow}>
+                            <span className={styles.infoLabel}>Discharge Nurse:</span>
+                            <span className={styles.infoValue}>{summary.dischargingNurse}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
