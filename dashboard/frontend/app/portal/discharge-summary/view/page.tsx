@@ -692,7 +692,7 @@ function FullResultPreview() {
                     <div className={styles.previewSection}>
                       <h4>Clinical Summary</h4>
                       <div style={{ marginBottom: 16 }}>
-                        <strong style={{ display: "block", marginBottom: 4, color: "#334155" }}>Reason for Admission:</strong>
+                        <strong style={{ display: "block", marginBottom: 4, color: "#334155" }}>Chief Complaints:</strong>
                         {summary.complaints.length > 0 ? (
                           <p>{summary.complaints.join("; ")}</p>
                         ) : (
