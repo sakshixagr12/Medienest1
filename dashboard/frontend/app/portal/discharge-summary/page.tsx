@@ -186,6 +186,11 @@ const MedicationRepeater = ({ items, onChange }: any) => {
     next[idx] = { ...next[idx], [field]: val };
     onChange(next);
   };
+  const parseDosage = (d: string) => {
+    const m = (d || "").match(/^([\d.]+)\s*(.*)$/);
+    if (m) return { val: m[1], unit: m[2] || "mg" };
+    return { val: d || "", unit: "mg" };
+  };
   return (
     <div className={styles.repeaterTable}>
       {items.length > 0 && (
@@ -238,7 +243,37 @@ const MedicationRepeater = ({ items, onChange }: any) => {
               </ul>
             )}
           </div>
-          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="500mg" value={med.dosage} onChange={(e) => updateMed(i, "dosage", e.target.value)} />
+          <div style={{ display: "flex", gap: "4px" }}>
+            <input 
+              className={styles.iconInput} 
+              style={{ paddingLeft: 12, width: "60px", minWidth: 0 }} 
+              placeholder="500" 
+              value={parseDosage(med.dosage).val} 
+              onChange={(e) => {
+                const u = parseDosage(med.dosage).unit;
+                updateMed(i, "dosage", e.target.value ? `${e.target.value} ${u}` : "");
+              }} 
+            />
+            <select 
+              className={styles.iconInput}
+              style={{ padding: "0 8px", width: "auto" }}
+              value={parseDosage(med.dosage).unit}
+              onChange={(e) => {
+                const v = parseDosage(med.dosage).val;
+                updateMed(i, "dosage", v ? `${v} ${e.target.value}` : "");
+              }}
+            >
+              <option value="mg">mg</option>
+              <option value="g">g</option>
+              <option value="mcg">mcg</option>
+              <option value="ml">ml</option>
+              <option value="tbsp">tbsp</option>
+              <option value="tsp">tsp</option>
+              <option value="units">units</option>
+              <option value="drops">drops</option>
+              <option value="patch">patch</option>
+            </select>
+          </div>
           <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="BID" value={med.frequency} onChange={(e) => updateMed(i, "frequency", e.target.value)} />
           <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
         </div>
