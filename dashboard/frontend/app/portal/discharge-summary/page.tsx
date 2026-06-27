@@ -99,25 +99,25 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
   };
   return (
     <div className={styles.bulletListContainer}>
-      {items.length === 0 ? (
+      {items.length === 0 && field !== "treatment" && (
         <button className={styles.btnAddPoint} onClick={() => updateField(field, [""])}>+ Start adding {field}</button>
-      ) : (
-        items.map((item, idx) => (
-          <div key={idx} className={styles.bulletRow}>
-            <div className={styles.bulletMarker} />
-            <div className={styles.inputWrapper}>
-              <input ref={(el) => { inputRefs.current[idx] = el; }} className={styles.bulletInput} value={item} onChange={(e) => updateItem(idx, e.target.value)} onKeyDown={(e) => onKeyDown(e, idx)} onBlur={() => setTimeout(() => setActiveSuggestion(null), 200)} placeholder={idx === 0 ? placeholder : "Next point..."} />
-              {activeSuggestion && activeSuggestion.field === field && activeSuggestion.index === idx && (
-                <div className={`${styles.ghostText} ${styles.active}`}><span style={{ color: "transparent", visibility: "hidden" }}>{item}</span>{activeSuggestion.text}<span className={styles.ghostHint}>TAB</span></div>
-              )}
-            </div>
-            <button className={styles.btnRemovePoint} onClick={() => removeItem(idx)}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
-            </button>
-          </div>
-        ))
       )}
-      {field === "treatment" ? (
+      {items.length > 0 && items.map((item, idx) => (
+        <div key={idx} className={styles.bulletRow}>
+          <div className={styles.bulletMarker} />
+          <div className={styles.inputWrapper}>
+            <input ref={(el) => { inputRefs.current[idx] = el; }} className={styles.bulletInput} value={item} onChange={(e) => updateItem(idx, e.target.value)} onKeyDown={(e) => onKeyDown(e, idx)} onBlur={() => setTimeout(() => setActiveSuggestion(null), 200)} placeholder={idx === 0 ? placeholder : "Next point..."} />
+            {activeSuggestion && activeSuggestion.field === field && activeSuggestion.index === idx && (
+              <div className={`${styles.ghostText} ${styles.active}`}><span style={{ color: "transparent", visibility: "hidden" }}>{item}</span>{activeSuggestion.text}<span className={styles.ghostHint}>TAB</span></div>
+            )}
+          </div>
+          <button className={styles.btnRemovePoint} onClick={() => removeItem(idx)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
+          </button>
+        </div>
+      ))}
+      {(items.length > 0 || field === "treatment") && (
+        field === "treatment" ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <button className={styles.btnAddPoint} onClick={() => setShowTreatmentOptions(!showTreatmentOptions)}>
             + Add Treatment
@@ -132,7 +132,7 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
         </div>
       ) : (
         <button className={styles.btnAddPoint} onClick={() => addItem(items.length - 1)}>+ Add another point</button>
-      )}
+      ))}
     </div>
   );
 };
