@@ -1016,6 +1016,7 @@ function PatientHubContent({
                       Resume Draft
                     </Link>
                   ) : (
+                    <>
                     <Link
                       href={`/portal/admission-record/view?id=${a.id}${getDoctorParams()}`}
                       className={styles.tableAction}
