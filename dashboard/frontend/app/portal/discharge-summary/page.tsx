@@ -58,7 +58,6 @@ interface BulletListEditorProps {
 }
 
 const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStatus, setAutoSaveStatus, suggestTimer, activeSuggestion, setActiveSuggestion, fetchSmartSuggestion }: BulletListEditorProps) => {
-  const [showTreatmentOptions, setShowTreatmentOptions] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const updateItem = (index: number, val: string) => {
     const newItems = [...items];
@@ -78,11 +77,19 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
   };
   const addItem = (index: number, initialValue: string = "") => {
     const newItems = [...items];
-    newItems.splice(index + 1, 0, initialValue);
-    updateField(field, newItems);
-    setActiveSuggestion(null);
-    setShowTreatmentOptions(false);
-    setTimeout(() => inputRefs.current[index + 1]?.focus(), 0);
+    
+    // If the current point is empty, just replace it instead of adding a new one
+    if (newItems[index] === "") {
+      newItems[index] = initialValue;
+      updateField(field, newItems);
+      setActiveSuggestion(null);
+      setTimeout(() => inputRefs.current[index]?.focus(), 0);
+    } else {
+      newItems.splice(index + 1, 0, initialValue);
+      updateField(field, newItems);
+      setActiveSuggestion(null);
+      setTimeout(() => inputRefs.current[index + 1]?.focus(), 0);
+    }
   };
   const removeItem = (index: number) => {
     if (items.length <= 1) { updateField(field, [""]); return; }
@@ -118,17 +125,16 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
       ))}
       {(items.length > 0 || field === "treatment") && (
         field === "treatment" ? (
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <button type="button" className={styles.btnAddPoint} onClick={(e) => { e.preventDefault(); setShowTreatmentOptions(!showTreatmentOptions); }}>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
+          <button type="button" className={styles.btnAddPoint} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, ""); }}>
             + Add Treatment
           </button>
-          {showTreatmentOptions && (
-            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "8px", background: "white", border: "1px solid var(--border, #e2e8f0)", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px", zIndex: 50, display: "flex", flexDirection: "column", gap: "4px", width: "200px" }}>
-              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, ""); }}>Blank Point</button>
-              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>Medication given...</button>
-              <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>Fluid given...</button>
-            </div>
-          )}
+          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Medication given: "); }}>
+            + Medication
+          </button>
+          <button type="button" className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-primary)", borderColor: "var(--sanctuary-primary)" }} onClick={(e) => { e.preventDefault(); addItem(items.length - 1, "Fluid given: "); }}>
+            + Fluid
+          </button>
         </div>
       ) : (
         <button className={styles.btnAddPoint} onClick={() => addItem(items.length - 1)}>+ Add another point</button>
