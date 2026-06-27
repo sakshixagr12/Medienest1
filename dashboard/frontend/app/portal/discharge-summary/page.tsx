@@ -410,14 +410,14 @@ function DischargeSummaryRedesign() {
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="field"><label>Phone Number</label><input type="text" inputMode="numeric" placeholder="e.g. 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, ''))} /></div>
+                      <div className="field"><label>Phone Number</label><input type="text" inputMode="numeric" maxLength={10} placeholder="e.g. 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, '').slice(0, 10))} /></div>
                       <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
                       <div className="field"><label>Discharge Destination</label><input type="text" placeholder="e.g. Home, Facility" value={summary.dischargeDestination} onChange={(e) => updateField("dischargeDestination", e.target.value)} /></div>
                       <div className="field"><label>Emergency Contact Relation</label><input type="text" placeholder="e.g. Spouse" value={summary.emergencyContactRelation} onChange={(e) => updateField("emergencyContactRelation", e.target.value)} /></div>
-                      <div className="field"><label>Contact Number</label><input type="text" inputMode="numeric" placeholder="e.g. 9876543210" value={summary.emergencyContactNumber} onChange={(e) => updateField("emergencyContactNumber", e.target.value.replace(/\D/g, ''))} /></div>
+                      <div className="field"><label>Contact Number</label><input type="text" inputMode="numeric" maxLength={10} placeholder="e.g. 9876543210" value={summary.emergencyContactNumber} onChange={(e) => updateField("emergencyContactNumber", e.target.value.replace(/\D/g, '').slice(0, 10))} /></div>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
