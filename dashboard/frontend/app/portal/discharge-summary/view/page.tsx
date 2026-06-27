@@ -649,18 +649,7 @@ function FullResultPreview() {
                           <span className={styles.infoLabel}>Consultant:</span>
                           <span className={styles.infoValue}>Dr. {summary.doctor || "---"}</span>
                         </div>
-                        {summary.attendingPhysician && (
-                          <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>Attending Phys:</span>
-                            <span className={styles.infoValue}>{summary.attendingPhysician}</span>
-                          </div>
-                        )}
-                        {summary.dischargingNurse && (
-                          <div className={styles.infoRow}>
-                            <span className={styles.infoLabel}>Discharge Nurse:</span>
-                            <span className={styles.infoValue}>{summary.dischargingNurse}</span>
-                          </div>
-                        )}
+                        </div>
                         {summary.dischargeDestination && (
                           <div className={styles.infoRow}>
                             <span className={styles.infoLabel}>Discharge To:</span>
