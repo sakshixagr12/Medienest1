@@ -21,8 +21,10 @@ const PORT = process.env.PORT || 4001;
       await client.connect();
       await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS attending_physician TEXT;`);
       await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharging_nurse TEXT;`);
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharge_destination TEXT;`);
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS emergency_contact TEXT;`);
       await client.query(`NOTIFY pgrst, 'reload schema';`);
-      console.log("✅ Auto-migrated Care Team columns successfully!");
+      console.log("✅ Auto-migrated Care Team, Destination, and Contact columns successfully!");
     } catch (e) {
       console.log("ℹ️ Migration skipped or failed:", e.message);
     } finally {
