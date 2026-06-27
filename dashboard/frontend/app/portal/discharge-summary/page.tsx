@@ -7,6 +7,19 @@ import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 
+const DIAGNOSIS_OPTIONS = [
+  "Pneumonia",
+  "Pneumonitis",
+  "Pulmonary edema",
+  "Bronchitis",
+  "Asthma",
+  "COPD",
+  "Tuberculosis",
+  "Lung cancer",
+  "Acute respiratory distress syndrome",
+  "Pleural effusion"
+];
+
 interface Medicine {
   name: string;
   dosage: string;
