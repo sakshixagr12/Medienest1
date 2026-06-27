@@ -304,6 +304,18 @@ function DischargeSummaryRedesign() {
     setSummary((prev) => ({ ...prev, [field]: value }));
   };
 
+  const calculateLengthOfStay = (doa: string, dod: string) => {
+    if (!doa || !dod) return "—";
+    const d1 = new Date(doa);
+    const d2 = new Date(dod);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return "—";
+    const diffTime = d2.getTime() - d1.getTime();
+    if (diffTime < 0) return "Invalid Dates";
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Same Day";
+    return `${diffDays} Day${diffDays > 1 ? 's' : ''}`;
+  };
+
   // --- SMART ASSIST ENGINE ---
   const fetchSmartSuggestion = async (
     field: string,
@@ -1083,6 +1095,12 @@ function DischargeSummaryRedesign() {
                 <span className={styles.contextValue}>
                   {summary.dod ? new Date(summary.dod).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' }) : "—"}
                   {summary.dod && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ marginLeft: 4 }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+                </span>
+              </div>
+              <div className={styles.contextItem}>
+                <span className={styles.contextLabel}>Length of Stay</span>
+                <span className={styles.contextValue} style={{ color: "#3b82f6", fontWeight: 700 }}>
+                  {calculateLengthOfStay(summary.doa, summary.dod)}
                 </span>
               </div>
               <div className={styles.contextItem}>
