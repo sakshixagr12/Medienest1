@@ -420,255 +420,73 @@ function PatientHubContent({
       {admissions.length > 0 && (
         <div
           className={styles.sectionBox}
-          style={{ borderLeft: "4px solid #f59e0b", background: "#fffbeb" }}
+          style={{ borderLeft: `4px solid ${admissions[0].status === "Discharged" ? "#94a3b8" : "#3b82f6"}`, background: "#f8fafc" }}
         >
-          <h3
-            style={{
-              color: "#b45309",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <path d="M3 14h18M5 14v4M19 14v4M3 8h18M6 8V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M12 4v4"></path>
-            </svg>
-            Current/Latest Admission Details
-          </h3>
-          <div className={styles.profileGrid}>
-            <div className={styles.profileItem}>
-              <strong>Admission ID:</strong>{" "}
-              <span style={{ fontFamily: "monospace", fontWeight: 900 }}>
-                {admissions[0].id.slice(0, 8).toUpperCase()}
-              </span>
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Adm. Date:</strong>{" "}
-              {new Date(admissions[0].date_admission).toLocaleString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Department:</strong>{" "}
-              {admissions[0].department || "General Medicine"}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Ward No:</strong> {admissions[0].ward || "---"}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Bed No:</strong> {admissions[0].bed || "---"}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Admitting Dr:</strong> Dr. {admissions[0].doctor_name}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Adm. Type:</strong>{" "}
-              {admissions[0].admission_type || "OPD"}
-            </div>
-            <div className={styles.profileItem}>
-              <strong>Triage:</strong>
-              <span
-                style={{
-                  marginLeft: 8,
-                  padding: "2px 8px",
-                  borderRadius: 4,
-                  fontSize: 10,
-                  fontWeight: 900,
-                  textTransform: "uppercase",
-                  background:
-                    admissions[0].severity === "Severe"
-                      ? "#ef4444"
-                      : admissions[0].severity === "Moderate"
-                        ? "#f59e0b"
-                        : "#10b981",
-                  color: "#fff",
-                }}
-              >
-                {admissions[0].severity || "Mild"}
-              </span>
-            </div>
-            {(admissions[0].vitals_pulse || admissions[0].vitals_bp_sys) && (
-              <div
-                className={styles.profileItem}
-                style={{
-                  gridColumn: "span 2",
-                  marginTop: 8,
-                  padding: "12px 16px",
-                  background: "#fef2f2",
-                  borderRadius: 8,
-                  border: "1px solid #fecaca",
-                  color: "#991b1b",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div
-                    style={{ display: "flex", gap: 16, alignItems: "center" }}
-                  >
-                    <strong style={{ fontSize: 13 }}>️ VITALS:</strong>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 12,
-                        fontSize: 13,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {admissions[0].vitals_bp_sys && (
-                        <span>
-                          BP: {admissions[0].vitals_bp_sys}/
-                          {admissions[0].vitals_bp_dia} mmHg
-                        </span>
-                      )}
-                      {admissions[0].vitals_pulse && (
-                        <span>Pulse: {admissions[0].vitals_pulse} bpm</span>
-                      )}
-                      {admissions[0].vitals_temp && (
-                        <span>Temp: {admissions[0].vitals_temp}°F</span>
-                      )}
-                      {admissions[0].vitals_spo2 && (
-                        <span>SpO₂: {admissions[0].vitals_spo2}%</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {admissions[0].allergies && (
-                      <span
-                        style={{
-                          background: "#ef4444",
-                          color: "#fff",
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: 10,
-                          fontWeight: 900,
-                        }}
-                      >
-                        ALLERGIES
-                      </span>
-                    )}
-                    {admissions[0].vitals_temp > 101 && (
-                      <span
-                        style={{
-                          background: "#f59e0b",
-                          color: "#fff",
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: 10,
-                          fontWeight: 900,
-                        }}
-                      >
-                        ️ FEVER
-                      </span>
-                    )}
-                    {admissions[0].vitals_spo2 < 94 && (
-                      <span
-                        style={{
-                          background: "#dc2626",
-                          color: "#fff",
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: 10,
-                          fontWeight: 900,
-                        }}
-                      >
-                        LOW SPO2
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+             <div>
+                <h3 style={{ margin: 0, color: "#0f172a", fontSize: 16 }}>Current Admission</h3>
+                <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Admission #{admissions[0].id.slice(0, 8).toUpperCase()}</div>
+             </div>
+             {admissions[0].status === "Discharged" ? (
+               <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#f1f5f9", padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 700, color: "#64748b", border: "1px solid #e2e8f0" }}>
+                  <span style={{ color: "#94a3b8" }}>⚪</span> Discharged
+               </div>
+             ) : (
+               <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#ecfdf5", padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 700, color: "#059669", border: "1px solid #a7f3d0" }}>
+                  <span style={{ color: "#10b981" }}>🟢</span> Admitted
+               </div>
+             )}
           </div>
-          {admissions[0].attachments &&
-            admissions[0].attachments.length > 0 && (
-              <div
-                style={{
-                  marginTop: 20,
-                  paddingTop: 16,
-                  borderTop: "1px solid rgba(0,0,0,0.05)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    marginBottom: 12,
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: "var(--sanctuary-primary)",
-                  }}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
+          
+          <div className={styles.profileGrid} style={{ marginBottom: 24 }}>
+             <div className={styles.profileItem}>
+               <strong>Ward:</strong> {admissions[0].ward || "General Ward"}
+             </div>
+             <div className={styles.profileItem}>
+               <strong>Consultant:</strong> Dr. {admissions[0].doctor_name}
+             </div>
+             <div className={styles.profileItem}>
+               <strong>Admission Date:</strong> {new Date(admissions[0].date_admission).toLocaleString("en-GB", { day: "numeric", month: "short" })}
+             </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12 }}>
+             {admissions[0].status === "Discharged" ? (
+                <>
+                  <Link 
+                    href={`/portal/admission-record/view?id=${admissions[0].id}${getDoctorParams()}`} 
+                    style={{ flex: 1, padding: "10px 16px", borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "center", background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", textDecoration: "none" }}
                   >
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                  </svg>
-                  ATTACHED REPORTS ({admissions[0].attachments.length})
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {admissions[0].attachments.map((file: any, idx: number) => (
-                    <a
-                      key={idx}
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        padding: "6px 12px",
-                        background: "#fff",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: 8,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: "var(--sanctuary-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                    >
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                      >
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                      </svg>
-                      {file.name.length > 20
-                        ? file.name.slice(0, 17) + "..."
-                        : file.name}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+                     View Admission
+                  </Link>
+                  <button 
+                    onClick={async () => {
+                      const { data } = await supabase.from("discharge_summaries").select("id").eq("patient_name", admissions[0].patient_name).eq("date_admission", admissions[0].date_admission).order("created_at", { ascending: false }).limit(1).single();
+                      if (data?.id) window.location.href = `/portal/discharge-summary/view?id=${data.id}${getDoctorParams().replace('?', '&')}`;
+                      else alert("Discharge summary not found.");
+                    }}
+                    style={{ flex: 1, padding: "10px 16px", borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "center", background: "#f8fafc", color: "#0f172a", border: "1px solid #cbd5e1", cursor: "pointer" }}
+                  >
+                     View Discharge
+                  </button>
+                </>
+             ) : (
+                <>
+                  <Link 
+                    href={`/portal/admission-record?draftId=${admissions[0].id}&patientId=${patientId}${getDoctorParams().replace('?', '&')}`} 
+                    style={{ flex: 1, padding: "10px 16px", borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "center", background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", textDecoration: "none" }}
+                  >
+                     Continue Admission
+                  </Link>
+                  <Link 
+                    href={`/portal/discharge-summary?patientId=${patientId}&admissionId=${admissions[0].id}${getDoctorParams().replace('?', '&')}`} 
+                    style={{ flex: 1, padding: "10px 16px", borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "center", background: "#2563eb", color: "#fff", border: "1px solid #2563eb", textDecoration: "none" }}
+                  >
+                     Create Discharge
+                  </Link>
+                </>
+             )}
+          </div>
         </div>
       )}
     </>
