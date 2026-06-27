@@ -1021,8 +1021,7 @@ function DischargeSummaryRedesign() {
         discharge_destination: summary.dischargeDestination, emergency_contact_relation: summary.emergencyContactName ? `${summary.emergencyContactRelation} - ${summary.emergencyContactName}` : summary.emergencyContactRelation, emergency_contact_number: summary.emergencyContactNumber,
         complaints: JSON.stringify(summary.complaints), findings: JSON.stringify(summary.findings), treatment: JSON.stringify(summary.treatment),
         discharge_condition: JSON.stringify(summary.dischargeCondition),
-        medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId,
-        ...(admissionId ? { admission_id: admissionId } : {})
+        medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId
       }]).select("id").single();
       
       if (error) throw error;
