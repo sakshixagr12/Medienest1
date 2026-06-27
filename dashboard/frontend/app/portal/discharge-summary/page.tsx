@@ -400,7 +400,7 @@ function DischargeSummaryRedesign() {
                     <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
                     
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="field"><label>Age</label><input type="text" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value)} /></div>
+                      <div className="field"><label>Age</label><input type="text" inputMode="numeric" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value.replace(/\\D/g, ''))} /></div>
                       <div className="field">
                         <label>Sex</label>
                         <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
