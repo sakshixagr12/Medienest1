@@ -17,6 +17,37 @@ export const FINDING_SHORT_LABELS: Record<string, string> = {
   "Dressing Clean and Intact": "Dressing Intact"
 };
 
+export const NORMAL_FINDINGS = new Set([
+  "Vitals Stable", "Afebrile", "Normotensive", "Maintaining SpO2 on Room Air",
+  "Conscious", "Oriented", "Alert", "No Pallor", "No Icterus", "No Cyanosis", "No Clubbing", "No Lymphadenopathy", "No Pedal Edema", "Well Hydrated",
+  "CVS Normal", "S1 S2 Heard", "No Murmur", "Regular Rhythm", "JVP Not Elevated", "Normal Peripheral Pulses",
+  "RS Normal", "Bilateral Vesicular Breath Sounds (NVBS)", "No Added Sounds", "Chest Clear",
+  "Abdomen Soft", "Non-Tender", "No Organomegaly", "Bowel Sounds Present", "No Distension",
+  "CNS Normal", "Higher Mental Functions Intact", "No Focal Neurological Deficit (FND)", "Cranial Nerves Intact", "Motor System Normal", "Sensory System Normal", "Plantar Flexor", "Reflexes Normal", "Pupils Bilaterally Equal & Reactive to Light (PEARL)",
+  "Dressing Clean and Intact", "Wound Healthy", "No Active Bleeding", "ROM Full",
+  "Distal Pulses Palpable", "No Neurovascular Deficit", "Capillary Refill Normal (<2s)", "Sensory Intact", "Motor Intact",
+  "Cast Intact", "Splint in Situ", "External Fixator Stable", "Pin Tracts Clean",
+  "Active", "Playful", "Feeding Well", "No Respiratory Distress", "Anterior Fontanelle Normal", "Tone Normal",
+  "Weight Appropriate for Age", "Normal Head Circumference",
+  "Primary Intention Healing", "No Discharge", "Dressing Clean and Dry", "Sutures/Staples Intact",
+  "Drain Intact", "Catheter in Situ", "Ryles Tube in Situ", "Foley Catheter Patent", "Flatus Passed", "Stool Passed",
+  "No Edema", "Uterus Relaxed", "Uterus Contracted", "Fetal Heart Sounds (FHS) Good", "Fundal Height Corresponds to Dates", "Cephalic Presentation", "Adequate Liquor",
+  "Os Closed", "Cervix Healthy", "Vaginal Vault Healthy",
+  "Episiotomy Wound Healthy", "LSCS Wound Healthy", "Breasts Soft", "Lactation Established"
+]);
+
+export const ABNORMAL_FINDINGS = new Set([
+  "Febrile", "Tachycardia", "Bradycardia", "Tachypnea", "Hypertensive", "Hypotensive",
+  "Lethargic", "Pallor Present", "Icterus Present", "Pedal Edema Present", "Dehydrated",
+  "Murmur Present", "Irregular Rhythm", 
+  "Bilateral Crepitations", "Basal Crepitations", "Rhonchi Present", "Wheeze Present", "Decreased Air Entry", "Tachypnea", "Subcostal Retractions", "Intercostal Retractions", "Nasal Flaring", "Grunting", "Crepitations", "Wheeze",
+  "Tender", "Hepatomegaly", "Splenomegaly", "Guarding Present", "Rigidity Present", "Bowel Sounds Sluggish",
+  "Dressing Soaked", "Wound Gaping", "Swelling Present", "Deformity Present", "Tenderness Present", "Crepitus Felt", "Range of Motion (ROM) Restricted",
+  "Signs of Dehydration Present", "Irritable", "Poor Feeding", "Failure to Thrive",
+  "Serous Discharge", "Purulent Discharge", "Erythema Present", "Induration Present",
+  "Breech Presentation", "Bleeding Present", "Discharge Present", "Os Open"
+]);
+
 export const MUTUALLY_EXCLUSIVE_GROUPS = [
   ["Afebrile", "Febrile"],
   ["Conscious", "Lethargic", "Unconscious"],
