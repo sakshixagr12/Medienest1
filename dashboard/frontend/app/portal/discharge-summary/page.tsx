@@ -26,6 +26,7 @@ interface SummaryData {
   complaints: string[];
   findings: string[];
   treatment: string[];
+  dischargeCondition: string[];
   advice: string[];
   medicines: Medicine[];
 }
@@ -166,7 +167,7 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", sex: "Male", regNo: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], advice: [""], medicines: []
+    patientName: "", phone: "", age: "", sex: "Male", regNo: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
   });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -249,6 +250,7 @@ function DischargeSummaryRedesign() {
         patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} / ${summary.sex}`,
         doctor_name: summary.doctor, date_admission: summary.doa, date_discharge: summary.dod, diagnosis: summary.diagnosis,
         complaints: JSON.stringify(summary.complaints), findings: JSON.stringify(summary.findings), treatment: JSON.stringify(summary.treatment),
+        discharge_condition: JSON.stringify(summary.dischargeCondition),
         medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId
       }]).select("id").single();
       
@@ -426,6 +428,7 @@ function DischargeSummaryRedesign() {
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg>Discharge Medications</div></div>
                     <MedicationRepeater items={summary.medicines} onChange={(val: any) => updateField("medicines", val)} />
                   </div>
+                  {renderClinicalCard("Condition at Discharge", "dischargeCondition", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>, "e.g. Vitals stable, patient conscious")}
                   {renderClinicalCard("Advice & Follow-up", "advice", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, "e.g. Review after 5 days in OPD")}
                 </div>
               </div>
