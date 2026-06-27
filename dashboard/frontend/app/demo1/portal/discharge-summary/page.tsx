@@ -1071,9 +1071,9 @@ function DischargeSummaryRedesign() {
                     <label>Phone Number (WhatsApp)</label>
                     <input
                       type="tel"
-                      value={summary.phone || ""}
-                      onChange={(e) => updateField("phone", e.target.value)}
-                      placeholder="e.g. 9876543210"
+                      value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""}
+                      onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      placeholder="e.g. 98765 43210"
                     />
                   </div>
                   <div className="field">
