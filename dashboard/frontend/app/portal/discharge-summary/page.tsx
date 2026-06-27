@@ -157,6 +157,9 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
 };
 
 const MedicationRepeater = ({ items, onChange }: any) => {
+  const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
+  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+
   const addMed = () => onChange([...items, { name: "", dosage: "", frequency: "" }]);
   const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
   const updateMed = (idx: number, field: string, val: string) => {
@@ -176,9 +179,45 @@ const MedicationRepeater = ({ items, onChange }: any) => {
       )}
       {items.map((med: any, i: number) => (
         <div key={i} className={styles.repeaterTableRow}>
-          <div className={styles.iconInputWrapper}>
+          <div className={styles.iconInputWrapper} style={{ position: "relative", overflow: "visible" }}>
             <div className={styles.iconInputIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M10.5 20.5l-6-6a4.5 4.5 0 0 1 6.5-6.5l6 6a4.5 4.5 0 0 1-6.5 6.5z"/><path d="M14 6l4 4"/><path d="M7 13l4 4"/></svg></div>
-            <input className={styles.iconInput} placeholder="e.g. Paracetamol" value={med.name} onChange={(e) => updateMed(i, "name", e.target.value)} />
+            <input 
+              className={styles.iconInput} 
+              placeholder="e.g. Paracetamol" 
+              value={med.name} 
+              onChange={(e) => {
+                const val = e.target.value;
+                updateMed(i, "name", val);
+                const filtered = MEDICATION_OPTIONS.filter((opt) => opt.toLowerCase().includes(val.toLowerCase()));
+                setFilteredOptions(filtered);
+                setActiveDropdownIndex(i);
+              }}
+              onFocus={() => {
+                setFilteredOptions(MEDICATION_OPTIONS);
+                setActiveDropdownIndex(i);
+              }}
+              onBlur={() => {
+                // Use a short timeout so that mousedown on options fires first
+                setTimeout(() => setActiveDropdownIndex(null), 200);
+              }}
+            />
+            {activeDropdownIndex === i && filteredOptions.length > 0 && (
+              <ul className={styles.dropdown} style={{ top: "100%", zIndex: 50 }}>
+                {filteredOptions.map((opt) => (
+                  <li
+                    key={opt}
+                    onMouseDown={(e) => {
+                      // Prevent default to avoid blur firing before update
+                      e.preventDefault();
+                      updateMed(i, "name", opt);
+                      setActiveDropdownIndex(null);
+                    }}
+                  >
+                    {opt}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="500mg" value={med.dosage} onChange={(e) => updateMed(i, "dosage", e.target.value)} />
           <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="BID" value={med.frequency} onChange={(e) => updateMed(i, "frequency", e.target.value)} />
@@ -208,8 +247,25 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", ageUnit: "Years", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
-  });
+    patientName: "", phone: "", age: "", ageUnit: "Years", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: [];
+
+const MEDICATION_OPTIONS = [
+  "Paracetamol",
+  "Ibuprofen",
+  "Amoxicillin",
+  "Azithromycin",
+  "Pantoprazole",
+  "Ondansetron",
+  "Cetirizine",
+  "Metformin",
+  "Amlodipine",
+  "Losartan",
+  "Atorvastatin",
+  "Aspirin",
+  "Clopidogrel",
+  "Ceftriaxone",
+  "Dexamethasone"
+];  });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<string | null>(null);
