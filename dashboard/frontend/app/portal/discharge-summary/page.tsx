@@ -495,7 +495,39 @@ function DischargeSummaryRedesign() {
                 <div className={styles.premiumCard}>
                   <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
-                    <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
+                    <div className={styles.field}>
+                      <input
+                        type="text"
+                        placeholder="e.g. Acute Gastroenteritis with severe dehydration"
+                        value={summary.diagnosis}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateField("diagnosis", val);
+                          const filtered = diagnosisOptions.filter((opt) =>
+                            opt.toLowerCase().includes(val.toLowerCase())
+                          );
+                          setDiagnosisOptions(filtered);
+                          setShowDiagnosisDropdown(true);
+                        }}
+                        onFocus={() => setShowDiagnosisDropdown(true)}
+                        style={{ fontWeight: 600, fontSize: 16 }}
+                      />
+                      {showDiagnosisDropdown && filteredDiagnosisOptions.length > 0 && (
+                        <ul className={styles.dropdown}>
+                          {filteredDiagnosisOptions.map((opt) => (
+                            <li
+                              key={opt}
+                              onMouseDown={() => {
+                                updateField("diagnosis", opt);
+                                setShowDiagnosisDropdown(false);
+                              }}
+                            >
+                              {opt}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                   {renderClinicalCard("Admission Reason", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
                   {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
