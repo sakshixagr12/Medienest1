@@ -697,7 +697,7 @@ function FullResultPreview() {
                       <div
                         className={`${styles.previewSection} ${styles.medPreviewSection}`}
                       >
-                        <h4>Medications Advised on Discharge</h4>
+                        <h4>Prescribed Medications at Discharge</h4>
                         <table className={styles.medTable}>
                           <thead>
                             <tr>
