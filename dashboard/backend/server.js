@@ -12,6 +12,26 @@ const { askLLM } = require("./utils/llmRotation");
 const app = express();
 const PORT = process.env.PORT || 4001;
 
+// --- AUTO-MIGRATION HACK (Runs on nodemon restart) ---
+(async () => {
+  const { Client } = require("pg");
+  if (process.env.DATABASE_URL) {
+    const client = new Client({ connectionString: process.env.DATABASE_URL });
+    try {
+      await client.connect();
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS attending_physician TEXT;`);
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharging_nurse TEXT;`);
+      await client.query(`NOTIFY pgrst, 'reload schema';`);
+      console.log("✅ Auto-migrated Care Team columns successfully!");
+    } catch (e) {
+      console.log("ℹ️ Migration skipped or failed:", e.message);
+    } finally {
+      await client.end();
+    }
+  }
+})();
+// ------------------------------------------------------
+
 // Supabase Initialization - Using Service Role for background tasks
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
