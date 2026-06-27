@@ -119,5 +119,9 @@ export const EXAMINATION_TEMPLATES: DepartmentTemplate[] = [
         findings: ["Lochia Rubra", "Lochia Serosa", "Lochia Alba", "Episiotomy Wound Healthy", "LSCS Wound Healthy", "Breasts Soft", "Lactation Established"],
       }
     ],
+  },
+  {
+    name: "Custom",
+    categories: [],
   }
 ];
