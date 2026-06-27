@@ -24,6 +24,8 @@ interface SummaryData {
   doctor: string;
   attendingPhysician: string;
   dischargingNurse: string;
+  dischargeDestination: string;
+  emergencyContact: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -168,7 +170,7 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", sex: "Male", regNo: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
+    patientName: "", phone: "", age: "", sex: "Male", regNo: "", dischargeDestination: "", emergencyContact: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
   });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -263,6 +265,7 @@ function DischargeSummaryRedesign() {
         patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} / ${summary.sex}`,
         doctor_name: summary.doctor, date_admission: summary.doa, date_discharge: summary.dod, diagnosis: summary.diagnosis,
         attending_physician: summary.attendingPhysician, discharging_nurse: summary.dischargingNurse,
+        discharge_destination: summary.dischargeDestination, emergency_contact: summary.emergencyContact,
         complaints: JSON.stringify(summary.complaints), findings: JSON.stringify(summary.findings), treatment: JSON.stringify(summary.treatment),
         discharge_condition: JSON.stringify(summary.dischargeCondition),
         medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId
@@ -408,6 +411,11 @@ function DischargeSummaryRedesign() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
                       <div className="field"><label>Phone Number</label><input type="text" placeholder="e.g. +91 9876543210" value={summary.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
                       <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                      <div className="field"><label>Discharge Destination</label><input type="text" placeholder="e.g. Home, Another Facility" value={summary.dischargeDestination} onChange={(e) => updateField("dischargeDestination", e.target.value)} /></div>
+                      <div className="field"><label>Emergency Contact</label><input type="text" placeholder="e.g. Spouse: 555-0199" value={summary.emergencyContact} onChange={(e) => updateField("emergencyContact", e.target.value)} /></div>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>

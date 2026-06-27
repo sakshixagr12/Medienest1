@@ -25,6 +25,8 @@ interface SummaryData {
   doctor: string;
   attendingPhysician: string;
   dischargingNurse: string;
+  dischargeDestination: string;
+  emergencyContact: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -128,6 +130,8 @@ function FullResultPreview() {
             doctor: data.doctor_name || "---",
             attendingPhysician: data.attending_physician || "",
             dischargingNurse: data.discharging_nurse || "",
+            dischargeDestination: data.discharge_destination || "",
+            emergencyContact: data.emergency_contact || "",
             diagnosis: data.diagnosis || "Diagnosis not recorded",
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
@@ -304,6 +308,8 @@ function FullResultPreview() {
         date_discharge: summary.dod,
         attending_physician: summary.attendingPhysician,
         discharging_nurse: summary.dischargingNurse,
+        discharge_destination: summary.dischargeDestination,
+        emergency_contact: summary.emergencyContact,
         diagnosis: summary.diagnosis,
         complaints: JSON.stringify(summary.complaints),
         findings: JSON.stringify(summary.findings),
