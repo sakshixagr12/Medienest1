@@ -274,7 +274,19 @@ const MedicationRepeater = ({ items, onChange }: any) => {
               <option value="patch">patch</option>
             </select>
           </div>
-          <input className={styles.iconInput} style={{ paddingLeft: 12 }} placeholder="BID" value={med.frequency} onChange={(e) => updateMed(i, "frequency", e.target.value)} />
+          <select 
+            className={styles.iconInput} 
+            style={{ padding: "0 12px" }} 
+            value={med.frequency} 
+            onChange={(e) => updateMed(i, "frequency", e.target.value)}
+          >
+            <option value="" disabled>Select Frequency</option>
+            <option value="OD">OD</option>
+            <option value="BD">BD</option>
+            <option value="TDS">TDS</option>
+            <option value="QID">QID</option>
+            <option value="SOS">SOS</option>
+          </select>
           <button onClick={() => removeMed(i)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>✕</button>
         </div>
       ))}
