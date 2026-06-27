@@ -178,6 +178,18 @@ function DischargeSummaryRedesign() {
   const [isSaving, setIsSaving] = useState(false);
   const [showDraftModal, setShowDraftModal] = useState(false);
 
+  const calculateLengthOfStay = (doa: string, dod: string) => {
+    if (!doa || !dod) return "—";
+    const d1 = new Date(doa);
+    const d2 = new Date(dod);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return "—";
+    const diffTime = d2.getTime() - d1.getTime();
+    if (diffTime < 0) return "Invalid Dates";
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Same Day";
+    return `${diffDays} Day${diffDays > 1 ? 's' : ''}`;
+  };
+
   useEffect(() => {
     const draft = localStorage.getItem("discharge_summary_draft");
     if (draft) {
@@ -395,9 +407,15 @@ function DischargeSummaryRedesign() {
                       <div className="field"><label>IPD / Reg No.</label><input type="text" placeholder="e.g. IPD-2023-001" value={summary.regNo} onChange={(e) => updateField("regNo", e.target.value)} /></div>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
                       <div className="field"><label>Date of Admission</label><input type="datetime-local" value={summary.doa} onChange={(e) => updateField("doa", e.target.value)} /></div>
                       <div className="field"><label>Date of Discharge</label><input type="datetime-local" value={summary.dod} onChange={(e) => updateField("dod", e.target.value)} /></div>
+                      <div className="field">
+                        <label>Length of Stay</label>
+                        <div style={{ padding: "10px 14px", background: "var(--sanctuary-gray-low, #f8fafc)", borderRadius: "10px", border: "1px solid var(--border, #e2e8f0)", color: "var(--sanctuary-ink, #0f172a)", fontWeight: 600, fontSize: "14px", height: "42px", display: "flex", alignItems: "center" }}>
+                          {calculateLengthOfStay(summary.doa, summary.dod)}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="field"><label>Consultant / Doctor</label><input type="text" placeholder="e.g. Dr. Smith" value={summary.doctor} onChange={(e) => updateField("doctor", e.target.value)} /></div>
