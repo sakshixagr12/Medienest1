@@ -666,7 +666,7 @@ function FullResultPreview() {
                     </div>
 
                     <div className={styles.previewSection}>
-                      <h4>Physical Findings & Investigations</h4>
+                      <h4>Examination Findings</h4>
                       {summary.findings.length > 0 ? (
                         <ul
                           style={{ listStyle: "none", padding: 0, margin: 0 }}
