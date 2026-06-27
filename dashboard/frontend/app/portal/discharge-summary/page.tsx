@@ -180,6 +180,7 @@ const PREDEFINED_CONDITIONS = [
 ];
 
 const DischargeConditionEditor = ({ items, onChange }: any) => {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const predefinedSelected = items.filter((i: string) => PREDEFINED_CONDITIONS.includes(i));
   const customItems = items.filter((i: string) => !PREDEFINED_CONDITIONS.includes(i));
   const hasRealCustom = customItems.some((i: string) => i !== "");
@@ -211,6 +212,18 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
     setShowCustom(true);
     if (customItems.length === 0 || customItems[customItems.length - 1] !== "") {
       onChange([...items, ""]);
+      setTimeout(() => inputRefs.current[customItems.length]?.focus(), 0);
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent, idx: number, item: string) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCustom();
+    } else if (e.key === "Backspace" && item === "" && customItems.length > 1) {
+      e.preventDefault();
+      removeCustom(idx);
+      setTimeout(() => inputRefs.current[idx - 1]?.focus(), 0);
     }
   };
 
@@ -246,7 +259,14 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
             <div key={idx} className={styles.bulletRow}>
               <div className={styles.bulletMarker} />
               <div className={styles.inputWrapper}>
-                <input className={styles.bulletInput} value={item} onChange={(e) => updateCustom(idx, e.target.value)} placeholder="Type custom condition..." />
+                <input 
+                  ref={(el) => { inputRefs.current[idx] = el; }}
+                  className={styles.bulletInput} 
+                  value={item} 
+                  onChange={(e) => updateCustom(idx, e.target.value)} 
+                  onKeyDown={(e) => onKeyDown(e, idx, item)}
+                  placeholder="Type custom condition..." 
+                />
               </div>
               <button className={styles.btnRemovePoint} onClick={() => removeCustom(idx)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
