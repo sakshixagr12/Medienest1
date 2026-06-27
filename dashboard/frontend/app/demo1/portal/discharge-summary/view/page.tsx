@@ -759,11 +759,34 @@ function FullResultPreview() {
                         <ul
                           style={{ listStyle: "none", padding: 0, margin: 0 }}
                         >
-                          {summary.advice.map((a, i) => (
-                            <li key={i} style={{ marginBottom: 6 }}>
-                              • {a}
-                            </li>
-                          ))}
+                          {summary.advice.map((a, i) => {
+                            const match = a.match(/^([A-Z_-]+):\s*(.*)$/);
+                            if (match) {
+                              const cat = match[1];
+                              const text = match[2];
+                              const catLabels: any = {
+                                "FOLLOW-UP": "Follow-up",
+                                "DIET": "Diet",
+                                "FLUIDS": "Fluids",
+                                "ACTIVITY": "Activity",
+                                "WARNING_SIGNS": "Warning Signs",
+                                "INVESTIGATION": "Investigation"
+                              };
+                              const label = catLabels[cat];
+                              
+                              if (label) {
+                                return (
+                                  <li key={i} style={{ marginBottom: 12 }}>
+                                    <strong style={{ display: "block", color: "#334155", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label} {cat !== "FOLLOW-UP" ? "Advice" : ""}</strong>
+                                    <span style={{ color: "#475569" }}>{text}</span>
+                                  </li>
+                                );
+                              } else {
+                                return <li key={i} style={{ marginBottom: 6, color: "#475569" }}>• {text}</li>;
+                              }
+                            }
+                            return <li key={i} style={{ marginBottom: 6 }}>• {a}</li>;
+                          })}
                         </ul>
                       ) : (
                         <p>General post-discharge care.</p>
