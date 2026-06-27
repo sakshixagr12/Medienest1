@@ -142,7 +142,7 @@ const MedicationRepeater = ({ items, onChange }: any) => {
   const removeMed = (idx: number) => onChange(items.filter((_: any, i: number) => i !== idx));
   const updateMed = (idx: number, field: string, val: string) => {
     const next = [...items];
-    next[idx][field] = val;
+    next[idx] = { ...next[idx], [field]: val };
     onChange(next);
   };
   return (
