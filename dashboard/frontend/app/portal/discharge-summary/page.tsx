@@ -17,6 +17,7 @@ interface SummaryData {
   patientName: string;
   phone: string;
   age: string;
+  ageUnit: string;
   sex: string;
   regNo: string;
   doa: string;
@@ -171,7 +172,7 @@ function DischargeSummaryRedesign() {
 
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<SummaryData>({
-    patientName: "", phone: "", age: "", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
+    patientName: "", phone: "", age: "", ageUnit: "Years", sex: "Male", regNo: "", dischargeDestination: "", emergencyContactRelation: "", emergencyContactNumber: "", doa: new Date().toISOString().slice(0, 16), dod: new Date().toISOString().slice(0, 16), doctor: "", attendingPhysician: "", dischargingNurse: "", diagnosis: "", complaints: [""], findings: [""], treatment: [""], dischargeCondition: [""], advice: [""], medicines: []
   });
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -263,7 +264,7 @@ function DischargeSummaryRedesign() {
       }
 
       const { data: insertedRecord, error } = await supabase.from("discharge_summaries").insert([{
-        patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} / ${summary.sex}`,
+        patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} ${summary.ageUnit} / ${summary.sex}`,
         doctor_name: summary.doctor, date_admission: summary.doa, date_discharge: summary.dod, diagnosis: summary.diagnosis,
         attending_physician: summary.attendingPhysician, discharging_nurse: summary.dischargingNurse,
         discharge_destination: summary.dischargeDestination, emergency_contact_relation: summary.emergencyContactRelation, emergency_contact_number: summary.emergencyContactNumber,
@@ -400,7 +401,32 @@ function DischargeSummaryRedesign() {
                     <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
                     
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="field"><label>Age</label><input type="text" inputMode="numeric" placeholder="e.g. 45" value={summary.age} onChange={(e) => updateField("age", e.target.value.replace(/\D/g, ''))} /></div>
+                      <div className="field">
+                        <label>Age</label>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input 
+                            type="text" 
+                            inputMode="numeric" 
+                            placeholder="e.g. 45" 
+                            value={summary.age} 
+                            onChange={(e) => {
+                              let val = e.target.value.replace(/\D/g, '');
+                              if (parseInt(val) > 120) val = "120";
+                              updateField("age", val);
+                            }} 
+                            style={{ flex: 1 }}
+                          />
+                          <select 
+                            value={summary.ageUnit} 
+                            onChange={(e) => updateField("ageUnit", e.target.value)}
+                            style={{ width: "110px", padding: "10px", borderRadius: "10px", border: "1px solid var(--border, #e2e8f0)", background: "#f8fafc" }}
+                          >
+                            <option value="Years">Years</option>
+                            <option value="Months">Months</option>
+                            <option value="Days">Days</option>
+                          </select>
+                        </div>
+                      </div>
                       <div className="field">
                         <label>Sex</label>
                         <select value={summary.sex} onChange={(e) => updateField("sex", e.target.value)}>
