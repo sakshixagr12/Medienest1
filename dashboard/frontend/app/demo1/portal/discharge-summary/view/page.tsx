@@ -756,38 +756,61 @@ function FullResultPreview() {
                     <div className={styles.previewSection}>
                       <h4>Follow-up Advice & Instructions</h4>
                       {summary.advice.length > 0 ? (
-                        <ul
-                          style={{ listStyle: "none", padding: 0, margin: 0 }}
-                        >
-                          {summary.advice.map((a, i) => {
-                            const match = a.match(/^([A-Z_-]+):\s*(.*)$/);
-                            if (match) {
-                              const cat = match[1];
-                              const text = match[2];
-                              const catLabels: any = {
+                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                          {(() => {
+                            const grouped: Record<string, string[]> = {};
+                            const custom: string[] = [];
+                            
+                            summary.advice.forEach((a: string) => {
+                               if (!a.trim()) return;
+                               const match = a.match(/^([A-Z_-]+):\s*(.*)$/);
+                               if (match) {
+                                  const cat = match[1];
+                                  const text = match[2];
+                                  if (!text.trim()) return;
+                                  if (!grouped[cat]) grouped[cat] = [];
+                                  grouped[cat].push(text);
+                               } else {
+                                  custom.push(a);
+                               }
+                            });
+
+                            const catLabels: Record<string, string> = {
                                 "FOLLOW-UP": "Follow-up",
                                 "DIET": "Diet",
                                 "FLUIDS": "Fluids",
                                 "ACTIVITY": "Activity",
                                 "WARNING_SIGNS": "Warning Signs",
                                 "INVESTIGATION": "Investigation"
-                              };
-                              const label = catLabels[cat];
-                              
-                              if (label) {
-                                return (
-                                  <li key={i} style={{ marginBottom: 12 }}>
-                                    <strong style={{ display: "block", color: "#334155", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label} {cat !== "FOLLOW-UP" ? "Advice" : ""}</strong>
-                                    <span style={{ color: "#475569" }}>{text}</span>
-                                  </li>
-                                );
-                              } else {
-                                return <li key={i} style={{ marginBottom: 6, color: "#475569" }}>• {text}</li>;
-                              }
+                            };
+
+                            const sections = [];
+                            
+                            for (const cat in grouped) {
+                               const label = catLabels[cat] || cat;
+                               sections.push(
+                                  <div key={cat} style={{ marginBottom: "8px" }}>
+                                    <strong style={{ display: "block", color: "#334155", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>{label} {cat !== "FOLLOW-UP" ? "Advice" : ""}</strong>
+                                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                                       {grouped[cat].map((text, i) => <li key={i} style={{ marginBottom: "4px", color: "#475569", marginLeft: "8px" }}>• {text}</li>)}
+                                    </ul>
+                                  </div>
+                               );
                             }
-                            return <li key={i} style={{ marginBottom: 6 }}>• {a}</li>;
-                          })}
-                        </ul>
+
+                            if (custom.length > 0) {
+                               sections.push(
+                                  <div key="custom" style={{ marginBottom: "8px" }}>
+                                    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                                       {custom.map((text, i) => <li key={i} style={{ marginBottom: "4px", color: "#475569", marginLeft: "8px" }}>• {text}</li>)}
+                                    </ul>
+                                  </div>
+                               );
+                            }
+
+                            return sections;
+                          })()}
+                        </div>
                       ) : (
                         <p>General post-discharge care.</p>
                       )}

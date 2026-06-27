@@ -503,6 +503,146 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
   );
 };
 
+const generateAIAdvice = (category: string, diagnosis: string) => {
+  const diag = (diagnosis || "").toLowerCase();
+  let suggestions: string[] = [];
+
+  if (category === "DIET") {
+    suggestions = ["Normal Diet", "Soft Diet", "High Protein Diet", "High Fiber Diet"];
+    if (diag.includes("diabet")) suggestions.push("Diabetic Diet", "Low Glycemic Index Diet");
+    if (diag.includes("hypertension") || diag.includes("cardiac") || diag.includes("bp")) suggestions.push("Low Salt Diet", "Cardiac Diet");
+    if (diag.includes("gastro") || diag.includes("diarrhea") || diag.includes("vomit")) suggestions.push("Bland Diet", "BRAT Diet");
+  } else if (category === "FLUIDS") {
+    suggestions = ["Maintain Adequate Hydration", "Increase Oral Fluids", "1.5L to 2L Water per Day"];
+    if (diag.includes("gastro") || diag.includes("diarrhea") || diag.includes("dehydrat")) suggestions.push("ORS After Each Loose Stool", "Frequent Sips of Fluids");
+    if (diag.includes("heart failure") || diag.includes("kidney") || diag.includes("renal") || diag.includes("ckd")) suggestions.push("Restrict Fluids to 1L/day", "Restrict Fluids to 1.5L/day", "Strict I/O Charting");
+  } else if (category === "ACTIVITY") {
+    suggestions = ["Resume Normal Activities", "Adequate Rest", "Avoid Heavy Lifting", "Avoid Strenuous Exercise for 1 Week"];
+    if (diag.includes("fracture") || diag.includes("ortho") || diag.includes("surgery")) suggestions.push("Strict Bed Rest", "Weight Bearing As Tolerated", "Non-Weight Bearing", "Physiotherapy Exercises");
+    if (diag.includes("respiratory") || diag.includes("pneumonia") || diag.includes("asthma")) suggestions.push("Breathing Exercises", "Incentive Spirometry");
+  }
+
+  return suggestions.sort(() => 0.5 - Math.random()).slice(0, 5);
+};
+
+const AIAssistedCategoryEditor = ({ category, categoryLabel, icon, items, onChange, diagnosis }: any) => {
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  useEffect(() => {
+    if (aiSuggestions.length === 0) {
+      setAiSuggestions(generateAIAdvice(category, diagnosis));
+    }
+  }, [category, diagnosis]);
+
+  const regenerate = () => {
+    setAiSuggestions(generateAIAdvice(category, diagnosis));
+  };
+
+  const catPrefix = `${category}: `;
+  const absoluteIndices = items.map((val: string, idx: number) => val.startsWith(catPrefix) ? idx : -1).filter((idx: number) => idx !== -1);
+  const myItemTexts = absoluteIndices.map((idx: number) => items[idx].substring(catPrefix.length));
+  
+  const selectedSet = new Set(myItemTexts);
+  const customItems = myItemTexts.map((text: string, localIdx: number) => ({ text, absoluteIdx: absoluteIndices[localIdx] })).filter(item => !aiSuggestions.includes(item.text));
+
+  const toggleItem = (text: string) => {
+    const fullString = `${catPrefix}${text}`;
+    let next = [...items];
+    if (next.includes(fullString)) {
+      next = next.filter((i: string) => i !== fullString);
+    } else {
+      next.push(fullString);
+    }
+    onChange(next);
+  };
+
+  const addCustom = () => {
+    onChange([...items, `${catPrefix}`]);
+    setTimeout(() => {
+       const len = items.filter((i: string) => i.startsWith(catPrefix) && !aiSuggestions.includes(i.substring(catPrefix.length))).length;
+       inputRefs.current[len]?.focus();
+    }, 0);
+  };
+
+  const updateCustom = (absoluteIdx: number, newText: string) => {
+    const next = [...items];
+    next[absoluteIdx] = `${catPrefix}${newText}`;
+    onChange(next);
+  };
+
+  const removeCustom = (absoluteIdx: number) => {
+    const next = items.filter((_: string, idx: number) => idx !== absoluteIdx);
+    onChange(next);
+  };
+  
+  const removeCategory = () => {
+    onChange(items.filter((i: string) => !i.startsWith(catPrefix)));
+  };
+
+  return (
+    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", position: "relative" }}>
+      <button onClick={removeCategory} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}>✕</button>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <div style={{ fontWeight: 600, color: "#334155", display: "flex", alignItems: "center", gap: "8px", fontSize: "15px" }}>
+          <span>{icon}</span> {categoryLabel} Advice
+        </div>
+      </div>
+      
+      <div style={{ marginBottom: "16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+          <span style={{ fontSize: "13px", fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px" }}>✨ AI Suggestions</span>
+          <button onClick={regenerate} style={{ background: "none", border: "none", color: "#3b82f6", fontSize: "13px", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/></svg>
+            Regenerate
+          </button>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {aiSuggestions.map(sug => {
+            const isSelected = selectedSet.has(sug);
+            return (
+              <label key={sug} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "white", padding: "6px 14px", borderRadius: "20px", border: `1px solid ${isSelected ? "#3b82f6" : "#cbd5e1"}`, color: isSelected ? "#1e40af" : "#475569", transition: "all 0.2s", fontSize: "13px", fontWeight: 500, boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
+                <input type="checkbox" checked={isSelected} onChange={() => toggleItem(sug)} style={{ display: "none" }} />
+                <div style={{ width: "14px", height: "14px", borderRadius: "4px", border: `2px solid ${isSelected ? "#3b82f6" : "#cbd5e1"}`, display: "flex", alignItems: "center", justifyContent: "center", background: isSelected ? "#3b82f6" : "transparent" }}>
+                  {isSelected && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
+                </div>
+                {sug}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ borderTop: "1px dashed #cbd5e1", paddingTop: "16px", marginTop: "8px" }}>
+        {customItems.length > 0 && (
+           <div style={{ marginBottom: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+             {customItems.map((cItem, customLocalIdx) => (
+               <div key={cItem.absoluteIdx} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                 <div style={{ marginTop: "12px", width: "5px", height: "5px", borderRadius: "50%", background: "#94a3b8", flexShrink: 0 }} />
+                 <input 
+                   ref={(el) => { inputRefs.current[customLocalIdx] = el; }}
+                   type="text" 
+                   value={cItem.text} 
+                   onChange={e => updateCustom(cItem.absoluteIdx, e.target.value)} 
+                   placeholder={`Custom ${categoryLabel.toLowerCase()} advice...`}
+                   style={{ flex: 1, padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", background: "white" }} 
+                 />
+                 <button onClick={() => removeCustom(cItem.absoluteIdx)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                 </button>
+               </div>
+             ))}
+           </div>
+        )}
+        <button onClick={addCustom} style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "1px dashed #cbd5e1", color: "#64748b", padding: "8px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer", width: "100%", justifyContent: "center", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.background = "#f1f5f9"} onMouseOut={e => e.currentTarget.style.background = "none"}>
+          + Add Custom {categoryLabel} Advice
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const ADVICE_CATEGORIES = [
   { id: "FOLLOW-UP", label: "Follow-up", icon: "📅" },
   { id: "DIET", label: "Diet", icon: "🥗" },
@@ -513,7 +653,7 @@ const ADVICE_CATEGORIES = [
   { id: "CUSTOM", label: "Custom", icon: "✍️" },
 ];
 
-const AdviceEditor = ({ items, onChange }: any) => {
+const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
   const addCategory = (cat: string) => {
     onChange([...items, `${cat}: `]);
   };
@@ -527,6 +667,15 @@ const AdviceEditor = ({ items, onChange }: any) => {
   const removeItem = (idx: number) => {
     onChange(items.filter((_: any, i: number) => i !== idx));
   };
+
+  const aiCategories = ["DIET", "FLUIDS", "ACTIVITY"];
+  const activeAiCats = aiCategories.filter(cat => items.some((i: string) => i.startsWith(`${cat}: `)));
+  
+  const otherItems = items.map((val: string, idx: number) => ({ val, idx })).filter((item: any) => {
+    const match = item.val.match(/^([A-Z_-]+):\s*(.*)$/);
+    if (match && aiCategories.includes(match[1])) return false;
+    return true;
+  });
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -545,7 +694,12 @@ const AdviceEditor = ({ items, onChange }: any) => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {items.map((item: string, idx: number) => {
+        {activeAiCats.map(catId => {
+          const catDef = ADVICE_CATEGORIES.find(c => c.id === catId)!;
+          return <AIAssistedCategoryEditor key={catId} category={catId} categoryLabel={catDef.label} icon={catDef.icon} items={items} onChange={onChange} diagnosis={diagnosis} />;
+        })}
+
+        {otherItems.map(({ val: item, idx }) => {
           const match = item.match(/^([A-Z_-]+):\s*(.*)$/);
           const catId = match ? match[1] : "CUSTOM";
           let val = match ? match[2] : item;
@@ -901,7 +1055,7 @@ function DischargeSummaryRedesign() {
           {field === "dischargeCondition" ? (
             <DischargeConditionEditor items={items} onChange={(val: any) => updateField(field, val)} />
           ) : field === "advice" ? (
-            <AdviceEditor items={items} onChange={(val: any) => updateField(field, val)} />
+            <AdviceEditor items={items} onChange={(val: any) => updateField(field, val)} diagnosis={summary.diagnosis} />
           ) : (
             <BulletListEditor field={field} items={items} placeholder={placeholder} updateField={updateField} autoSaveStatus={autoSaveStatus} setAutoSaveStatus={setAutoSaveStatus} suggestTimer={suggestTimer} activeSuggestion={activeSuggestion} setActiveSuggestion={setActiveSuggestion} fetchSmartSuggestion={fetchSmartSuggestion} />
           )}
