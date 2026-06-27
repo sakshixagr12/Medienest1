@@ -182,6 +182,12 @@ const PREDEFINED_CONDITIONS = [
 const DischargeConditionEditor = ({ items, onChange }: any) => {
   const predefinedSelected = items.filter((i: string) => PREDEFINED_CONDITIONS.includes(i));
   const customItems = items.filter((i: string) => !PREDEFINED_CONDITIONS.includes(i));
+  const hasRealCustom = customItems.some((i: string) => i !== "");
+  const [showCustom, setShowCustom] = useState(hasRealCustom);
+
+  useEffect(() => {
+    if (customItems.some((i: string) => i !== "")) setShowCustom(true);
+  }, [items]);
   
   const togglePredefined = (cond: string) => {
     let next = [...items];
@@ -201,11 +207,20 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
     onChange([...predefinedSelected, ...newCustom]);
   };
   
-  const addCustom = () => onChange([...items, ""]);
+  const addCustom = () => {
+    setShowCustom(true);
+    if (customItems.length === 0 || customItems[customItems.length - 1] !== "") {
+      onChange([...items, ""]);
+    }
+  };
+
   const removeCustom = (idx: number) => {
     const newCustom = customItems.filter((_: any, i: number) => i !== idx);
     let next = [...predefinedSelected, ...newCustom];
-    if (next.length === 0) next = [""];
+    if (next.length === 0) {
+      next = [""];
+      setShowCustom(false);
+    }
     onChange(next);
   };
 
@@ -225,7 +240,7 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
       
       <div className={styles.bulletListContainer}>
         {customItems.map((item: string, idx: number) => {
-          if (item === "" && customItems.length === 1 && predefinedSelected.length > 0) return null;
+          if (!showCustom && item === "") return null;
 
           return (
             <div key={idx} className={styles.bulletRow}>
