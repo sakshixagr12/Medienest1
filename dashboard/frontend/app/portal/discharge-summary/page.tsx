@@ -361,7 +361,7 @@ function DischargeSummaryRedesign() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     <span className={styles.stickyPatientName}>{summary.patientName || "—"}</span>
                   </div>
-                  {summary.age && <div className={styles.stickyPatientChip}><span className={styles.stickyChipLabel}>Age</span><span>{summary.age} / {summary.sex || "M"}</span></div>}
+                  {summary.age && <div className={styles.stickyPatientChip}><span className={styles.stickyChipLabel}>Age</span><span>{summary.age} {summary.ageUnit} / {summary.sex || "M"}</span></div>}
                   {summary.doctor && <div className={styles.stickyPatientChip}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg><span>Dr. {summary.doctor}</span></div>}
                 </div>
               </div>
