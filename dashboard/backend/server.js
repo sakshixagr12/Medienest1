@@ -115,6 +115,19 @@ const aiLimiter = rateLimit({
 
 app.use(generalLimiter);
 app.use(express.json());
+
+app.get("/api/alter", async (req, res) => {
+  const { Client } = require("pg");
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  try {
+    await client.connect();
+    await client.query("ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharge_condition JSONB DEFAULT '[]'::jsonb;");
+    await client.end();
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
 app.use(
   "/api/patient-history",
   requireAuth,
