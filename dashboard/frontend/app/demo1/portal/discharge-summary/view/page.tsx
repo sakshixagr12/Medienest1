@@ -647,17 +647,6 @@ function FullResultPreview() {
                 <tr>
                   <td>
                     <div className={styles.previewSection}>
-                      <h4>Final Diagnosis</h4>
-                      <p>
-                        {summary.diagnosis || (
-                          <span className={styles.emptyPlaceholder}>
-                            Pending diagnosis...
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className={styles.previewSection}>
                       <h4>Chief Complaints & History</h4>
                       {summary.complaints.length > 0 ? (
                         <ul
@@ -693,6 +682,17 @@ function FullResultPreview() {
                           No findings recorded.
                         </p>
                       )}
+                    </div>
+
+                    <div className={styles.previewSection}>
+                      <h4>Final Diagnosis</h4>
+                      <p>
+                        {summary.diagnosis || (
+                          <span className={styles.emptyPlaceholder}>
+                            Pending diagnosis...
+                          </span>
+                        )}
+                      </p>
                     </div>
 
                     <div className={styles.previewSection}>
