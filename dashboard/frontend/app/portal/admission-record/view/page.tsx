@@ -15,6 +15,7 @@ export default function AdmissionRecordView() {
 
   const [record, setRecord] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [dischargeDate, setDischargeDate] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchRecord() {
@@ -28,6 +29,19 @@ export default function AdmissionRecordView() {
 
       if (!error && data) {
         setRecord(data);
+        if (data.status === 'Discharged') {
+          const { data: dData } = await supabase
+            .from("discharge_summaries")
+            .select("created_at")
+            .eq("patient_name", data.patient_name)
+            .eq("date_admission", data.date_admission)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+          if (dData?.created_at) {
+            setDischargeDate(dData.created_at);
+          }
+        }
       }
       setLoading(false);
     }
