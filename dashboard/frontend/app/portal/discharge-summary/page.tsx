@@ -1012,6 +1012,8 @@ function DischargeSummaryRedesign() {
         }
       }
 
+      const admissionId = searchParams.get("admissionId");
+
       const { data: insertedRecord, error } = await supabase.from("discharge_summaries").insert([{
         patient_name: summary.patientName, reg_no: summary.regNo || '', age_sex: `${summary.age} ${summary.ageUnit} / ${summary.sex}`,
         doctor_name: summary.doctor, date_admission: summary.doa, date_discharge: summary.dod, diagnosis: summary.diagnosis,
@@ -1019,10 +1021,16 @@ function DischargeSummaryRedesign() {
         discharge_destination: summary.dischargeDestination, emergency_contact_relation: summary.emergencyContactName ? `${summary.emergencyContactRelation} - ${summary.emergencyContactName}` : summary.emergencyContactRelation, emergency_contact_number: summary.emergencyContactNumber,
         complaints: JSON.stringify(summary.complaints), findings: JSON.stringify(summary.findings), treatment: JSON.stringify(summary.treatment),
         discharge_condition: JSON.stringify(summary.dischargeCondition),
-        medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId
+        medicines: JSON.stringify(summary.medicines), advice: JSON.stringify(summary.advice), clinic_id: clinic?.id, patient_id: patientId,
+        ...(admissionId ? { admission_id: admissionId } : {})
       }]).select("id").single();
       
       if (error) throw error;
+
+      if (admissionId) {
+        await supabase.from("admission_records").update({ status: "Discharged" }).eq("id", admissionId);
+      }
+
       localStorage.removeItem("discharge_summary_draft");
       localStorage.removeItem("discharge_summary_draft_step");
       
