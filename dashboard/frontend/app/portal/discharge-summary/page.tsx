@@ -542,7 +542,7 @@ function DischargeSummaryRedesign() {
                       )}
                     </div>
                   </div>
-                  {renderClinicalCard("Admission Reason", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
+                  {renderClinicalCard("Chief Complaints", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
                   {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
                 </div>
               </div>
