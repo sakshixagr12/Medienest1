@@ -809,19 +809,18 @@ function FullResultPreview() {
               <tfoot>
                 <tr>
                   <td>
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 900 }}>
-                        Dr. {summary.doctor || "(Authorized Signature)"}
-                      </div>
-                      <div style={{ fontSize: 11, color: "#444" }}>
-                        Clinic Consultant / Chief Resident
-                      </div>
-                      <div
-                        style={{ fontSize: 10, color: "#999", marginTop: 8 }}
-                      >
-                        Generated via MedieNest EMR Platform
-                      </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "80px", paddingTop: "20px", borderTop: "1px solid #cbd5e1" }}>
+                       <div style={{ textAlign: "center", width: "300px" }}>
+                         <div style={{ borderTop: "1px dashed #94a3b8", paddingTop: "8px", fontSize: "12px", color: "#64748b" }}>
+                           Patient / Guardian Signature
+                         </div>
+                       </div>
+                       <div style={{ textAlign: "center", width: "300px" }}>
+                         <div style={{ borderTop: "1px dashed #94a3b8", paddingTop: "8px", fontSize: "12px", color: "#64748b" }}>
+                           <strong style={{ color: "#000", display: "block", fontSize: "13px" }}>Dr. {summary.doctor || "A"}</strong>
+                           Consultant Physician
+                         </div>
+                       </div>
                     </div>
                   </td>
                 </tr>
