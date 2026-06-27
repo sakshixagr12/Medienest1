@@ -480,12 +480,6 @@ const BulletListEditor = ({
           </div>
         ))
       )}
-      <button
-        className={styles.btnAddPoint}
-        onClick={() => addItem(items.length - 1)}
-      >
-        + Add another point
-      </button>
     </div>
   );
 };
