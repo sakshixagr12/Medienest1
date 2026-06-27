@@ -2748,9 +2748,9 @@ function AdmissionRecordRedesign() {
                             <label>Phone Number</label>
                             <input
                               type="tel"
-                              value={summary.phone || ""}
+                              value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""}
                               onChange={(e) =>
-                                updateField("phone", e.target.value)
+                                updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
                               }
                             />
                           </div>
