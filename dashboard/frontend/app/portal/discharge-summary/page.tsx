@@ -398,7 +398,7 @@ function DischargeSummaryRedesign() {
                     </div>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value)} /></div>
+                    <div className="field"><label>Full Name</label><input type="text" placeholder="e.g. John Doe" value={summary.patientName} onChange={(e) => updateField("patientName", e.target.value.replace(/[^a-zA-Z\s]/g, ''))} /></div>
                     
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
                       <div className="field">
