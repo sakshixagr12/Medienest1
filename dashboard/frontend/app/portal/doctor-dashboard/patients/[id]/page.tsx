@@ -1042,9 +1042,25 @@ function PatientHubContent({
                         </svg>
                         View Admission
                       </Link>
-                      <Link
-                        href={`/portal/discharge-summary?patientId=${patientId}&admissionId=${a.id}${getDoctorParams().replace('?', '&')}`}
+                      <button
+                        onClick={async () => {
+                          const { data, error } = await supabase
+                            .from("discharge_summaries")
+                            .select("id")
+                            .eq("patient_name", a.patient_name)
+                            .eq("date_admission", a.date_admission)
+                            .order("created_at", { ascending: false })
+                            .limit(1)
+                            .single();
+                          
+                          if (data?.id) {
+                            window.location.href = `/portal/discharge-summary/view?id=${data.id}${getDoctorParams().replace('?', '&')}`;
+                          } else {
+                            alert("Discharge summary not found.");
+                          }
+                        }}
                         className={styles.tableAction}
+                        style={{ background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0 }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 6 }}>
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -1053,7 +1069,7 @@ function PatientHubContent({
                           <line x1="16" y1="17" x2="8" y2="17"></line>
                         </svg>
                         View Discharge
-                      </Link>
+                      </button>
                     </>
                   ) : (
                     <>
