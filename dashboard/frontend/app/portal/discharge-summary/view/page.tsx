@@ -18,6 +18,7 @@ interface SummaryData {
   patientName: string;
   phone: string;
   age: string;
+  ageUnit: string;
   sex: string;
   regNo: string;
   doa: string;
@@ -112,10 +113,19 @@ function FullResultPreview() {
 
           // Map demographic "Age / Sex" back to separate fields
           let ageVal = "";
+          let ageUnitVal = "Years";
           let sexVal = "Male";
           if (data.age_sex) {
             const parts = data.age_sex.split("/");
-            ageVal = parts[0]?.trim() || "";
+            const rawAge = parts[0]?.trim() || "";
+            if (rawAge.includes(" ")) {
+              const aParts = rawAge.split(" ");
+              ageVal = aParts[0];
+              ageUnitVal = aParts[1];
+            } else {
+              ageVal = rawAge.replace(/\D/g, "");
+              ageUnitVal = "Years";
+            }
             const rawSex = (parts[1] || "").trim().toLowerCase();
             sexVal = rawSex === "f" || rawSex === "female" ? "Female" : "Male";
           }
@@ -124,6 +134,7 @@ function FullResultPreview() {
             patientName: data.patient_name || "Unnamed Patient",
             phone: "",
             age: ageVal,
+            ageUnit: ageUnitVal,
             sex: sexVal,
             regNo: data.reg_no || "---",
             doa: data.date_admission || "---",
@@ -304,7 +315,7 @@ function FullResultPreview() {
       const payload: any = {
         patient_name: summary.patientName,
         reg_no: summary.regNo,
-        age_sex: `${summary.age} / ${summary.sex}`,
+        age_sex: `${summary.age} ${summary.ageUnit} / ${summary.sex}`,
         doctor_name: summary.doctor,
         date_admission: summary.doa,
         date_discharge: summary.dod,
@@ -632,7 +643,7 @@ function FullResultPreview() {
                         </div>
                         <div className={styles.infoRow}>
                           <span className={styles.infoLabel}>Age / Sex:</span>
-                          <span className={styles.infoValue}>{summary.age ? `${summary.age}Y` : "---"} / {summary.sex}</span>
+                          <span className={styles.infoValue}>{summary.age ? `${summary.age} ${summary.ageUnit}` : "---"} / {summary.sex}</span>
                         </div>
                         <div className={styles.infoRow}>
                           <span className={styles.infoLabel}>Reg / IPD No:</span>
