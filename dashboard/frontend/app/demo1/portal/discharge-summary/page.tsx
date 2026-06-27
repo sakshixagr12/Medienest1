@@ -675,6 +675,7 @@ function DischargeSummaryRedesign() {
     field: keyof SummaryData,
     icon: React.ReactNode,
     placeholder: string,
+    borderColor?: string
   ) => {
     const items = summary[field] as string[];
     const value = items.filter((s) => s.trim()).join(", ");
@@ -682,7 +683,7 @@ function DischargeSummaryRedesign() {
       <div
         className={styles.summaryCard}
         onClick={() => setActiveSection(field)}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer", borderLeft: borderColor ? `4px solid ${borderColor}` : undefined }}
       >
         <div className={styles.cardHeader}>
           <div className={styles.cardTitle}>
