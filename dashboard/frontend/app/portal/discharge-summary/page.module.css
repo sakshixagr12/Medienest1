@@ -1360,3 +1360,65 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* --- Medication Repeater --- */
+.repeaterTable {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.repeaterHeaderRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 40px;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.repeaterTableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 40px;
+  gap: 16px;
+  align-items: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.iconInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.iconInputIcon {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.iconInput {
+  width: 100%;
+  padding: 10px;
+  padding-left: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--sanctuary-ink);
+  background: var(--sanctuary-gray-low);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.iconInput:focus {
+  border-color: var(--sanctuary-primary);
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.05);
+}
