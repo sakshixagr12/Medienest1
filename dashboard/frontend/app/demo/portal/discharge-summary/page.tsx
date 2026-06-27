@@ -29,6 +29,7 @@ interface SummaryData {
   complaints: string[];
   findings: string[];
   treatment: string[];
+  dischargeCondition: string[];
   advice: string[];
   medicines: Medicine[];
 }
@@ -40,7 +41,7 @@ interface Suggestion {
   fullText: string;
 }
 
-const SECTION_SEQUENCE = ["complaints", "findings", "treatment", "advice"];
+const SECTION_SEQUENCE = ["complaints", "findings", "treatment", "dischargeCondition", "advice"];
 
 // --- STANDALONE REUSABLE STRUCTURED LIST COMPONENT WITH SMART ASSIST ---
 interface BulletListEditorProps {
@@ -227,6 +228,7 @@ function DischargeSummaryRedesign() {
     complaints: [],
     findings: [],
     treatment: [],
+    dischargeCondition: [],
     advice: [],
     medicines: [],
   });
@@ -271,6 +273,7 @@ function DischargeSummaryRedesign() {
           complaints: migrate(draft.complaints),
           findings: migrate(draft.findings),
           treatment: migrate(draft.treatment),
+          dischargeCondition: migrate(draft.dischargeCondition),
           advice: migrate(draft.advice),
         });
       } catch (e) {
@@ -355,6 +358,13 @@ function DischargeSummaryRedesign() {
           " strenuous physical activity and lifting heavy weights";
       else if (input.includes("salt"))
         baseSuggestion = " restricted diet (less than 5g per day)";
+    }
+    // Logic for Discharge Condition
+    else if (field === "dischargeCondition") {
+      if (input.includes("stable"))
+        baseSuggestion = " hemodynamically stable, conscious and oriented";
+      else if (input.includes("wound"))
+        baseSuggestion = " clean and dry, healing well";
     }
 
     if (baseSuggestion) {
@@ -596,6 +606,7 @@ function DischargeSummaryRedesign() {
           findings: JSON.stringify(summary.findings),
           treatment: JSON.stringify(summary.treatment),
           medicines: JSON.stringify(summary.medicines),
+          discharge_condition: JSON.stringify(summary.dischargeCondition),
           advice: JSON.stringify(summary.advice),
           clinic_id: clinic?.id,
           patient_id: patientId,
@@ -632,6 +643,7 @@ function DischargeSummaryRedesign() {
         complaints: [],
         findings: [],
         treatment: [],
+        dischargeCondition: [],
         advice: [],
         medicines: [],
       });

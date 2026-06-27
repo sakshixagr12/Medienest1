@@ -29,6 +29,7 @@ interface SummaryData {
   complaints: string[];
   findings: string[];
   treatment: string[];
+  dischargeCondition: string[];
   advice: string[];
   medicines: Medicine[];
 }
@@ -40,7 +41,7 @@ interface Suggestion {
   fullText: string;
 }
 
-const SECTION_SEQUENCE = ["complaints", "findings", "treatment", "advice"];
+const SECTION_SEQUENCE = ["complaints", "findings", "treatment", "dischargeCondition", "advice"];
 
 // --- STANDALONE REUSABLE STRUCTURED LIST COMPONENT WITH SMART ASSIST ---
 interface BulletListEditorProps {
@@ -227,6 +228,7 @@ function DischargeSummaryRedesign() {
     complaints: [],
     findings: [],
     treatment: [],
+    dischargeCondition: [],
     advice: [],
     medicines: [],
   });
@@ -271,6 +273,7 @@ function DischargeSummaryRedesign() {
           complaints: migrate(draft.complaints),
           findings: migrate(draft.findings),
           treatment: migrate(draft.treatment),
+          dischargeCondition: migrate(draft.dischargeCondition),
           advice: migrate(draft.advice),
         });
       } catch (e) {
@@ -355,6 +358,13 @@ function DischargeSummaryRedesign() {
           " strenuous physical activity and lifting heavy weights";
       else if (input.includes("salt"))
         baseSuggestion = " restricted diet (less than 5g per day)";
+    }
+    // Logic for Discharge Condition
+    else if (field === "dischargeCondition") {
+      if (input.includes("stable"))
+        baseSuggestion = " hemodynamically stable, conscious and oriented";
+      else if (input.includes("wound"))
+        baseSuggestion = " clean and dry, healing well";
     }
 
     if (baseSuggestion) {
@@ -596,6 +606,7 @@ function DischargeSummaryRedesign() {
           findings: JSON.stringify(summary.findings),
           treatment: JSON.stringify(summary.treatment),
           medicines: JSON.stringify(summary.medicines),
+          discharge_condition: JSON.stringify(summary.dischargeCondition),
           advice: JSON.stringify(summary.advice),
           clinic_id: clinic?.id,
           patient_id: patientId,
@@ -632,6 +643,7 @@ function DischargeSummaryRedesign() {
         complaints: [],
         findings: [],
         treatment: [],
+        dischargeCondition: [],
         advice: [],
         medicines: [],
       });
@@ -1321,6 +1333,15 @@ function DischargeSummaryRedesign() {
                 )}
               </div>
               {renderClinicalCard(
+                "Condition at Discharge",
+                "dischargeCondition",
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>,
+                "Vitals, general condition at discharge...",
+              )}
+              {renderClinicalCard(
                 "Advice & Follow-up",
                 "advice",
                 null,
@@ -1420,6 +1441,14 @@ function DischargeSummaryRedesign() {
                             </table>
                           </div>
                         )}
+                        <div className={styles.previewSection}>
+                          <h4>Condition at Discharge</h4>
+                          <ul style={{ listStyle: "none", padding: 0 }}>
+                            {summary.dischargeCondition.map((c, i) => (
+                              <li key={i}>• {c}</li>
+                            ))}
+                          </ul>
+                        </div>
                         <div className={styles.previewSection}>
                           <h4>Advice</h4>
                           <ul style={{ listStyle: "none", padding: 0 }}>
