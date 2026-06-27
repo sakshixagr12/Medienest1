@@ -22,7 +22,8 @@ const PORT = process.env.PORT || 4001;
       await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS attending_physician TEXT;`);
       await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharging_nurse TEXT;`);
       await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS discharge_destination TEXT;`);
-      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS emergency_contact TEXT;`);
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS emergency_contact_relation TEXT;`);
+      await client.query(`ALTER TABLE discharge_summaries ADD COLUMN IF NOT EXISTS emergency_contact_number TEXT;`);
       await client.query(`NOTIFY pgrst, 'reload schema';`);
       console.log("✅ Auto-migrated Care Team, Destination, and Contact columns successfully!");
     } catch (e) {
