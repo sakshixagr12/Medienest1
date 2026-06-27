@@ -192,7 +192,7 @@ export default function RegisterPatientPage() {
                     <input
                       type="tel"
                       className={styles.inputBox}
-                      value={ptPhone}
+                      value={ptPhone ? (ptPhone.length > 5 ? `${ptPhone.slice(0, 5)} ${ptPhone.slice(5, 10)}` : ptPhone) : ""}
                       onChange={(e) =>
                         setPtPhone(
                           e.target.value.replace(/\D/g, "").slice(0, 10),
