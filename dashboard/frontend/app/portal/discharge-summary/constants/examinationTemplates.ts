@@ -6,6 +6,17 @@ export type DepartmentTemplate = {
   }[];
 };
 
+export const FINDING_SHORT_LABELS: Record<string, string> = {
+  "Pupils Bilaterally Equal & Reactive to Light (PEARL)": "PEARL",
+  "Bilateral Vesicular Breath Sounds (NVBS)": "NVBS",
+  "No Focal Neurological Deficit (FND)": "No FND",
+  "Range of Motion (ROM) Restricted": "ROM Restricted",
+  "Maintaining SpO2 on Room Air": "SpO2 Normal (RA)",
+  "Higher Mental Functions Intact": "Mental Functions Intact",
+  "Weight Appropriate for Age": "Normal Weight",
+  "Dressing Clean and Intact": "Dressing Intact"
+};
+
 export const MUTUALLY_EXCLUSIVE_GROUPS = [
   ["Afebrile", "Febrile"],
   ["Conscious", "Lethargic", "Unconscious"],
