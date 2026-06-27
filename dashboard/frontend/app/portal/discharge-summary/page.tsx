@@ -175,6 +175,78 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
   );
 };
 
+const PREDEFINED_CONDITIONS = [
+  "Conscious", "Hemodynamically Stable", "Afebrile", "Ambulatory", "Oxygen Support Required", "Wound Healing Well"
+];
+
+const DischargeConditionEditor = ({ items, onChange }: any) => {
+  const predefinedSelected = items.filter((i: string) => PREDEFINED_CONDITIONS.includes(i));
+  const customItems = items.filter((i: string) => !PREDEFINED_CONDITIONS.includes(i));
+  
+  const togglePredefined = (cond: string) => {
+    let next = [...items];
+    if (next.includes(cond)) {
+      next = next.filter((i: string) => i !== cond);
+      if (next.length === 0) next = [""];
+    } else {
+      next.push(cond);
+      next = next.filter((i: string) => i !== "");
+    }
+    onChange(next);
+  };
+
+  const updateCustom = (idx: number, val: string) => {
+    const newCustom = [...customItems];
+    newCustom[idx] = val;
+    onChange([...predefinedSelected, ...newCustom]);
+  };
+  
+  const addCustom = () => onChange([...items, ""]);
+  const removeCustom = (idx: number) => {
+    const newCustom = customItems.filter((_: any, i: number) => i !== idx);
+    let next = [...predefinedSelected, ...newCustom];
+    if (next.length === 0) next = [""];
+    onChange(next);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+        {PREDEFINED_CONDITIONS.map(cond => {
+          const isSelected = items.includes(cond);
+          return (
+            <label key={cond} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "8px 12px", borderRadius: "8px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
+              <input type="checkbox" checked={isSelected} onChange={() => togglePredefined(cond)} style={{ cursor: "pointer", width: "16px", height: "16px", accentColor: "#3b82f6" }} />
+              <span style={{ fontSize: "14px", fontWeight: 500 }}>{cond}</span>
+            </label>
+          );
+        })}
+      </div>
+      
+      <div className={styles.bulletListContainer}>
+        {customItems.map((item: string, idx: number) => {
+          if (item === "" && customItems.length === 1 && predefinedSelected.length > 0) return null;
+
+          return (
+            <div key={idx} className={styles.bulletRow}>
+              <div className={styles.bulletMarker} />
+              <div className={styles.inputWrapper}>
+                <input className={styles.bulletInput} value={item} onChange={(e) => updateCustom(idx, e.target.value)} placeholder="Type custom condition..." />
+              </div>
+              <button className={styles.btnRemovePoint} onClick={() => removeCustom(idx)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
+              </button>
+            </div>
+          );
+        })}
+        <button onClick={addCustom} className={styles.btnAddPoint} style={{ alignSelf: "flex-start", marginTop: "8px", background: "transparent", color: "#3b82f6", borderColor: "#3b82f6" }}>
+          + Add Custom Condition
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const MedicationRepeater = ({ items, onChange }: any) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
@@ -471,7 +543,11 @@ function DischargeSummaryRedesign() {
           </div>
         </div>
         <div className={styles.previewContent}>
-          <BulletListEditor field={field} items={items} placeholder={placeholder} updateField={updateField} autoSaveStatus={autoSaveStatus} setAutoSaveStatus={setAutoSaveStatus} suggestTimer={suggestTimer} activeSuggestion={activeSuggestion} setActiveSuggestion={setActiveSuggestion} fetchSmartSuggestion={fetchSmartSuggestion} />
+          {field === "dischargeCondition" ? (
+            <DischargeConditionEditor items={items} onChange={(val: any) => updateField(field, val)} />
+          ) : (
+            <BulletListEditor field={field} items={items} placeholder={placeholder} updateField={updateField} autoSaveStatus={autoSaveStatus} setAutoSaveStatus={setAutoSaveStatus} suggestTimer={suggestTimer} activeSuggestion={activeSuggestion} setActiveSuggestion={setActiveSuggestion} fetchSmartSuggestion={fetchSmartSuggestion} />
+          )}
         </div>
       </div>
     );
