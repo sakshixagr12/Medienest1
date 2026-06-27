@@ -822,6 +822,8 @@ function DischargeSummaryRedesign() {
             <section className={styles.fullWidthSection} style={{ display: step === 2 ? "flex" : "none" }}>
               <div className={styles.stepFadeIn}>
                 <div className={styles.premiumCard}>
+                  {renderClinicalCard("Chief Complaints", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
+                  {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
                   <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
                     <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
                     <div className={styles.field}>
@@ -862,8 +864,6 @@ function DischargeSummaryRedesign() {
                       )}
                     </div>
                   </div>
-                  {renderClinicalCard("Chief Complaints", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
-                  {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
                 </div>
               </div>
             </section>
