@@ -197,19 +197,7 @@ function DischargeSummaryRedesign() {
   
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<string | null>(null);
-  const [diagnosisOptions] = useState<string[]>([
-    "Pneumonia",
-    "Pneumonitis",
-    "Pulmonary edema",
-    "Bronchitis",
-    "Asthma",
-    "COPD",
-    "Tuberculosis",
-    "Lung cancer",
-    "Acute respiratory distress syndrome",
-    "Pleural effusion"
-  ]);
-  const [filteredDiagnosisOptions, setFilteredDiagnosisOptions] = useState<string[]>(diagnosisOptions);
+  const [filteredDiagnosisOptions, setFilteredDiagnosisOptions] = useState<string[]>(DIAGNOSIS_OPTIONS);
   const [showDiagnosisDropdown, setShowDiagnosisDropdown] = useState(false);
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -217,6 +205,7 @@ function DischargeSummaryRedesign() {
   const [activeSuggestion, setActiveSuggestion] = useState<Suggestion | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showDraftModal, setShowDraftModal] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   const calculateLengthOfStay = (doa: string, dod: string) => {
     if (!doa || !dod) return "—";
@@ -325,13 +314,6 @@ function DischargeSummaryRedesign() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const getStatus = (val: any) => {
-    if (!val) return styles.dotRed;
-    if (Array.isArray(val)) return val.some(s => (typeof s === "string" ? s.trim() : s.name?.trim())) ? styles.dotGreen : styles.dotRed;
-    if (typeof val === "string") return val.trim() ? styles.dotGreen : styles.dotRed;
-    return styles.dotGreen;
   };
 
   const renderWizardProgress = () => {
@@ -517,10 +499,10 @@ function DischargeSummaryRedesign() {
                         onChange={(e) => {
                           const val = e.target.value;
                           updateField("diagnosis", val);
-                          const filtered = diagnosisOptions.filter((opt) =>
+                          const filtered = DIAGNOSIS_OPTIONS.filter((opt) =>
                             opt.toLowerCase().includes(val.toLowerCase())
                           );
-                          setDiagnosisOptions(filtered);
+                          setFilteredDiagnosisOptions(filtered);
                           setShowDiagnosisDropdown(true);
                         }}
                         onFocus={() => setShowDiagnosisDropdown(true)}
