@@ -1057,6 +1057,7 @@ function PatientHubContent({
                       </svg>
                       Print
                     </button>
+                    </>
                   )}
                 </div>
               </td>
