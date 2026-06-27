@@ -6,7 +6,7 @@ import TopBar from "@/components/TopBar";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
-import { EXAMINATION_TEMPLATES, MUTUALLY_EXCLUSIVE_GROUPS } from "./constants/examinationTemplates";
+import { EXAMINATION_TEMPLATES, MUTUALLY_EXCLUSIVE_GROUPS, FINDING_SHORT_LABELS } from "./constants/examinationTemplates";
 
 const DIAGNOSIS_OPTIONS = [
   "Pneumonia",
@@ -274,10 +274,11 @@ const ExaminationEditor = ({ items, onChange }: any) => {
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               {chipsToShow.map(finding => {
                 const isSelected = items.includes(finding);
+                const displayLabel = FINDING_SHORT_LABELS[finding] || finding;
                 return (
                   <label key={finding} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "6px 12px", borderRadius: "16px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
                     <input type="checkbox" checked={isSelected} onChange={() => togglePredefined(finding)} style={{ display: "none" }} />
-                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{finding}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 500 }}>{displayLabel}</span>
                   </label>
                 );
               })}
