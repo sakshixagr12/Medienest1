@@ -541,6 +541,62 @@ export default function AdmissionRecordView() {
             </tbody>
           </table>
         </div>
+
+        {/* Timeline Section (Not Printable) */}
+        <div style={{ marginTop: 40, maxWidth: 900, marginLeft: "auto", marginRight: "auto", padding: 20 }} className={styles.noPrint}>
+          <h3 style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: 12, color: "#1e293b", fontSize: 18, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Admission Timeline
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 28, position: "relative", paddingLeft: 10 }}>
+            {/* Vertical Line */}
+            <div style={{ position: "absolute", left: 25, top: 10, bottom: 20, width: 2, background: "#e2e8f0", zIndex: 0 }}></div>
+            
+            <div style={{ display: "flex", gap: 20, position: "relative", zIndex: 1, alignItems: "flex-start" }}>
+               <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#3b82f6", color: "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #f8fafc" }}>
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+               </div>
+               <div style={{ paddingTop: 4 }}>
+                 <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 15 }}>Admission Created</div>
+                 <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>{new Date(record.created_at || record.date_admission).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+               </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 20, position: "relative", zIndex: 1, alignItems: "flex-start" }}>
+               <div style={{ width: 32, height: 32, borderRadius: "50%", background: (record.updated_at && record.updated_at !== record.created_at) ? "#3b82f6" : "#f1f5f9", color: (record.updated_at && record.updated_at !== record.created_at) ? "white" : "#94a3b8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #f8fafc", border: (record.updated_at && record.updated_at !== record.created_at) ? "none" : "1px solid #cbd5e1" }}>
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+               </div>
+               <div style={{ paddingTop: 4 }}>
+                 <div style={{ fontWeight: 700, color: (record.updated_at && record.updated_at !== record.created_at) ? "#0f172a" : "#94a3b8", fontSize: 15 }}>Record Updated</div>
+                 <div style={{ fontSize: 13, color: "#cbd5e1", marginTop: 2 }}>
+                   {(record.updated_at && record.updated_at !== record.created_at) ? new Date(record.updated_at).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "No updates since admission"}
+                 </div>
+               </div>
+            </div>
+
+            {record.status === 'Discharged' && dischargeDate ? (
+              <div style={{ display: "flex", gap: 20, position: "relative", zIndex: 1, alignItems: "flex-start" }}>
+                 <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#10b981", color: "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #f8fafc" }}>
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                 </div>
+                 <div style={{ paddingTop: 4 }}>
+                   <div style={{ fontWeight: 700, color: "#0f172a", fontSize: 15 }}>Discharge Created</div>
+                   <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>{new Date(dischargeDate).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                 </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 20, position: "relative", zIndex: 1, alignItems: "flex-start" }}>
+                 <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#f1f5f9", color: "#94a3b8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #f8fafc", border: "1px solid #cbd5e1" }}>
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                 </div>
+                 <div style={{ paddingTop: 4 }}>
+                   <div style={{ fontWeight: 700, color: "#94a3b8", fontSize: 15 }}>Pending Discharge</div>
+                   <div style={{ fontSize: 13, color: "#cbd5e1", marginTop: 2 }}>Patient is currently admitted</div>
+                 </div>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );
