@@ -58,6 +58,7 @@ interface BulletListEditorProps {
 }
 
 const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStatus, setAutoSaveStatus, suggestTimer, activeSuggestion, setActiveSuggestion, fetchSmartSuggestion }: BulletListEditorProps) => {
+  const [showTreatmentOptions, setShowTreatmentOptions] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const updateItem = (index: number, val: string) => {
     const newItems = [...items];
@@ -75,11 +76,12 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
       setActiveSuggestion(null);
     }
   };
-  const addItem = (index: number) => {
+  const addItem = (index: number, initialValue: string = "") => {
     const newItems = [...items];
-    newItems.splice(index + 1, 0, "");
+    newItems.splice(index + 1, 0, initialValue);
     updateField(field, newItems);
     setActiveSuggestion(null);
+    setShowTreatmentOptions(false);
     setTimeout(() => inputRefs.current[index + 1]?.focus(), 0);
   };
   const removeItem = (index: number) => {
@@ -115,7 +117,22 @@ const BulletListEditor = ({ field, items, placeholder, updateField, autoSaveStat
           </div>
         ))
       )}
-      <button className={styles.btnAddPoint} onClick={() => addItem(items.length - 1)}>+ Add another point</button>
+      {field === "treatment" ? (
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <button className={styles.btnAddPoint} onClick={() => setShowTreatmentOptions(!showTreatmentOptions)}>
+            + Add Treatment
+          </button>
+          {showTreatmentOptions && (
+            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "8px", background: "white", border: "1px solid var(--border, #e2e8f0)", borderRadius: "10px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px", zIndex: 10, display: "flex", flexDirection: "column", gap: "4px", width: "200px" }}>
+              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "")}>Blank Point</button>
+              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "Medication given: ")}>Medication given...</button>
+              <button className={styles.btnAddPoint} style={{ background: "transparent", color: "var(--sanctuary-ink, #0f172a)", border: "none", textAlign: "left", padding: "8px 12px", width: "100%", justifyContent: "flex-start" }} onClick={() => addItem(items.length - 1, "Fluid given: ")}>Fluid given...</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <button className={styles.btnAddPoint} onClick={() => addItem(items.length - 1)}>+ Add another point</button>
+      )}
     </div>
   );
 };
