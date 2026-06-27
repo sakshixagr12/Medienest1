@@ -282,6 +282,105 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
   );
 };
 
+const ADVICE_CATEGORIES = [
+  { id: "FOLLOW-UP", label: "Follow-up", icon: "📅" },
+  { id: "DIET", label: "Diet", icon: "🥗" },
+  { id: "FLUIDS", label: "Fluids", icon: "💧" },
+  { id: "ACTIVITY", label: "Activity", icon: "🏃" },
+  { id: "WARNING_SIGNS", label: "Warning Signs", icon: "⚠️" },
+  { id: "INVESTIGATION", label: "Investigation", icon: "🔬" },
+  { id: "CUSTOM", label: "Custom", icon: "✍️" },
+];
+
+const AdviceEditor = ({ items, onChange }: any) => {
+  const addCategory = (cat: string) => {
+    onChange([...items, `${cat}: `]);
+  };
+
+  const updateItem = (idx: number, val: string) => {
+    const next = [...items];
+    next[idx] = val;
+    onChange(next);
+  };
+
+  const removeItem = (idx: number) => {
+    onChange(items.filter((_: any, i: number) => i !== idx));
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+        {ADVICE_CATEGORIES.map(cat => (
+          <button 
+            key={cat.id} 
+            onClick={() => addCategory(cat.id)}
+            style={{ display: "flex", alignItems: "center", gap: "6px", background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "20px", padding: "6px 12px", cursor: "pointer", color: "#334155", fontSize: "13px", fontWeight: 600, transition: "all 0.2s" }}
+            onMouseOver={(e) => { e.currentTarget.style.background = "#e2e8f0"; e.currentTarget.style.borderColor = "#94a3b8"; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.borderColor = "#cbd5e1"; }}
+          >
+            <span>{cat.icon}</span> + {cat.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {items.map((item: string, idx: number) => {
+          const match = item.match(/^([A-Z_-]+):\s*(.*)$/);
+          const catId = match ? match[1] : "CUSTOM";
+          let val = match ? match[2] : item;
+
+          const catDef = ADVICE_CATEGORIES.find(c => c.id === catId) || ADVICE_CATEGORIES.find(c => c.id === "CUSTOM");
+
+          if (catId === "FOLLOW-UP") {
+            let num = "", unit = "Days", dept = "OPD";
+            const fuMatch = val.match(/Review after (\d+)\s+([A-Za-z]+)\s+in\s+(.+?)\.?$/);
+            if (fuMatch) {
+              num = fuMatch[1];
+              unit = fuMatch[2];
+              dept = fuMatch[3];
+            }
+            return (
+              <div key={idx} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", position: "relative" }}>
+                <button onClick={() => removeItem(idx)} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}>✕</button>
+                <div style={{ fontWeight: 600, color: "#334155", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}><span>{catDef?.icon}</span> {catDef?.label} Advice</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                  <span style={{ color: "#475569", fontWeight: 500 }}>Review after:</span>
+                  <input type="number" value={num} onChange={e => updateItem(idx, `FOLLOW-UP: Review after ${e.target.value} ${unit} in ${dept}.`)} style={{ width: "70px", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  <select value={unit} onChange={e => updateItem(idx, `FOLLOW-UP: Review after ${num} ${e.target.value} in ${dept}.`)} style={{ padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Months">Months</option>
+                  </select>
+                  <span style={{ color: "#475569", fontWeight: 500, marginLeft: "8px" }}>Department:</span>
+                  <select value={dept} onChange={e => updateItem(idx, `FOLLOW-UP: Review after ${num} ${unit} in ${e.target.value}.`)} style={{ padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1", flex: 1, minWidth: "150px" }}>
+                    <option value="OPD">OPD</option>
+                    <option value="Medicine OPD">Medicine OPD</option>
+                    <option value="Surgery OPD">Surgery OPD</option>
+                    <option value="Emergency">Emergency</option>
+                  </select>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={idx} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", position: "relative" }}>
+              <button onClick={() => removeItem(idx)} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}>✕</button>
+              <div style={{ fontWeight: 600, color: "#334155", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}><span>{catDef?.icon}</span> {catDef?.label} {catId !== "CUSTOM" && "Advice"}</div>
+              <textarea 
+                value={val} 
+                onChange={e => updateItem(idx, (catId === "CUSTOM" && !item.startsWith("CUSTOM:")) ? e.target.value : `${catId}: ${e.target.value}`)}
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", minHeight: "60px", resize: "vertical", fontFamily: "inherit" }}
+                placeholder={`Type ${catDef?.label.toLowerCase()} advice here...`}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const MedicationRepeater = ({ items, onChange }: any) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
@@ -580,6 +679,8 @@ function DischargeSummaryRedesign() {
         <div className={styles.previewContent}>
           {field === "dischargeCondition" ? (
             <DischargeConditionEditor items={items} onChange={(val: any) => updateField(field, val)} />
+          ) : field === "advice" ? (
+            <AdviceEditor items={items} onChange={(val: any) => updateField(field, val)} />
           ) : (
             <BulletListEditor field={field} items={items} placeholder={placeholder} updateField={updateField} autoSaveStatus={autoSaveStatus} setAutoSaveStatus={setAutoSaveStatus} suggestTimer={suggestTimer} activeSuggestion={activeSuggestion} setActiveSuggestion={setActiveSuggestion} fetchSmartSuggestion={fetchSmartSuggestion} />
           )}
