@@ -496,12 +496,12 @@ function DischargeSummaryRedesign() {
             <section className={styles.fullWidthSection} style={{ display: step === 2 ? "flex" : "none" }}>
               <div className={styles.stepFadeIn}>
                 <div className={styles.premiumCard}>
-                  <div className={styles.summaryCard}>
-                    <div className={styles.cardHeader}><div className={styles.cardTitle}>FINAL DIAGNOSIS</div></div>
+                  <div className={styles.summaryCard} style={{ borderLeft: '4px solid #ef4444' }}>
+                    <div className={styles.cardHeader}><div className={styles.cardTitle}><span style={{ fontSize: '18px', marginRight: '6px' }}>🩺</span>Diagnosis</div></div>
                     <div className="field"><input type="text" placeholder="e.g. Acute Gastroenteritis with severe dehydration" value={summary.diagnosis} onChange={(e) => updateField("diagnosis", e.target.value)} style={{ fontWeight: 600, fontSize: 16 }} /></div>
                   </div>
-                  {renderClinicalCard("Reason for Admission", "complaints", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, "e.g. High grade fever since 5 days")}
-                  {renderClinicalCard("Examination Findings", "findings", <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>, "e.g. Patient conscious, oriented, PR: 98/min")}
+                  {renderClinicalCard("Admission Reason", "complaints", <span style={{ fontSize: '18px', marginRight: '6px' }}>📋</span>, "e.g. High grade fever since 5 days", "#3b82f6")}
+                  {renderClinicalCard("Examination", "findings", <span style={{ fontSize: '18px', marginRight: '6px' }}>🩻</span>, "e.g. Patient conscious, oriented, PR: 98/min", "#f59e0b")}
                 </div>
               </div>
             </section>
