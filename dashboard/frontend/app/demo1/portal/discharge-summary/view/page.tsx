@@ -684,9 +684,9 @@ function FullResultPreview() {
                       )}
                     </div>
 
-                    <div className={styles.previewSection}>
-                      <h4>Final Diagnosis</h4>
-                      <p>
+                    <div className={styles.previewSection} style={{ backgroundColor: "#fef2f2", padding: "16px", borderRadius: "8px", borderLeft: "4px solid #ef4444", margin: "24px 0" }}>
+                      <h4 style={{ color: "#b91c1c", fontSize: "16px", borderBottom: "1px solid #fecaca", paddingBottom: "8px", marginBottom: "12px", textTransform: "uppercase" }}>🩺 Final Diagnosis</h4>
+                      <p style={{ fontWeight: 700, fontSize: "15px", color: "#7f1d1d" }}>
                         {summary.diagnosis || (
                           <span className={styles.emptyPlaceholder}>
                             Pending diagnosis...
