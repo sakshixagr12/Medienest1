@@ -658,7 +658,6 @@ function FullResultPreview() {
                             <span className={styles.infoValue}>{summary.dischargeDestination}</span>
                           </div>
                         )}
-                        )}
                       </div>
                     </div>
                   </td>
