@@ -836,6 +836,29 @@ function AdmissionRecordRedesign() {
 
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const [activeAdmissionId, setActiveAdmissionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const pId = searchParams.get("patientId");
+    const dId = searchParams.get("draftId");
+    if (pId && !dId) {
+      const checkActive = async () => {
+        const { data } = await supabase
+          .from("admission_records")
+          .select("id")
+          .eq("patient_id", pId)
+          .eq("status", "Admitted")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data?.id) {
+          setActiveAdmissionId(data.id);
+        }
+      };
+      checkActive();
+    }
+  }, [searchParams]);
+
   // 1. Initial Load: Restore from URL or LocalStorage
   useEffect(() => {
     const urlStep = searchParams.get("step");
@@ -1868,6 +1891,27 @@ function AdmissionRecordRedesign() {
     // Validation removed as per user request to not make fields mandatory for next step
     handleSetStep((s) => s + 1);
   };
+
+  if (activeAdmissionId) {
+    const dParams = searchParams.get("doctorId") ? `&doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : "";
+    return (
+      <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
+        <TopBar title="Admission Record" backHref={`/portal/doctor-dashboard${dParams.replace('&', '?')}`} />
+        <div style={{ padding: 40, maxWidth: 600, margin: "0 auto", marginTop: 100, background: "#fef2f2", border: "2px solid #ef4444", borderRadius: 12, textAlign: "center", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
+          <div style={{ background: "#fee2e2", width: 64, height: 64, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", marginBottom: 20 }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <h2 style={{ color: "#b91c1c", margin: "0 0 16px 0", fontSize: 20 }}>Patient already has an active admission.</h2>
+          <p style={{ fontSize: 16, color: "#7f1d1d", margin: "0 0 32px 0" }}>Admission ID: <b style={{ fontFamily: "monospace", fontSize: 18 }}>{activeAdmissionId.slice(0, 8).toUpperCase()}</b></p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+             <button onClick={() => router.push(`/portal/admission-record?draftId=${activeAdmissionId}&patientId=${searchParams.get("patientId")}${dParams}`)} style={{ flex: 1, background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Continue Admission</button>
+             <button onClick={() => router.push(`/portal/discharge-summary?admissionId=${activeAdmissionId}&patientId=${searchParams.get("patientId")}${dParams}`)} style={{ flex: 1, background: "#2563eb", color: "#fff", border: "1px solid #2563eb", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Create Discharge</button>
+             <button onClick={() => router.back()} style={{ flex: 1, background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (clinicLoading) return null;
 
