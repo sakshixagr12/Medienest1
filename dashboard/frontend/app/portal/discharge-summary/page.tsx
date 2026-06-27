@@ -346,10 +346,10 @@ function DischargeSummaryRedesign() {
     );
   };
 
-  const renderClinicalCard = (title: string, field: keyof SummaryData, icon: React.ReactNode, placeholder: string) => {
+  const renderClinicalCard = (title: string, field: keyof SummaryData, icon: React.ReactNode, placeholder: string, borderColor?: string) => {
     const items = summary[field] as any[];
     return (
-      <div className={`${styles.summaryCard} ${styles.inlineEditCard}`} style={{ cursor: "default" }}>
+      <div className={`${styles.summaryCard} ${styles.inlineEditCard}`} style={{ cursor: "default", borderLeft: borderColor ? `4px solid ${borderColor}` : undefined }}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitle}>{icon}{title}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
