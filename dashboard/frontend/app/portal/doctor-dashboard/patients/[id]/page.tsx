@@ -67,7 +67,21 @@ function PatientHubContent({
   const [admissions, setAdmissions] = useState<any[]>([]); // New state for Admission Records
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("Patient Summary");
+  const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "Patient Summary");
+
+  // Sync activeTab with URL parameter
+  useEffect(() => {
+    const currentTab = searchParams?.get("tab");
+    if (activeTab !== currentTab && activeTab !== "Patient Summary") {
+      const p = new URLSearchParams(searchParams?.toString() || "");
+      p.set("tab", activeTab);
+      router.replace(`?${p.toString()}`, { scroll: false });
+    } else if (activeTab === "Patient Summary" && currentTab) {
+      const p = new URLSearchParams(searchParams?.toString() || "");
+      p.delete("tab");
+      router.replace(`?${p.toString()}`, { scroll: false });
+    }
+  }, [activeTab, searchParams, router]);
   const { clinic } = useClinic();
 
   const supabase = createClient();
