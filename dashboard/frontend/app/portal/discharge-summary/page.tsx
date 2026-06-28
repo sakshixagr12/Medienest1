@@ -938,6 +938,21 @@ function DischargeSummaryRedesign() {
       if (admissionId) {
         const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
         if (data && !error) {
+           const { data: existingSummary } = await supabase
+             .from("discharge_summaries")
+             .select("id")
+             .eq("patient_name", data.patient_name)
+             .eq("date_admission", data.date_admission)
+             .order("created_at", { ascending: false })
+             .limit(1)
+             .single();
+           
+           if (existingSummary?.id) {
+             alert("This admission has already been discharged.");
+             router.push(`/portal/discharge-summary/view?id=${existingSummary.id}`);
+             return;
+           }
+
            if (draftToLoad && draftToLoad.patientName && draftToLoad.patientName !== data.patient_name) {
               draftToLoad = null;
               localStorage.removeItem("discharge_summary_draft");
@@ -1047,7 +1062,11 @@ function DischargeSummaryRedesign() {
       if (error) throw error;
 
       if (admissionId) {
-        await supabase.from("admission_records").update({ status: "Discharged" }).eq("id", admissionId);
+        const { error: updateErr } = await supabase.from("admission_records").update({ status: "Discharged", date_discharge: summary.dod, discharge_summary_id: insertedRecord.id }).eq("id", admissionId);
+        if (updateErr) {
+          console.warn("Could not update extended fields, falling back to basic status update", updateErr);
+          await supabase.from("admission_records").update({ status: "Discharged" }).eq("id", admissionId);
+        }
       }
 
       localStorage.removeItem("discharge_summary_draft");
