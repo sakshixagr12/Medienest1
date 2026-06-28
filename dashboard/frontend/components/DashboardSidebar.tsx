@@ -151,7 +151,7 @@ export default function DashboardSidebar({
             href: buildDoctorUrl("/portal/admission-record"),
           },
           {
-            label: "Discharge Summary",
+            label: "Discharge Management",
             icon: (
               <svg
                 width="18"
