@@ -134,7 +134,11 @@ export default function DischargeManagementPage() {
                           <button
                             className={styles.btnAction}
                             onClick={() => {
-                              // Future integration placeholder
+                              if (!record.id) {
+                                alert("Invalid Admission ID");
+                                return;
+                              }
+                              router.push(`/demo/portal/discharge-summary?admissionId=${record.id}`);
                             }}
                           >
                             Create Discharge
