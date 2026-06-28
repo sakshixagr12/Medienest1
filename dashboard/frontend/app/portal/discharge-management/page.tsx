@@ -16,7 +16,7 @@ export default function DischargeManagementPage() {
   useEffect(() => {
     const fetchPendingDischarges = async () => {
       try {
-        const [pendingRes, recentRes] = await Promise.all([
+        const [pendingRes, recentRes, summariesRes] = await Promise.all([
           supabase
             .from("admission_records")
             .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, status")
@@ -27,10 +27,37 @@ export default function DischargeManagementPage() {
             .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, date_discharge, discharge_summary_id, status")
             .eq("status", "Discharged")
             .order("date_discharge", { ascending: false })
-            .limit(50)
+            .limit(50),
+          supabase
+            .from("discharge_summaries")
+            .select("patient_name, date_admission")
         ]);
 
         if (pendingRes.error) throw pendingRes.error;
+
+        // Filter out any "Admitted" records that actually have a matching discharge summary
+        // (This self-heals the UI for legacy records whose status wasn't updated)
+        let actualPending = pendingRes.data || [];
+        if (summariesRes.data && summariesRes.data.length > 0) {
+          const dischargedAdmissionsToUpdate: string[] = [];
+          
+          actualPending = (pendingRes.data || []).filter(adm => {
+             const isDischarged = summariesRes.data.some(sum => 
+                sum.patient_name === adm.patient_name && 
+                sum.date_admission === adm.date_admission
+             );
+             if (isDischarged) dischargedAdmissionsToUpdate.push(adm.id);
+             return !isDischarged;
+          });
+          
+          // Fire-and-forget background update to heal the DB
+          if (dischargedAdmissionsToUpdate.length > 0) {
+            Promise.all(dischargedAdmissionsToUpdate.map(id => 
+               supabase.from("admission_records").update({ status: "Discharged" }).eq("id", id)
+            )).catch(err => console.error("Failed to auto-heal admission statuses", err));
+          }
+        }
+
         // if recentRes errors (e.g. no date_discharge col), we'll try fetching without it below:
         if (recentRes.error) {
            const fallbackRes = await supabase
@@ -46,7 +73,7 @@ export default function DischargeManagementPage() {
            setRecentlyDischarged(recentRes.data || []);
         }
 
-        setPendingDischarges(pendingRes.data || []);
+        setPendingDischarges(actualPending);
       } catch (err) {
         console.error("Error fetching pending discharges:", err);
       } finally {
