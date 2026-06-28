@@ -1598,14 +1598,21 @@ function AdmissionRecordRedesign() {
     setShowDraftModal(false);
   };
 
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      router.back();
+    } else {
+      const patientIdParam = searchParams?.get("patientId");
+      if (patientIdParam) {
+        router.push(`/portal/doctor-dashboard/patients/${patientIdParam}?tab=Admissions`);
+      } else {
+        router.push(`/portal/doctor-dashboard`);
+      }
+    }
+  };
+
   const handleDraftDashboard = () => {
-    const params = new URLSearchParams();
-    const dId = searchParams.get("doctorId");
-    const dName = searchParams.get("doctorName") || searchParams.get("docName");
-    if (dId) params.set("doctorId", dId);
-    if (dName) params.set("doctorName", dName);
-    const qs = params.toString();
-    router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
+    handleBack();
   };
 
   const handleDraftStartNew = () => {
@@ -1944,7 +1951,7 @@ function AdmissionRecordRedesign() {
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
              <button onClick={() => router.push(`/portal/admission-record?draftId=${activeAdmissionId}&patientId=${searchParams.get("patientId")}${dParams}`)} style={{ flex: 1, background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Continue Admission</button>
              <button onClick={() => router.push(`/portal/discharge-summary?admissionId=${activeAdmissionId}&patientId=${searchParams.get("patientId")}${dParams}`)} style={{ flex: 1, background: "#2563eb", color: "#fff", border: "1px solid #2563eb", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Create Discharge</button>
-             <button onClick={() => router.back()} style={{ flex: 1, background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+             <button onClick={handleBack} style={{ flex: 1, background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", padding: "12px", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -3357,19 +3364,7 @@ function AdmissionRecordRedesign() {
             <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--sanctuary-ink)", marginBottom: 8 }}>Admission Record Finalized</h3>
             <p style={{ fontSize: 14, color: "#64748b", marginBottom: 28 }}>The admission record has been successfully saved and linked to the patient. What would you like to do next?</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <button type="button" onClick={() => {
-                const params = new URLSearchParams();
-                const dId = searchParams.get("doctorId");
-                const dName = searchParams.get("doctorName") || searchParams.get("docName");
-                if (dId) params.set("doctorId", dId);
-                if (dName) params.set("doctorName", dName);
-                const qs = params.toString();
-                if (finalizePatientId) {
-                  router.push(`/portal/doctor-dashboard/patients/${finalizePatientId}${qs ? `?${qs}` : ""}`);
-                } else {
-                  router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
-                }
-              }} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>View Patient Profile</button>
+                handleBack();
               
               {finalizeRecordId && (
                 <button type="button" onClick={() => {
@@ -3386,15 +3381,7 @@ function AdmissionRecordRedesign() {
                   Print Admission Record
                 </button>
               )}
-              <button type="button" onClick={() => {
-                const params = new URLSearchParams();
-                const dId = searchParams.get("doctorId");
-                const dName = searchParams.get("doctorName") || searchParams.get("docName");
-                if (dId) params.set("doctorId", dId);
-                if (dName) params.set("doctorName", dName);
-                const qs = params.toString();
-                router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
-              }} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
+              <button type="button" onClick={handleBack} style={{ width: "100%", padding: "12px", background: "#f1f5f9", color: "var(--sanctuary-ink)", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>Back to Dashboard</button>
               <button type="button" onClick={() => {
                 handleDraftStartNew();
                 setShowFinalizeModal(false);
