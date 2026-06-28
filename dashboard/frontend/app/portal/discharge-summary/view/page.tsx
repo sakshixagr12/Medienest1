@@ -532,13 +532,17 @@ function FullResultPreview() {
                 <button
                   className={styles.btnViewHub}
                   onClick={() => {
-                    const params = new URLSearchParams();
-                    const dId = searchParams.get("doctorId");
-                    const dName = searchParams.get("doctorName");
-                    if (dId) params.set("doctorId", dId);
-                    if (dName) params.set("doctorName", dName);
-                    const qs = params.toString();
-                    router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`); // Redirect to dashboard or specific patient if we have UUID
+                    if (window.history.length > 2) {
+                      router.back();
+                    } else {
+                      const params = new URLSearchParams();
+                      const dId = searchParams.get("doctorId");
+                      const dName = searchParams.get("doctorName");
+                      if (dId) params.set("doctorId", dId);
+                      if (dName) params.set("doctorName", dName);
+                      const qs = params.toString();
+                      router.push(`/portal/doctor-dashboard${qs ? `?${qs}` : ""}`);
+                    }
                   }}
                 >
                   Go to Dashboard
