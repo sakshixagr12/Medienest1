@@ -886,7 +886,40 @@ function DischargeSummaryRedesign() {
                     </tr>
                   </thead>
                   <tbody>
-                    {summary.medicines.map((m, idx) => (
+                    {summary.medicines.map((m, idx) => { if (admissionId) {
+        const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
+        if (data && !error) {
+           if (draftToLoad && draftToLoad.patientName && draftToLoad.patientName !== data.patient_name) {
+              draftToLoad = null;
+              localStorage.removeItem("discharge_summary_draft");
+              localStorage.removeItem("discharge_summary_draft_step");
+              handleSetStep(1);
+           }
+           
+           const [ageStr, sexStr] = data.age_sex ? data.age_sex.split(" / ") : ["", ""];
+           setSummary(prev => ({
+             ...prev,
+             ...(draftToLoad || {}),
+             patientName: draftToLoad?.patientName || data.patient_name || prev.patientName,
+             phone: draftToLoad?.phone || data.contact || prev.phone,
+             age: draftToLoad?.age || ageStr || prev.age,
+             sex: draftToLoad?.sex || sexStr || prev.sex,
+             regNo: draftToLoad?.regNo || data.patient_id || data.reg_no || prev.regNo,
+             doa: draftToLoad?.doa || (data.date_admission ? data.date_admission.slice(0, 16) : prev.doa),
+             doctor: draftToLoad?.doctor || data.doctor_name || prev.doctor,
+             diagnosis: draftToLoad?.diagnosis || data.final_diagnosis || data.diagnosis || prev.diagnosis,
+             complaints: draftToLoad?.complaints?.length ? draftToLoad.complaints : (Array.isArray(data.complaints) && data.complaints.length > 0 ? data.complaints : prev.complaints),
+             findings: draftToLoad?.findings?.length ? draftToLoad.findings : (Array.isArray(data.findings) && data.findings.length > 0 ? data.findings : prev.findings),
+             treatment: draftToLoad?.treatment?.length ? draftToLoad.treatment : (Array.isArray(data.treatment_plan) && data.treatment_plan.length > 0 ? data.treatment_plan : prev.treatment),
+           }));
+           return;
+        } else {
+           if (window.confirm("Unable to load admission details. Return to Discharge Management?")) {
+             router.push("/demo/portal/discharge-management");
+           }
+           return;
+        }
+      } return (
                       <tr key={m.id}>
                         <td
                           style={{
