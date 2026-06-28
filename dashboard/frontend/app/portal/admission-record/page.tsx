@@ -3364,7 +3364,7 @@ function AdmissionRecordRedesign() {
             <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--sanctuary-ink)", marginBottom: 8 }}>Admission Record Finalized</h3>
             <p style={{ fontSize: 14, color: "#64748b", marginBottom: 28 }}>The admission record has been successfully saved and linked to the patient. What would you like to do next?</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                handleBack();
+              <button type="button" onClick={handleBack} style={{ width: "100%", padding: "12px", background: "var(--sanctuary-blue)", color: "#fff", borderRadius: 12, fontWeight: 700, border: "none", cursor: "pointer" }}>View Patient Profile</button>
               
               {finalizeRecordId && (
                 <button type="button" onClick={() => {
