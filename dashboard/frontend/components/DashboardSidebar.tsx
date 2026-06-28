@@ -54,7 +54,8 @@ export default function DashboardSidebar({
   const isDoctor = pathname
     ? pathname.includes("/portal/doctor-dashboard") ||
       pathname.includes("/portal/digital-prescription") ||
-      pathname.includes("/portal/discharge-summary")
+      pathname.includes("/portal/discharge-summary") ||
+      pathname.includes("/portal/discharge-management")
     : false;
 
   const doctorIdParam = searchParams?.get("doctorId");
