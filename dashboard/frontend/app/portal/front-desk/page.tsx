@@ -245,10 +245,10 @@ export default function FrontDeskPage() {
         await supabase
           .from("patients")
           .update({
-            age: ptAge,
+            age: ptAge ? parseInt(ptAge) : null,
             gender: ptSex,
-            weight: ptWeight || null,
-            blood_group: ptBloodGroup.toUpperCase() || null,
+            weight: ptWeight ? parseFloat(ptWeight.toString()) : null,
+            blood_group: ptBloodGroup ? ptBloodGroup.toUpperCase() : null,
             address: ptAddress || null,
             clinic_id: clinic.id,
           })
@@ -260,10 +260,10 @@ export default function FrontDeskPage() {
             {
               name: normalizedName,
               contact: cleanPhone,
-              age: ptAge,
+              age: ptAge ? parseInt(ptAge) : null,
               gender: ptSex,
-              weight: ptWeight || null,
-              blood_group: ptBloodGroup.toUpperCase() || null,
+              weight: ptWeight ? parseFloat(ptWeight.toString()) : null,
+              blood_group: ptBloodGroup ? ptBloodGroup.toUpperCase() : null,
               address: ptAddress || null,
               clinic_id: clinic.id,
             },
@@ -288,7 +288,14 @@ export default function FrontDeskPage() {
       resetCheckIn();
     } catch (err: any) {
       console.error("Check-in error:", err);
-      const errMsg = err.message || err.details || "Check-in failed";
+      let errMsg = "Check-in failed";
+      if (err instanceof Error) {
+        errMsg = err.message;
+      } else if (err && typeof err === "object") {
+        errMsg = err.message || err.details || err.hint || err.error_description || JSON.stringify(err);
+      } else if (typeof err === "string") {
+        errMsg = err;
+      }
       alert(
         `Failed to check-in: ${errMsg}. Please check if you have permissions.`,
       );
