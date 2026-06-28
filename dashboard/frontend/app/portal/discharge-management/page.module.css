@@ -1,0 +1,121 @@
+.page {
+  min-height: 100vh;
+  background: var(--sanctuary-bg);
+  color: var(--sanctuary-ink);
+  padding: 32px 40px 120px 40px;
+}
+
+.main {
+  max-width: 1711px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--sanctuary-primary);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--sanctuary-ink-l);
+  font-weight: 500;
+}
+
+.searchSection {
+  margin-bottom: 16px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--ambient-glow);
+  transition: all 0.3s ease;
+}
+
+.searchBar:focus-within {
+  border-color: var(--sanctuary-primary);
+  box-shadow: 0 0 0 4px rgba(23, 3, 55, 0.05);
+}
+
+.searchIcon {
+  color: var(--sanctuary-primary);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--sanctuary-ink-l);
+  opacity: 0.7;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--ambient-glow);
+}
+
+.cardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sanctuary-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--sanctuary-ink-l);
+}
+
+.emptyIcon {
+  margin-bottom: 16px;
+  color: var(--sanctuary-ink-l);
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 15px;
+  font-weight: 600;
+}
