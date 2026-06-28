@@ -1235,11 +1235,11 @@ function DischargeSummaryRedesign() {
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
                       <div className="field"><label>Discharge Destination</label><input type="text" placeholder="e.g. Home, Facility" value={summary.dischargeDestination} onChange={(e) => updateField("dischargeDestination", e.target.value)} /></div>
-                      <div className="field"><label>Emergency Contact Relation</label><input type="text" placeholder="e.g. Spouse" value={summary.emergencyContactRelation} onChange={(e) => updateField("emergencyContactRelation", e.target.value)} /></div>
+                      <div className="field"><label>Emergency Contact Relation</label><input type="text" maxLength={50} placeholder="e.g. Spouse" value={summary.emergencyContactRelation} onChange={(e) => updateField("emergencyContactRelation", e.target.value.replace(/[^a-zA-Z\s]/g, ''))} /></div>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                      <div className="field"><label>Emergency Contact Name</label><input type="text" placeholder="e.g. John Doe" value={summary.emergencyContactName} onChange={(e) => updateField("emergencyContactName", e.target.value)} /></div>
+                      <div className="field"><label>Emergency Contact Name</label><input type="text" maxLength={50} placeholder="e.g. John Doe" value={summary.emergencyContactName} onChange={(e) => updateField("emergencyContactName", e.target.value.replace(/[^a-zA-Z\s]/g, ''))} /></div>
                       <div className="field"><label>Contact Number</label><input type="text" inputMode="numeric" maxLength={10} placeholder="e.g. 9876543210" value={summary.emergencyContactNumber} onChange={(e) => updateField("emergencyContactNumber", e.target.value.replace(/\D/g, '').slice(0, 10))} /></div>
                     </div>
 
