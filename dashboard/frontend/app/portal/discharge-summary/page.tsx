@@ -1142,7 +1142,6 @@ function DischargeSummaryRedesign() {
       <div className={styles.page}>
         <TopBar 
           title="Discharge Summary" 
-          backHref={`/portal/doctor-dashboard${searchParams.get("doctorId") ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : ""}`}
         />
         
         <div className={styles.workspaceHeader}>
