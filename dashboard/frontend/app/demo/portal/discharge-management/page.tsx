@@ -10,22 +10,42 @@ export default function DischargeManagementPage() {
   const supabase = createClient();
   
   const [pendingDischarges, setPendingDischarges] = useState<any[]>([]);
+  const [recentlyDischarged, setRecentlyDischarged] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPendingDischarges = async () => {
       try {
-        const { data, error } = await supabase
-          .from("admission_records")
-          .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, status")
-          .eq("status", "Admitted")
-          .order("date_admission", { ascending: false });
+        const [pendingRes, recentRes] = await Promise.all([
+          supabase
+            .from("admission_records")
+            .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, status")
+            .eq("status", "Admitted")
+            .order("date_admission", { ascending: false }),
+          supabase
+            .from("admission_records")
+            .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, date_discharge, discharge_summary_id, status")
+            .eq("status", "Discharged")
+            .order("date_discharge", { ascending: false })
+            .limit(50)
+        ]);
 
-        if (error) {
-          throw error;
+        if (pendingRes.error) throw pendingRes.error;
+        if (recentRes.error) {
+           const fallbackRes = await supabase
+             .from("admission_records")
+             .select("id, patient_name, patient_id, department, ward, bed, doctor_name, date_admission, status")
+             .eq("status", "Discharged")
+             .order("date_admission", { ascending: false })
+             .limit(50);
+           if (!fallbackRes.error) {
+              setRecentlyDischarged(fallbackRes.data || []);
+           }
+        } else {
+           setRecentlyDischarged(recentRes.data || []);
         }
 
-        setPendingDischarges(data || []);
+        setPendingDischarges(pendingRes.data || []);
       } catch (err) {
         console.error("Error fetching pending discharges:", err);
       } finally {
@@ -157,24 +177,86 @@ export default function DischargeManagementPage() {
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>Recently Discharged</h2>
             </div>
-            <div className={styles.emptyState}>
-              <svg
-                className={styles.emptyIcon}
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              <p className={styles.emptyText}>No discharge records found.</p>
-            </div>
+            {recentlyDischarged.length === 0 ? (
+              <div className={styles.emptyState}>
+                <svg
+                  className={styles.emptyIcon}
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <p className={styles.emptyText}>No discharge records found.</p>
+              </div>
+            ) : (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Admission ID</th>
+                      <th>Patient Name</th>
+                      <th>Patient ID</th>
+                      <th>Consultant</th>
+                      <th>Discharge Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentlyDischarged.map((record) => (
+                      <tr key={record.id}>
+                        <td>
+                          {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
+                        </td>
+                        <td>{record.patient_name || "—"}</td>
+                        <td>
+                          {record.patient_id ? record.patient_id.substring(0, 8).toUpperCase() : "—"}
+                        </td>
+                        <td>{record.doctor_name || "—"}</td>
+                        <td>
+                          {record.date_discharge
+                            ? new Date(record.date_discharge).toLocaleDateString()
+                            : record.date_admission ? new Date(record.date_admission).toLocaleDateString() : "—"}
+                        </td>
+                        <td>
+                          <button
+                            className={styles.btnActionSecondary}
+                            onClick={async () => {
+                              if (record.discharge_summary_id) {
+                                router.push(`/demo/portal/discharge-summary/view?id=${record.discharge_summary_id}`);
+                              } else {
+                                const { data } = await supabase
+                                  .from("discharge_summaries")
+                                  .select("id")
+                                  .eq("patient_name", record.patient_name)
+                                  .eq("date_admission", record.date_admission)
+                                  .order("created_at", { ascending: false })
+                                  .limit(1)
+                                  .single();
+                                if (data?.id) {
+                                  router.push(`/demo/portal/discharge-summary/view?id=${data.id}`);
+                                } else {
+                                  alert("Discharge summary not found.");
+                                }
+                              }
+                            }}
+                          >
+                            View Discharge
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </main>
