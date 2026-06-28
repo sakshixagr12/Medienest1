@@ -286,8 +286,27 @@ function DischargeSummaryRedesign() {
       }
 
       if (admissionId) {
+        const { error: updateErr } = await supabase.from("admission_records").update({ status: "Discharged", date_discharge: summary.dod }).eq("id", admissionId);
+        if (updateErr) {
+          console.warn("Could not update admission status", updateErr);
+        }
         const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
         if (data && !error) {
+           const { data: existingSummary } = await supabase
+             .from("discharge_summaries")
+             .select("id")
+             .eq("patient_name", data.patient_name)
+             .eq("date_admission", data.date_admission)
+             .order("created_at", { ascending: false })
+             .limit(1)
+             .single();
+           
+           if (existingSummary?.id) {
+             alert("This admission has already been discharged.");
+             router.push(`/demo/portal/discharge-summary/view?id=${existingSummary.id}`);
+             return;
+           }
+
            if (draftToLoad && draftToLoad.patientName && draftToLoad.patientName !== data.patient_name) {
               draftToLoad = null;
               localStorage.removeItem("discharge_summary_draft");
