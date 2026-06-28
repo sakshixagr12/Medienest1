@@ -165,7 +165,7 @@ export default function DashboardSidebar({
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
             ),
-            href: buildDoctorUrl("/portal/discharge-summary"),
+            href: buildDoctorUrl("/portal/discharge-management"),
           },
         ]
       : []),
