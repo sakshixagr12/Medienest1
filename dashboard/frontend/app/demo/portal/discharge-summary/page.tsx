@@ -252,35 +252,78 @@ function DischargeSummaryRedesign() {
   // Refs for debounce
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // 2. Load Draft with Migration Logic
+  // 2. Load Draft & Fetch Admission
   useEffect(() => {
-    const draftStr = localStorage.getItem("discharge_summary_draft");
-    if (draftStr) {
-      try {
-        const draft = JSON.parse(draftStr);
-        const migrate = (val: any) => {
-          if (Array.isArray(val)) return val;
-          if (typeof val === "string" && val.trim()) {
-            return val
-              .split("\n")
-              .map((s) => s.replace(/^[•\-\*]\s*/, "").trim())
-              .filter(Boolean);
-          }
-          return [];
-        };
-        setSummary({
-          ...draft,
-          complaints: migrate(draft.complaints),
-          findings: migrate(draft.findings),
-          treatment: migrate(draft.treatment),
-          dischargeCondition: migrate(draft.dischargeCondition),
-          advice: migrate(draft.advice),
-        });
-      } catch (e) {
-        console.error("Failed to parse draft", e);
+    const fetchAdmissionAndDraft = async () => {
+      const admissionId = searchParams.get("admissionId");
+      let draftToLoad: any = null;
+      const draftStr = localStorage.getItem("discharge_summary_draft");
+      
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          const migrate = (val: any) => {
+            if (Array.isArray(val)) return val;
+            if (typeof val === "string" && val.trim()) {
+              return val
+                .split("\n")
+                .map((s) => s.replace(/^[•\-\*]\s*/, "").trim())
+                .filter(Boolean);
+            }
+            return [];
+          };
+          draftToLoad = {
+            ...draft,
+            complaints: migrate(draft.complaints),
+            findings: migrate(draft.findings),
+            treatment: migrate(draft.treatment),
+            dischargeCondition: migrate(draft.dischargeCondition),
+            advice: migrate(draft.advice),
+          };
+        } catch (e) {
+          console.error("Failed to parse draft", e);
+        }
       }
-    }
-  }, []);
+
+      if (admissionId) {
+        const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
+        if (data && !error) {
+           if (draftToLoad && draftToLoad.patientName && draftToLoad.patientName !== data.patient_name) {
+              draftToLoad = null;
+              localStorage.removeItem("discharge_summary_draft");
+           }
+           
+           const [ageStr, sexStr] = data.age_sex ? data.age_sex.split(" / ") : ["", ""];
+           setSummary(prev => ({
+             ...prev,
+             ...(draftToLoad || {}),
+             patientName: draftToLoad?.patientName || data.patient_name || prev.patientName,
+             phone: draftToLoad?.phone || data.contact || prev.phone,
+             age: draftToLoad?.age || ageStr || prev.age,
+             sex: draftToLoad?.sex || sexStr || prev.sex,
+             regNo: draftToLoad?.regNo || data.patient_id || data.reg_no || prev.regNo,
+             doa: draftToLoad?.doa || (data.date_admission ? data.date_admission.slice(0, 16) : prev.doa),
+             doctor: draftToLoad?.doctor || data.doctor_name || prev.doctor,
+             diagnosis: draftToLoad?.diagnosis || data.final_diagnosis || data.diagnosis || prev.diagnosis,
+             complaints: draftToLoad?.complaints?.length ? draftToLoad.complaints : (Array.isArray(data.complaints) && data.complaints.length > 0 ? data.complaints : prev.complaints),
+             findings: draftToLoad?.findings?.length ? draftToLoad.findings : (Array.isArray(data.findings) && data.findings.length > 0 ? data.findings : prev.findings),
+             treatment: draftToLoad?.treatment?.length ? draftToLoad.treatment : (Array.isArray(data.treatment_plan) && data.treatment_plan.length > 0 ? data.treatment_plan : prev.treatment),
+           }));
+           return;
+        } else {
+           if (window.confirm("Unable to load admission details. Return to Discharge Management?")) {
+             router.push("/demo/portal/discharge-management");
+           }
+           return;
+        }
+      }
+
+      if (draftToLoad) {
+        setSummary(draftToLoad);
+      }
+    };
+    fetchAdmissionAndDraft();
+  }, [searchParams, supabase, router]);
 
   // 3. Auto-save
   const saveDraft = useCallback((data: SummaryData) => {
