@@ -286,10 +286,7 @@ function DischargeSummaryRedesign() {
       }
 
       if (admissionId) {
-        const { error: updateErr } = await supabase.from("admission_records").update({ status: "Discharged", date_discharge: summary.dod }).eq("id", admissionId);
-        if (updateErr) {
-          console.warn("Could not update admission status", updateErr);
-        }
+
         const { data, error } = await supabase.from("admission_records").select("*").eq("id", admissionId).single();
         if (data && !error) {
            const { data: existingSummary } = await supabase
