@@ -450,7 +450,7 @@ function AdmissionRecordRedesign() {
     ward: "",
     bed: "",
     department: "",
-    date_admission: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
+    date_admission: "",
     severity: "Mild",
     admission_type: "OPD",
     has_diabetes: false,
@@ -539,14 +539,18 @@ function AdmissionRecordRedesign() {
             : [],
         }));
       } catch (e) {
-        console.error("Failed to parse draft", e);
+        console.error("Draft error", e);
       }
     } else {
-      if (docNameParam) {
-        setSummary((prev) => ({ ...prev, doctor: docNameParam }));
-      } else if (doctors && doctors.length > 0) {
-        setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
-      }
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
+    }
+
+    if (docNameParam) {
+      setSummary((prev) => ({ ...prev, doctor: docNameParam }));
+    } else if (doctors && doctors.length > 0) {
+      setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
     }
     setClinicLoading(false);
   }, [docNameParam, doctors]);
