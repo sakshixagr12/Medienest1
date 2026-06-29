@@ -887,7 +887,7 @@ function AdmissionRecordRedesign() {
           ward: summary.ward,
           bed: summary.bed,
           department: summary.department,
-          date_admission: summary.date_admission ? new Date(new Date(summary.date_admission).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
+          date_admission: summary.date_admission ? new Date(summary.date_admission).toISOString() : new Date().toISOString(),
           severity: summary.severity,
           admission_type: summary.admission_type,
           doctor_observations: summary.doctor_observations,
