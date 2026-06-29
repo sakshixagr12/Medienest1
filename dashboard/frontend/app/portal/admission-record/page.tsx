@@ -781,11 +781,7 @@ function AdmissionRecordRedesign() {
     ward: "",
     bed: "",
     department: "",
-    date_admission: (() => {
-      const d = new Date();
-      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      return d.toISOString().slice(0, 16);
-    })(),
+    date_admission: "",
     severity: "Mild",
     admission_type: "OPD",
     has_diabetes: false,
@@ -1013,8 +1009,12 @@ function AdmissionRecordRedesign() {
           try {
             draftToLoad = JSON.parse(draftStr);
           } catch (e) {
-            console.error("Failed to parse draft", e);
+            console.error("Draft error", e);
           }
+        } else {
+          const d = new Date();
+          d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+          setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
         }
 
         if (pId) {
