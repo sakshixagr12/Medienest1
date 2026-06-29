@@ -750,8 +750,8 @@ app.post(
   "/api/internal/process-expired-subscriptions",
   async (req, res) => {
     try {
-      const cronSecret = process.env.CRON_SECRET || "medienest_cron_secret_token";
-      if (req.headers["x-cron-token"] !== cronSecret) {
+      const cronSecret = process.env.CRON_SECRET;
+      if (!cronSecret || req.headers["x-cron-token"] !== cronSecret) {
         return res.status(403).json({ success: false, error: "Unauthorized" });
       }
 
