@@ -318,7 +318,7 @@ function DischargeSummaryRedesign() {
              age: draftToLoad?.age || ageStr || prev.age,
              sex: draftToLoad?.sex || sexStr || prev.sex,
              regNo: draftToLoad?.regNo || data.patient_id || data.reg_no || prev.regNo,
-             doa: draftToLoad?.doa || (data.date_admission ? data.date_admission.slice(0, 16) : prev.doa),
+             doa: draftToLoad?.doa || (data.date_admission ? new Date(new Date(data.date_admission).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : prev.doa),
              doctor: draftToLoad?.doctor || data.doctor_name || prev.doctor,
              diagnosis: draftToLoad?.diagnosis || data.final_diagnosis || data.diagnosis || prev.diagnosis,
              complaints: draftToLoad?.complaints?.length ? draftToLoad.complaints : (Array.isArray(data.complaints) && data.complaints.length > 0 ? data.complaints : prev.complaints),
