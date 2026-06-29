@@ -1550,43 +1550,47 @@ function AdmissionRecordRedesign() {
           summary.nursing_instructions ? `Nursing: ${summary.nursing_instructions}` : ""
         ].filter(Boolean).join("\n\n");
 
-        await supabase.from("admission_records").insert([
-          {
-            patient_name: summary.patientName || "Draft Patient",
-            age_sex: `${summary.age} / ${summary.sex}`,
-            contact: summary.phone,
-            doctor_name: summary.doctor,
-            ward: summary.ward,
-            bed: summary.bed,
-            department: summary.department,
-            date_admission: summary.date_admission ? new Date(summary.date_admission).toISOString() : new Date().toISOString(),
-            severity: summary.severity,
-            admission_type: summary.admission_type,
-            doctor_observations: combinedObservations,
-            attachments: summary.attachments,
-            vitals: summary.vitals,
-            vitals_bp_sys: summary.vitals_bp_sys ? parseInt(summary.vitals_bp_sys) : null,
-            vitals_bp_dia: summary.vitals_bp_dia ? parseInt(summary.vitals_bp_dia) : null,
-            vitals_pulse: summary.vitals_pulse ? parseInt(summary.vitals_pulse) : null,
-            vitals_temp: summary.vitals_temp ? parseFloat(summary.vitals_temp) : null,
-            vitals_spo2: summary.vitals_spo2 ? parseInt(summary.vitals_spo2) : null,
-            has_diabetes: summary.has_diabetes,
-            has_hypertension: summary.has_hypertension,
-            has_thyroid: summary.has_thyroid,
-            past_surgeries: summary.past_surgeries,
-            allergies: summary.allergies,
-            diagnosis: summary.diagnosis,
-            final_diagnosis: summary.final_diagnosis,
-            hpi: summary.hpi,
-            complaints: summary.complaints,
-            findings: summary.findings,
-            investigations: summary.investigations,
-            treatment_plan: summary.treatment_plan,
-            clinic_id: clinic?.id,
-            patient_id: patientId,
-            status: 'Draft'
-          },
-        ]);
+        const admissionData = {
+          patient_name: summary.patientName || "Draft Patient",
+          age_sex: `${summary.age} / ${summary.sex}`,
+          contact: summary.phone,
+          doctor_name: summary.doctor,
+          ward: summary.ward,
+          bed: summary.bed,
+          department: summary.department,
+          date_admission: summary.date_admission ? new Date(summary.date_admission).toISOString() : new Date().toISOString(),
+          severity: summary.severity,
+          admission_type: summary.admission_type,
+          doctor_observations: combinedObservations,
+          attachments: summary.attachments,
+          vitals: summary.vitals,
+          vitals_bp_sys: summary.vitals_bp_sys ? parseInt(summary.vitals_bp_sys) : null,
+          vitals_bp_dia: summary.vitals_bp_dia ? parseInt(summary.vitals_bp_dia) : null,
+          vitals_pulse: summary.vitals_pulse ? parseInt(summary.vitals_pulse) : null,
+          vitals_temp: summary.vitals_temp ? parseFloat(summary.vitals_temp) : null,
+          vitals_spo2: summary.vitals_spo2 ? parseInt(summary.vitals_spo2) : null,
+          has_diabetes: summary.has_diabetes,
+          has_hypertension: summary.has_hypertension,
+          has_thyroid: summary.has_thyroid,
+          past_surgeries: summary.past_surgeries,
+          allergies: summary.allergies,
+          diagnosis: summary.diagnosis,
+          final_diagnosis: summary.final_diagnosis,
+          hpi: summary.hpi,
+          complaints: summary.complaints,
+          findings: summary.findings,
+          investigations: summary.investigations,
+          treatment_plan: summary.treatment_plan,
+          clinic_id: clinic?.id,
+          patient_id: patientId,
+          status: 'Draft'
+        };
+
+        if (activeAdmissionId) {
+          await supabase.from("admission_records").update(admissionData).eq("id", activeAdmissionId);
+        } else {
+          await supabase.from("admission_records").insert([admissionData]);
+        }
       }
     } catch (e) {
       console.error("Failed to save draft", e);
