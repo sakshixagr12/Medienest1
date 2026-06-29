@@ -51,7 +51,24 @@ export default function AdmissionRecordView() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button className={styles.btnBack} onClick={() => router.back()}>
+          <button
+            className={styles.btnBack}
+            onClick={() => {
+              if (record?.patient_id) {
+                const params = new URLSearchParams();
+                const dId = searchParams?.get("doctorId");
+                const dName = searchParams?.get("doctorName");
+                if (dId) params.set("doctorId", dId);
+                if (dName) params.set("doctorName", dName);
+                const qs = params.toString();
+                router.push(
+                  `/demo1/portal/doctor-dashboard/patients/${record.patient_id}?tab=Admissions${qs ? `&${qs}` : ""}`
+                );
+              } else {
+                router.back();
+              }
+            }}
+          >
             <svg
               width="18"
               height="18"
