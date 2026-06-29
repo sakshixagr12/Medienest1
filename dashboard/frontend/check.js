@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env.local' });
+// Run using: node --env-file=.env.local check.js
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
