@@ -2987,47 +2987,46 @@ function AdmissionRecordRedesign() {
                               </div>
                               
                               {showDropdown && searchTerm.trim().length > 0 && (
-                                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, marginTop: 4, zIndex: 50, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}>
-                                  {searchResults.length > 0 ? (
-                                    <div style={{ display: "flex", flexDirection: "column", padding: 8 }}>
-                                      {searchResults.map((pt, idx) => (
-                                        <div 
-                                          key={pt.id}
-                                          onClick={() => handleSelectPatient(pt)}
-                                          onMouseEnter={() => setFocusedResultIndex(idx)}
-                                          style={{ 
-                                            padding: "10px 12px", 
-                                            borderRadius: 6,
-                                            cursor: "pointer",
-                                            background: focusedResultIndex === idx ? "#f1f5f9" : "transparent",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: 4
-                                          }}
-                                        >
-                                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <span style={{ fontWeight: 700, color: "#1e293b", fontSize: 14 }}>{pt.name}</span>
-                                            <span style={{ fontSize: 11, fontWeight: 800, color: "#6366f1", background: "#e0e7ff", padding: "2px 6px", borderRadius: 4 }}>{pt.id.slice(0, 8).toUpperCase()}</span>
+                                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, marginTop: 4, zIndex: 50, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)", overflow: "hidden" }}>
+                                  <div style={{ display: "flex", flexDirection: "column" }}>
+                                    {searchResults.length > 0 ? (
+                                      searchResults.map((pt, idx) => (
+                                        <React.Fragment key={pt.id}>
+                                          <div 
+                                            onClick={() => handleSelectPatient(pt)}
+                                            onMouseEnter={() => setFocusedResultIndex(idx)}
+                                            style={{ 
+                                              padding: "14px 16px",
+                                              cursor: "pointer",
+                                              background: focusedResultIndex === idx ? "#f8fafc" : "transparent",
+                                              display: "flex",
+                                              flexDirection: "column",
+                                              gap: 6,
+                                              transition: "background 0.2s"
+                                            }}
+                                          >
+                                            <span style={{ fontWeight: 800, color: "#0f172a", fontSize: 15 }}>🧑 {pt.name}</span>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: "#4f46e5" }}>{pt.id}</span>
+                                            <span style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{pt.age_sex}</span>
+                                            <span style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>📞 {pt.contact}</span>
                                           </div>
-                                          <div style={{ fontSize: 12, color: "#64748b", display: "flex", gap: 12 }}>
-                                            <span>{pt.age_sex}</span>
-                                            <span>•</span>
-                                            <span>📞 {pt.contact}</span>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div style={{ padding: "20px", textAlign: "center" }}>
-                                      <div style={{ fontSize: 14, fontWeight: 600, color: "#64748b", marginBottom: 12 }}>No existing patient found.</div>
+                                          <hr style={{ margin: 0, border: "none", borderBottom: "1px solid #e2e8f0" }} />
+                                        </React.Fragment>
+                                      ))
+                                    ) : (
+                                      <div style={{ padding: "20px", textAlign: "center" }}>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: "#64748b", marginBottom: 8 }}>No existing patient found.</div>
+                                      </div>
+                                    )}
+                                    <div style={{ padding: "12px 16px", background: "#f8fafc" }}>
                                       <button 
                                         onClick={() => setIsNewPatientMode(true)}
-                                        style={{ background: "#10b981", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 6, fontWeight: 600, cursor: "pointer", fontSize: 13 }}
+                                        style={{ width: "100%", background: "#10b981", color: "#fff", border: "none", padding: "10px 16px", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontSize: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}
                                       >
                                         + Create New Patient
                                       </button>
                                     </div>
-                                  )}
+                                  </div>
                                 </div>
                               )}
                             </>
