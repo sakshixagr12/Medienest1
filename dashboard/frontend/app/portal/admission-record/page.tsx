@@ -970,11 +970,16 @@ function AdmissionRecordRedesign() {
       setIsSearching(true);
       try {
         const query = searchTerm.trim();
-        const { data } = await supabase
+        let dbQuery = supabase
           .from("patients")
           .select("*")
-          .or(`name.ilike.%${query}%,contact.ilike.%${query}%,id.ilike.%${query}%`)
-          .limit(5);
+          .or(`name.ilike.%${query}%,contact.ilike.%${query}%`);
+          
+        if (clinic?.id) {
+          dbQuery = dbQuery.eq("clinic_id", clinic.id);
+        }
+
+        const { data } = await dbQuery.limit(5);
 
         if (data) {
           setSearchResults(data);
@@ -990,7 +995,7 @@ function AdmissionRecordRedesign() {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, isNewPatientMode, summary.patientId]);
+  }, [searchTerm, isNewPatientMode, summary.patientId, clinic?.id]);
 
   const handleSelectPatient = (patient: any) => {
     const ageStr = patient.age_sex ? patient.age_sex.split(" / ")[0] : "";
