@@ -157,9 +157,6 @@
 
 /* Print Styles */
 @media print {
-  :global(body) {
-    background-color: white;
-  }
   .page {
     padding: 0;
     background: white;
