@@ -1947,7 +1947,7 @@ function AdmissionRecordRedesign() {
     const dParams = searchParams.get("doctorId") ? `&doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(searchParams.get("doctorName") || searchParams.get("docName") || "")}` : "";
     return (
       <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
-        <TopBar title="Admission Record" backHref={`/portal/doctor-dashboard${dParams.replace('&', '?')}`} />
+        <TopBar title="Admission Management" backHref={`/portal/doctor-dashboard${dParams.replace('&', '?')}`} />
         <div style={{ padding: 40, maxWidth: 600, margin: "0 auto", marginTop: 100, background: "#fef2f2", border: "2px solid #ef4444", borderRadius: 12, textAlign: "center", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
           <div style={{ background: "#fee2e2", width: 64, height: 64, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", marginBottom: 20 }}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -1975,7 +1975,7 @@ function AdmissionRecordRedesign() {
       )}
       <div className={styles.page}>
         <TopBar
-          title="Admission Record"
+          title="Admission Management"
           backHref={`/portal/doctor-dashboard${
             searchParams.get("doctorId")
               ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
