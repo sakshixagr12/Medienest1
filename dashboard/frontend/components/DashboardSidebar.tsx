@@ -136,7 +136,7 @@ export default function DashboardSidebar({
     ...(!isReceptionist
       ? [
           {
-            label: "Admission Record",
+            label: "Admission Management",
             icon: (
               <svg
                 width="18"
