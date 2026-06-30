@@ -796,7 +796,7 @@ function PatientHubContent({
           marginBottom: 20,
         }}
       >
-        <h3>Admission Records</h3>
+        <h3>Admission Management</h3>
         <Link href={`/portal/admission-record?patientId=${patientId}${getDoctorParams().replace('?', '&')}`} className={styles.btnSecondary} style={{ fontSize: "13px", padding: "8px 16px", textDecoration: "none" }}>
           + Create Record
         </Link>
