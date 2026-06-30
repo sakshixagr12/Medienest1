@@ -68,6 +68,8 @@ function PatientHubContent({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Patient Summary");
+  const [timelineFilter, setTimelineFilter] = useState("All");
+  const [timelineSearch, setTimelineSearch] = useState("");
   const { clinic } = useClinic();
 
   const supabase = createClient();
@@ -674,135 +676,214 @@ function PatientHubContent({
     </>
   );
 
-  const renderHistory = () => (
-    <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 24,
-        }}
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input
-          type="text"
-          placeholder="Search clinical notes..."
-          style={{
-            flex: 1,
-            padding: "12px 16px",
-            borderRadius: 12,
-            border: "1px solid #e2e8f0",
-            outline: "none",
-            background: "#fff",
-          }}
-        />
-      </div>
+  const renderHistory = () => {
+    // 1. Merge and Normalize Data
+    let timelineEvents: any[] = [];
+    
+    // OPD Visits
+    (visits || []).forEach(v => {
+      timelineEvents.push({
+        id: v.prescription_id || `visit-${v.visit_date}`,
+        type: 'OPD',
+        date: new Date(v.visit_date),
+        consultant: v.doctor,
+        department: 'General Practice',
+        diagnosisOrComplaint: v.complaints,
+        raw: v
+      });
+    });
 
-      <section className={styles.timelineSection}>
-        {visits.map((visit, index) => (
-          <div key={visit.prescription_id} className={styles.timelineItem}>
-            <div className={styles.timelineMarker} />
-            <div className={styles.timelineCard}>
-              <div className={styles.timelineHeader}>
-                <div className={styles.visitMeta}>
-                  <h3>Consultation - {visit.doctor}</h3>
-                  <p>
-                    {new Date(visit.visit_date).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}{" "}
-                    •{" "}
-                    {new Date(
-                      visit.created_at || visit.visit_date,
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <span className={`${styles.badge} ${styles.badgeFollowUp}`}>
-                  COMPLETED Visit
-                </span>
-              </div>
+    // Admissions
+    (admissions || []).forEach(a => {
+      timelineEvents.push({
+        id: a.id,
+        type: 'Admission',
+        date: new Date(a.date_admission),
+        consultant: a.doctor_name,
+        department: a.department,
+        diagnosisOrComplaint: a.diagnosis || a.department,
+        status: a.status,
+        wardBed: `${a.ward || 'General'} / ${a.bed || '-'}`,
+        raw: a
+      });
+    });
 
-              <div className={styles.visitDetails}>
-                <div className={styles.detailBlock}>
-                  <h5>Chief Complaints</h5>
-                  <div className={styles.complaintList}>
-                    <p
-                      style={{
-                        fontSize: 15,
-                        lineHeight: 1.6,
-                        color: "#334155",
-                      }}
-                    >
-                      • {visit.complaints}
+    // Discharges
+    (summaries || []).forEach(s => {
+      timelineEvents.push({
+        id: s.id,
+        type: 'Discharge',
+        date: new Date(s.created_at || s.date_discharge),
+        consultant: s.doctor_name,
+        department: 'General Practice', // Usually carried over from admission
+        diagnosisOrComplaint: s.diagnosis,
+        condition: s.condition_at_discharge || 'Stable',
+        raw: s
+      });
+    });
+
+    // 2. Sort by Date Descending (Newest first)
+    timelineEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    // 3. Filter
+    const filteredEvents = timelineEvents.filter(e => {
+      if (timelineFilter !== 'All' && e.type !== timelineFilter) return false;
+      if (timelineSearch) {
+        const term = timelineSearch.toLowerCase();
+        const matches = 
+          (e.consultant || '').toLowerCase().includes(term) ||
+          (e.department || '').toLowerCase().includes(term) ||
+          (e.diagnosisOrComplaint || '').toLowerCase().includes(term);
+        if (!matches) return false;
+      }
+      return true;
+    });
+
+    return (
+      <>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flex: 1, minWidth: 200, alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#fff" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "#94a3b8" }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search diagnosis, consultant, department..."
+              value={timelineSearch}
+              onChange={(e) => setTimelineSearch(e.target.value)}
+              style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 15 }}
+            />
+          </div>
+          <select 
+            value={timelineFilter} 
+            onChange={(e) => setTimelineFilter(e.target.value)}
+            style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#fff", outline: "none", fontWeight: 600, color: "#334155", minWidth: 150 }}
+          >
+            <option value="All">All Encounters</option>
+            <option value="OPD">OPD Visits</option>
+            <option value="Admission">Admissions</option>
+            <option value="Discharge">Discharges</option>
+          </select>
+        </div>
+
+        <section className={styles.timelineSection}>
+          {filteredEvents.map((event, index) => (
+            <div key={`${event.type}-${event.id}-${index}`} className={styles.timelineItem}>
+              <div className={styles.timelineMarker} />
+              <div className={styles.timelineCard}>
+                <div className={styles.timelineHeader}>
+                  <div className={styles.visitMeta}>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {event.type === 'OPD' && '🩺 OPD Visit'}
+                      {event.type === 'Admission' && '🏥 Admission'}
+                      {event.type === 'Discharge' && '✅ Discharged'}
+                    </h3>
+                    <p style={{ marginTop: 4 }}>
+                      {event.date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })} • {event.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
-                    {visit.findings && (
-                      <p
-                        style={{
-                          fontSize: 15,
-                          lineHeight: 1.6,
-                          color: "#334155",
-                        }}
-                      >
-                        • {visit.findings}
-                      </p>
-                    )}
                   </div>
+                  {event.type === 'Admission' ? (
+                    <span className={styles.badge} style={event.status === 'Draft' ? { background: '#fef3c7', color: '#d97706' } : { background: '#ecfdf5', color: '#065f46' }}>
+                      {event.status?.toUpperCase() || 'ADMITTED'}
+                    </span>
+                  ) : (
+                    <span className={`${styles.badge} ${styles.badgeFollowUp}`}>
+                      COMPLETED
+                    </span>
+                  )}
+                </div>
 
-                  <h5>Prescribed Medications</h5>
-                  <div className={styles.medList}>
-                    {visit.medicines.map((m, mi) => (
-                      <div key={mi} className={styles.medCardSmall}>
-                        <div className={styles.medIcon}></div>
-                        <div className={styles.medInfo}>
-                          <h6>{m.name}</h6>
-                          <p>
-                            {m.dose} • {m.freq} • {m.dur}
-                          </p>
+                <div className={styles.visitDetails} style={{ marginTop: 16 }}>
+                  {event.type === 'OPD' && (
+                    <>
+                      <div className={styles.detailBlock}>
+                        <h5>Department & Consultant</h5>
+                        <p style={{ fontSize: 15, color: "#334155", fontWeight: 600 }}>{event.department} • Dr. {event.consultant}</p>
+                      </div>
+                      <div className={styles.detailBlock}>
+                        <h5>Chief Complaints</h5>
+                        <div className={styles.complaintList}>
+                          <p style={{ fontSize: 15, lineHeight: 1.6, color: "#334155" }}>• {event.diagnosisOrComplaint}</p>
+                          {event.raw.findings && (
+                            <p style={{ fontSize: 15, lineHeight: 1.6, color: "#334155" }}>• {event.raw.findings}</p>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className={styles.detailBlock} style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                        <button className={styles.actionBtn} style={{ background: '#f1f5f9', color: '#0f172a', padding: '8px 16px', borderRadius: 8, fontWeight: 600, border: '1px solid #cbd5e1' }} onClick={() => alert("Viewing legacy OPD record...")}>
+                          View Visit
+                        </button>
+                      </div>
+                    </>
+                  )}
 
-                <div className={styles.detailBlock}>
-                  <h5>Doctor's Advice</h5>
-                  <div className={styles.doctorNote}>
-                    <p
-                      style={{
-                        fontStyle: "italic",
-                        color: "#475569",
-                        lineHeight: 1.7,
-                      }}
-                    >
-                      "{visit.advice}"
-                    </p>
-                  </div>
+                  {event.type === 'Admission' && (
+                    <>
+                      <div className={styles.profileGrid} style={{ marginBottom: 16 }}>
+                        <div className={styles.profileItem}>
+                          <strong>Department:</strong> {event.department || '---'}
+                        </div>
+                        <div className={styles.profileItem}>
+                          <strong>Consultant:</strong> Dr. {event.consultant}
+                        </div>
+                        <div className={styles.profileItem}>
+                          <strong>Ward / Bed:</strong> {event.wardBed}
+                        </div>
+                      </div>
+                      <div className={styles.detailBlock}>
+                        <h5>Diagnosis / Remarks</h5>
+                        <p style={{ fontSize: 15, color: "#334155" }}>{event.diagnosisOrComplaint || 'Not specified'}</p>
+                      </div>
+                      <div className={styles.detailBlock} style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                        <Link href={`/portal/admission-record/view?id=${event.id}${getDoctorParams()}`} style={{ textDecoration: 'none', background: '#f1f5f9', color: '#0f172a', padding: '8px 16px', borderRadius: 8, fontWeight: 600, border: '1px solid #cbd5e1' }}>
+                          View Admission
+                        </Link>
+                        {(!event.status || event.status !== 'Discharged') && (
+                          <Link href={`/portal/admission-record?draftId=${event.id}&patientId=${patientId}${getDoctorParams().replace('?', '&')}`} style={{ textDecoration: 'none', background: '#eff6ff', color: '#2563eb', padding: '8px 16px', borderRadius: 8, fontWeight: 600, border: '1px solid #bfdbfe' }}>
+                            Continue Admission
+                          </Link>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {event.type === 'Discharge' && (
+                    <>
+                      <div className={styles.profileGrid} style={{ marginBottom: 16 }}>
+                        <div className={styles.profileItem}>
+                          <strong>Consultant:</strong> Dr. {event.consultant}
+                        </div>
+                        <div className={styles.profileItem}>
+                          <strong>Condition at Discharge:</strong> {event.condition}
+                        </div>
+                      </div>
+                      <div className={styles.detailBlock}>
+                        <h5>Final Diagnosis</h5>
+                        <p style={{ fontSize: 15, color: "#334155", fontWeight: 600 }}>{event.diagnosisOrComplaint || '---'}</p>
+                      </div>
+                      <div className={styles.detailBlock} style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                        <Link href={`/portal/discharge-summary/view?id=${event.id}${getDoctorParams()}`} style={{ textDecoration: 'none', background: '#f1f5f9', color: '#0f172a', padding: '8px 16px', borderRadius: 8, fontWeight: 600, border: '1px solid #cbd5e1' }}>
+                          View Discharge
+                        </Link>
+                        <Link href={`/portal/discharge-summary/view?id=${event.id}&print=true${getDoctorParams().replace('?', '&')}`} target="_blank" style={{ textDecoration: 'none', background: '#fff', color: '#0f172a', padding: '8px 16px', borderRadius: 8, fontWeight: 600, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                          Print
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-        {visits.length === 0 && (
-          <div className={styles.emptyState}>No visits found.</div>
-        )}
-      </section>
-    </>
-  );
+          ))}
+          {filteredEvents.length === 0 && (
+            <div className={styles.emptyState}>No clinical history available.</div>
+          )}
+        </section>
+      </>
+    );
+  };
 
   const renderMedications = () => (
     <div className={styles.sectionBox}>
