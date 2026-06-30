@@ -2114,87 +2114,9 @@ function AdmissionRecordRedesign() {
                             >
                               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                             </svg>
-                          {/* --- Alerts & History Panel (Intelligent) --- */}
-                    <div
-                      className={styles.progressCard}
-                      style={{
-                        borderLeft: "4px solid #ef4444",
-                        background: "#fff",
-                        marginTop: 0,
-                        padding: "16px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 7,
-                          marginBottom: 16,
-                          borderBottom: "1px solid #fee2e2",
-                          paddingBottom: 10,
-                        }}
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
-                          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                        </svg>
-                        <span style={{ fontSize: 11, fontWeight: 900, color: "#b91c1c", textTransform: "uppercase", letterSpacing: 0.7 }}>
-                          Alerts &amp; History
-                        </span>
-                      </div>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                        {/* Alerts */}
-                        <div>
-                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-                             Alerts
-                           </div>
-                           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
-                               <span style={{ fontSize: 14 }}>🟥</span> Penicillin Allergy
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> Diabetic
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> CKD
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> On Blood Thinners
-                             </div>
-                           </div>
+                            Alerts & History
+                          </div>
                         </div>
-
-                        {/* History Grid */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                               Past Admissions
-                             </div>
-                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                               2
-                             </div>
-                           </div>
-                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                               Last Discharge
-                             </div>
-                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                               14 Feb 2026
-                             </div>
-                           </div>
-                        </div>
-
-                        <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                             Past Surgeries
-                           </div>
-                           <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                             Appendectomy (2018)
-                           </div>
-                        </div>
-
-                      </div>
-                    </div>                        </div>
                           {summary.allergies?.trim() && (
                             <div className={styles.allergyBadge}>Allergies</div>
                           )}
