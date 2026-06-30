@@ -564,7 +564,7 @@ function AdmissionRecordRedesign() {
       setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
     }
     setClinicLoading(false);
-  }, [docNameParam, doctors, searchParams]););
+  }, [docNameParam, doctors, searchParams]);
 
   const saveDraft = useCallback((data: SummaryData) => {
     try {
