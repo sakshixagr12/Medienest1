@@ -1112,11 +1112,10 @@ function AdmissionRecordRedesign() {
         }
         setClinicLoading(false);
       };
-      
       loadDraftOrFresh();
     }
     setClinicLoading(false);
-  }, [docNameParam, doctors, searchParams]);
+  }, [docNameParam, doctors, searchParams.get("patientId"), searchParams.get("draftId"), searchParams.get("new")]);
 
   const saveDraft = useCallback((data: SummaryData) => {
     try {
