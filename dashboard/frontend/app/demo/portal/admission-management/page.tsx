@@ -175,9 +175,18 @@ export default function AdmissionManagementPage() {
                 Manage active admissions, drafts, and create new patient admissions.
               </p>
             </div>
-            <Link href="/demo/portal/admission-record?new=true" className={styles.btnPrimary}>
-              + New Admission
-            </Link>
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              <Link href="/demo/portal/doctor-dashboard" className={styles.btnSecondary} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Doctor Desk
+              </Link>
+              <Link href="/demo/portal/admission-record?new=true" className={styles.btnPrimary}>
+                + New Admission
+              </Link>
+            </div>
           </div>
         </div>
 
