@@ -538,19 +538,6 @@ function AdmissionRecordRedesign() {
               )
             : [],
         }));
-      } catch (e) {
-        console.error("Draft error", e);
-      }
-    } else {
-      const d = new Date();
-      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
-    }
-
-    if (docNameParam) {
-      setSummary((prev) => ({ ...prev, doctor: docNameParam }));
-    } else if (doctors && doctors.length > 0) {
-      setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
     }
     setClinicLoading(false);
   }, [docNameParam, doctors]);
