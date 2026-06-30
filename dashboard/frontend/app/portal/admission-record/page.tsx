@@ -1001,17 +1001,27 @@ function AdmissionRecordRedesign() {
       fetchDraft();
     } else {
       const pId = searchParams.get("patientId");
+      const isNew = searchParams.get("new") === "true";
       
       const loadDraftOrFresh = async () => {
         let draftToLoad: any = null;
-        const draftStr = localStorage.getItem("admission_draft");
-        if (draftStr) {
-          try {
-            draftToLoad = JSON.parse(draftStr);
-          } catch (e) {
-            console.error("Draft error", e);
-          }
+        
+        if (isNew) {
+          localStorage.removeItem("admission_draft");
+          localStorage.removeItem("admission_draft_step");
+          handleSetStep(1);
         } else {
+          const draftStr = localStorage.getItem("admission_draft");
+          if (draftStr) {
+            try {
+              draftToLoad = JSON.parse(draftStr);
+            } catch (e) {
+              console.error("Draft error", e);
+            }
+          }
+        }
+        
+        if (!draftToLoad) {
           const d = new Date();
           d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
           setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
