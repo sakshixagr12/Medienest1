@@ -1926,13 +1926,39 @@ function AdmissionRecordRedesign() {
                                   <span className={styles.requiredDot} />
                                 )}
                               </label>
-                              <input
-                                type="text"
-                                value={summary.age || ""}
-                                onChange={(e) =>
-                                  updateField("age", e.target.value)
-                                }
-                              />
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <input
+                                  id="age"
+                                  type="number"
+                                  max="130"
+                                  value={summary.age?.match(/\d+/)?.[0] || ""}
+                                  onChange={(e) => {
+                                    let val = parseInt(e.target.value);
+                                    if (isNaN(val)) {
+                                      updateField("age", "");
+                                      return;
+                                    }
+                                    if (val > 130) val = 130;
+                                    const unit = summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years";
+                                    updateField("age", `${val} ${unit}`);
+                                  }}
+                                  style={{ flex: 1, minWidth: 0 }}
+                                />
+                                <select
+                                  value={summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years"}
+                                  onChange={(e) => {
+                                    const num = summary.age?.match(/\d+/)?.[0] || "";
+                                    if (num) {
+                                      updateField("age", `${num} ${e.target.value}`);
+                                    }
+                                  }}
+                                  style={{ width: "100px", flexShrink: 0 }}
+                                >
+                                  <option value="Years">Years</option>
+                                  <option value="Months">Months</option>
+                                  <option value="Days">Days</option>
+                                </select>
+                              </div>
                             </div>
                             <div className="field">
                               <label>Sex</label>
