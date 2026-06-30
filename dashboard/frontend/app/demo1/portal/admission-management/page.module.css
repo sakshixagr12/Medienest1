@@ -1,0 +1,216 @@
+.page {
+  min-height: 100vh;
+  background: var(--sanctuary-bg);
+  color: var(--sanctuary-ink);
+  padding: 32px 40px 120px 40px;
+}
+
+.main {
+  max-width: 1711px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--sanctuary-primary);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--sanctuary-ink-l);
+  font-weight: 500;
+}
+
+.searchSection {
+  margin-bottom: 16px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--ambient-glow);
+  transition: all 0.3s ease;
+}
+
+.searchBar:focus-within {
+  border-color: var(--sanctuary-primary);
+  box-shadow: 0 0 0 4px rgba(23, 3, 55, 0.05);
+}
+
+.searchIcon {
+  color: var(--sanctuary-primary);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--sanctuary-ink-l);
+  opacity: 0.7;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--ambient-glow);
+}
+
+.cardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sanctuary-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--sanctuary-ink-l);
+}
+
+.emptyIcon {
+  margin-bottom: 16px;
+  color: var(--sanctuary-ink-l);
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Table styles */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sanctuary-ink-l);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sanctuary-ink);
+  border-bottom: 1px solid var(--border);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: rgba(23, 3, 55, 0.02);
+}
+
+.actionsContainer {
+  display: flex;
+  gap: 8px;
+}
+
+.btnAction {
+  background: #fff;
+  color: var(--sanctuary-primary);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btnAction:hover {
+  border-color: var(--sanctuary-primary);
+  background: var(--sanctuary-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.1);
+}
+
+.btnDanger {
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.btnDanger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.btnPrimary {
+  background: var(--sanctuary-primary);
+  color: #fff;
+  border: 1.5px solid var(--sanctuary-primary);
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  align-self: flex-start;
+  text-decoration: none;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.2);
+}
