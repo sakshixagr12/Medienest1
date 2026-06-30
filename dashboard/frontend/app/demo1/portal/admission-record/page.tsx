@@ -501,8 +501,14 @@ function AdmissionRecordRedesign() {
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const isNew = searchParams.get("new") === "true";
+    if (isNew) {
+      localStorage.removeItem("admission_draft");
+      localStorage.removeItem("admission_draft_step");
+    }
+
     const draftStr = localStorage.getItem("admission_draft");
-    if (draftStr) {
+    if (draftStr && !isNew) {
       try {
         const draft = JSON.parse(draftStr);
         // Merge with initial state to avoid 'undefined' fields for older drafts
@@ -538,9 +544,22 @@ function AdmissionRecordRedesign() {
               )
             : [],
         }));
+      } catch (e) {
+        console.error("Draft error", e);
+      }
+    } else {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
+    }
+
+    if (docNameParam) {
+      setSummary((prev) => ({ ...prev, doctor: docNameParam }));
+    } else if (doctors && doctors.length > 0) {
+      setSummary((prev) => ({ ...prev, doctor: doctors[0].name }));
     }
     setClinicLoading(false);
-  }, [docNameParam, doctors]);
+  }, [docNameParam, doctors, searchParams]);
 
   const saveDraft = useCallback((data: SummaryData) => {
     try {
