@@ -32,9 +32,11 @@ interface Allergy {
 }
 
 interface SummaryData {
+  patientId?: string;
   patientName: string;
   phone: string;
   age: string;
+  address?: string;
   sex: string;
   doctor: string;
   ward: string;
