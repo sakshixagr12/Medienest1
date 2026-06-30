@@ -68,6 +68,8 @@ function PatientHubContent({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "Patient Summary");
+  const [timelineFilter, setTimelineFilter] = useState("All");
+  const [timelineSearch, setTimelineSearch] = useState("");
 
   // Sync activeTab with URL parameter
   useEffect(() => {
