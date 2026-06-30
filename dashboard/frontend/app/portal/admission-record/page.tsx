@@ -3279,16 +3279,6 @@ function AdmissionRecordRedesign() {
             </div>
 
             <div style={{ display: "flex", gap: 12 }}>
-              {!isQuickMode && step > 1 && (
-                <button
-                  type="button"
-                  className={styles.btnSecondarySticky}
-                  onClick={() => handleSetStep((s) => s - 1)}
-                >
-                  ← Previous Step
-                </button>
-              )}
-
               <button
                 type="button"
                 className={styles.btnSecondarySticky}
