@@ -539,19 +539,68 @@ function AdmissionRecordRedesign() {
           investigations: Array.isArray(draft.investigations)
             ? draft.investigations.map((inv: any) =>
                 typeof inv === "string"
-                  ? { name: inv, status: "Pending" }
-                  : inv,
-              )
-            : [],
-        }));
-      } catch (e) {
-        console.error("Draft error", e);
+    const pId = searchParams.get("patientId");
+    const isNew = searchParams.get("new") === "true";
+    
+    const loadDraftOrFresh = async () => {
+      let draftToLoad: any = null;
+      
+      if (isNew) {
+        localStorage.removeItem("admission_draft");
+        localStorage.removeItem("admission_draft_step");
+        setStep(1);
+      } else {
+        const draftStr = localStorage.getItem("admission_draft");
+        if (draftStr) {
+          try {
+            draftToLoad = JSON.parse(draftStr);
+            setSummary((prev) => ({
+                ...prev,
+                ...draftToLoad,
+                ward: draftToLoad.ward || "",
+                bed: draftToLoad.bed || "",
+                department: draftToLoad.department || "",
+                diagnosis: draftToLoad.diagnosis || "",
+                hpi: draftToLoad.hpi || "",
+                has_diabetes: !!draftToLoad.has_diabetes,
+                has_hypertension: !!draftToLoad.has_hypertension,
+                has_thyroid: !!draftToLoad.has_thyroid,
+                past_surgeries: draftToLoad.past_surgeries || "",
+                allergies: draftToLoad.allergies || "",
+                severity: draftToLoad.severity || "Mild",
+                admission_type: draftToLoad.admission_type || "OPD",
+                doctor_observations: draftToLoad.doctor_observations || "",
+                attachments: draftToLoad.attachments || [],
+                vitals: draftToLoad.vitals || "",
+                vitals_bp_sys: draftToLoad.vitals_bp_sys || "",
+                vitals_bp_dia: draftToLoad.vitals_bp_dia || "",
+                vitals_pulse: draftToLoad.vitals_pulse || "",
+                vitals_temp: draftToLoad.vitals_temp || "",
+                final_diagnosis: draftToLoad.final_diagnosis || "",
+                investigations: Array.isArray(draftToLoad.investigations)
+                    ? draftToLoad.investigations.map((inv: any) =>
+                        typeof inv === "string"
+                        ? { name: inv, status: "Pending" }
+                        : inv,
+                    )
+                    : [],
+            }));
+          } catch (e) {
+            console.error("Draft error", e);
+          }
+        }
       }
-    } else {
-      const d = new Date();
-      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
-    }
+      
+      if (!draftToLoad) {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        setSummary((prev) => ({ ...prev, date_admission: d.toISOString().slice(0, 16) }));
+      }
+
+      if (pId) {  }
+    };
+    
+    loadDraftOrFresh();
 
     if (docNameParam) {
         setSummary((prev) => ({ ...prev, doctor: docNameParam }));
