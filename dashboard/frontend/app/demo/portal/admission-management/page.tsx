@@ -175,7 +175,7 @@ export default function AdmissionManagementPage() {
                 Manage active admissions, drafts, and create new patient admissions.
               </p>
             </div>
-            <Link href="/demo/portal/admission-record" className={styles.btnPrimary}>
+            <Link href="/portal/admission-record?new=true" className={styles.btnPrimary}>
               + New Admission
             </Link>
           </div>
