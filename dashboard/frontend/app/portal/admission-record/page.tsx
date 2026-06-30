@@ -3005,7 +3005,7 @@ function AdmissionRecordRedesign() {
                                               transition: "background 0.2s"
                                             }}
                                           >
-                                            <span style={{ fontWeight: 800, color: "#0f172a", fontSize: 15 }}>🧑 {pt.name}</span>
+                                            <span style={{ fontWeight: 800, color: "#0f172a", fontSize: 15 }}>👤 {pt.name}</span>
                                             <span style={{ fontSize: 13, fontWeight: 700, color: "#4f46e5" }}>{pt.id}</span>
                                             <span style={{ fontSize: 13, color: "#475569", fontWeight: 500 }}>{pt.age_sex}</span>
                                             <span style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>📞 {pt.contact}</span>
@@ -3023,7 +3023,7 @@ function AdmissionRecordRedesign() {
                                         onClick={() => setIsNewPatientMode(true)}
                                         style={{ width: "100%", background: "#10b981", color: "#fff", border: "none", padding: "10px 16px", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontSize: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}
                                       >
-                                        + Create New Patient
+                                        + Register New Patient
                                       </button>
                                     </div>
                                   </div>
