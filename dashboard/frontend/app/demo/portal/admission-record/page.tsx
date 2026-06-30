@@ -2097,106 +2097,82 @@ function AdmissionRecordRedesign() {
                           </div>
                         </div>
                       </div>
-
+                      {/* --- Alerts & History Panel (Intelligent) --- */}
                       <div
                         className={styles.summaryCard}
-                        style={{ borderTop: "4px solid #ef4444" }}
+                        style={{ borderTop: "4px solid #ef4444", padding: "16px" }}
                       >
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                            </svg>
-                            Alerts & History
-                          </div>
-                        </div>
-                          {summary.allergies?.trim() && (
-                            <div className={styles.allergyBadge}>Allergies</div>
-                          )}
-                        </div>
                         <div
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 12,
-                            marginBottom: 20,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 7,
+                            marginBottom: 16,
+                            borderBottom: "1px solid #fee2e2",
+                            paddingBottom: 10,
                           }}
                         >
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_diabetes}
-                              onChange={(e) =>
-                                updateField("has_diabetes", e.target.checked)
-                              }
-                            />
-                            Diabetes
-                          </label>
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_hypertension}
-                              onChange={(e) =>
-                                updateField(
-                                  "has_hypertension",
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                            Hypertension
-                          </label>
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={summary.has_thyroid}
-                              onChange={(e) =>
-                                updateField("has_thyroid", e.target.checked)
-                              }
-                            />
-                            Thyroid
-                          </label>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                          </svg>
+                          <span style={{ fontSize: 11, fontWeight: 900, color: "#b91c1c", textTransform: "uppercase", letterSpacing: 0.7 }}>
+                            Alerts &amp; History
+                          </span>
                         </div>
-                        <div className="field">
-                          <label style={{ color: "#ef4444", fontWeight: 900 }}>
-                            ️ Critical Allergies
-                          </label>
-                          <textarea
-                            value={summary.allergies || ""}
-                            onChange={(e) =>
-                              updateField("allergies", e.target.value)
-                            }
-                            placeholder="List all drug or environmental allergies..."
-                            style={{
-                              width: "100%",
-                              minHeight: 60,
-                              border: "1px solid #fecaca",
-                              background: "#fef2f2",
-                              padding: 12,
-                              borderRadius: 8,
-                              outline: "none",
-                              fontSize: 13,
-                            }}
-                          ></textarea>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                          {/* Alerts */}
+                          <div>
+                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                               Alerts
+                             </div>
+                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
+                                 <span style={{ fontSize: 14 }}>🟥</span> Penicillin Allergy
+                               </div>
+                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                                 <span style={{ fontSize: 14 }}>🟨</span> Diabetic
+                               </div>
+                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                                 <span style={{ fontSize: 14 }}>🟨</span> CKD
+                               </div>
+                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                                 <span style={{ fontSize: 14 }}>🟨</span> On Blood Thinners
+                               </div>
+                             </div>
+                          </div>
+
+                          {/* History Grid */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                             <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                               <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                                 Past Admissions
+                               </div>
+                               <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                                 2
+                               </div>
+                             </div>
+                             <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                               <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                                 Last Discharge
+                               </div>
+                               <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                                 14 Feb 2026
+                               </div>
+                             </div>
+                          </div>
+
+                          <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                               Past Surgeries
+                             </div>
+                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                               Appendectomy (2018)
+                             </div>
+                          </div>
+
                         </div>
-                        <div className="field">
-                          <label>Past Surgeries</label>
-                          <input
-                            type="text"
-                            value={summary.past_surgeries || ""}
-                            onChange={(e) =>
-                              updateField("past_surgeries", e.target.value)
-                            }
-                            placeholder="e.g. Appendectomy (2018)"
-                          />
-                        </div>
-                      </div>
+                      </div>               </div>
                     </div>
                   )}
 
