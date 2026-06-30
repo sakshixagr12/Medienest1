@@ -950,6 +950,78 @@ function AdmissionRecordRedesign() {
   const [toast, setToast] = useState<string | null>(null);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
+  // --- Smart Patient Search States ---
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isNewPatientMode, setIsNewPatientMode] = useState(false);
+  const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!searchTerm.trim() || isNewPatientMode || summary.patientId) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const query = searchTerm.trim();
+        const { data } = await supabase
+          .from("patients")
+          .select("*")
+          .or(`name.ilike.%${query}%,contact.ilike.%${query}%,id.ilike.%${query}%`)
+          .limit(5);
+
+        if (data) {
+          setSearchResults(data);
+          setShowDropdown(true);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (err) {
+        console.error("Error searching patients:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, isNewPatientMode, summary.patientId]);
+
+  const handleSelectPatient = (patient: any) => {
+    const ageStr = patient.age_sex ? patient.age_sex.split(" / ")[0] : "";
+    const sexStr = patient.age_sex ? patient.age_sex.split(" / ")[1] : "Male";
+    
+    // Parse chronic diseases from history array
+    const hasDiabetes = patient.history?.includes("Diabetes") || false;
+    const hasHypertension = patient.history?.includes("Hypertension") || false;
+    const hasThyroid = patient.history?.includes("Thyroid") || false;
+    
+    setSummary(prev => ({
+      ...prev,
+      patientId: patient.id,
+      patientName: patient.name || "",
+      age: ageStr,
+      sex: sexStr,
+      phone: patient.contact || "",
+      address: patient.address || "",
+      allergies: patient.allergies || "",
+      has_diabetes: hasDiabetes,
+      has_hypertension: hasHypertension,
+      has_thyroid: hasThyroid,
+      past_surgeries: patient.past_surgeries || "",
+      department: patient.department || "",
+      doctor: patient.primary_consultant || "",
+    }));
+    
+    setSearchTerm("");
+    setShowDropdown(false);
+  };
+
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
