@@ -1353,7 +1353,7 @@ function PatientHubContent({
                 New Visit
               </button>
               <Link 
-                href={`/demo/portal/doctor-dashboard/patients/${patientId}/export${getDoctorParams()}`} 
+                href={`/demo/portal/doctor-dashboard/patients/${patientId}/export`} 
                 target="_blank" 
                 className={`${styles.actionBtn} ${styles.btnSecondary}`}
               >
