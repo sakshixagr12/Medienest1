@@ -1159,6 +1159,7 @@ function AdmissionRecordRedesign() {
 
     return (
       <div
+        id={field}
         className={`${styles.summaryCard} ${styles.inlineEditCard}`}
         style={{ cursor: "default" }}
       >
