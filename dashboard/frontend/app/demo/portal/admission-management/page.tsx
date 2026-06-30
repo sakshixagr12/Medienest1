@@ -347,21 +347,10 @@ export default function AdmissionManagementPage() {
                               <div className={styles.actionsContainer}>
                                 <button
                                   className={styles.btnAction}
-                                  onClick={() => router.push(`/demo/portal/admission-record/view?id=${record.id}`)}
+                                  style={{ background: "#3b82f6", color: "white", padding: "8px 16px", borderRadius: "8px", border: "none", fontWeight: "600", cursor: "pointer" }}
+                                  onClick={() => router.push(`/demo/portal/admission-workspace/${record.id}`)}
                                 >
-                                  View
-                                </button>
-                                <button
-                                  className={styles.btnAction}
-                                  onClick={() => router.push(`/demo/portal/admission-record?draftId=${record.id}&patientId=${record.patient_id}`)}
-                                >
-                                  Continue Admission
-                                </button>
-                                <button
-                                  className={styles.btnAction}
-                                  onClick={() => router.push(`/demo/portal/discharge-summary?admissionId=${record.id}&patientId=${record.patient_id}`)}
-                                >
-                                  Create Discharge
+                                  Manage Workspace
                                 </button>
                               </div>
                             </td>
