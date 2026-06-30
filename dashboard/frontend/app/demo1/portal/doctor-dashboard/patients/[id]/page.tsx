@@ -1243,9 +1243,13 @@ function PatientHubContent({
                 </svg>
                 New Visit
               </button>
-              <button className={`${styles.actionBtn} ${styles.btnSecondary}`}>
+              <Link 
+                href={`/demo1/portal/doctor-dashboard/patients/${patientId}/export${getDoctorParams()}`} 
+                target="_blank" 
+                className={`${styles.actionBtn} ${styles.btnSecondary}`}
+              >
                 Export History
-              </button>
+              </Link>
             </div>
           </div>
 
