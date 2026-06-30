@@ -12,6 +12,7 @@ export default function DischargeManagementPage() {
   const [pendingDischarges, setPendingDischarges] = useState<any[]>([]);
   const [recentlyDischarged, setRecentlyDischarged] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchPendingDischarges = async () => {
@@ -84,6 +85,26 @@ export default function DischargeManagementPage() {
     fetchPendingDischarges();
   }, [supabase]);
 
+  const filteredPendingDischarges = pendingDischarges.filter((record) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      (record.patient_name || "").toLowerCase().includes(term) ||
+      (record.patient_id || "").toLowerCase().includes(term) ||
+      (record.id || "").toLowerCase().includes(term)
+    );
+  });
+
+  const filteredRecentlyDischarged = recentlyDischarged.filter((record) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      (record.patient_name || "").toLowerCase().includes(term) ||
+      (record.patient_id || "").toLowerCase().includes(term) ||
+      (record.id || "").toLowerCase().includes(term)
+    );
+  });
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -112,6 +133,8 @@ export default function DischargeManagementPage() {
               type="text"
               className={styles.searchInput}
               placeholder="Search by Patient Name, Patient ID or Admission ID"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -127,7 +150,7 @@ export default function DischargeManagementPage() {
               <div className={styles.emptyState}>
                 <p className={styles.emptyText}>Loading...</p>
               </div>
-            ) : pendingDischarges.length === 0 ? (
+            ) : filteredPendingDischarges.length === 0 ? (
               <div className={styles.emptyState}>
                 <svg
                   className={styles.emptyIcon}
@@ -159,7 +182,7 @@ export default function DischargeManagementPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pendingDischarges.map((record) => (
+                    {filteredPendingDischarges.map((record) => (
                       <tr key={record.id}>
                         <td>
                           {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
@@ -205,7 +228,7 @@ export default function DischargeManagementPage() {
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>Recently Discharged</h2>
             </div>
-            {recentlyDischarged.length === 0 ? (
+            {filteredRecentlyDischarged.length === 0 ? (
               <div className={styles.emptyState}>
                 <svg
                   className={styles.emptyIcon}
@@ -238,7 +261,7 @@ export default function DischargeManagementPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentlyDischarged.map((record) => (
+                    {filteredRecentlyDischarged.map((record) => (
                       <tr key={record.id}>
                         <td>
                           {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
