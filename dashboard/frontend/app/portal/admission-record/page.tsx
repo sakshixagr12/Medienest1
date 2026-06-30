@@ -834,6 +834,24 @@ function AdmissionRecordRedesign() {
 
   const [activeAdmissionId, setActiveAdmissionId] = useState<string | null>(null);
 
+  const [patientHistoryData, setPatientHistoryData] = useState<{
+    isLoading: boolean;
+    isNewPatient: boolean;
+    pastAdmissionsCount: number;
+    lastDischargeDate: string | null;
+    allergies: string;
+    chronicDiseases: string[];
+    pastSurgeries: string;
+  }>({
+    isLoading: true,
+    isNewPatient: true,
+    pastAdmissionsCount: 0,
+    lastDischargeDate: null,
+    allergies: "",
+    chronicDiseases: [],
+    pastSurgeries: "",
+  });
+
   useEffect(() => {
     const pId = searchParams.get("patientId");
     const dId = searchParams.get("draftId");
@@ -996,6 +1014,43 @@ function AdmissionRecordRedesign() {
             nursing_instructions: "",
           };
           setSummary((prev) => ({ ...prev, ...newSummary }));
+
+          if (data.patient_id) {
+            let admissionsCount = 0;
+            let lastDischarge = null;
+            const { data: records } = await supabase
+              .from("admission_records")
+              .select("status, updated_at")
+              .eq("patient_id", data.patient_id)
+              .order("created_at", { ascending: false });
+
+            if (records && records.length > 0) {
+               admissionsCount = records.length;
+               const dischargedRecords = records.filter((r: any) => r.status === "Discharged");
+               if (dischargedRecords.length > 0) {
+                 lastDischarge = dischargedRecords[0].updated_at;
+               }
+            }
+
+            const chronic: string[] = [];
+            if (data.has_diabetes) chronic.push("Diabetes");
+            if (data.has_hypertension) chronic.push("Hypertension");
+            if (data.has_thyroid) chronic.push("Thyroid");
+
+            setPatientHistoryData({
+              isLoading: false,
+              isNewPatient: admissionsCount === 0 && !data.allergies?.trim() && !data.past_surgeries?.trim() && chronic.length === 0,
+              pastAdmissionsCount: admissionsCount,
+              lastDischargeDate: lastDischarge,
+              allergies: data.allergies || "",
+              chronicDiseases: chronic,
+              pastSurgeries: data.past_surgeries || "",
+            });
+          } else {
+            setPatientHistoryData(prev => ({ ...prev, isLoading: false }));
+          }
+        } else {
+          setPatientHistoryData(prev => ({ ...prev, isLoading: false }));
         }
       };
       fetchDraft();
@@ -1053,9 +1108,42 @@ function AdmissionRecordRedesign() {
               doctor: docNameParam || (doctors && doctors.length > 0 ? doctors[0].name : prev.doctor)
             }));
             setClinicLoading(false);
+            
+            // FETCH HISTORY
+            let admissionsCount = 0;
+            let lastDischarge = null;
+            const { data: records } = await supabase
+              .from("admission_records")
+              .select("status, updated_at")
+              .eq("patient_id", pId)
+              .order("created_at", { ascending: false });
+
+            if (records && records.length > 0) {
+               admissionsCount = records.length;
+               const dischargedRecords = records.filter((r: any) => r.status === "Discharged");
+               if (dischargedRecords.length > 0) {
+                 lastDischarge = dischargedRecords[0].updated_at;
+               }
+            }
+
+            const chronic: string[] = [];
+            if (patient.has_diabetes) chronic.push("Diabetes");
+            if (patient.has_hypertension) chronic.push("Hypertension");
+            if (patient.has_thyroid) chronic.push("Thyroid");
+
+            setPatientHistoryData({
+              isLoading: false,
+              isNewPatient: admissionsCount === 0 && !patient.allergies?.trim() && !patient.past_surgeries?.trim() && chronic.length === 0,
+              pastAdmissionsCount: admissionsCount,
+              lastDischargeDate: lastDischarge,
+              allergies: patient.allergies || "",
+              chronicDiseases: chronic,
+              pastSurgeries: patient.past_surgeries || "",
+            });
             return;
           }
         }
+        setPatientHistoryData(prev => ({ ...prev, isLoading: false }));
 
         // If no patientId or patient fetch failed, use draft or fresh
         if (draftToLoad) {
@@ -2349,86 +2437,95 @@ function AdmissionRecordRedesign() {
                     })()}
 
                     {/* --- Alerts & History Panel (Intelligent) --- */}
-                    <div
-                      className={styles.progressCard}
-                      style={{
-                        borderLeft: "4px solid #ef4444",
-                        background: "#fff",
-                        marginTop: 0,
-                        padding: "16px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 7,
-                          marginBottom: 16,
-                          borderBottom: "1px solid #fee2e2",
-                          paddingBottom: 10,
-                        }}
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
-                          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                        </svg>
-                        <span style={{ fontSize: 11, fontWeight: 900, color: "#b91c1c", textTransform: "uppercase", letterSpacing: 0.7 }}>
-                          Alerts &amp; History
-                        </span>
-                      </div>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                        {/* Alerts */}
-                        <div>
-                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-                             Alerts
-                           </div>
-                           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
-                               <span style={{ fontSize: 14 }}>🟥</span> Penicillin Allergy
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> Diabetic
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> CKD
-                             </div>
-                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                               <span style={{ fontSize: 14 }}>🟨</span> On Blood Thinners
-                             </div>
-                           </div>
+                    {patientHistoryData.isLoading ? (
+                      <div className={styles.progressCard} style={{ borderLeft: "4px solid #cbd5e1", background: "#f8fafc", padding: "16px", marginTop: 0 }}>
+                        <div style={{ display: "flex", gap: 7, marginBottom: 16 }}>
+                          <div style={{ width: 15, height: 15, background: "#e2e8f0", borderRadius: 4 }}></div>
+                          <div style={{ width: 100, height: 15, background: "#e2e8f0", borderRadius: 4 }}></div>
                         </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                          <div style={{ width: "100%", height: 14, background: "#e2e8f0", borderRadius: 4 }}></div>
+                          <div style={{ width: "80%", height: 14, background: "#e2e8f0", borderRadius: 4 }}></div>
+                          <div style={{ width: "60%", height: 14, background: "#e2e8f0", borderRadius: 4 }}></div>
+                        </div>
+                      </div>
+                    ) : patientHistoryData.isNewPatient ? (
+                      <div className={styles.progressCard} style={{ borderLeft: "4px solid #10b981", background: "#fff", padding: "16px", marginTop: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16, borderBottom: "1px solid #d1fae5", paddingBottom: 10 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                          <span style={{ fontSize: 11, fontWeight: 900, color: "#047857", textTransform: "uppercase", letterSpacing: 0.7 }}>Alerts &amp; History</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "#065f46" }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                          No known alerts. First admission.
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={styles.progressCard} style={{ borderLeft: `4px solid ${patientHistoryData.allergies || patientHistoryData.chronicDiseases.length > 0 ? "#ef4444" : "#3b82f6"}`, background: "#fff", padding: "16px", marginTop: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16, borderBottom: `1px solid ${patientHistoryData.allergies || patientHistoryData.chronicDiseases.length > 0 ? "#fee2e2" : "#bfdbfe"}`, paddingBottom: 10 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={patientHistoryData.allergies || patientHistoryData.chronicDiseases.length > 0 ? "#ef4444" : "#3b82f6"} strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                          <span style={{ fontSize: 11, fontWeight: 900, color: patientHistoryData.allergies || patientHistoryData.chronicDiseases.length > 0 ? "#b91c1c" : "#1d4ed8", textTransform: "uppercase", letterSpacing: 0.7 }}>Alerts &amp; History</span>
+                        </div>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                          <div>
+                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                               Alerts
+                             </div>
+                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                               {!(patientHistoryData.allergies || patientHistoryData.chronicDiseases.length > 0) ? (
+                                 <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#166534" }}>
+                                   ✓ No Known Drug Allergies (NKDA)
+                                 </div>
+                               ) : (
+                                 <>
+                                   {patientHistoryData.allergies && (
+                                     <div style={{ display: "flex", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
+                                       <span style={{ fontSize: 14 }}>🟥</span> <span>Allergies: {patientHistoryData.allergies}</span>
+                                     </div>
+                                   )}
+                                   {patientHistoryData.chronicDiseases.map(disease => (
+                                     <div key={disease} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                                       <span style={{ fontSize: 14 }}>🟨</span> {disease}
+                                     </div>
+                                   ))}
+                                 </>
+                               )}
+                             </div>
+                          </div>
 
-                        {/* History Grid */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                             <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                               <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                                 Past Admissions
+                               </div>
+                               <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                                 {patientHistoryData.pastAdmissionsCount}
+                               </div>
+                             </div>
+                             {patientHistoryData.lastDischargeDate && (
+                               <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                                 <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                                   Last Discharge
+                                 </div>
+                                 <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                                   {new Date(patientHistoryData.lastDischargeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                 </div>
+                               </div>
+                             )}
+                          </div>
+
+                          <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
                              <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                               Past Admissions
+                               Past Surgeries
                              </div>
                              <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                               2
+                               {patientHistoryData.pastSurgeries ? patientHistoryData.pastSurgeries : "None"}
                              </div>
-                           </div>
-                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                               Last Discharge
-                             </div>
-                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                               14 Feb 2026
-                             </div>
-                           </div>
+                          </div>
                         </div>
-
-                        <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                             Past Surgeries
-                           </div>
-                           <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                             Appendectomy (2018)
-                           </div>
-                        </div>
-
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
                 {step === 2 && (
