@@ -149,7 +149,7 @@ export default function DashboardSidebar({
                 <path d="M3 14h18M5 14v4M19 14v4M3 8h18M6 8V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M12 4v4"></path>
               </svg>
             ),
-            href: buildDoctorUrl("/portal/admission-record"),
+            href: buildDoctorUrl("/portal/admission-management"),
           },
           {
             label: "Discharge Management",
