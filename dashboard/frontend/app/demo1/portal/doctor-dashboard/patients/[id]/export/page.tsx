@@ -83,10 +83,6 @@ export default function PatientHistoryExport({
         console.error("Error fetching export data:", err);
       } finally {
         setLoading(false);
-        // Automatically trigger print dialog after a brief delay for rendering
-        setTimeout(() => {
-          window.print();
-        }, 500);
       }
     };
 
