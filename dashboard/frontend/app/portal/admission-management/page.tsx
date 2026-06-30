@@ -176,7 +176,7 @@ export default function AdmissionManagementPage() {
               </p>
             </div>
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <Link href="/portal/doctor-dashboard" className={styles.btnSecondary} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Link href="/portal/doctor-dashboard" className={styles.btnSecondary} style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", padding: "12px 24px", fontSize: "15px", height: "46.5px" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="19" y1="12" x2="5" y2="12"></line>
                   <polyline points="12 19 5 12 12 5"></polyline>
