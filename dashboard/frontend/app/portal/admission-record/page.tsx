@@ -2960,7 +2960,7 @@ function AdmissionRecordRedesign() {
                                   ref={searchInputRef}
                                   id="patientSearch"
                                   type="text"
-                                  placeholder="Search by ID, Name, or Phone..."
+                                  placeholder="Search Patient ID / Name / Mobile Number"
                                   value={searchTerm}
                                   onChange={(e) => setSearchTerm(e.target.value)}
                                   onKeyDown={(e) => {
