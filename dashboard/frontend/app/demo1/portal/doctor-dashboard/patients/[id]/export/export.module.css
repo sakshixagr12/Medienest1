@@ -1,0 +1,184 @@
+.page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+}
+
+.reportContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 40px;
+  position: relative;
+}
+
+.reportHeader {
+  text-align: center;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.reportTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.patientInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.infoValue {
+  font-size: 15px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.timelineEvent {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 8px;
+}
+
+.eventDate {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.eventBadge {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.eventGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.eventDetail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: #1e293b;
+  margin-top: 2px;
+}
+
+.doctorNotesArea {
+  margin-top: 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-height: 150px;
+  padding: 16px;
+}
+
+.footer {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.printBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.printBtn:hover {
+  background: #1d4ed8;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: white;
+  }
+  .page {
+    padding: 0;
+    background: white;
+  }
+  .reportContainer {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    max-width: 100%;
+  }
+  .printBtn {
+    display: none;
+  }
+  .timelineEvent {
+    break-inside: avoid;
+    border: 1px solid #cbd5e1;
+    background: white;
+  }
+  .doctorNotesArea {
+    break-inside: avoid;
+  }
+}
