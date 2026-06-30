@@ -48,7 +48,7 @@ export default function AdmissionManagementPage() {
   }, [supabase]);
 
   const handleDeleteDraft = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this draft?")) return;
+    if (!confirm("Delete this draft admission?\n\nThis action cannot be undone.")) return;
     try {
       const { error } = await supabase.from("admission_records").delete().eq("id", id);
       if (error) throw error;
