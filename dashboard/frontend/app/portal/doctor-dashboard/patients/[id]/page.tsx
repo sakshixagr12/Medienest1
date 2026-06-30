@@ -1200,7 +1200,7 @@ function PatientHubContent({
                 New Visit
               </button>
               <Link 
-                href={`/portal/doctor-dashboard/patients/${patientId}/export${getDoctorParams()}`} 
+                href={`/portal/doctor-dashboard/patients/${patientId}/export`} 
                 target="_blank" 
                 className={`${styles.actionBtn} ${styles.btnSecondary}`}
               >
