@@ -1238,12 +1238,12 @@ function AdmissionRecordRedesign() {
     <>
       {toast && (
         <div className={styles.toast} role="alert">
-          {toast}
+{toast}
         </div>
       )}
       <div className={styles.page}>
         <TopBar
-          title="Admission Record"
+          title="Admission Management"
           backHref={`/demo1/portal/doctor-dashboard${
             searchParams.get("doctorId")
               ? `?doctorId=${searchParams.get("doctorId")}&doctorName=${encodeURIComponent(
