@@ -34,6 +34,7 @@ export default function PatientHistoryExport({
 
         // OPD Visits
         (data.visits || []).forEach((v: any) => {
+          if (v.status?.toUpperCase() === "DRAFT" || v.status?.toUpperCase() === "DELETED") return;
           events.push({
             id: v.prescription_id || `visit-${v.visit_date}`,
             type: "OPD",
@@ -47,6 +48,7 @@ export default function PatientHistoryExport({
 
         // Admissions
         (data.admissions || []).forEach((a: any) => {
+          if (a.status?.toUpperCase() === "DRAFT" || a.status?.toUpperCase() === "DELETED") return;
           events.push({
             id: a.id,
             type: "Admission",
@@ -62,6 +64,7 @@ export default function PatientHistoryExport({
 
         // Discharges
         (data.summaries || []).forEach((s: any) => {
+          if (s.status?.toUpperCase() === "DRAFT" || s.status?.toUpperCase() === "DELETED") return;
           events.push({
             id: s.id,
             type: "Discharge",
@@ -129,7 +132,7 @@ export default function PatientHistoryExport({
             </div>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Patient ID</span>
-              <span className={styles.infoValue}>{patient.patient_id || patient.id.slice(0,8).toUpperCase()}</span>
+              <span className={styles.infoValue}>{patient.patient_id || "-"}</span>
             </div>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Age / Gender</span>
