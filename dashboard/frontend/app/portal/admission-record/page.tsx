@@ -2348,13 +2348,14 @@ function AdmissionRecordRedesign() {
                       );
                     })()}
 
-                    {/* --- Alerts & History Panel --- */}
+                    {/* --- Alerts & History Panel (Intelligent) --- */}
                     <div
                       className={styles.progressCard}
                       style={{
                         borderLeft: "4px solid #ef4444",
-                        background: "linear-gradient(135deg, #fff5f5 0%, #fff1f2 100%)",
+                        background: "#fff",
                         marginTop: 0,
+                        padding: "16px",
                       }}
                     >
                       <div
@@ -2362,7 +2363,9 @@ function AdmissionRecordRedesign() {
                           display: "flex",
                           alignItems: "center",
                           gap: 7,
-                          marginBottom: 14,
+                          marginBottom: 16,
+                          borderBottom: "1px solid #fee2e2",
+                          paddingBottom: 10,
                         }}
                       >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
@@ -2372,83 +2375,58 @@ function AdmissionRecordRedesign() {
                           Alerts &amp; History
                         </span>
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px 8px", marginBottom: 12 }}>
-                        {[
-                          { key: "has_diabetes" as const, label: "Diabetes" },
-                          { key: "has_hypertension" as const, label: "Hypertension" },
-                          { key: "has_thyroid" as const, label: "Thyroid" },
-                        ].map(({ key, label }) => (
-                          <label
-                            key={key}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 5,
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: summary[key] ? "#b91c1c" : "#64748b",
-                              background: summary[key] ? "#fee2e2" : "#f8fafc",
-                              border: `1px solid ${summary[key] ? "#fca5a5" : "#e2e8f0"}`,
-                              borderRadius: 8,
-                              padding: "5px 8px",
-                              cursor: "pointer",
-                              transition: "all 0.15s",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={summary[key]}
-                              onChange={(e) => updateField(key, e.target.checked)}
-                              style={{ accentColor: "#ef4444", width: 12, height: 12 }}
-                            />
-                            {label}
-                          </label>
-                        ))}
-                      </div>
-                      <div style={{ marginBottom: 10 }}>
-                        <label style={{ fontSize: 10, fontWeight: 800, color: "#ef4444", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                          Critical Allergies
-                        </label>
-                        <textarea
-                          value={summary.allergies || ""}
-                          onChange={(e) => updateField("allergies", e.target.value)}
-                          placeholder="Drug or environmental allergies..."
-                          rows={2}
-                          style={{
-                            width: "100%",
-                            border: "1px solid #fecaca",
-                            background: "#fef2f2",
-                            padding: "8px 10px",
-                            borderRadius: 8,
-                            outline: "none",
-                            fontSize: 12,
-                            resize: "none",
-                            color: "#7f1d1d",
-                            boxSizing: "border-box",
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                          Past Surgeries
-                        </label>
-                        <input
-                          type="text"
-                          value={summary.past_surgeries || ""}
-                          onChange={(e) => updateField("past_surgeries", e.target.value)}
-                          placeholder="e.g. Appendectomy (2018)"
-                          style={{
-                            width: "100%",
-                            border: "1px solid #e2e8f0",
-                            background: "#f8fafc",
-                            padding: "8px 10px",
-                            borderRadius: 8,
-                            outline: "none",
-                            fontSize: 12,
-                            color: "#334155",
-                            boxSizing: "border-box",
-                          }}
-                        />
+                      
+                      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        {/* Alerts */}
+                        <div>
+                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+                             Alerts
+                           </div>
+                           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
+                               <span style={{ fontSize: 14 }}>🟥</span> Penicillin Allergy
+                             </div>
+                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                               <span style={{ fontSize: 14 }}>🟨</span> Diabetic
+                             </div>
+                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                               <span style={{ fontSize: 14 }}>🟨</span> CKD
+                             </div>
+                             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                               <span style={{ fontSize: 14 }}>🟨</span> On Blood Thinners
+                             </div>
+                           </div>
+                        </div>
+
+                        {/* History Grid */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                               Past Admissions
+                             </div>
+                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                               2
+                             </div>
+                           </div>
+                           <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                               Last Discharge
+                             </div>
+                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                               14 Feb 2026
+                             </div>
+                           </div>
+                        </div>
+
+                        <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                           <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                             Past Surgeries
+                           </div>
+                           <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
+                             Appendectomy (2018)
+                           </div>
+                        </div>
+
                       </div>
                     </div>
                   </>
