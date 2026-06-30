@@ -2942,21 +2942,120 @@ function AdmissionRecordRedesign() {
                             {summary.patientName ? "Completed" : "Required"}
                           </div>
                         </div>
-                        <div className="field">
+                        <div className="field" style={{ position: "relative" }}>
                           <label>
-                            Full Name{" "}
+                            {(!searchParams.get("patientId") && !isNewPatientMode && !summary.patientId) ? "Search Patient" : "Full Name"}{" "}
                             {!summary.patientName && (
                               <span className={styles.requiredDot} />
                             )}
                           </label>
-                          <input
-                            id="patientName"
-                            type="text"
-                            value={summary.patientName || ""}
-                            onChange={(e) =>
-                              updateField("patientName", e.target.value)
-                            }
-                          />
+                          
+                          {(!searchParams.get("patientId") && !isNewPatientMode && !summary.patientId) ? (
+                            <>
+                              <div style={{ position: "relative" }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
+                                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                                <input
+                                  ref={searchInputRef}
+                                  id="patientSearch"
+                                  type="text"
+                                  placeholder="Search by ID, Name, or Phone..."
+                                  value={searchTerm}
+                                  onChange={(e) => setSearchTerm(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "ArrowDown") {
+                                      e.preventDefault();
+                                      setFocusedResultIndex(prev => Math.min(prev + 1, searchResults.length - 1));
+                                    } else if (e.key === "ArrowUp") {
+                                      e.preventDefault();
+                                      setFocusedResultIndex(prev => Math.max(prev - 1, -1));
+                                    } else if (e.key === "Enter" && focusedResultIndex >= 0 && searchResults[focusedResultIndex]) {
+                                      e.preventDefault();
+                                      handleSelectPatient(searchResults[focusedResultIndex]);
+                                    } else if (e.key === "Escape") {
+                                      setShowDropdown(false);
+                                    }
+                                  }}
+                                  style={{ paddingLeft: 40, border: "2px solid #6366f1", height: 46 }}
+                                />
+                                {isSearching && (
+                                  <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}>
+                                    <div className={styles.spinner} style={{ width: 18, height: 18, borderTopColor: "#6366f1" }} />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {showDropdown && searchTerm.trim().length > 0 && (
+                                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, marginTop: 4, zIndex: 50, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}>
+                                  {searchResults.length > 0 ? (
+                                    <div style={{ display: "flex", flexDirection: "column", padding: 8 }}>
+                                      {searchResults.map((pt, idx) => (
+                                        <div 
+                                          key={pt.id}
+                                          onClick={() => handleSelectPatient(pt)}
+                                          onMouseEnter={() => setFocusedResultIndex(idx)}
+                                          style={{ 
+                                            padding: "10px 12px", 
+                                            borderRadius: 6,
+                                            cursor: "pointer",
+                                            background: focusedResultIndex === idx ? "#f1f5f9" : "transparent",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 4
+                                          }}
+                                        >
+                                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <span style={{ fontWeight: 700, color: "#1e293b", fontSize: 14 }}>{pt.name}</span>
+                                            <span style={{ fontSize: 11, fontWeight: 800, color: "#6366f1", background: "#e0e7ff", padding: "2px 6px", borderRadius: 4 }}>{pt.id.slice(0, 8).toUpperCase()}</span>
+                                          </div>
+                                          <div style={{ fontSize: 12, color: "#64748b", display: "flex", gap: 12 }}>
+                                            <span>{pt.age_sex}</span>
+                                            <span>•</span>
+                                            <span>📞 {pt.contact}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div style={{ padding: "20px", textAlign: "center" }}>
+                                      <div style={{ fontSize: 14, fontWeight: 600, color: "#64748b", marginBottom: 12 }}>No existing patient found.</div>
+                                      <button 
+                                        onClick={() => setIsNewPatientMode(true)}
+                                        style={{ background: "#10b981", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 6, fontWeight: 600, cursor: "pointer", fontSize: 13 }}
+                                      >
+                                        + Create New Patient
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input
+                                id="patientName"
+                                type="text"
+                                value={summary.patientName || ""}
+                                onChange={(e) => updateField("patientName", e.target.value)}
+                                style={{ flex: 1 }}
+                              />
+                              {(!searchParams.get("patientId") && summary.patientId) && (
+                                <button 
+                                  onClick={() => {
+                                    if (window.confirm("Reset patient data?")) {
+                                      setSummary(prev => ({ ...prev, patientId: undefined, patientName: "", age: "", sex: "Male", phone: "", address: "", allergies: "", has_diabetes: false, has_hypertension: false, has_thyroid: false, past_surgeries: "" }));
+                                      setIsNewPatientMode(false);
+                                      setSearchTerm("");
+                                    }
+                                  }}
+                                  style={{ background: "#fef2f2", color: "#ef4444", border: "1px solid #fecaca", borderRadius: 8, padding: "0 16px", fontWeight: 700, cursor: "pointer", flexShrink: 0 }}
+                                >
+                                  Clear Patient
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className={styles.patientBrief}>
                           <div className={styles.briefItem}>
