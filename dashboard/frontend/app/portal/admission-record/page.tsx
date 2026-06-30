@@ -2309,21 +2309,6 @@ function AdmissionRecordRedesign() {
                                     </svg>
                                   )}
                                   <span style={{ flex: 1 }}>{item.label}</span>
-                                  {!done && (
-                                    <span
-                                      style={{
-                                        fontSize: 10,
-                                        fontWeight: 700,
-                                        color: "#b45309",
-                                        background: "#fef3c7",
-                                        padding: "1px 7px",
-                                        borderRadius: 10,
-                                        letterSpacing: 0.3,
-                                      }}
-                                    >
-                                      Missing
-                                    </span>
-                                  )}
                                 </div>
                               );
                             })}
