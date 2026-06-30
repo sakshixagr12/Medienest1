@@ -1863,6 +1863,7 @@ function AdmissionRecordRedesign() {
 
     return (
       <div
+        id={field}
         className={`${styles.summaryCard} ${styles.inlineEditCard}`}
         style={{ cursor: "default" }}
       >
@@ -2203,21 +2204,21 @@ function AdmissionRecordRedesign() {
                     {/* --- Smart Admission Assistant Panel --- */}
                     {(() => {
                       const admissionChecklist = step === 1 ? [
-                        { label: "Name", value: summary.patientName },
-                        { label: "Age", value: summary.age },
-                        { label: "Phone Number", value: summary.phone },
-                        { label: "Doctor Assigned", value: summary.doctor },
-                        { label: "Ward", value: summary.ward },
-                        { label: "Bed", value: summary.bed }
+                        { label: "Name", value: summary.patientName, field: "patientName" },
+                        { label: "Age", value: summary.age, field: "age" },
+                        { label: "Phone Number", value: summary.phone, field: "phone" },
+                        { label: "Doctor Assigned", value: summary.doctor, field: "doctor" },
+                        { label: "Ward", value: summary.ward, field: "ward" },
+                        { label: "Bed", value: summary.bed, field: "bed" }
                       ] : step === 2 ? [
-                        { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "" },
-                        { label: "Vitals (Temp)", value: summary.vitals_temp },
-                        { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "" },
-                        { label: "Vitals (Pulse)", value: summary.vitals_pulse },
-                        { label: "Provisional Diagnosis", value: summary.provisional_diagnosis }
+                        { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "", field: "complaints" },
+                        { label: "Vitals (Temp)", value: summary.vitals_temp, field: "vitals_temp" },
+                        { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "", field: "vitals_bp_sys" },
+                        { label: "Vitals (Pulse)", value: summary.vitals_pulse, field: "vitals_pulse" },
+                        { label: "Provisional Diagnosis", value: summary.provisional_diagnosis, field: "provisional_diagnosis" }
                       ] : [
-                        { label: "Final Diagnosis", value: summary.final_diagnosis },
-                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "" }
+                        { label: "Final Diagnosis", value: summary.final_diagnosis, field: "final_diagnosis" },
+                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "", field: "treatment_plan" }
                       ];
                       const completed = admissionChecklist.filter((f) => !!f.value).length;
                       const total = admissionChecklist.length;
@@ -2272,6 +2273,15 @@ function AdmissionRecordRedesign() {
                               return (
                                 <div
                                   key={i}
+                                  onClick={() => {
+                                    if (!done) {
+                                      const el = document.getElementById(item.field);
+                                      if (el) {
+                                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                        el.focus({ preventScroll: true });
+                                      }
+                                    }
+                                  }}
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
@@ -2284,6 +2294,7 @@ function AdmissionRecordRedesign() {
                                     fontWeight: 600,
                                     color: done ? "#166534" : "#92400e",
                                     transition: "all 0.2s ease",
+                                    cursor: done ? "default" : "pointer",
                                   }}
                                 >
                                   {done ? (
@@ -2805,6 +2816,7 @@ function AdmissionRecordRedesign() {
                             )}
                           </label>
                           <input
+                            id="patientName"
                             type="text"
                             value={summary.patientName || ""}
                             onChange={(e) =>
@@ -2822,6 +2834,7 @@ function AdmissionRecordRedesign() {
                                 )}
                               </label>
                               <input
+                                id="age"
                                 type="text"
                                 value={summary.age || ""}
                                 onChange={(e) =>
@@ -2846,6 +2859,7 @@ function AdmissionRecordRedesign() {
                           <div className="field">
                             <label>Phone Number</label>
                             <input
+                              id="phone"
                               type="tel"
                               value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""}
                               onChange={(e) =>
@@ -2873,6 +2887,7 @@ function AdmissionRecordRedesign() {
                                 )}
                               </label>
                               <input
+                                id="ward"
                                 type="text"
                                 value={summary.ward || ""}
                                 onChange={(e) =>
@@ -2889,6 +2904,7 @@ function AdmissionRecordRedesign() {
                                 )}
                               </label>
                               <input
+                                id="bed"
                                 type="text"
                                 value={summary.bed || ""}
                                 onChange={(e) =>
@@ -2973,6 +2989,7 @@ function AdmissionRecordRedesign() {
                               )}
                             </label>
                             <select
+                              id="doctor"
                               value={summary.doctor || ""}
                               onChange={(e) =>
                                 updateField("doctor", e.target.value)
