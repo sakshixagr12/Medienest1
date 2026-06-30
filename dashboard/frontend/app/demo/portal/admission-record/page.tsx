@@ -1451,101 +1451,149 @@ function AdmissionRecordRedesign() {
               <section className={styles.leftColumn}>
                 {step === 1 && (
                   <>
-                {/* --- Clinical Readiness Progress --- */}
+                {/* --- Smart Admission Assistant Panel --- */}
                 {(() => {
-                  const { percentage, missing } = calculateProgress();
-                  const color =
-                    percentage < 40
-                      ? "#ef4444"
-                      : percentage < 80
-                        ? "#f59e0b"
-                        : "#10b981";
+                  const admissionChecklist = step === 1 ? [
+                    { label: "Name", value: summary.patientName, field: "patientName" },
+                    { label: "Age", value: summary.age, field: "age" },
+                    { label: "Phone Number", value: summary.phone, field: "phone" },
+                    { label: "Doctor Assigned", value: summary.doctor, field: "doctor" },
+                    { label: "Ward", value: summary.ward, field: "ward" },
+                    { label: "Bed", value: summary.bed, field: "bed" }
+                  ] : step === 2 ? [
+                    { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "", field: "complaints" },
+                    { label: "Vitals (Temp)", value: summary.vitals_temp, field: "vitals_temp" },
+                    { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "", field: "vitals_bp_sys" },
+                    { label: "Vitals (Pulse)", value: summary.vitals_pulse, field: "vitals_pulse" },
+                    { label: "Provisional Diagnosis", value: summary.provisional_diagnosis, field: "provisional_diagnosis" }
+                  ] : [
+                    { label: "Final Diagnosis", value: summary.final_diagnosis, field: "final_diagnosis" },
+                    { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "", field: "treatment_plan" }
+                  ];
+                  const completed = admissionChecklist.filter((f) => !!f.value).length;
+                  const total = admissionChecklist.length;
+                  const allDone = completed === total;
                   return (
-                    <div className={styles.progressCard}>
+                    <div
+                      className={styles.progressCard}
+                      style={{
+                        borderLeft: "4px solid #6366f1",
+                        background: "linear-gradient(135deg, #f8f7ff 0%, #eef2ff 100%)",
+                      }}
+                    >
                       <div
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          marginBottom: 12,
+                          marginBottom: 16,
                         }}
                       >
-                        <div className={styles.cardTitle} style={{ margin: 0 }}>
+                        <div className={styles.cardTitle} style={{ margin: 0, color: "#4f46e5" }}>
                           <svg
-                            width="18"
-                            height="18"
+                            width="17"
+                            height="17"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="currentColor"
+                            stroke="#6366f1"
                             strokeWidth="2.5"
                           >
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                            <rect
-                              x="8"
-                              y="2"
-                              width="8"
-                              height="4"
-                              rx="1"
-                              ry="1"
-                            ></rect>
-                            <path d="M9 14l2 2 4-4"></path>
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                           </svg>
-                          Clinical Readiness
+                          ADMISSION STATUS
                         </div>
-                        <div style={{ fontSize: 18, fontWeight: 900, color }}>
-                          {percentage}%
-                        </div>
-                      </div>
-                      <div className={styles.progressBarTrack}>
                         <div
-                          className={styles.progressBarFill}
-                          style={{ width: `${percentage}%`, background: color }}
-                        />
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 800,
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            background: allDone ? "#d1fae5" : "#e0e7ff",
+                            color: allDone ? "#065f46" : "#4338ca",
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          {completed}/{total}
+                        </div>
                       </div>
-                      {missing.length > 0 && (
-                        <div style={{ marginTop: 16 }}>
-                          <div
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {admissionChecklist.map((item, i) => {
+                          const done = !!item.value;
+                          return (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                if (!done) {
+                                  const el = document.getElementById(item.field);
+                                  if (el) {
+                                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                    el.focus({ preventScroll: true });
+                                  }
+                                }
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                padding: "7px 10px",
+                                borderRadius: 8,
+                                background: done ? "#f0fdf4" : "#fff7ed",
+                                border: `1px solid ${done ? "#bbf7d0" : "#fed7aa"}`,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: done ? "#166534" : "#92400e",
+                                transition: "all 0.2s ease",
+                                cursor: done ? "default" : "pointer",
+                              }}
+                            >
+                              {done ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
+                                  <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="3">
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                  <line x1="12" y1="9" x2="12" y2="13" />
+                                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                              )}
+                              <span style={{ flex: 1 }}>{item.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div
+                        style={{
+                          marginTop: 14,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          paddingTop: 12,
+                          borderTop: "1px dashed #c7d2fe",
+                        }}
+                      >
+                        <span style={{ fontSize: 11, color: "#6366f1", fontWeight: 700 }}>
+                          Completion: {completed}/{total}
+                        </span>
+                        {allDone && (
+                          <span
                             style={{
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: 800,
-                              color: "#94a3b8",
-                              textTransform: "uppercase",
-                              marginBottom: 8,
+                              color: "#059669",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
                             }}
                           >
-                            Missing Information ({missing.length})
-                          </div>
-                          <div style={{ maxHeight: 100, overflowY: "auto" }}>
-                            {missing.slice(0, 3).map((m, i) => (
-                              <div key={i} className={styles.missingItem}>
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                >
-                                  <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-                                </svg>
-                                {m}
-                              </div>
-                            ))}
-                            {missing.length > 3 && (
-                              <div
-                                style={{
-                                  fontSize: 10,
-                                  color: "#64748b",
-                                  padding: "4px 0",
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                + {missing.length - 3} more fields...
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                            Ready to Submit
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })()}
