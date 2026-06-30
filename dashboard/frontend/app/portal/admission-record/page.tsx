@@ -1822,8 +1822,8 @@ function AdmissionRecordRedesign() {
               <React.Fragment key={s.id}>
                 <div
                   className={`${styles.wizardStep} ${step === s.id ? styles.wizardStepActive : step > s.id ? styles.wizardStepCompleted : ""}`}
-                  onClick={() => step > s.id && handleSetStep(s.id)}
-                  style={{ cursor: step > s.id ? "pointer" : "default" }}
+                  onClick={() => handleSetStep(s.id)}
+                  style={{ cursor: "pointer" }}
                 >
                   <div className={styles.wizardStepIcon}>{s.icon}</div>
                   <div className={styles.wizardStepLabel}>
