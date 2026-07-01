@@ -1606,11 +1606,8 @@ function AdmissionRecordRedesign() {
             className={`${styles.layout} ${isQuickMode ? styles.quickModeLayout : ""}`}
             style={!isQuickMode && step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}}
           >
-            {!isQuickMode && (step === 1 || step === 2) && (
+            {!isQuickMode && step === 2 && (
               <section className={styles.leftColumn}>
-                {step === 1 && (
-                  <>
-                {/* --- Smart Admission Assistant Panel --- */}
                 {(() => {
                   const admissionChecklist = step === 1 ? [
                     { label: "Name", value: summary.patientName, field: "patientName" },
@@ -1825,9 +1822,21 @@ function AdmissionRecordRedesign() {
                     ))}
                   </div>
                 </div>
-                  </>
-                )}
-                {step === 2 && (
+              </section>
+            )}
+            
+            {!isQuickMode && step === 1 && (
+                <div style={{ display: 'none' }}>
+                  {/* Keep summary reference safe if needed, though we moved attachments below */}
+                </div>
+            )}
+
+            <section
+              className={
+                isQuickMode ? styles.quickModeColumn : (step === 1 ? styles.step1FullColumn : styles.rightColumn)
+              }
+            >
+              {isQuickMode ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     {renderClinicalCard(
                       "Complaints",
@@ -2414,6 +2423,7 @@ function AdmissionRecordRedesign() {
                                 </select>
                               </div>
                             </div>
+                            </div>
                           </div>
 
                           {/* Additional Information */}
@@ -2450,6 +2460,79 @@ function AdmissionRecordRedesign() {
                                    <input type="text" placeholder="Enter occupation" value={summary.occupation || ""} onChange={(e) => updateField("occupation", e.target.value)} />
                                  </div>
                                </div>
+                            </div>
+                          </div>
+
+                             </div>
+                          </div>
+
+                          {/* Attachments (Moved here) */}
+                          <div className={styles.summaryCard}>
+                            <div className={styles.cardHeader}>
+                              <div className={styles.cardTitle}>
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                >
+                                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                </svg>
+                                Attachments
+                              </div>
+                            </div>
+                            <div className={styles.uploadZone}>
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*,application/pdf"
+                                onChange={handleFileUpload}
+                                className={styles.fileInputHidden}
+                                id="file-upload"
+                              />
+                              <label htmlFor="file-upload" className={styles.uploadLabel}>
+                                <svg
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                                </svg>
+                                <span>Upload Reports</span>
+                              </label>
+                            </div>
+                            <div className={styles.attachmentList}>
+                              {summary.attachments.map((file, i) => (
+                                <div key={i} className={styles.attachmentItem}>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div className={styles.fileName}>{file.name}</div>
+                                    <div className={styles.fileMeta}>
+                                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: 10 }}>
+                                    <a
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={styles.btnFileAction}
+                                    >
+                                      View
+                                    </a>
+                                    <button
+                                      onClick={() => handleDeleteAttachment(i)}
+                                      className={styles.btnFileDelete}
+                                    >
+                                      ️
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
 
