@@ -27,6 +27,7 @@ interface SummaryData {
   attendingPhysician: string;
   dischargingNurse: string;
   dischargeDestination: string;
+  emergencyContactName: string;
   emergencyContactRelation: string;
   emergencyContactNumber: string;
   diagnosis: string;
