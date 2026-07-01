@@ -2118,6 +2118,38 @@ function AdmissionRecordRedesign() {
 
   if (clinicLoading) return null;
 
+  const stateRef = useRef<any>({});
+  stateRef.current = { summary, isQuickMode, step, showDropdown, handleFinalSubmit, handleSaveDraft, handleNextStep, updateField };
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const { summary, isQuickMode, step, showDropdown, handleFinalSubmit, handleSaveDraft, handleNextStep, updateField } = stateRef.current;
+      
+      // Ctrl+S to save draft
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSaveDraft();
+        return;
+      }
+      
+      // Ctrl+Enter to continue/submit
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (isQuickMode) {
+          handleFinalSubmit();
+        } else if (step < 3) {
+          handleNextStep();
+        } else {
+          handleFinalSubmit();
+        }
+        return;
+      }
+    };
+    
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
   return (
     <>
       {toast && (
