@@ -14,29 +14,10 @@ interface Investigation {
   status: "Pending" | "Completed";
 }
 
-interface ChiefComplaint {
-  complaint: string;
-  duration: string;
-}
-
-interface Medication {
-  name: string;
-  dosage: string;
-  frequency: string;
-}
-
-interface Allergy {
-  name: string;
-  type: "Drug" | "Food" | "Environmental";
-  severity: "Mild" | "Moderate" | "Severe";
-}
-
 interface SummaryData {
-  patientId?: string;
   patientName: string;
   phone: string;
   age: string;
-  address?: string;
   sex: string;
   doctor: string;
   ward: string;
@@ -58,28 +39,13 @@ interface SummaryData {
   vitals_pulse: string;
   vitals_temp: string;
   vitals_spo2: string;
-  vitals_resp_rate: string;
-  vitals_weight: string;
-  vitals_height: string;
-  chief_complaints_extended: ChiefComplaint[];
-  complaints: string[]; // Keep for legacy
+  complaints: string[];
   hpi: string;
-  medical_history: string[];
-  current_medications: Medication[];
-  allergy_details: Allergy[];
-  examination_findings: string;
-  provisional_diagnosis: string;
-  risk_flags: string[];
-  infection_control: string;
   findings: string[];
   diagnosis: string;
   final_diagnosis: string;
   investigations: Investigation[];
-  treatment_plan: any[];
-  additional_notes: string;
-  diet_instructions: string;
-  activity_restrictions: string;
-  nursing_instructions: string;
+  treatment_plan: string[];
 }
 
 interface Suggestion {
