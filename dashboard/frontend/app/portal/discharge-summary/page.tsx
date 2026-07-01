@@ -617,7 +617,7 @@ const AIAssistedCategoryEditor = ({ category, categoryLabel, icon, items, onChan
       <div style={{ borderTop: "1px dashed #cbd5e1", paddingTop: "16px", marginTop: "8px" }}>
         {customItems.length > 0 && (
            <div style={{ marginBottom: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-             {customItems.map((cItem, customLocalIdx) => (
+             {customItems.map((cItem: any, customLocalIdx: number) => (
                <div key={cItem.absoluteIdx} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                  <div style={{ marginTop: "12px", width: "5px", height: "5px", borderRadius: "50%", background: "#94a3b8", flexShrink: 0 }} />
                  <input 
