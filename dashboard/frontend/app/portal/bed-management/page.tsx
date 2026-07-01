@@ -219,7 +219,7 @@ export default function BedManagementPage() {
 
   return (
     <div className="pageWrapper" style={{ minHeight: "100vh", background: "var(--sanctuary-bg)" }}>
-      <TopBar title="Bed Management" backHref="/portal/settings" />
+      <TopBar title="Bed Management" backHref="/portal/clinic-settings" />
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Beds</h1>
