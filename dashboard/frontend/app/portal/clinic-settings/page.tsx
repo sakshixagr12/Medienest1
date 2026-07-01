@@ -370,6 +370,44 @@ export default function ClinicSettingsPage() {
             </div>
           </div>
 
+          {/* Ward Management Card */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.iconBox}>
+                <Building size={20} />
+              </div>
+              <h3>Hospital Infrastructure</h3>
+            </div>
+            <div className={styles.cardBody}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontWeight: 600, color: "#1e293b", fontSize: 15, marginBottom: 4 }}>
+                    Ward Management
+                  </div>
+                  <div style={{ color: "#64748b", fontSize: 13, paddingRight: 16 }}>
+                    Configure hospital wards, beds, and manage facility capacity.
+                  </div>
+                </div>
+                <Link 
+                  href="/portal/ward-management" 
+                  style={{
+                    background: "#f1f5f9",
+                    color: "#3b82f6",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    border: "1px solid #e2e8f0",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  Manage Wards →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* Subscription Card */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
