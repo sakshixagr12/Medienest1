@@ -1412,7 +1412,7 @@ function AdmissionRecordRedesign() {
               )}
 
               {/* Allergy Alert */}
-              {summary.allergies?.trim() && (
+              {(typeof summary.allergies === 'string' ? summary.allergies : Array.isArray(summary.allergies) ? summary.allergies.join(', ') : "")?.trim() && (
                 <div className={styles.allergyAlertChip}>
                   <svg
                     width="13"
@@ -1427,9 +1427,10 @@ function AdmissionRecordRedesign() {
                     <line x1="12" y1="17" x2="12.01" y2="17" />
                   </svg>
                   <span>
-                    {summary.allergies.length > 30
-                      ? summary.allergies.slice(0, 28) + "…"
-                      : summary.allergies}{" "}
+                    {(() => {
+                      const algStr = typeof summary.allergies === 'string' ? summary.allergies : Array.isArray(summary.allergies) ? summary.allergies.join(', ') : "";
+                      return algStr.length > 30 ? algStr.slice(0, 28) + "…" : algStr;
+                    })()}{" "}
                     Allergy
                   </span>
                 </div>
