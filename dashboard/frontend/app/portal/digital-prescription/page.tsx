@@ -726,7 +726,7 @@ export default function PrescriptionPage() {
     setGuidanceError("");
     try {
       const treatmentText = meds.length > 0
-        ? meds.map(m => `${m.type || 'Tab'}. ${m.name} ${m.dose || ''} (${m.freq || ''}, ${m.duration || ''})`).join('; ')
+        ? meds.map((m: any) => `${m.type || 'Tab'}. ${m.name} ${m.dose || ''} (${m.freq || ''}, ${m.duration || ''})`).join('; ')
         : "None prescribed yet";
 
       const res = await authenticatedFetch(
@@ -768,7 +768,7 @@ export default function PrescriptionPage() {
           'warning_signs'
         ];
 
-        sections.forEach(sec => {
+        sections.forEach((sec: any) => {
           initialStatus[sec] = 'pending';
           if (sec === 'understanding_condition') {
             const disease = data.guidance.understanding_condition.disease_name || diagnosis || "Condition";
@@ -2500,14 +2500,14 @@ export default function PrescriptionPage() {
 
             <div className={styles.reviewFooter}>
               <div className={styles.reviewProgressText}>
-                {Object.values(guidanceStatus).filter(s => s === 'accepted').length} of 6 sections approved
+                {Object.values(guidanceStatus).filter((s: any) => s === 'accepted').length} of 6 sections approved
               </div>
               <div className={styles.reviewFooterActions}>
                 <button 
                   className={styles.footerBtn} 
                   onClick={() => {
                     const nextStatus = { ...guidanceStatus };
-                    Object.keys(nextStatus).forEach(k => {
+                    Object.keys(nextStatus).forEach((k: any) => {
                       if (nextStatus[k] === 'pending') nextStatus[k] = 'accepted';
                     });
                     setGuidanceStatus(nextStatus);
@@ -2521,7 +2521,7 @@ export default function PrescriptionPage() {
                     const approvedData = { ...guidanceSheet };
                     handleConfirmAndSaveGuidance(approvedData);
                   }}
-                  disabled={Object.values(guidanceStatus).some(s => s === 'pending' || s === 'editing')}
+                  disabled={Object.values(guidanceStatus).some((s: any) => s === 'pending' || s === 'editing')}
                 >
                   Confirm & Save Prescription
                 </button>
