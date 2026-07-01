@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 import TopBar from "@/components/TopBar";
+import Link from "next/link";
 
 interface Ward {
   id: string;
@@ -340,7 +341,27 @@ export default function WardManagementPage() {
                       </span>
                     </div>
                   </div>
-                  <div className={styles.cardActions}>
+                  <div className={styles.actions}>
+                    <Link
+                      href={`/portal/ward-management/${ward.id}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 16px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        backgroundColor: "#f1f5f9",
+                        color: "#3b82f6",
+                        border: "1px solid #e2e8f0",
+                        textDecoration: "none",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"></path><path d="M10 14L21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                      View Details
+                    </Link>
                     <button
                       className={styles.btnEdit}
                       onClick={() => handleOpenModal(ward)}
