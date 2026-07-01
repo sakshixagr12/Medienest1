@@ -657,6 +657,54 @@ function AdmissionRecordRedesign() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+S to save draft
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveDraft(summary);
+      }
+      // Ctrl+Enter to continue/submit
+      else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (isQuickMode) {
+          handleFinalSubmit();
+        } else if (step < 3) {
+          setStep(s => s + 1);
+        } else {
+          handleFinalSubmit();
+        }
+      }
+      // Enter to go to next field
+      else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        const active = document.activeElement as HTMLElement;
+        if (active) {
+          if (active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON' || active.tagName === 'A') {
+            return;
+          }
+          if (showDropdown && active.tagName === 'INPUT') {
+            return;
+          }
+          if (active.tagName === 'INPUT' || active.tagName === 'SELECT') {
+            e.preventDefault();
+            const focusable = Array.from(document.querySelectorAll('input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'))
+              .filter(el => {
+                const rect = el.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0 && (el as HTMLElement).tabIndex !== -1;
+              });
+            const index = focusable.indexOf(active);
+            if (index > -1 && index < focusable.length - 1) {
+              (focusable[index + 1] as HTMLElement).focus();
+            }
+          }
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [summary, saveDraft, isQuickMode, step, showDropdown]);
+
   const handlePatientSelect = (patient: any) => {
     setSummary((prev) => ({
       ...prev,
@@ -2220,10 +2268,27 @@ function AdmissionRecordRedesign() {
                             <div className="field">
                               <label>Triage / Severity</label>
                               <div className={styles.triageGroup}>
-                                {["Mild", "Moderate", "Severe"].map((lvl) => (
+                                {["Mild", "Moderate", "Severe"].map((lvl, i) => (
                                   <button
                                     key={lvl}
+                                    type="button"
+                                    id={`triageBtn-${lvl}`}
                                     onClick={() => updateField("severity", lvl)}
+                                    onKeyDown={(e) => {
+                                      const levels = ["Mild", "Moderate", "Severe"];
+                                      let newIdx = i;
+                                      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                                        e.preventDefault();
+                                        newIdx = (i + 1) % 3;
+                                      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                                        e.preventDefault();
+                                        newIdx = (i + 2) % 3;
+                                      }
+                                      if (newIdx !== i) {
+                                        updateField("severity", levels[newIdx]);
+                                        document.getElementById(`triageBtn-${levels[newIdx]}`)?.focus();
+                                      }
+                                    }}
                                     className={`${styles.triageBtn} ${summary.severity === lvl ? styles.active : ""} ${styles[lvl.toLowerCase()]}`}
                                   >
                                     {lvl}
