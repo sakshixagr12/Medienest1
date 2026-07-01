@@ -42,8 +42,8 @@ export default function DischargeManagementPage() {
         if (summariesRes.data && summariesRes.data.length > 0) {
           const dischargedAdmissionsToUpdate: string[] = [];
           
-          actualPending = (pendingRes.data || []).filter(adm => {
-             const isDischarged = summariesRes.data.some(sum => 
+          actualPending = (pendingRes.data || []).filter((adm: any) => {
+             const isDischarged = summariesRes.data.some((sum: any) => 
                 sum.patient_name === adm.patient_name && 
                 sum.date_admission === adm.date_admission
              );
