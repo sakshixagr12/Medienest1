@@ -498,6 +498,15 @@ function AdmissionRecordRedesign() {
   const [toast, setToast] = useState<string | null>(null);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
+  // Autocomplete State
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const quickDropdownRef = useRef<HTMLDivElement>(null);
+
   const suggestTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -598,6 +607,72 @@ function AdmissionRecordRedesign() {
       return () => clearTimeout(timer);
     }
   }, [summary, saveDraft, autoSaveStatus]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(summary.patientName || "");
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [summary.patientName]);
+
+  useEffect(() => {
+    const searchPatients = async () => {
+      if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        const { data, error } = await supabase
+          .from("patients")
+          .select("*")
+          .eq("clinic_id", clinic?.id)
+          .or(`name.ilike.%${debouncedSearchTerm}%,contact.ilike.%${debouncedSearchTerm}%`)
+          .limit(10);
+        if (error) throw error;
+        setSearchResults(data || []);
+      } catch (err) {
+        console.error("Error searching patients", err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+    if (showDropdown) {
+      searchPatients();
+    }
+  }, [debouncedSearchTerm, clinic?.id, supabase, showDropdown]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+      if (quickDropdownRef.current && !quickDropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handlePatientSelect = (patient: any) => {
+    setSummary((prev) => ({
+      ...prev,
+      patientName: patient.name,
+      phone: patient.contact || prev.phone,
+      age: patient.age ? `${patient.age} Years` : prev.age,
+      sex: patient.gender || prev.sex,
+      has_diabetes: patient.has_diabetes || prev.has_diabetes,
+      has_hypertension: patient.has_hypertension || prev.has_hypertension,
+      has_thyroid: patient.has_thyroid || prev.has_thyroid,
+      allergies: patient.allergies || prev.allergies,
+      past_surgeries: patient.past_surgeries || prev.past_surgeries,
+    }));
+    setShowDropdown(false);
+    setActiveIndex(-1);
+  };
 
   const updateField = (field: keyof SummaryData, value: any) => {
     setSummary((prev) => ({ ...prev, [field]: value }));
@@ -1729,15 +1804,65 @@ function AdmissionRecordRedesign() {
                         Patient Name
                       </div>
                     </div>
-                    <input
-                      className={styles.emergencyMainInput}
-                      value={summary.patientName || ""}
-                      onChange={(e) =>
-                        updateField("patientName", e.target.value)
-                      }
-                      placeholder="Enter full name for emergency record..."
-                      autoFocus
-                    />
+                    <div style={{ position: "relative" }} ref={quickDropdownRef}>
+                      <input
+                        className={styles.emergencyMainInput}
+                        value={summary.patientName || ""}
+                        onChange={(e) => {
+                          updateField("patientName", e.target.value);
+                          setShowDropdown(true);
+                          setActiveIndex(-1);
+                        }}
+                        onFocus={() => {
+                          if (summary.patientName?.length >= 2) setShowDropdown(true);
+                        }}
+                        onKeyDown={(e) => {
+                          if (!showDropdown) return;
+                          if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            setActiveIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+                          } else if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+                          } else if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (activeIndex >= 0 && activeIndex < searchResults.length) {
+                              handlePatientSelect(searchResults[activeIndex]);
+                            }
+                          } else if (e.key === "Escape") {
+                            setShowDropdown(false);
+                          }
+                        }}
+                        placeholder="Enter full name for emergency record..."
+                        autoFocus
+                      />
+                      {showDropdown && (debouncedSearchTerm.length >= 2) && (
+                        <div className={styles.patientDropdown}>
+                          {isSearching ? (
+                            <div className={styles.dropdownItem}>Searching...</div>
+                          ) : searchResults.length > 0 ? (
+                            searchResults.map((patient, idx) => (
+                              <div
+                                key={patient.id}
+                                className={`${styles.dropdownItem} ${idx === activeIndex ? styles.dropdownItemActive : ""}`}
+                                onClick={() => handlePatientSelect(patient)}
+                                onMouseEnter={() => setActiveIndex(idx)}
+                              >
+                                <div className={styles.dropdownName}>{patient.name}</div>
+                                <div className={styles.dropdownDetails}>
+                                  {patient.id.slice(0, 8)} • {patient.age ? `${patient.age}Y` : "N/A"} / {patient.gender || "U"} • {patient.contact || "No Phone"}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
+                              <div style={{ color: "#6b7280", marginBottom: 4 }}>No patient found.</div>
+                              <div style={{ color: "#4f46e5", fontSize: 12, fontWeight: 500 }}>+ Register New Patient</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className={styles.emergencyGrid}>
@@ -1902,7 +2027,7 @@ function AdmissionRecordRedesign() {
                             className={`${styles.statusDot} ${getStatus(summary.patientName)}`}
                           />
                         </div>
-                        <div className="field">
+                        <div className="field" style={{ position: "relative" }} ref={dropdownRef}>
                           <label>
                             Full Name{" "}
                             {!summary.patientName && (
@@ -1912,10 +2037,58 @@ function AdmissionRecordRedesign() {
                           <input
                             type="text"
                             value={summary.patientName || ""}
-                            onChange={(e) =>
-                              updateField("patientName", e.target.value)
-                            }
+                            onChange={(e) => {
+                              updateField("patientName", e.target.value);
+                              setShowDropdown(true);
+                              setActiveIndex(-1);
+                            }}
+                            onFocus={() => {
+                              if (summary.patientName?.length >= 2) setShowDropdown(true);
+                            }}
+                            onKeyDown={(e) => {
+                              if (!showDropdown) return;
+                              if (e.key === "ArrowDown") {
+                                e.preventDefault();
+                                setActiveIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+                              } else if (e.key === "ArrowUp") {
+                                e.preventDefault();
+                                setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+                              } else if (e.key === "Enter") {
+                                e.preventDefault();
+                                if (activeIndex >= 0 && activeIndex < searchResults.length) {
+                                  handlePatientSelect(searchResults[activeIndex]);
+                                }
+                              } else if (e.key === "Escape") {
+                                setShowDropdown(false);
+                              }
+                            }}
                           />
+                          {showDropdown && (debouncedSearchTerm.length >= 2) && (
+                            <div className={styles.patientDropdown}>
+                              {isSearching ? (
+                                <div className={styles.dropdownItem}>Searching...</div>
+                              ) : searchResults.length > 0 ? (
+                                searchResults.map((patient, idx) => (
+                                  <div
+                                    key={patient.id}
+                                    className={`${styles.dropdownItem} ${idx === activeIndex ? styles.dropdownItemActive : ""}`}
+                                    onClick={() => handlePatientSelect(patient)}
+                                    onMouseEnter={() => setActiveIndex(idx)}
+                                  >
+                                    <div className={styles.dropdownName}>{patient.name}</div>
+                                    <div className={styles.dropdownDetails}>
+                                      {patient.id.slice(0, 8)} • {patient.age ? `${patient.age}Y` : "N/A"} / {patient.gender || "U"} • {patient.contact || "No Phone"}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
+                                  <div style={{ color: "#6b7280", marginBottom: 4 }}>No patient found.</div>
+                                  <div style={{ color: "#4f46e5", fontSize: 12, fontWeight: 500 }}>+ Register New Patient</div>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className={styles.patientBrief}>
                           <div className={styles.briefItem}>
