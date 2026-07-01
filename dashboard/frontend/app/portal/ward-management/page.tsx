@@ -226,7 +226,7 @@ export default function WardManagementPage() {
 
   return (
     <div className="pageWrapper" style={{ minHeight: "100vh", background: "var(--sanctuary-bg)" }}>
-      <TopBar title="Ward Management" backHref="/portal/settings" />
+      <TopBar title="Ward Management" backHref="/portal/clinic-settings" />
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Wards</h1>
