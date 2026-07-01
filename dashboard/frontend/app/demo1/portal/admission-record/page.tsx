@@ -1517,7 +1517,7 @@ function AdmissionRecordRedesign() {
                   </svg>
                   <span>
                     {(() => {
-                      const algStr = typeof summary.allergies === 'string' ? summary.allergies : Array.isArray(summary.allergies) ? summary.allergies.join(', ') : "";
+                      const algStr = summary.allergies || "";
                       return algStr.length > 30 ? algStr.slice(0, 28) + "…" : algStr;
                     })()}{" "}
                     Allergy
