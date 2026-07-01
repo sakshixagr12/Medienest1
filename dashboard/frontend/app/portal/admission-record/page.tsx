@@ -2144,6 +2144,20 @@ function AdmissionRecordRedesign() {
         }
         return;
       }
+
+      // Enter -> next field
+      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.defaultPrevented) {
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT')) {
+          const focusable = Array.from(document.querySelectorAll('input, select, textarea, button'));
+          const index = focusable.indexOf(activeElement);
+          if (index > -1 && index < focusable.length - 1) {
+             e.preventDefault();
+             (focusable[index + 1] as HTMLElement).focus();
+             return;
+          }
+        }
+      }
     };
     
     window.addEventListener("keydown", handleGlobalKeyDown);
