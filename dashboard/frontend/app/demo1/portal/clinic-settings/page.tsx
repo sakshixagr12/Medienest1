@@ -388,22 +388,40 @@ export default function ClinicSettingsPage() {
                     Configure hospital wards, beds, and manage facility capacity.
                   </div>
                 </div>
-                <Link 
-                  href="/demo1/portal/ward-management" 
-                  style={{
-                    background: "#f1f5f9",
-                    color: "#3b82f6",
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    textDecoration: "none",
-                    fontWeight: 600,
-                    fontSize: 13,
-                    border: "1px solid #e2e8f0",
-                    whiteSpace: "nowrap"
-                  }}
-                >
-                  Manage Wards →
-                </Link>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <Link 
+                    href="/demo1/portal/ward-management" 
+                    style={{
+                      background: "#f1f5f9",
+                      color: "#3b82f6",
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      fontSize: 13,
+                      border: "1px solid #e2e8f0",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    Manage Wards →
+                  </Link>
+                  <Link 
+                    href="/demo1/portal/bed-management" 
+                    style={{
+                      background: "#f8fafc",
+                      color: "#64748b",
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      fontSize: 13,
+                      border: "1px solid #cbd5e1",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    Manage Beds →
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
