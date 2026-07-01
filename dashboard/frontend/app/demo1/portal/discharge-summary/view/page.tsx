@@ -643,7 +643,7 @@ function FullResultPreview() {
                         <div className={styles.infoRow}>
                           <span className={styles.infoLabel}>Discharge To</span>
                           <span className={styles.infoColon}>:</span>
-                          <span className={styles.infoValue}>{summary.dischargeDestination || "basti, up"}</span>
+                          <span className={styles.infoValue}>{"basti, up"}</span>
                         </div>
                       </div>
                     </div>
