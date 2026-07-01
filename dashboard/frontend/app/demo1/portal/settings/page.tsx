@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TopBar from "@/components/TopBar";
+import Link from "next/link";
 import { useClinic } from "@/context/ClinicContext";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
@@ -218,6 +219,38 @@ export default function SettingsPage() {
         <button className={styles.saveBtn} onClick={saveDoctorProfile}>
           Update Practitioner Profile
         </button>
+
+        {/* Hospital Infrastructure */}
+        <div className={styles.sectionLabel} style={{ marginTop: 32 }}>
+          Hospital Infrastructure
+        </div>
+        <div className={styles.box} style={{ padding: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontWeight: 600, color: "#1e293b", fontSize: 15, marginBottom: 4 }}>
+                Ward Management
+              </div>
+              <div style={{ color: "#64748b", fontSize: 13 }}>
+                Configure hospital wards, beds, and manage facility capacity.
+              </div>
+            </div>
+            <Link 
+              href="/demo1/portal/ward-management" 
+              style={{
+                background: "#f1f5f9",
+                color: "#3b82f6",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontWeight: 600,
+                fontSize: 13,
+                border: "1px solid #e2e8f0"
+              }}
+            >
+              Manage Wards →
+            </Link>
+          </div>
+        </div>
 
         {/* Services List */}
         <div className={styles.sectionLabel} style={{ marginTop: 32 }}>
