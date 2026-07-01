@@ -184,7 +184,7 @@ const PREDEFINED_CONDITIONS = [
 const ExaminationEditor = ({ items, onChange }: any) => {
   const [selectedDept, setSelectedDept] = useState("Medicine");
   
-  const template = EXAMINATION_TEMPLATES.find(t => t.name === selectedDept) || EXAMINATION_TEMPLATES[0];
+  const template = EXAMINATION_TEMPLATES.find((t: any) => t.name === selectedDept) || EXAMINATION_TEMPLATES[0];
   const predefinedInCurrentTemplate = new Set(template.categories.flatMap(c => c.findings));
   
   const predefinedSelected = items.filter((i: string) => predefinedInCurrentTemplate.has(i));
@@ -205,9 +205,9 @@ const ExaminationEditor = ({ items, onChange }: any) => {
       next = next.filter((i: string) => i !== finding);
       if (next.length === 0) next = [""];
     } else {
-      const group = MUTUALLY_EXCLUSIVE_GROUPS.find(g => g.includes(finding));
+      const group = MUTUALLY_EXCLUSIVE_GROUPS.find((g: any) => g.includes(finding));
       if (group) {
-        next = next.filter(i => !group.includes(i));
+        next = next.filter((i: any) => !group.includes(i));
       }
       next.push(finding);
       next = next.filter((i: string) => i !== "");
@@ -259,12 +259,12 @@ const ExaminationEditor = ({ items, onChange }: any) => {
           onChange={e => setSelectedDept(e.target.value)}
           style={{ padding: "6px 12px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", background: "white", outline: "none", cursor: "pointer" }}
         >
-          {EXAMINATION_TEMPLATES.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+          {EXAMINATION_TEMPLATES.map((t: any) => <option key={t.name} value={t.name}>{t.name}</option>)}
         </select>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {template.categories.map(cat => {
+        {template.categories.map((cat: any) => {
           const isExpanded = expandedCategories[cat.categoryName];
           const chipsToShow = isExpanded ? cat.findings : cat.findings.slice(0, 5);
           const hasMore = cat.findings.length > 5;
@@ -273,7 +273,7 @@ const ExaminationEditor = ({ items, onChange }: any) => {
           <div key={cat.categoryName}>
             <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{cat.categoryName}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {chipsToShow.map(finding => {
+              {chipsToShow.map((finding: any) => {
                 const isSelected = items.includes(finding);
                 let displayLabel = FINDING_SHORT_LABELS[finding] || finding;
                 
@@ -327,7 +327,7 @@ const ExaminationEditor = ({ items, onChange }: any) => {
         <div style={{ marginTop: "8px", padding: "16px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
           <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--sanctuary-ink-l)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Selected Findings Preview</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {predefinedSelected.map(finding => {
+            {predefinedSelected.map((finding: any) => {
               const isNormal = NORMAL_FINDINGS.has(finding);
               const isAbnormal = ABNORMAL_FINDINGS.has(finding);
               let displayLabel = FINDING_SHORT_LABELS[finding] || finding;
@@ -461,7 +461,7 @@ const DischargeConditionEditor = ({ items, onChange }: any) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-        {PREDEFINED_CONDITIONS.map(cond => {
+        {PREDEFINED_CONDITIONS.map((cond: any) => {
           const isSelected = items.includes(cond);
           return (
             <label key={cond} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", background: isSelected ? "#eff6ff" : "var(--sanctuary-gray-low)", padding: "8px 12px", borderRadius: "8px", border: `1px solid ${isSelected ? "#3b82f6" : "var(--border)"}`, color: isSelected ? "#1e40af" : "var(--sanctuary-ink)", transition: "all 0.2s" }}>
@@ -544,7 +544,7 @@ const AIAssistedCategoryEditor = ({ category, categoryLabel, icon, items, onChan
   const myItemTexts = absoluteIndices.map((idx: number) => items[idx].substring(catPrefix.length));
   
   const selectedSet = new Set(myItemTexts);
-  const customItems = myItemTexts.map((text: string, localIdx: number) => ({ text, absoluteIdx: absoluteIndices[localIdx] })).filter(item => !aiSuggestions.includes(item.text));
+  const customItems = myItemTexts.map((text: string, localIdx: number) => ({ text, absoluteIdx: absoluteIndices[localIdx] })).filter((item: any) => !aiSuggestions.includes(item.text));
 
   const toggleItem = (text: string) => {
     const fullString = `${catPrefix}${text}`;
@@ -599,7 +599,7 @@ const AIAssistedCategoryEditor = ({ category, categoryLabel, icon, items, onChan
           </button>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-          {aiSuggestions.map(sug => {
+          {aiSuggestions.map((sug: any) => {
             const isSelected = selectedSet.has(sug);
             return (
               <label key={sug} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: isSelected ? "#eff6ff" : "white", padding: "6px 14px", borderRadius: "20px", border: `1px solid ${isSelected ? "#3b82f6" : "#cbd5e1"}`, color: isSelected ? "#1e40af" : "#475569", transition: "all 0.2s", fontSize: "13px", fontWeight: 500, boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }}>
@@ -669,7 +669,7 @@ const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
   };
 
   const aiCategories = ["DIET", "FLUIDS", "ACTIVITY"];
-  const activeAiCats = aiCategories.filter(cat => items.some((i: string) => i.startsWith(`${cat}: `)));
+  const activeAiCats = aiCategories.filter((cat: any) => items.some((i: string) => i.startsWith(`${cat}: `)));
   
   const otherItems = items.map((val: string, idx: number) => ({ val, idx })).filter((item: any) => {
     const match = item.val.match(/^([A-Z_-]+):\s*(.*)$/);
@@ -680,7 +680,7 @@ const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
-        {ADVICE_CATEGORIES.map(cat => (
+        {ADVICE_CATEGORIES.map((cat: any) => (
           <button 
             key={cat.id} 
             onClick={() => addCategory(cat.id)}
@@ -694,8 +694,8 @@ const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {activeAiCats.map(catId => {
-          const catDef = ADVICE_CATEGORIES.find(c => c.id === catId)!;
+        {activeAiCats.map((catId: any) => {
+          const catDef = ADVICE_CATEGORIES.find((c: any) => c.id === catId)!;
           return <AIAssistedCategoryEditor key={catId} category={catId} categoryLabel={catDef.label} icon={catDef.icon} items={items} onChange={onChange} diagnosis={diagnosis} />;
         })}
 
@@ -704,7 +704,7 @@ const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
           const catId = match ? match[1] : "CUSTOM";
           let val = match ? match[2] : item;
 
-          const catDef = ADVICE_CATEGORIES.find(c => c.id === catId) || ADVICE_CATEGORIES.find(c => c.id === "CUSTOM");
+          const catDef = ADVICE_CATEGORIES.find((c: any) => c.id === catId) || ADVICE_CATEGORIES.find((c: any) => c.id === "CUSTOM");
 
           if (catId === "FOLLOW-UP") {
             let num = "", unit = "Days", dept = "OPD";
