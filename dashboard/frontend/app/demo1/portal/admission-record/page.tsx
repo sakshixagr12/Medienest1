@@ -15,6 +15,7 @@ interface Investigation {
 }
 
 interface SummaryData {
+  patientId?: string;
   patientName: string;
   phone: string;
   age: string;
@@ -637,7 +638,7 @@ function AdmissionRecordRedesign() {
           .from("patients")
           .select("*")
           .eq("clinic_id", clinic?.id)
-          .or(`name.ilike.%${debouncedSearchTerm}%,contact.ilike.%${debouncedSearchTerm}%`)
+          .or(`name.ilike.%${debouncedSearchTerm}%,contact.ilike.%${debouncedSearchTerm}%,id.eq.${debouncedSearchTerm}`)
           .limit(10);
         if (error) throw error;
         setSearchResults(data || []);
@@ -669,10 +670,13 @@ function AdmissionRecordRedesign() {
   const handlePatientSelect = (patient: any) => {
     setSummary((prev) => ({
       ...prev,
+      patientId: patient.id,
       patientName: patient.name,
       phone: patient.contact || prev.phone,
       age: patient.age ? `${patient.age} Years` : prev.age,
       sex: patient.gender || prev.sex,
+      dateOfBirth: patient.date_of_birth || prev.dateOfBirth,
+      address: patient.address || prev.address,
       has_diabetes: patient.has_diabetes || prev.has_diabetes,
       has_hypertension: patient.has_hypertension || prev.has_hypertension,
       has_thyroid: patient.has_thyroid || prev.has_thyroid,
@@ -2201,7 +2205,7 @@ function AdmissionRecordRedesign() {
                                       <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{summary.sex || 'Female'}</span>
                                     </div>
                                     <div className={styles.patientDetailsSub}>
-                                      PT-000245 • {summary.age || 'N/A'} • {summary.dateOfBirth || '12-Feb-2002'}
+                                      {summary.patientId ? summary.patientId.slice(0, 8).toUpperCase() : 'N/A'} • {summary.age || 'N/A'} • {summary.dateOfBirth || 'N/A'}
                                     </div>
                                     <div className={styles.patientDetailsSub}>
                                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -2214,9 +2218,12 @@ function AdmissionRecordRedesign() {
                                   className={styles.btnClearPatient}
                                   onClick={() => {
                                     updateField('patientName', '');
+                                    updateField('patientId', undefined);
                                     updateField('age', '');
-                                    updateField('sex', '');
+                                    updateField('sex', 'Male');
                                     updateField('phone', '');
+                                    updateField('dateOfBirth', '');
+                                    updateField('address', '');
                                   }}
                                 >
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -2458,29 +2465,61 @@ function AdmissionRecordRedesign() {
                               Alerts &amp; History
                             </div>
                             
-                            <div className={`${styles.alertItem} ${styles.alertRed}`}>
-                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                              <div className={styles.alertContent}>
-                                <div className={styles.alertTitle}>Allergy</div>
-                                <div className={styles.alertSub}>Penicillin</div>
-                              </div>
-                            </div>
+                            {((summary.allergies || "").trim() || summary.has_diabetes || summary.has_hypertension || summary.has_thyroid) ? (
+                              <>
+                                {(summary.allergies || "").trim() && (
+                                  <div className={`${styles.alertItem} ${styles.alertRed}`}>
+                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                                    <div className={styles.alertContent}>
+                                      <div className={styles.alertTitle}>Allergy</div>
+                                      <div className={styles.alertSub}>{summary.allergies}</div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {summary.has_diabetes && (
+                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                                    <div className={styles.alertContent}>
+                                      <div className={styles.alertTitle}>Condition</div>
+                                      <div className={styles.alertSub}>Diabetes</div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {summary.has_hypertension && (
+                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                                    <div className={styles.alertContent}>
+                                      <div className={styles.alertTitle}>Condition</div>
+                                      <div className={styles.alertSub}>Hypertension</div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {summary.has_thyroid && (
+                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                                    <div className={styles.alertContent}>
+                                      <div className={styles.alertTitle}>Condition</div>
+                                      <div className={styles.alertSub}>Thyroid</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div style={{ fontSize: 13, color: '#64748b' }}>No critical alerts recorded.</div>
+                            )}
 
-                            <div className={`${styles.alertItem} ${styles.alertYellow}`}>
-                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                              <div className={styles.alertContent}>
-                                <div className={styles.alertTitle}>No Known Drug Allergy</div>
-                                <div className={styles.alertSub}>Not documented</div>
+                            {summary.past_surgeries && (
+                              <div className={`${styles.alertItem} ${styles.alertBlue}`}>
+                                <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                                <div className={styles.alertContent}>
+                                  <div className={styles.alertTitle}>Past Surgeries</div>
+                                  <div className={styles.alertSub}>{summary.past_surgeries}</div>
+                                </div>
                               </div>
-                            </div>
-
-                            <div className={`${styles.alertItem} ${styles.alertBlue}`}>
-                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
-                              <div className={styles.alertContent}>
-                                <div className={styles.alertTitle}>Previous Admissions</div>
-                                <div className={styles.alertSub}>2 admissions in last 12 months</div>
-                              </div>
-                            </div>
+                            )}
 
                             <div style={{ color: '#3b82f6', fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, cursor: 'pointer' }}>
                               View Full History
