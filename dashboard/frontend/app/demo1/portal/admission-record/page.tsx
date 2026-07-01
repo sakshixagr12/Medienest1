@@ -1604,14 +1604,174 @@ function AdmissionRecordRedesign() {
           {renderWizardProgress()}
           <div
             className={`${styles.layout} ${isQuickMode ? styles.quickModeLayout : ""}`}
-            style={!isQuickMode ? (step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : step === 1 ? { gridTemplateColumns: "1fr" } : {}) : {}}
+            style={!isQuickMode ? (step === 3 ? { gridTemplateColumns: "1fr", maxWidth: "1000px", margin: "0 auto" } : {}) : {}}
           >
             {!isQuickMode && (step === 1 || step === 2) && (
-              <section className={step === 1 ? styles.hiddenLeftColumn : styles.leftColumn} style={step === 1 ? { display: 'none' } : {}}>
+              <section className={styles.leftColumn}>
                 {step === 1 && (
-                  <div style={{ display: 'none' }}>
-                    {/* Hiding checklist in step 1 to achieve 2-column layout */}
+                  <>
+                {(() => {
+                  const admissionChecklist = step === 1 ? [
+                    { label: "Name", value: summary.patientName, field: "patientName" },
+                    { label: "Age", value: summary.age, field: "age" },
+                    { label: "Phone Number", value: summary.phone, field: "phone" },
+                    { label: "Doctor Assigned", value: summary.doctor, field: "doctor" },
+                    { label: "Ward", value: summary.ward, field: "ward" },
+                    { label: "Bed", value: summary.bed, field: "bed" }
+                  ] : step === 2 ? [
+                    { label: "Chief Complaint", value: summary.complaints?.length > 0 ? summary.complaints[0] : "", field: "complaints" },
+                    { label: "Vitals (Temp)", value: summary.vitals_temp, field: "vitals_temp" },
+                    { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "", field: "vitals_bp_sys" },
+                    { label: "Vitals (Pulse)", value: summary.vitals_pulse, field: "vitals_pulse" },
+                    { label: "Provisional Diagnosis", value: summary.diagnosis, field: "diagnosis" }
+                  ] : [
+                    { label: "Final Diagnosis", value: summary.final_diagnosis, field: "final_diagnosis" },
+                    { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? summary.treatment_plan[0] : "", field: "treatment_plan" }
+                  ];
+                  const completed = admissionChecklist.filter((f) => !!f.value).length;
+                  const total = admissionChecklist.length;
+                  const allDone = completed === total;
+                  return (
+                    <div
+                      className={styles.progressCard}
+                      style={{
+                        borderLeft: "4px solid #6366f1",
+                        background: "linear-gradient(135deg, #f8f7ff 0%, #eef2ff 100%)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <div className={styles.cardTitle} style={{ margin: 0, color: "#4f46e5" }}>
+                          <svg
+                            width="17"
+                            height="17"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#6366f1"
+                            strokeWidth="2.5"
+                          >
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                          </svg>
+                          ADMISSION STATUS
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 800,
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            background: allDone ? "#d1fae5" : "#e0e7ff",
+                            color: allDone ? "#065f46" : "#4338ca",
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          {completed}/{total}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {admissionChecklist.map((item, i) => {
+                          const done = !!item.value;
+                          return (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                if (!done) {
+                                  const el = document.getElementById(item.field);
+                                  if (el) {
+                                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                    el.focus({ preventScroll: true });
+                                  }
+                                }
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                padding: "7px 10px",
+                                borderRadius: 8,
+                                background: done ? "#f0fdf4" : "#fff7ed",
+                                border: `1px solid ${done ? "#bbf7d0" : "#fed7aa"}`,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: done ? "#166534" : "#92400e",
+                                transition: "all 0.2s ease",
+                                cursor: done ? "default" : "pointer",
+                              }}
+                            >
+                              {done ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
+                                  <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="3">
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                  <line x1="12" y1="9" x2="12" y2="13" />
+                                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                              )}
+                              <span style={{ flex: 1 }}>{item.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div
+                        style={{
+                          marginTop: 14,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          paddingTop: 12,
+                          borderTop: "1px dashed #c7d2fe",
+                        }}
+                      >
+                        <span style={{ fontSize: 11, color: "#6366f1", fontWeight: 700 }}>
+                          Completion: {completed}/{total}
+                        </span>
+                        {allDone && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              color: "#059669",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                            Ready to Submit
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                  <div className={styles.summaryCard} style={{ marginTop: 12 }}>
+                    <div className={styles.cardHeader} style={{ marginBottom: 0 }}>
+                      <div className={styles.cardTitle} style={{ fontSize: 11, textTransform: 'uppercase', color: '#16a34a' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        ALERTS & HISTORY
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 12, fontSize: 13, color: '#0f172a', fontWeight: 600 }}>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                         No known alerts. First admission.
+                      </div>
+                    </div>
                   </div>
+
+                  </>
                 )}
                 {step === 2 && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1655,8 +1815,9 @@ function AdmissionRecordRedesign() {
 
             <section
               className={
-                isQuickMode ? styles.quickModeColumn : (step === 1 ? styles.step1FullColumn : styles.rightColumn)
+                isQuickMode ? styles.quickModeColumn : (step === 1 ? styles.mainColumn : styles.mainColumn)
               }
+              style={step !== 1 ? { gridColumn: "span 2" } : {}}
             >
               {isQuickMode ? (
                 <div className={styles.emergencyFadeIn}>
@@ -2314,10 +2475,11 @@ function AdmissionRecordRedesign() {
                           </div>
 
                         </div>
+                      </div>
+                    </div>
+                  ) : null}
 
-                        {/* --- Right Sidebar Column --- */}
-                        <div className={styles.sidebar}>
-                          
+                  {step === 3 && (
                           {/* Alerts & History */}
                           <div className={styles.alertCard}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
@@ -2429,11 +2591,6 @@ function AdmissionRecordRedesign() {
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </div>
                           </div>
-
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {step === 2 && (
                     <div className={styles.stepFadeIn}>

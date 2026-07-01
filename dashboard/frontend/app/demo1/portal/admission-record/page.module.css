@@ -193,8 +193,8 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 40px;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 24px;
   align-items: flex-start;
 }
 
