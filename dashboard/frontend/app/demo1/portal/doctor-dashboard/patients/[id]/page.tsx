@@ -681,7 +681,7 @@ function PatientHubContent({
     let timelineEvents: any[] = [];
     
     // OPD Visits
-    (visits || []).forEach(v => {
+    (visits || []).forEach((v: any) => {
       timelineEvents.push({
         id: v.prescription_id || `visit-${v.visit_date}`,
         type: 'OPD',
@@ -694,7 +694,7 @@ function PatientHubContent({
     });
 
     // Admissions
-    (admissions || []).forEach(a => {
+    (admissions || []).forEach((a: any) => {
       timelineEvents.push({
         id: a.id,
         type: 'Admission',
@@ -709,7 +709,7 @@ function PatientHubContent({
     });
 
     // Discharges
-    (summaries || []).forEach(s => {
+    (summaries || []).forEach((s: any) => {
       timelineEvents.push({
         id: s.id,
         type: 'Discharge',
@@ -726,7 +726,7 @@ function PatientHubContent({
     timelineEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
 
     // 3. Filter
-    const filteredEvents = timelineEvents.filter(e => {
+    const filteredEvents = timelineEvents.filter((e: any) => {
       if (timelineFilter !== 'All' && e.type !== timelineFilter) return false;
       if (timelineSearch) {
         const term = timelineSearch.toLowerCase();
