@@ -2530,7 +2530,7 @@ function AdmissionRecordRedesign() {
               <button
                 type="button"
                 className={styles.btnSecondarySticky}
-                onClick={handleSaveDraft}
+                onClick={() => saveDraft(summary)}
                 disabled={isSaving}
               >
                 Save Draft
