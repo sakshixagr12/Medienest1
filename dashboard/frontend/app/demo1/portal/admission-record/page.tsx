@@ -2136,9 +2136,9 @@ function AdmissionRecordRedesign() {
                           {/* Selected Patient Card */}
                           {summary.patientName && (
                             <div className={styles.summaryCard} style={{ padding: 0, overflow: 'hidden' }}>
-                              <div style={{ background: '#f8fafc', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#334155' }}>
+                              <div style={{ background: '#f8fafc', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                Selected Patient
+                                SELECTED PATIENT
                               </div>
                               <div className={styles.selectedPatientCard}>
                                 <div className={styles.selectedPatientInfo}>
