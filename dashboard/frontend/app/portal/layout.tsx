@@ -30,22 +30,30 @@ export default function PortalLayout({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "var(--bg)",
+          background: "#f8fafc",
+          fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div
-            className="spinner"
             style={{
-              border: "3px solid #e2e8f0",
-              borderTopColor: "var(--teal)",
-              width: 40,
-              height: 40,
+              width: 48,
+              height: 48,
+              border: "4px solid #e2e8f0",
+              borderTopColor: "#3b82f6",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
             }}
           />
-          <p style={{ marginTop: 16, color: "var(--ink-l)", fontSize: 14 }}>
-            Loading your clinic…
+          <p style={{ marginTop: 24, color: "#475569", fontSize: 16, fontWeight: 500 }}>
+            Loading your clinic...
           </p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       </div>
     );
@@ -62,20 +70,22 @@ export default function PortalLayout({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--bg)",
+            background: "#f8fafc",
+            fontFamily: "system-ui, -apple-system, sans-serif",
           }}
         >
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div
-              className="spinner"
               style={{
-                border: "3px solid #e2e8f0",
-                borderTopColor: "var(--teal)",
-                width: 40,
-                height: 40,
+                width: 48,
+                height: 48,
+                border: "4px solid #e2e8f0",
+                borderTopColor: "#3b82f6",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
               }}
             />
-            <p style={{ marginTop: 16, color: "var(--ink-l)", fontSize: 14 }}>
+            <p style={{ marginTop: 24, color: "#475569", fontSize: 16, fontWeight: 500 }}>
               Loading portal view...
             </p>
           </div>
