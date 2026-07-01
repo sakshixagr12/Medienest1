@@ -62,7 +62,6 @@ export default function WardManagementPage() {
       .from("wards")
       .select("*")
       .order("created_at", { ascending: false });
-      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching wards:", error.message, error);
