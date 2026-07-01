@@ -23,6 +23,15 @@ interface SummaryData {
   ward: string;
   bed: string;
   department: string;
+  alternateNumber?: string;
+  address?: string;
+  dateOfBirth?: string;
+  referringDoctor?: string;
+  relativeName?: string;
+  relationship?: string;
+  guardianPhone?: string;
+  occupation?: string;
+  admissionCategory?: string;
   date_admission: string;
   severity: string;
   admission_type: string;
