@@ -2691,7 +2691,7 @@ function AdmissionRecordRedesign() {
           <div className={styles.stickyBarInner}>
             <div style={{ marginRight: "auto", display: "flex", gap: 12 }}>
               <button className={styles.btnClearSticky} onClick={handleClear}>
-                ️ {isQuickMode ? "Reset" : "Clear"}
+                ️ {isQuickMode ? "Reset" : "Cancel"}
               </button>
             </div>
 
@@ -2718,8 +2718,7 @@ function AdmissionRecordRedesign() {
                   className={styles.btnSaveSticky}
                   onClick={() => setStep((s) => s + 1)}
                 >
-                  Next Step: {step === 1 ? "Clinical Info" : "Management Plan"}{" "}
-                  →
+                  Continue →
                 </button>
               ) : (
                 <button
