@@ -61,7 +61,7 @@ export default function WardManagementPage() {
     const { data, error } = await supabase
       .from("wards")
       .select("*")
-      .eq("is_active", true)
+      .order("created_at", { ascending: false });
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -183,10 +183,9 @@ export default function WardManagementPage() {
   };
 
   // Filtering
-  const filteredWards = wards.filter(
-    (w) =>
-      w.ward_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.ward_code.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredWards = wards.filter((ward) =>
+    ward.ward_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    ward.ward_code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination Logic
@@ -195,6 +194,12 @@ export default function WardManagementPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Stats Logic
+  const totalWards = wards.length;
+  const activeWards = wards.filter(w => w.is_active).length;
+  const inactiveWards = wards.filter(w => !w.is_active).length;
+  const totalCapacity = wards.filter(w => w.is_active).reduce((sum, w) => sum + w.capacity, 0);
 
   // Reset to page 1 on search
   useEffect(() => {
@@ -250,6 +255,46 @@ export default function WardManagementPage() {
               </svg>
               Add Ward
             </button>
+          </div>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.iconBlue}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </div>
+            <div className={styles.statInfo}>
+              <span className={styles.statValue}>{totalWards}</span>
+              <span className={styles.statLabel}>Total Wards</span>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.iconGreen}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div className={styles.statInfo}>
+              <span className={styles.statValue}>{activeWards}</span>
+              <span className={styles.statLabel}>Active Wards</span>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.iconRed}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            </div>
+            <div className={styles.statInfo}>
+              <span className={styles.statValue}>{inactiveWards}</span>
+              <span className={styles.statLabel}>Inactive Wards</span>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.iconPurple}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div className={styles.statInfo}>
+              <span className={styles.statValue}>{totalCapacity}</span>
+              <span className={styles.statLabel}>Total Capacity</span>
+            </div>
           </div>
         </div>
 
