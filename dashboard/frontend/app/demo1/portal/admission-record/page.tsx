@@ -2475,7 +2475,6 @@ function AdmissionRecordRedesign() {
                           </div>
 
                         </div>
-                        </div>
                       </div>
                     </div>
                   ) : null}
