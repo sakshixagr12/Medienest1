@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import TopBar from "@/app/components/TopBar";
+import TopBar from "@/components/TopBar";
 import styles from "./page.module.css";
 import { createClient } from "@/lib/supabase/client";
 
