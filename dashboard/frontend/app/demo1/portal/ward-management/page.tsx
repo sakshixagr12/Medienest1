@@ -220,7 +220,7 @@ export default function WardManagementPage() {
   };
 
   return (
-    <>
+    <div className="pageWrapper" style={{ minHeight: "100vh", background: "var(--sanctuary-bg)" }}>
       <TopBar title="Ward Management" backHref="/demo1/portal/settings" />
       <div className={styles.container}>
         <div className={styles.header}>
@@ -481,6 +481,6 @@ export default function WardManagementPage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
