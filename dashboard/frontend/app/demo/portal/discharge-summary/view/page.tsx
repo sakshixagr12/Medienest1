@@ -128,6 +128,8 @@ function FullResultPreview() {
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
             treatment: safeParse(data.treatment),
+            dischargeDestination: data.discharge_destination || "",
+            emergencyContactName: data.emergency_contact_name || "",
             dischargeCondition: safeParse(data.discharge_condition),
             advice: safeParse(data.advice),
             medicines: safeParse(data.medicines),
