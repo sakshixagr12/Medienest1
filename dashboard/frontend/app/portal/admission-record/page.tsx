@@ -2538,7 +2538,7 @@ function AdmissionRecordRedesign() {
                                        <span style={{ fontSize: 14 }}>🟥</span> <span>Allergies: {patientHistoryData.allergies}</span>
                                      </div>
                                    )}
-                                   {patientHistoryData.chronicDiseases.map(disease => (
+                                   {patientHistoryData.chronicDiseases.map((disease: any) => (
                                      <div key={disease} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
                                        <span style={{ fontSize: 14 }}>🟨</span> {disease}
                                      </div>
