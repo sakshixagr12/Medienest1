@@ -2215,12 +2215,12 @@ function AdmissionRecordRedesign() {
               )}
 
               {/* Critical Alerts: Allergies + Comorbidities */}
-              {((typeof summary.allergies === 'string' ? summary.allergies.trim() : Array.isArray(summary.allergies) ? summary.allergies.join(", ").trim() : "") ||
+              {((typeof summary.allergies === 'string' ? summary.allergies.trim() : (summary.allergies || "").trim()) ||
                 summary.has_diabetes ||
                 summary.has_hypertension ||
                 summary.has_thyroid) && (() => {
                 const flags: string[] = [];
-                const allergyStr = typeof summary.allergies === 'string' ? summary.allergies.trim() : Array.isArray(summary.allergies) ? summary.allergies.join(", ").trim() : "";
+                const allergyStr = typeof summary.allergies === 'string' ? summary.allergies.trim() : (summary.allergies || "").trim();
                 if (allergyStr) flags.push(allergyStr);
                 if (summary.has_diabetes) flags.push("Diabetes");
                 if (summary.has_hypertension) flags.push("Hypertension");
