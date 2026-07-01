@@ -1501,7 +1501,7 @@ function AdmissionRecordRedesign() {
               )}
 
               {/* Allergy Alert */}
-              {(typeof summary.allergies === 'string' ? summary.allergies : Array.isArray(summary.allergies) ? summary.allergies.join(', ') : "")?.trim() && (
+              {(summary.allergies || "").trim() && (
                 <div className={styles.allergyAlertChip}>
                   <svg
                     width="13"
@@ -1760,7 +1760,7 @@ function AdmissionRecordRedesign() {
                     <div className={styles.cardHeader} style={{ marginBottom: 0 }}>
                       <div className={styles.cardTitle} style={{ fontSize: 11, textTransform: 'uppercase', color: '#16a34a' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                        ALERTS & HISTORY
+                        ALERTS &amp; HISTORY
                       </div>
                     </div>
                     <div style={{ marginTop: 12, fontSize: 13, color: '#0f172a', fontWeight: 600 }}>
@@ -2361,8 +2361,8 @@ function AdmissionRecordRedesign() {
                                 </select>
                               </div>
                             </div>
-                            </div>
                           </div>
+
 
                           {/* Additional Information */}
                           <div className={styles.summaryCard}>
@@ -2399,9 +2399,6 @@ function AdmissionRecordRedesign() {
                                  </div>
                                </div>
                             </div>
-                          </div>
-
-                             </div>
                           </div>
 
                           {/* Attachments (Moved here) */}
@@ -2445,7 +2442,7 @@ function AdmissionRecordRedesign() {
                               </label>
                             </div>
                             <div className={styles.attachmentList}>
-                              {summary.attachments.map((file, i) => (
+                              {summary.attachments?.map((file, i) => (
                                 <div key={i} className={styles.attachmentItem}>
                                   <div style={{ flex: 1, minWidth: 0 }}>
                                     <div className={styles.fileName}>{file.name}</div>
@@ -2477,7 +2474,7 @@ function AdmissionRecordRedesign() {
                         </div>
                       </div>
                     </div>
-                  ) : null}
+                  )}
 
                   {step === 2 && (
                     <div className={styles.stepFadeIn}>
