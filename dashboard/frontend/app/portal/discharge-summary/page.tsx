@@ -699,7 +699,7 @@ const AdviceEditor = ({ items, onChange, diagnosis }: any) => {
           return <AIAssistedCategoryEditor key={catId} category={catId} categoryLabel={catDef.label} icon={catDef.icon} items={items} onChange={onChange} diagnosis={diagnosis} />;
         })}
 
-        {otherItems.map(({ val: item, idx }) => {
+        {otherItems.map(({ val: item, idx }: any) => {
           const match = item.match(/^([A-Z_-]+):\s*(.*)$/);
           const catId = match ? match[1] : "CUSTOM";
           let val = match ? match[2] : item;
