@@ -1455,14 +1455,14 @@ function AdmissionRecordRedesign() {
                     { label: "Ward", value: summary.ward, field: "ward" },
                     { label: "Bed", value: summary.bed, field: "bed" }
                   ] : step === 2 ? [
-                    { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "", field: "complaints" },
+                    { label: "Chief Complaint", value: summary.complaints?.length > 0 ? summary.complaints[0] : "", field: "complaints" },
                     { label: "Vitals (Temp)", value: summary.vitals_temp, field: "vitals_temp" },
                     { label: "Vitals (BP)", value: summary.vitals_bp_sys && summary.vitals_bp_dia ? "Done" : "", field: "vitals_bp_sys" },
                     { label: "Vitals (Pulse)", value: summary.vitals_pulse, field: "vitals_pulse" },
-                    { label: "Provisional Diagnosis", value: summary.provisional_diagnosis, field: "provisional_diagnosis" }
+                    { label: "Provisional Diagnosis", value: summary.diagnosis, field: "diagnosis" }
                   ] : [
                     { label: "Final Diagnosis", value: summary.final_diagnosis, field: "final_diagnosis" },
-                    { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "", field: "treatment_plan" }
+                    { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? summary.treatment_plan[0] : "", field: "treatment_plan" }
                   ];
                   const completed = admissionChecklist.filter((f) => !!f.value).length;
                   const total = admissionChecklist.length;
@@ -2525,7 +2525,7 @@ function AdmissionRecordRedesign() {
               <button
                 type="button"
                 className={styles.btnSecondarySticky}
-                onClick={handleSaveDraft}
+                onClick={() => saveDraft(summary)}
                 disabled={isSaving}
               >
                 Save Draft
