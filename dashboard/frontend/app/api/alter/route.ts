@@ -10,10 +10,8 @@ export async function GET() {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data, error } = await supabase
-        .from('admission_records')
-        .select('id, patient_name, date_admission, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .from('wards')
+        .select('*');
 
     if (error) {
       return NextResponse.json({ success: false, error: error.message });
