@@ -2093,215 +2093,284 @@ function AdmissionRecordRedesign() {
                 <>
                   {step === 1 && (
                     <div className={styles.stepFadeIn}>
-                      <div className={styles.summaryCard}>
-                        <div className={styles.cardHeader}>
-                          <div className={styles.cardTitle}>
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                            >
-                              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                              <circle cx="12" cy="7" r="4" />
-                            </svg>
-                            Patient Context
-                          </div>
-                          <div
-                            className={`${styles.statusDot} ${getStatus(summary.patientName)}`}
-                          />
-                        </div>
-                        <div className="field" style={{ position: "relative" }} ref={dropdownRef}>
-                          <label>
-                            Full Name{" "}
-                            {!summary.patientName && (
-                              <span className={styles.requiredDot} />
-                            )}
-                          </label>
-                          <input
-                            type="text"
-                            value={summary.patientName || ""}
-                            onChange={(e) => {
-                              updateField("patientName", e.target.value);
-                              setShowDropdown(true);
-                              setActiveIndex(-1);
-                            }}
-                            onFocus={() => {
-                              if (summary.patientName?.length >= 2) setShowDropdown(true);
-                            }}
-                            onKeyDown={(e) => {
-                              if (!showDropdown) return;
-                              if (e.key === "ArrowDown") {
-                                e.preventDefault();
-                                setActiveIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
-                              } else if (e.key === "ArrowUp") {
-                                e.preventDefault();
-                                setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
-                              } else if (e.key === "Enter") {
-                                e.preventDefault();
-                                if (activeIndex >= 0 && activeIndex < searchResults.length) {
-                                  handlePatientSelect(searchResults[activeIndex]);
-                                }
-                              } else if (e.key === "Escape") {
-                                setShowDropdown(false);
-                              }
-                            }}
-                          />
-                          {showDropdown && (debouncedSearchTerm.length >= 2) && (
-                            <div className={styles.patientDropdown}>
-                              {isSearching ? (
-                                <div className={styles.dropdownItem}>Searching...</div>
-                              ) : searchResults.length > 0 ? (
-                                searchResults.map((patient, idx) => (
-                                  <div
-                                    key={patient.id}
-                                    className={`${styles.dropdownItem} ${idx === activeIndex ? styles.dropdownItemActive : ""}`}
-                                    onClick={() => handlePatientSelect(patient)}
-                                    onMouseEnter={() => setActiveIndex(idx)}
-                                  >
-                                    <div className={styles.dropdownName}>{patient.name}</div>
-                                    <div className={styles.dropdownDetails}>
-                                      {patient.id.slice(0, 8)} • {patient.age ? `${patient.age}Y` : "N/A"} / {patient.gender || "U"} • {patient.contact || "No Phone"}
+                      <div className={styles.mainLayout}>
+                        {/* --- Main Left Column --- */}
+                        <div className={styles.mainColumn}>
+                          
+                          {/* Patient Search Card */}
+                          <div className={styles.summaryCard}>
+                            <div className={styles.patientSearchHeader}>
+                              <div className={styles.patientSearchHeaderLeft}>
+                                <div className={styles.cardTitle}>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                  </svg>
+                                  Patient Search
+                                </div>
+                                <span className={styles.cardTitleBadge}>REQUIRED</span>
+                              </div>
+                              <button type="button" className={styles.btnRegisterNew}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Register New Patient
+                              </button>
+                            </div>
+                            <div className="field" style={{ position: "relative" }} ref={dropdownRef}>
+                              <div style={{ position: "relative" }}>
+                                <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input
+                                  type="text"
+                                  id="patientSearchInput"
+                                  value={summary.patientName || ""}
+                                  onChange={(e) => {
+                                    updateField("patientName", e.target.value);
+                                    setShowDropdown(true);
+                                    setActiveIndex(-1);
+                                  }}
+                                  onFocus={() => {
+                                    if (summary.patientName?.length >= 2) setShowDropdown(true);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (!showDropdown) return;
+                                    if (e.key === "ArrowDown") {
+                                      e.preventDefault();
+                                      setActiveIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+                                    } else if (e.key === "ArrowUp") {
+                                      e.preventDefault();
+                                      setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
+                                    } else if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      if (activeIndex >= 0 && activeIndex < searchResults.length) {
+                                        handlePatientSelect(searchResults[activeIndex]);
+                                      }
+                                    } else if (e.key === "Escape") {
+                                      setShowDropdown(false);
+                                    }
+                                  }}
+                                  style={{ paddingLeft: 36 }}
+                                  placeholder="Search by Patient ID, Name or Mobile Number"
+                                />
+                              </div>
+                              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6, paddingLeft: 2 }}>Type at least 2 characters to search</div>
+                              
+                              {showDropdown && (debouncedSearchTerm.length >= 2) && (
+                                <div className={styles.patientDropdown}>
+                                  {isSearching ? (
+                                    <div className={styles.dropdownItem}>Searching...</div>
+                                  ) : searchResults.length > 0 ? (
+                                    searchResults.map((patient, idx) => (
+                                      <div
+                                        key={patient.id}
+                                        className={`${styles.dropdownItem} ${idx === activeIndex ? styles.dropdownItemActive : ""}`}
+                                        onClick={() => handlePatientSelect(patient)}
+                                        onMouseEnter={() => setActiveIndex(idx)}
+                                      >
+                                        <div className={styles.dropdownName}>{patient.name}</div>
+                                        <div className={styles.dropdownDetails}>
+                                          {patient.id.slice(0, 8)} • {patient.age ? `${patient.age}Y` : "N/A"} / {patient.gender || "U"} • {patient.contact || "No Phone"}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
+                                      <div style={{ color: "#6b7280", marginBottom: 4 }}>No patient found.</div>
+                                      <div style={{ color: "#4f46e5", fontSize: 12, fontWeight: 500 }}>+ Register New Patient</div>
                                     </div>
-                                  </div>
-                                ))
-                              ) : (
-                                <div className={styles.dropdownItem} onClick={() => setShowDropdown(false)}>
-                                  <div style={{ color: "#6b7280", marginBottom: 4 }}>No patient found.</div>
-                                  <div style={{ color: "#4f46e5", fontSize: 12, fontWeight: 500 }}>+ Register New Patient</div>
+                                  )}
                                 </div>
                               )}
                             </div>
-                          )}
-                        </div>
-                        <div className={styles.patientBrief}>
-                          <div className={styles.briefItem}>
-                            <div className="field">
-                              <label>
-                                Age{" "}
-                                {!summary.age && (
-                                  <span className={styles.requiredDot} />
-                                )}
-                              </label>
-                              <div style={{ display: "flex", gap: 8 }}>
-                                <input
-                                  id="age"
-                                  type="number"
-                                  max="130"
-                                  value={summary.age?.match(/\d+/)?.[0] || ""}
-                                  onChange={(e) => {
-                                    let val = parseInt(e.target.value);
-                                    if (isNaN(val)) {
-                                      updateField("age", "");
-                                      return;
-                                    }
-                                    if (val > 130) val = 130;
-                                    const unit = summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years";
-                                    updateField("age", `${val} ${unit}`);
+                          </div>
+
+                          {/* Selected Patient Card */}
+                          {summary.patientName && (
+                            <div className={styles.summaryCard} style={{ padding: 0, overflow: 'hidden' }}>
+                              <div style={{ background: '#f8fafc', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#334155' }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Selected Patient
+                              </div>
+                              <div className={styles.selectedPatientCard}>
+                                <div className={styles.selectedPatientInfo}>
+                                  <div className={styles.patientAvatar}>
+                                    {summary.patientName.substring(0,2).toUpperCase()}
+                                  </div>
+                                  <div className={styles.patientDetailsCompact}>
+                                    <div className={styles.patientDetailsName}>
+                                      {summary.patientName}
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                      <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{summary.sex || 'Female'}</span>
+                                    </div>
+                                    <div className={styles.patientDetailsSub}>
+                                      PT-000245 • {summary.age || 'N/A'} • {summary.dateOfBirth || '12-Feb-2002'}
+                                    </div>
+                                    <div className={styles.patientDetailsSub}>
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                      {summary.phone || 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <button 
+                                  type="button" 
+                                  className={styles.btnClearPatient}
+                                  onClick={() => {
+                                    updateField('patientName', '');
+                                    updateField('age', '');
+                                    updateField('sex', '');
+                                    updateField('phone', '');
                                   }}
-                                  style={{ flex: 1, minWidth: 0 }}
-                                />
-                                <select
-                                  value={summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years"}
-                                  onChange={(e) => {
-                                    const num = summary.age?.match(/\d+/)?.[0] || "";
-                                    if (num) {
-                                      updateField("age", `${num} ${e.target.value}`);
-                                    }
-                                  }}
-                                  style={{ width: "100px", flexShrink: 0 }}
                                 >
-                                  <option value="Years">Years</option>
-                                  <option value="Months">Months</option>
-                                  <option value="Days">Days</option>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                  Clear Patient
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Patient Details Card */}
+                          <div className={styles.summaryCard}>
+                            <div className={styles.cardHeader}>
+                              <div className={styles.cardTitle}>Patient Details</div>
+                            </div>
+                            <div className={styles.grid3Col}>
+                              <div className="field">
+                                <label>Age</label>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                  <input
+                                    id="age"
+                                    type="number"
+                                    max="130"
+                                    value={summary.age?.match(/\d+/)?.[0] || ""}
+                                    onChange={(e) => {
+                                      let val = parseInt(e.target.value);
+                                      if (isNaN(val)) return updateField("age", "");
+                                      if (val > 130) val = 130;
+                                      const unit = summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years";
+                                      updateField("age", `${val} ${unit}`);
+                                    }}
+                                    style={{ flex: 1, minWidth: 0 }}
+                                  />
+                                  <select
+                                    value={summary.age?.match(/[a-zA-Z]+/)?.[0] || "Years"}
+                                    onChange={(e) => {
+                                      const num = summary.age?.match(/\d+/)?.[0] || "";
+                                      if (num) updateField("age", `${num} ${e.target.value}`);
+                                    }}
+                                    style={{ width: "90px", flexShrink: 0 }}
+                                  >
+                                    <option value="Years">Years</option>
+                                    <option value="Months">Months</option>
+                                    <option value="Days">Days</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="field">
+                                <label>Date of Birth</label>
+                                <input type="date" value={summary.dateOfBirth || ""} onChange={(e) => updateField("dateOfBirth", e.target.value)} />
+                              </div>
+                              <div className="field">
+                                <label>Sex</label>
+                                <select value={summary.sex || "Female"} onChange={(e) => updateField("sex", e.target.value)}>
+                                  <option>Female</option>
+                                  <option>Male</option>
+                                  <option>Other</option>
                                 </select>
                               </div>
                             </div>
-                            <div className="field">
-                              <label>Sex</label>
-                              <select
-                                value={summary.sex || "Male"}
-                                onChange={(e) =>
-                                  updateField("sex", e.target.value)
-                                }
-                              >
-                                <option>Male</option>
-                                <option>Female</option>
-                                <option>Other</option>
-                              </select>
+
+                            <div className={styles.grid2Col}>
+                              <div className="field">
+                                <label>Phone Number</label>
+                                <input
+                                  type="tel"
+                                  value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""}
+                                  onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                                />
+                              </div>
+                              <div className="field">
+                                <label>Alternate Number</label>
+                                <input
+                                  type="tel"
+                                  placeholder="Enter alternate number"
+                                  value={summary.alternateNumber || ""}
+                                  onChange={(e) => updateField("alternateNumber", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                                />
+                              </div>
                             </div>
-                          </div>
-                          <div className="field">
-                            <label>Phone Number</label>
-                            <input
-                              type="tel"
-                              value={summary.phone ? (summary.phone.length > 5 ? `${summary.phone.slice(0, 5)} ${summary.phone.slice(5, 10)}` : summary.phone) : ""}
-                              onChange={(e) =>
-                                updateField("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
-                              }
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Department</label>
-                            <input
-                              type="text"
-                              value={summary.department || ""}
-                              onChange={(e) =>
-                                updateField("department", e.target.value)
-                              }
-                              placeholder="e.g. Cardiology, Orthopedics"
-                            />
-                          </div>
-                          <div className={styles.briefItem}>
+
                             <div className="field">
-                              <label>
-                                Ward{" "}
-                                {!summary.ward && (
-                                  <span className={styles.requiredDot} />
-                                )}
-                              </label>
+                              <label>Address</label>
                               <input
                                 type="text"
-                                value={summary.ward || ""}
-                                onChange={(e) =>
-                                  updateField("ward", e.target.value)
-                                }
-                                placeholder="Ward A"
+                                placeholder="Lucknow, Uttar Pradesh, India"
+                                value={summary.address || ""}
+                                onChange={(e) => updateField("address", e.target.value)}
                               />
                             </div>
+                            
                             <div className="field">
-                              <label>
-                                Bed No.{" "}
-                                {!summary.bed && (
-                                  <span className={styles.requiredDot} />
-                                )}
-                              </label>
-                              <input
+                              <label>Department</label>
+                              <input 
                                 type="text"
-                                value={summary.bed || ""}
-                                onChange={(e) =>
-                                  updateField("bed", e.target.value)
-                                }
-                                placeholder="102"
+                                placeholder="e.g. Cardiology, Orthopedics"
+                                value={summary.department || ""} 
+                                onChange={(e) => updateField("department", e.target.value)} 
                               />
                             </div>
                           </div>
-                          <div className={styles.briefItem}>
-                            <div className="field">
-                              <label>Admission Source</label>
-                              <select
-                                value={summary.admission_type}
-                                onChange={(e) =>
-                                  updateField("admission_type", e.target.value)
-                                }
-                              >
-                                <option>OPD</option>
-                                <option>Emergency</option>
-                                <option>Referral</option>
-                              </select>
+
+                          {/* Admission Details Card */}
+                          <div className={styles.summaryCard}>
+                            <div className={styles.cardHeader}>
+                              <div className={styles.cardTitle}>Admission Details</div>
                             </div>
+                            <div className={styles.grid2Col}>
+                              <div className="field">
+                                <label>Admission Source</label>
+                                <select value={summary.admission_type || "OPD"} onChange={(e) => updateField("admission_type", e.target.value)}>
+                                  <option>OPD</option>
+                                  <option>Emergency</option>
+                                  <option>Referral</option>
+                                </select>
+                              </div>
+                              <div className="field">
+                                <label>Admission Type</label>
+                                <div className={styles.segmentedControl}>
+                                  <button type="button" className={`${styles.segmentBtn} ${summary.admissionCategory !== 'Day Care' ? styles.active : ''}`} onClick={() => updateField('admissionCategory', 'IPD')}>IPD</button>
+                                  <button type="button" className={`${styles.segmentBtn} ${summary.admissionCategory === 'Day Care' ? styles.active : ''}`} onClick={() => updateField('admissionCategory', 'Day Care')}>Day Care</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className={styles.grid2Col}>
+                              <div className="field">
+                                <label>Ward</label>
+                                <select value={summary.ward || ""} onChange={(e) => updateField("ward", e.target.value)}>
+                                  <option value="">Select Ward</option>
+                                  <option value="Ward A">Ward A</option>
+                                  <option value="Ward B">Ward B</option>
+                                </select>
+                              </div>
+                              <div className="field">
+                                <label>Bed No.</label>
+                                <input type="text" placeholder="102" value={summary.bed || ""} onChange={(e) => updateField("bed", e.target.value)} />
+                              </div>
+                            </div>
+
+                            <div className="field">
+                              <label>Admission Date &amp; Time</label>
+                              <div style={{ display: 'flex', gap: 12 }}>
+                                <input
+                                  type="datetime-local"
+                                  style={{ flex: 1 }}
+                                  value={summary.date_admission || ""}
+                                  onChange={(e) => updateField("date_admission", e.target.value)}
+                                />
+                                <button type="button" className={styles.btnNow} onClick={() => updateField("date_admission", new Date().toISOString().slice(0, 16))}>
+                                  Now
+                                </button>
+                              </div>
+                            </div>
+
                             <div className="field">
                               <label>Triage / Severity</label>
                               <div className={styles.triageGroup} data-triage="true" tabIndex={0}>
@@ -2318,113 +2387,148 @@ function AdmissionRecordRedesign() {
                                 ))}
                               </div>
                             </div>
+
+                            <div className={styles.grid2Col}>
+                              <div className="field">
+                                <label>Referring Doctor</label>
+                                <select value={summary.referringDoctor || ""} onChange={(e) => updateField("referringDoctor", e.target.value)}>
+                                  <option value="">Select Doctor</option>
+                                  <option value="Dr. A">Dr. A</option>
+                                  <option value="Dr. B">Dr. B</option>
+                                </select>
+                              </div>
+                              <div className="field">
+                                <label>Attending Doctor</label>
+                                <select value={summary.doctor || ""} onChange={(e) => updateField("doctor", e.target.value)}>
+                                  <option value="">Select Doctor</option>
+                                  {doctors?.map((d: any) => (
+                                    <option key={d.id} value={d.name}>Dr. {d.name}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
                           </div>
-                          <div className="field">
-                            <label>Adm. Date & Time</label>
-                            <input
-                              type="datetime-local"
-                              value={summary.date_admission || ""}
-                              onChange={(e) =>
-                                updateField("date_admission", e.target.value)
-                              }
-                            />
+
+                          {/* Additional Information */}
+                          <div className={styles.summaryCard}>
+                            <div className={styles.cardHeader} style={{ marginBottom: 0 }}>
+                              <div className={styles.cardTitle} style={{ fontSize: 13, color: '#334155' }}>
+                                Additional Information (Optional)
+                              </div>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                            </div>
+                            <div style={{ marginTop: 20 }}>
+                               <div className={styles.grid2Col}>
+                                 <div className="field">
+                                   <label>Relative / Guardian Name</label>
+                                   <input type="text" placeholder="Enter name" value={summary.relativeName || ""} onChange={(e) => updateField("relativeName", e.target.value)} />
+                                 </div>
+                                 <div className="field">
+                                   <label>Relationship</label>
+                                   <select value={summary.relationship || ""} onChange={(e) => updateField("relationship", e.target.value)}>
+                                     <option value="">Select relationship</option>
+                                     <option value="Spouse">Spouse</option>
+                                     <option value="Parent">Parent</option>
+                                     <option value="Child">Child</option>
+                                   </select>
+                                 </div>
+                               </div>
+                               <div className={styles.grid2Col} style={{ marginTop: 16 }}>
+                                 <div className="field">
+                                   <label>Guardian Phone</label>
+                                   <input type="tel" placeholder="Enter phone number" value={summary.guardianPhone || ""} onChange={(e) => updateField("guardianPhone", e.target.value)} />
+                                 </div>
+                                 <div className="field">
+                                   <label>Occupation</label>
+                                   <input type="text" placeholder="Enter occupation" value={summary.occupation || ""} onChange={(e) => updateField("occupation", e.target.value)} />
+                                 </div>
+                               </div>
+                            </div>
                           </div>
-                          <div className="field">
-                            <label>
-                              Attending Doctor{" "}
-                              {!summary.doctor && (
-                                <span className={styles.requiredDot} />
-                              )}
-                            </label>
-                            <select
-                              value={summary.doctor || ""}
-                              onChange={(e) =>
-                                updateField("doctor", e.target.value)
-                              }
-                            >
-                              <option value="">Select...</option>
-                              {doctors?.map((d: any) => (
-                                <option key={d.id} value={d.name}>
-                                  Dr. {d.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+
                         </div>
-                      </div>
 
-                      {/* --- Alerts & History Panel (Intelligent) --- */}
-                      <div
-                        className={styles.summaryCard}
-                        style={{ borderTop: "4px solid #ef4444", padding: "16px" }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 7,
-                            marginBottom: 16,
-                            borderBottom: "1px solid #fee2e2",
-                            paddingBottom: 10,
-                          }}
-                        >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                          </svg>
-                          <span style={{ fontSize: 11, fontWeight: 900, color: "#b91c1c", textTransform: "uppercase", letterSpacing: 0.7 }}>
-                            Alerts &amp; History
-                          </span>
-                        </div>
-                        
-                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                          {/* Alerts */}
-                          <div>
-                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-                               Alerts
-                             </div>
-                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#9f1239" }}>
-                                 <span style={{ fontSize: 14 }}>🟥</span> Penicillin Allergy
-                               </div>
-                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                                 <span style={{ fontSize: 14 }}>🟨</span> Diabetic
-                               </div>
-                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                                 <span style={{ fontSize: 14 }}>🟨</span> CKD
-                               </div>
-                               <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#92400e" }}>
-                                 <span style={{ fontSize: 14 }}>🟨</span> On Blood Thinners
-                               </div>
-                             </div>
+                        {/* --- Right Sidebar Column --- */}
+                        <div className={styles.sidebar}>
+                          
+                          {/* Alerts & History */}
+                          <div className={styles.alertCard}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                              Alerts &amp; History
+                            </div>
+                            
+                            <div className={`${styles.alertItem} ${styles.alertRed}`}>
+                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                              <div className={styles.alertContent}>
+                                <div className={styles.alertTitle}>Allergy</div>
+                                <div className={styles.alertSub}>Penicillin</div>
+                              </div>
+                            </div>
+
+                            <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                              <div className={styles.alertContent}>
+                                <div className={styles.alertTitle}>No Known Drug Allergy</div>
+                                <div className={styles.alertSub}>Not documented</div>
+                              </div>
+                            </div>
+
+                            <div className={`${styles.alertItem} ${styles.alertBlue}`}>
+                              <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                              <div className={styles.alertContent}>
+                                <div className={styles.alertTitle}>Previous Admissions</div>
+                                <div className={styles.alertSub}>2 admissions in last 12 months</div>
+                              </div>
+                            </div>
+
+                            <div style={{ color: '#3b82f6', fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, cursor: 'pointer' }}>
+                              View Full History
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </div>
                           </div>
 
-                          {/* History Grid */}
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                             <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                               <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                                 Past Admissions
-                               </div>
-                               <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                                 2
-                               </div>
-                             </div>
-                             <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                               <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                                 Last Discharge
-                               </div>
-                               <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                                 14 Feb 2026
-                               </div>
-                             </div>
-                          </div>
+                          {/* Admission Summary Sidebar */}
+                          <div className={styles.alertCard}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
+                              Admission Summary
+                            </div>
+                            
+                            <div className={styles.summaryList}>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Admission Type</span>
+                                <span className={styles.summaryValue}>{summary.admissionCategory || 'IPD'}</span>
+                              </div>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Source</span>
+                                <span className={styles.summaryValue}>{summary.admission_type || 'OPD'}</span>
+                              </div>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Attending Doctor</span>
+                                <span className={styles.summaryValue}>{summary.doctor ? `Dr. ${summary.doctor}` : 'Not Selected'}</span>
+                              </div>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Admission Date &amp; Time</span>
+                                <span className={styles.summaryValue}>{summary.date_admission ? new Date(summary.date_admission).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Not Selected'}</span>
+                              </div>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Triage / Severity</span>
+                                <div style={{ marginTop: 4 }}>
+                                  <span className={`${styles.triageBtn} ${summary.severity ? styles.active : ""} ${summary.severity ? styles[summary.severity.toLowerCase()] : styles.mild}`} style={{ padding: '2px 8px', fontSize: 11 }}>
+                                    {summary.severity || 'MILD'}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className={styles.summaryRow}>
+                                <span className={styles.summaryLabel}>Ward / Bed</span>
+                                <span className={styles.summaryValue}>{(summary.ward || summary.bed) ? `${summary.ward || 'Not Assigned'} / ${summary.bed || 'Not Assigned'}` : 'Not Assigned'}</span>
+                              </div>
+                            </div>
 
-                          <div style={{ background: "#f8fafc", padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                             <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-                               Past Surgeries
-                             </div>
-                             <div style={{ fontSize: 14, fontWeight: 700, color: "#334155" }}>
-                               Appendectomy (2018)
-                             </div>
+                            <div style={{ color: '#3b82f6', fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, cursor: 'pointer' }}>
+                              View More Details
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </div>
                           </div>
 
                         </div>
