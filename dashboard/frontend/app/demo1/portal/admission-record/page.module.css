@@ -2394,3 +2394,29 @@
   font-weight: 700;
   color: #0f172a;
 }
+
+/* --- Redesigned 3-Column Layout --- */
+.step1FullColumn {
+  width: 100%;
+}
+
+.mainLayout {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 100px;
+}
