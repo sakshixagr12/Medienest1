@@ -2360,7 +2360,7 @@ function AdmissionRecordRedesign() {
                         { label: "Provisional Diagnosis", value: summary.provisional_diagnosis, field: "provisional_diagnosis" }
                       ] : [
                         { label: "Final Diagnosis", value: summary.final_diagnosis, field: "final_diagnosis" },
-                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? (typeof summary.treatment_plan[0] === 'string' ? summary.treatment_plan[0] : summary.treatment_plan[0].name) : "", field: "treatment_plan" }
+                        { label: "Treatment Plan", value: summary.treatment_plan?.length > 0 ? summary.treatment_plan[0] : "", field: "treatment_plan" }
                       ];
                       const completed = admissionChecklist.filter((f) => !!f.value).length;
                       const total = admissionChecklist.length;
