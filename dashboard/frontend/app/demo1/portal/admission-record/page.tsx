@@ -657,54 +657,6 @@ function AdmissionRecordRedesign() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+S to save draft
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        saveDraft(summary);
-      }
-      // Ctrl+Enter to continue/submit
-      else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        if (isQuickMode) {
-          handleFinalSubmit();
-        } else if (step < 3) {
-          setStep(s => s + 1);
-        } else {
-          handleFinalSubmit();
-        }
-      }
-      // Enter to go to next field
-      else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-        const active = document.activeElement as HTMLElement;
-        if (active) {
-          if (active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON' || active.tagName === 'A') {
-            return;
-          }
-          if (showDropdown && active.tagName === 'INPUT') {
-            return;
-          }
-          if (active.tagName === 'INPUT' || active.tagName === 'SELECT') {
-            e.preventDefault();
-            const focusable = Array.from(document.querySelectorAll('input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'))
-              .filter(el => {
-                const rect = el.getBoundingClientRect();
-                return rect.width > 0 && rect.height > 0 && (el as HTMLElement).tabIndex !== -1;
-              });
-            const index = focusable.indexOf(active);
-            if (index > -1 && index < focusable.length - 1) {
-              (focusable[index + 1] as HTMLElement).focus();
-            }
-          }
-        }
-      }
-    };
-    
-    document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [summary, saveDraft, isQuickMode, step, showDropdown]);
-
   const handlePatientSelect = (patient: any) => {
     setSummary((prev) => ({
       ...prev,
@@ -1363,14 +1315,61 @@ function AdmissionRecordRedesign() {
 
   if (clinicLoading) return null;
 
+  const handleFormKeyDown = (e: React.KeyboardEvent) => {
+    // Ctrl+S to save draft
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      saveDraft(summary);
+      return;
+    }
+    
+    // Ctrl+Enter to continue/submit
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (isQuickMode) {
+        handleFinalSubmit();
+      } else if (step < 3) {
+        setStep(s => s + 1);
+      } else {
+        handleFinalSubmit();
+      }
+      return;
+    }
+
+    // Enter to go to next field
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      const active = document.activeElement as HTMLElement;
+      if (active) {
+        if (active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON' || active.tagName === 'A') {
+          return;
+        }
+        if (showDropdown && active.tagName === 'INPUT') {
+          return;
+        }
+        if (active.tagName === 'INPUT' || active.tagName === 'SELECT') {
+          e.preventDefault();
+          const focusable = Array.from(document.querySelectorAll('input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'))
+            .filter(el => {
+              const style = window.getComputedStyle(el);
+              return style.display !== 'none' && style.visibility !== 'hidden' && (el as HTMLElement).tabIndex !== -1;
+            });
+          const index = focusable.indexOf(active);
+          if (index > -1 && index < focusable.length - 1) {
+            (focusable[index + 1] as HTMLElement).focus();
+          }
+        }
+      }
+    }
+  };
+
   return (
     <>
       {toast && (
         <div className={styles.toast} role="alert">
-{toast}
+          {toast}
         </div>
       )}
-      <div className={styles.page}>
+      <div className={styles.page} onKeyDown={handleFormKeyDown}>
         <TopBar
           title="Admission Management"
           backHref={`/demo1/portal/doctor-dashboard${
