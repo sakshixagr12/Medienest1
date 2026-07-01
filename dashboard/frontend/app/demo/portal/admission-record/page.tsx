@@ -2173,7 +2173,7 @@ function AdmissionRecordRedesign() {
 
                         </div>
                       </div>               </div>
-                    </div>
+                    
                   )}
 
                   {step === 2 && (
