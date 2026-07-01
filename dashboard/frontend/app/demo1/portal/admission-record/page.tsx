@@ -2818,6 +2818,123 @@ function AdmissionRecordRedesign() {
                 </>
               )}
             </section>
+
+            {!isQuickMode && step === 1 && (
+              <section className={styles.sidebar}>
+                {/* Alerts & History */}
+                <div className={styles.alertCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    ALERTS &amp; HISTORY
+                  </div>
+                  
+                  {((summary.allergies || "").trim() || summary.has_diabetes || summary.has_hypertension || summary.has_thyroid) ? (
+                    <>
+                      {(summary.allergies || "").trim() && (
+                        <div className={`${styles.alertItem} ${styles.alertRed}`}>
+                          <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                          <div className={styles.alertContent}>
+                            <div className={styles.alertTitle}>Allergy</div>
+                            <div className={styles.alertSub}>{summary.allergies}</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {summary.has_diabetes && (
+                        <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                          <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                          <div className={styles.alertContent}>
+                            <div className={styles.alertTitle}>Condition</div>
+                            <div className={styles.alertSub}>Diabetes</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {summary.has_hypertension && (
+                        <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                          <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                          <div className={styles.alertContent}>
+                            <div className={styles.alertTitle}>Condition</div>
+                            <div className={styles.alertSub}>Hypertension</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {summary.has_thyroid && (
+                        <div className={`${styles.alertItem} ${styles.alertYellow}`}>
+                          <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                          <div className={styles.alertContent}>
+                            <div className={styles.alertTitle}>Condition</div>
+                            <div className={styles.alertSub}>Thyroid</div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ fontSize: 13, color: '#64748b' }}>No critical alerts recorded.</div>
+                  )}
+
+                  {summary.past_surgeries && (
+                    <div className={`${styles.alertItem} ${styles.alertBlue}`}>
+                      <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                      <div className={styles.alertContent}>
+                        <div className={styles.alertTitle}>Past Surgeries</div>
+                        <div className={styles.alertSub}>{summary.past_surgeries}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ color: '#3b82f6', fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, cursor: 'pointer' }}>
+                    View Full History
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </div>
+                </div>
+
+                {/* Admission Summary Sidebar */}
+                <div className={styles.alertCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
+                    ADMISSION SUMMARY
+                  </div>
+                  
+                  <div className={styles.summaryList}>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Admission Type</span>
+                      <span className={styles.summaryValue}>{summary.admissionCategory || 'IPD'}</span>
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Source</span>
+                      <span className={styles.summaryValue}>{summary.admission_type || 'OPD'}</span>
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Attending Doctor</span>
+                      <span className={styles.summaryValue}>{summary.doctor ? `Dr. ${summary.doctor}` : 'Not Selected'}</span>
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Admission Date &amp; Time</span>
+                      <span className={styles.summaryValue}>{summary.date_admission ? new Date(summary.date_admission).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Not Selected'}</span>
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Triage / Severity</span>
+                      <div style={{ marginTop: 4 }}>
+                        <span className={`${styles.triageBtn} ${summary.severity ? styles.active : ""} ${summary.severity ? styles[summary.severity.toLowerCase()] : styles.mild}`} style={{ padding: '2px 8px', fontSize: 11 }}>
+                          {summary.severity || 'MILD'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Ward / Bed</span>
+                      <span className={styles.summaryValue}>{(summary.ward || summary.bed) ? `${summary.ward || 'Not Assigned'} / ${summary.bed || 'Not Assigned'}` : 'Not Assigned'}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ color: '#3b82f6', fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, cursor: 'pointer' }}>
+                    View More Details
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </div>
+                </div>
+              </section>
+            )}
+
           </div>
         </main>
 
