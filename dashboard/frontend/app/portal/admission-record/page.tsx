@@ -854,6 +854,43 @@ function AdmissionRecordRedesign() {
     pastSurgeries: "",
   });
 
+  const [wards, setWards] = useState<any[]>([]);
+  const [availableBeds, setAvailableBeds] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!clinic?.id) return;
+    const fetchWards = async () => {
+      const { data } = await supabase.from("wards").select("*").eq("clinic_id", clinic.id).order("name");
+      if (data) setWards(data);
+    };
+    fetchWards();
+  }, [clinic?.id, supabase]);
+
+  useEffect(() => {
+    if (!summary.ward) {
+      setAvailableBeds([]);
+      return;
+    }
+    const fetchBeds = async () => {
+      const { data } = await supabase
+        .from("beds")
+        .select("*")
+        .eq("ward_id", summary.ward)
+        .eq("status", "Available")
+        .order("bed_number");
+      
+      if (data) setAvailableBeds(data);
+    };
+    fetchBeds();
+  }, [summary.ward, supabase]);
+
+  const handleBedSelect = async (bedNumber: string) => {
+    updateField("bed", bedNumber);
+    if (bedNumber && summary.ward) {
+       await supabase.from("beds").update({ status: 'Reserved' }).eq('ward_id', summary.ward).eq('bed_number', bedNumber);
+    }
+  };
+
   useEffect(() => {
     const pId = searchParams.get("patientId");
     const dId = searchParams.get("draftId");
@@ -1663,6 +1700,11 @@ function AdmissionRecordRedesign() {
       }
 
       if (error) throw error;
+
+      if (summary.ward && summary.bed) {
+         await supabase.from("beds").update({ status: 'Occupied' }).eq('ward_id', summary.ward).eq('bed_number', summary.bed);
+      }
+
       localStorage.removeItem("admission_draft");
       localStorage.removeItem("admission_draft_step");
       setFinalizePatientId(patientId);
@@ -2233,7 +2275,7 @@ function AdmissionRecordRedesign() {
                   </svg>
                   <span className={styles.stickyChipLabel}>Bed</span>
                   <span>
-                    {summary.ward ? `${summary.ward} – ` : ""}
+                    {summary.ward ? `${wards.find((w: any) => w.id === summary.ward)?.name || summary.ward} – ` : ""}
                     {summary.bed}
                   </span>
                 </div>
@@ -2398,7 +2440,7 @@ function AdmissionRecordRedesign() {
                         { label: "Age", value: summary.age, field: "age" },
                         { label: "Phone Number", value: summary.phone, field: "phone" },
                         { label: "Doctor Assigned", value: summary.doctor, field: "doctor" },
-                        { label: "Ward", value: summary.ward, field: "ward" },
+                        { label: "Ward", value: summary.ward ? (wards.find((w: any) => w.id === summary.ward)?.name || summary.ward) : "", field: "ward" },
                         { label: "Bed", value: summary.bed, field: "bed" }
                       ] : step === 2 ? [
                         { label: "Chief Complaint", value: summary.chief_complaints_extended?.length > 0 ? summary.chief_complaints_extended[0].complaint : "", field: "complaints" },
@@ -3196,11 +3238,21 @@ function AdmissionRecordRedesign() {
                             <div className={styles.grid2Col}>
                               <div className="field">
                                 <label>Ward</label>
-                                <input type="text" placeholder="Ward A" value={summary.ward || ""} onChange={(e) => updateField("ward", e.target.value)} />
+                                <select value={summary.ward || ""} onChange={(e) => updateField("ward", e.target.value)}>
+                                  <option value="">Select Ward</option>
+                                  {wards.map((w: any) => (
+                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                  ))}
+                                </select>
                               </div>
                               <div className="field">
                                 <label>Bed No.</label>
-                                <input type="text" placeholder="102" value={summary.bed || ""} onChange={(e) => updateField("bed", e.target.value)} />
+                                <select value={summary.bed || ""} onChange={(e) => handleBedSelect(e.target.value)}>
+                                  <option value="">Select Bed</option>
+                                  {availableBeds.map((b: any) => (
+                                    <option key={b.bed_number} value={b.bed_number}>{b.bed_number}</option>
+                                  ))}
+                                </select>
                               </div>
                             </div>
 
