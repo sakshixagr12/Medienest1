@@ -18,11 +18,18 @@ interface SummaryData {
   patientName: string;
   phone: string;
   age: string;
+  ageUnit: string;
   sex: string;
   regNo: string;
   doa: string;
   dod: string;
   doctor: string;
+  attendingPhysician: string;
+  dischargingNurse: string;
+  dischargeDestination: string;
+  emergencyContactName: string;
+  emergencyContactRelation: string;
+  emergencyContactNumber: string;
   diagnosis: string;
   complaints: string[];
   findings: string[];
@@ -119,11 +126,18 @@ function FullResultPreview() {
             patientName: data.patient_name || "Unnamed Patient",
             phone: "",
             age: ageVal,
+            ageUnit: "Years",
             sex: sexVal,
             regNo: data.reg_no || "---",
             doa: data.date_admission || "---",
             dod: data.date_discharge || "---",
             doctor: data.doctor_name || "---",
+            attendingPhysician: data.attending_physician || "",
+            dischargingNurse: data.discharging_nurse || "",
+            dischargeDestination: data.discharge_destination || "",
+            emergencyContactName: data.emergency_contact_name || "",
+            emergencyContactRelation: data.emergency_contact_relation || "",
+            emergencyContactNumber: data.emergency_contact_number || "",
             diagnosis: data.diagnosis || "Diagnosis not recorded",
             complaints: safeParse(data.complaints),
             findings: safeParse(data.findings),
