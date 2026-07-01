@@ -65,7 +65,7 @@ export default function WardManagementPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching wards:", error);
+      console.error("Error fetching wards:", error.message, error);
     } else {
       setWards(data || []);
     }
