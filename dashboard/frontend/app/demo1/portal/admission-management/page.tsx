@@ -81,13 +81,13 @@ export default function AdmissionManagementPage() {
 
   // Extract unique values for filters
   const allRecords = [...currentAdmissions, ...draftAdmissions];
-  const uniqueDepartments = Array.from(new Set(allRecords.map(r => r.department).filter(Boolean)));
-  const uniqueConsultants = Array.from(new Set(allRecords.map(r => r.doctor_name).filter(Boolean)));
-  const uniqueWards = Array.from(new Set(allRecords.map(r => r.ward).filter(Boolean)));
+  const uniqueDepartments = Array.from(new Set(allRecords.map((r: any) => r.department).filter(Boolean)));
+  const uniqueConsultants = Array.from(new Set(allRecords.map((r: any) => r.doctor_name).filter(Boolean)));
+  const uniqueWards = Array.from(new Set(allRecords.map((r: any) => r.ward).filter(Boolean)));
 
   // Filter Logic
   const applyFilters = (records: any[]) => {
-    return records.filter(record => {
+    return records.filter((record: any) => {
       // 1. Search
       const term = searchTerm.toLowerCase();
       const matchesSearch = !term || 
@@ -156,7 +156,7 @@ export default function AdmissionManagementPage() {
   // Summary Metrics
   const totalActive = currentAdmissions.length;
   const totalDraft = draftAdmissions.length;
-  const todayAdmissionsCount = allRecords.filter(a => a.date_admission && new Date(a.date_admission).toDateString() === new Date().toDateString()).length;
+  const todayAdmissionsCount = allRecords.filter((a: any) => a.date_admission && new Date(a.date_admission).toDateString() === new Date().toDateString()).length;
 
   // Reset pagination on filter change
   useEffect(() => {
@@ -255,21 +255,21 @@ export default function AdmissionManagementPage() {
               <span className={styles.filterLabel}>Department:</span>
               <select className={styles.filterSelect} value={filterDepartment} onChange={(e) => setFilterDepartment(e.target.value)}>
                 <option value="All">All Departments</option>
-                {uniqueDepartments.map(d => <option key={d as string} value={d as string}>{d as string}</option>)}
+                {uniqueDepartments.map((d: any) => <option key={d as string} value={d as string}>{d as string}</option>)}
               </select>
             </div>
             <div className={styles.filterGroup}>
               <span className={styles.filterLabel}>Consultant:</span>
               <select className={styles.filterSelect} value={filterConsultant} onChange={(e) => setFilterConsultant(e.target.value)}>
                 <option value="All">All Consultants</option>
-                {uniqueConsultants.map(c => <option key={c as string} value={c as string}>{c as string}</option>)}
+                {uniqueConsultants.map((c: any) => <option key={c as string} value={c as string}>{c as string}</option>)}
               </select>
             </div>
             <div className={styles.filterGroup}>
               <span className={styles.filterLabel}>Ward:</span>
               <select className={styles.filterSelect} value={filterWard} onChange={(e) => setFilterWard(e.target.value)}>
                 <option value="All">All Wards</option>
-                {uniqueWards.map(w => <option key={w as string} value={w as string}>{w as string}</option>)}
+                {uniqueWards.map((w: any) => <option key={w as string} value={w as string}>{w as string}</option>)}
               </select>
             </div>
             <div className={styles.filterGroup} style={{ marginLeft: "auto" }}>
