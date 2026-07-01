@@ -1,6 +1,6 @@
 .container {
   padding: 24px;
-  background-color: #f8fafc;
+  background-color: var(--sanctuary-bg);
   min-height: 100vh;
   font-family: system-ui, -apple-system, sans-serif;
 }
