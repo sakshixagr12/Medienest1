@@ -144,6 +144,7 @@ function FullResultPreview() {
             attendingPhysician: data.attending_physician || "",
             dischargingNurse: data.discharging_nurse || "",
             dischargeDestination: data.discharge_destination || "",
+            emergencyContactName: data.emergency_contact_name || "",
             emergencyContactRelation: data.emergency_contact_relation || "",
             emergencyContactNumber: data.emergency_contact_number || "",
             diagnosis: data.diagnosis || "Diagnosis not recorded",
