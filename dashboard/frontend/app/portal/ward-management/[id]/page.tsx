@@ -26,6 +26,9 @@ interface Bed {
   status: string;
   notes: string;
   created_at: string;
+  total_occupied_minutes?: number;
+  total_cleaning_minutes?: number;
+  total_available_minutes?: number;
 }
 
 export default function WardDetailsPage() {
@@ -198,6 +201,9 @@ export default function WardDetailsPage() {
                   <th>Bed Number</th>
                   <th>Type</th>
                   <th>Status</th>
+                  <th>Occupied</th>
+                  <th>Available</th>
+                  <th>Cleaning</th>
                   <th>Notes</th>
                 </tr>
               </thead>
@@ -213,7 +219,16 @@ export default function WardDetailsPage() {
                         {bed.status}
                       </span>
                     </td>
-                    <td style={{ color: "#64748b", maxWidth: "250px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <td style={{ fontSize: "13px" }}>
+                      {bed.total_occupied_minutes ? `${Math.floor(bed.total_occupied_minutes / 60)}h ${bed.total_occupied_minutes % 60}m` : '0m'}
+                    </td>
+                    <td style={{ fontSize: "13px" }}>
+                      {bed.total_available_minutes ? `${Math.floor(bed.total_available_minutes / 60)}h ${bed.total_available_minutes % 60}m` : '0m'}
+                    </td>
+                    <td style={{ fontSize: "13px" }}>
+                      {bed.total_cleaning_minutes ? `${Math.floor(bed.total_cleaning_minutes / 60)}h ${bed.total_cleaning_minutes % 60}m` : '0m'}
+                    </td>
+                    <td style={{ color: "#64748b", maxWidth: "200px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {bed.notes || "-"}
                     </td>
                   </tr>
