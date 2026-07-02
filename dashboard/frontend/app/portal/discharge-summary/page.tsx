@@ -1062,6 +1062,23 @@ function DischargeSummaryRedesign() {
       if (error) throw error;
 
       if (admissionId) {
+        const { data: admissionData } = await supabase.from("admission_records").select("bed").eq("id", admissionId).single();
+        if (admissionData?.bed) {
+          const { data: bedData } = await supabase.from("beds").select("id, last_status_change_at, total_occupied_minutes").eq("id", admissionData.bed).single();
+          if (bedData) {
+            let addMinutes = 0;
+            if (bedData.last_status_change_at) {
+              const diffMs = new Date().getTime() - new Date(bedData.last_status_change_at).getTime();
+              addMinutes = Math.floor(diffMs / 60000);
+            }
+            await supabase.from("beds").update({
+              status: "Cleaning",
+              total_occupied_minutes: (bedData.total_occupied_minutes || 0) + addMinutes,
+              last_status_change_at: new Date().toISOString()
+            }).eq("id", bedData.id);
+          }
+        }
+
         const { error: updateErr } = await supabase.from("admission_records").update({ status: "Discharged", date_discharge: summary.dod, discharge_summary_id: insertedRecord.id }).eq("id", admissionId);
         if (updateErr) {
           console.warn("Could not update extended fields, falling back to basic status update", updateErr);
