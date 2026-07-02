@@ -965,6 +965,20 @@ function AdmissionRecordRedesign() {
   };
 
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (summary.bed && summary.ward) {
+        // We use navigator.sendBeacon ideally, but a fire-and-forget async call 
+        // might work in some modern browsers for short releases
+        releaseReservation(summary.bed, summary.ward);
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [summary.bed, summary.ward, reservationToken]);
+
+  useEffect(() => {
     const pId = searchParams.get("patientId");
     const dId = searchParams.get("draftId");
     if (pId && !dId) {
