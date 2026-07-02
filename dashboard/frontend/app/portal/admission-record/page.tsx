@@ -887,7 +887,20 @@ function AdmissionRecordRedesign() {
   const handleBedSelect = async (bedNumber: string) => {
     updateField("bed", bedNumber);
     if (bedNumber && summary.ward) {
-       await supabase.from("beds").update({ status: 'Reserved' }).eq('ward_id', summary.ward).eq('bed_number', bedNumber);
+      const { data: bedData } = await supabase.from("beds").select("id, last_status_change_at, total_available_minutes, status").eq("ward_id", summary.ward).eq("bed_number", bedNumber).single();
+      if (bedData && bedData.status === "Available") {
+        let addMins = 0;
+        if (bedData.last_status_change_at) {
+          addMins = Math.floor((Date.now() - new Date(bedData.last_status_change_at).getTime()) / 60000);
+        }
+        await supabase.from("beds").update({ 
+          status: 'Reserved',
+          total_available_minutes: (bedData.total_available_minutes || 0) + addMins,
+          last_status_change_at: new Date().toISOString()
+        }).eq('id', bedData.id);
+      } else {
+        await supabase.from("beds").update({ status: 'Reserved' }).eq('ward_id', summary.ward).eq('bed_number', bedNumber);
+      }
     }
   };
 
@@ -1702,7 +1715,10 @@ function AdmissionRecordRedesign() {
       if (error) throw error;
 
       if (summary.ward && summary.bed) {
-         await supabase.from("beds").update({ status: 'Occupied' }).eq('ward_id', summary.ward).eq('bed_number', summary.bed);
+         await supabase.from("beds").update({ 
+           status: 'Occupied',
+           last_status_change_at: new Date().toISOString()
+         }).eq('ward_id', summary.ward).eq('bed_number', summary.bed);
       }
 
       localStorage.removeItem("admission_draft");
