@@ -20,6 +20,10 @@ interface Bed {
   status: string;
   notes: string;
   created_at: string;
+  total_occupied_minutes?: number;
+  total_cleaning_minutes?: number;
+  total_available_minutes?: number;
+  last_status_change_at?: string;
   ward_name?: string; // mapped client-side
 }
 
@@ -171,6 +175,24 @@ export default function BedManagementPage() {
       } else {
         fetchData();
       }
+    }
+  };
+
+  const handleCleaningComplete = async (bed: Bed) => {
+    try {
+      let addMins = 0;
+      if (bed.last_status_change_at) {
+        addMins = Math.floor((Date.now() - new Date(bed.last_status_change_at).getTime()) / 60000);
+      }
+      const { error } = await supabase.from("beds").update({
+        status: "Available",
+        total_cleaning_minutes: (bed.total_cleaning_minutes || 0) + addMins,
+        last_status_change_at: new Date().toISOString()
+      }).eq("id", bed.id);
+      if (error) throw error;
+      fetchData();
+    } catch (e: any) {
+      alert("Error marking cleaning complete: " + e.message);
     }
   };
 
@@ -369,9 +391,21 @@ export default function BedManagementPage() {
                       <span className={styles.detailValue}>{bed.bed_type}</span>
                     </div>
                     <div className={styles.detailItem}>
-                      <span className={styles.detailLabel}>Last Updated</span>
+                      <span className={styles.detailLabel}>Occupied</span>
                       <span className={styles.detailValue}>
-                        {new Date(bed.created_at).toLocaleDateString()}
+                        {bed.total_occupied_minutes ? `${Math.floor(bed.total_occupied_minutes / 60)}h ${bed.total_occupied_minutes % 60}m` : '0m'}
+                      </span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Available</span>
+                      <span className={styles.detailValue}>
+                        {bed.total_available_minutes ? `${Math.floor(bed.total_available_minutes / 60)}h ${bed.total_available_minutes % 60}m` : '0m'}
+                      </span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Cleaning</span>
+                      <span className={styles.detailValue}>
+                        {bed.total_cleaning_minutes ? `${Math.floor(bed.total_cleaning_minutes / 60)}h ${bed.total_cleaning_minutes % 60}m` : '0m'}
                       </span>
                     </div>
                   </div>
@@ -383,6 +417,16 @@ export default function BedManagementPage() {
                   )}
 
                   <div className={styles.actions}>
+                    {bed.status === "Cleaning" && (
+                      <button
+                        className={styles.btnEdit}
+                        style={{ color: "#166534", background: "#dcfce7", borderColor: "#bbf7d0", flex: 1 }}
+                        onClick={() => handleCleaningComplete(bed)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Cleaned
+                      </button>
+                    )}
                     <button
                       className={styles.btnEdit}
                       onClick={() => handleOpenModal(bed)}
