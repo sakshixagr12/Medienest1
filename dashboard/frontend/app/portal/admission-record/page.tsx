@@ -1789,10 +1789,22 @@ function AdmissionRecordRedesign() {
       if (error) throw error;
 
       if (summary.ward && summary.bed) {
-         await supabase.from("beds").update({ 
-           status: 'Occupied',
-           last_status_change_at: new Date().toISOString()
-         }).eq('ward_id', summary.ward).eq('bed_number', summary.bed);
+         // Verify lock token first
+         const { data: lockData } = await supabase.from("beds").select("id, reservation_token").eq("ward_id", summary.ward).eq("bed_number", summary.bed).single();
+         if (lockData && lockData.reservation_token && lockData.reservation_token !== reservationToken) {
+           throw new Error("This bed is no longer available. Please choose another bed.");
+         }
+         
+         if (lockData) {
+           await supabase.from("beds").update({ 
+             status: 'Occupied',
+             patient_id: patientId,
+             admission_id: insertedRecord?.id,
+             assigned_by: 'Active User',
+             last_status_change_at: new Date().toISOString()
+           }).eq('id', lockData.id);
+           logBedAudit(lockData.id, summary.ward, "Assigned", { patientId, admissionId: insertedRecord?.id });
+         }
       }
 
       localStorage.removeItem("admission_draft");
