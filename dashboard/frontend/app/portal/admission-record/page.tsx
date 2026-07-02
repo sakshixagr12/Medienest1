@@ -3340,7 +3340,7 @@ function AdmissionRecordRedesign() {
                             <div className={styles.grid2Col}>
                               <div className="field">
                                 <label>Ward</label>
-                                <select value={summary.ward || ""} onChange={(e) => updateField("ward", e.target.value)}>
+                                <select value={summary.ward || ""} onChange={(e) => handleWardChange(e.target.value)}>
                                   <option value="">Select Ward</option>
                                   {wards.map((w: any) => (
                                     <option key={w.id} value={w.id}>{w.name}</option>
@@ -3349,10 +3349,12 @@ function AdmissionRecordRedesign() {
                               </div>
                               <div className="field">
                                 <label>Bed No.</label>
-                                <select value={summary.bed || ""} onChange={(e) => handleBedSelect(e.target.value)}>
+                                <select value={summary.bed || ""} onChange={(e) => handleBedSelect(e.target.value)} disabled={!summary.ward}>
                                   <option value="">Select Bed</option>
                                   {availableBeds.map((b: any) => (
-                                    <option key={b.bed_number} value={b.bed_number}>{b.bed_number}</option>
+                                    <option key={b.bed_number} value={b.bed_number}>
+                                      {b.bed_number} {b.reservation_token === reservationToken ? "(Reserved)" : ""}
+                                    </option>
                                   ))}
                                 </select>
                               </div>
