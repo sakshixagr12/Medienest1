@@ -856,11 +856,27 @@ function AdmissionRecordRedesign() {
 
   const [wards, setWards] = useState<any[]>([]);
   const [availableBeds, setAvailableBeds] = useState<any[]>([]);
+  const [wardTotalBeds, setWardTotalBeds] = useState<number>(0);
+  const [reservationToken] = useState(() => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+
+  const logBedAudit = async (bedId: string, wardId: string, action: string, details?: any) => {
+    try {
+      await supabase.from("bed_audit_logs").insert([{
+        bed_id: bedId, ward_id: wardId, action, details
+      }]);
+    } catch (e) {
+      console.error("Audit log error", e);
+    }
+  };
 
   useEffect(() => {
     if (!clinic?.id) return;
     const fetchWards = async () => {
-      const { data } = await supabase.from("wards").select("*").eq("clinic_id", clinic.id).order("name");
+      const { data } = await supabase.from("wards")
+        .select("*")
+        .eq("clinic_id", clinic.id)
+        .eq("is_active", true)
+        .order("ward_name", { ascending: true });
       if (data) setWards(data);
     };
     fetchWards();
@@ -869,6 +885,7 @@ function AdmissionRecordRedesign() {
   useEffect(() => {
     if (!summary.ward) {
       setAvailableBeds([]);
+      setWardTotalBeds(0);
       return;
     }
     const fetchBeds = async () => {
@@ -876,32 +893,75 @@ function AdmissionRecordRedesign() {
         .from("beds")
         .select("*")
         .eq("ward_id", summary.ward)
-        .eq("status", "Available")
         .order("bed_number");
       
-      if (data) setAvailableBeds(data);
+      if (data) {
+        setWardTotalBeds(data.length);
+        const now = new Date().getTime();
+        const available = data.filter((b: any) => {
+          if (b.status === "Available") return true;
+          if (b.status === "Reserved") {
+            if (b.reservation_token === reservationToken) return true;
+            if (b.reserved_at) {
+              const resTime = new Date(b.reserved_at).getTime();
+              if (now - resTime > 15 * 60 * 1000) return true; // Expired reservation
+            }
+          }
+          return false;
+        });
+        setAvailableBeds(available);
+      }
     };
     fetchBeds();
-  }, [summary.ward, supabase]);
+  }, [summary.ward, supabase, reservationToken]);
 
-  const handleBedSelect = async (bedNumber: string) => {
-    updateField("bed", bedNumber);
-    if (bedNumber && summary.ward) {
-      const { data: bedData } = await supabase.from("beds").select("id, last_status_change_at, total_available_minutes, status").eq("ward_id", summary.ward).eq("bed_number", bedNumber).single();
-      if (bedData && bedData.status === "Available") {
+  const releaseReservation = async (bedNumber: string, wardId: string) => {
+    if (!bedNumber || !wardId) return;
+    try {
+      const { data: bData } = await supabase.from("beds").select("id, reservation_token, status").eq("ward_id", wardId).eq("bed_number", bedNumber).single();
+      if (bData && bData.reservation_token === reservationToken && bData.status === "Reserved") {
+        await supabase.from("beds").update({ status: 'Available', reservation_token: null, reserved_by: null, reserved_at: null }).eq("id", bData.id);
+        logBedAudit(bData.id, wardId, "Released");
+      }
+    } catch (e) {
+      console.error("Release reservation error", e);
+    }
+  };
+
+  const handleBedSelect = async (newBedNumber: string) => {
+    const oldBed = summary.bed;
+    updateField("bed", newBedNumber);
+    
+    if (oldBed && oldBed !== newBedNumber && summary.ward) {
+      await releaseReservation(oldBed, summary.ward);
+    }
+    
+    if (newBedNumber && summary.ward) {
+      const { data: bedData } = await supabase.from("beds").select("id, last_status_change_at, total_available_minutes, status").eq("ward_id", summary.ward).eq("bed_number", newBedNumber).single();
+      if (bedData) {
         let addMins = 0;
-        if (bedData.last_status_change_at) {
+        if (bedData.status === "Available" && bedData.last_status_change_at) {
           addMins = Math.floor((Date.now() - new Date(bedData.last_status_change_at).getTime()) / 60000);
         }
         await supabase.from("beds").update({ 
           status: 'Reserved',
           total_available_minutes: (bedData.total_available_minutes || 0) + addMins,
-          last_status_change_at: new Date().toISOString()
+          last_status_change_at: new Date().toISOString(),
+          reserved_at: new Date().toISOString(),
+          reservation_token: reservationToken,
+          reserved_by: 'Active User'
         }).eq('id', bedData.id);
-      } else {
-        await supabase.from("beds").update({ status: 'Reserved' }).eq('ward_id', summary.ward).eq('bed_number', bedNumber);
+        logBedAudit(bedData.id, summary.ward, "Reserved");
       }
     }
+  };
+
+  const handleWardChange = async (newWardId: string) => {
+    if (summary.bed && summary.ward) {
+      await releaseReservation(summary.bed, summary.ward);
+    }
+    updateField("ward", newWardId);
+    updateField("bed", "");
   };
 
   useEffect(() => {
