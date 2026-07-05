@@ -75,7 +75,7 @@ export default function BedManagementPage() {
     } else {
       // Map ward_name into beds for easier display
       const mappedBeds = (bedsData || []).map((bed: any) => {
-        const ward = (wardsData || []).find((w) => w.id === bed.ward_id);
+        const ward = (wardsData || []).find((w: any) => w.id === bed.ward_id);
         return {
           ...bed,
           ward_name: ward ? ward.ward_name : "Unknown Ward",
