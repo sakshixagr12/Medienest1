@@ -21,6 +21,13 @@ import {
   Zap,
   AlertTriangle,
   Clock,
+  Activity,
+  BedDouble,
+  DoorOpen,
+  Search,
+  Settings,
+  Mail,
+  Hash
 } from "lucide-react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -35,10 +42,17 @@ export default function ClinicSettingsPage() {
   const { clinic, doctors, refresh } = useClinic();
   const supabase = createClient();
 
-  // Clinic States
+  // Clinic States (Enhanced)
   const [clinicName, setClinicName] = useState("");
   const [clinicAddress, setClinicAddress] = useState("");
+  const [clinicPhone, setClinicPhone] = useState("");
+  const [clinicEmail, setClinicEmail] = useState("");
+  const [clinicRegNumber, setClinicRegNumber] = useState("");
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isSavingClinic, setIsSavingClinic] = useState(false);
+
+  // Search Doctor
+  const [docSearchQuery, setDocSearchQuery] = useState("");
 
   // Add Doctor States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -57,6 +71,15 @@ export default function ClinicSettingsPage() {
   const [selectedPlan, setSelectedPlan] = useState("Starter");
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showExpiredWarning, setShowExpiredWarning] = useState(false);
+  
+  // Infrastructure Mock Stats (would fetch in real app)
+  const [infraStats, setInfraStats] = useState({
+    wards: 4,
+    totalBeds: 120,
+    occupiedBeds: 85,
+    availableBeds: 35,
+    occupancyRate: "70.8%"
+  });
 
   // Fetch subscription details
   const fetchSubscription = async () => {
@@ -112,6 +135,11 @@ export default function ClinicSettingsPage() {
     if (clinic) {
       setClinicName(clinic.name || "");
       setClinicAddress(clinic.address || "");
+      // Mocked additional fields
+      setClinicPhone("+91 98765 43210");
+      setClinicEmail("contact@hospital.com");
+      setClinicRegNumber("MCI-H-998877");
+      
       fetchSubscription();
 
       // Check if redirected back with an order_id
@@ -119,7 +147,6 @@ export default function ClinicSettingsPage() {
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get("order_id");
         if (orderId) {
-          // Clean parameters from URL
           window.history.replaceState({}, document.title, window.location.pathname);
           verifyPaymentOnServer(orderId);
         }
@@ -166,7 +193,13 @@ export default function ClinicSettingsPage() {
     }
   }
 
-  const handleSaveClinic = async () => {
+  const filteredDoctors = doctors?.filter(d => 
+    d.name.toLowerCase().includes(docSearchQuery.toLowerCase()) || 
+    d.specialty?.toLowerCase().includes(docSearchQuery.toLowerCase())
+  );
+
+  const handleSaveClinic = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!clinic?.id) return;
     setIsSavingClinic(true);
     try {
@@ -180,7 +213,8 @@ export default function ClinicSettingsPage() {
 
       if (error) throw error;
       refresh();
-      alert("Clinic settings updated successfully!");
+      setIsEditProfileOpen(false);
+      alert("Clinic profile updated successfully!");
     } catch (e: any) {
       alert("Error updating clinic: " + e.message);
     } finally {
@@ -236,7 +270,7 @@ export default function ClinicSettingsPage() {
       setNewDocPhoto("");
       setIsAddModalOpen(false);
       refresh();
-      alert(`Dr. ${normalizedName} added to the clinic staff!`);
+      alert(`Dr. ${normalizedName} added to the hospital staff!`);
     } catch (e: any) {
       alert("Error adding doctor: " + e.message);
     } finally {
@@ -245,7 +279,7 @@ export default function ClinicSettingsPage() {
   };
 
   const handleDeleteDoctor = async (clinicDoctorId: string, doctorName: string) => {
-    if (!(await window.confirm(`Are you sure you want to remove Dr. ${doctorName} from this clinic?`))) {
+    if (!(await window.confirm(`Are you sure you want to remove Dr. ${doctorName} from this hospital?`))) {
       return;
     }
     try {
@@ -267,7 +301,6 @@ export default function ClinicSettingsPage() {
     if (!clinic?.id) return;
     setIsCheckingOut(true);
     try {
-      // 1. Get payment session ID from backend
       const res = await authenticatedFetch(`${API_BASE_URL}/api/payment/create-order`, {
         method: "POST",
         headers: {
@@ -275,7 +308,7 @@ export default function ClinicSettingsPage() {
         },
         body: JSON.stringify({
           clinic_id: clinic.id,
-          plan_name: selectedPlan,
+          plan_name: "Professional", // Defaulting to professional upgrade for this flow
         }),
       });
 
@@ -290,15 +323,13 @@ export default function ClinicSettingsPage() {
         return;
       }
 
-      // 2. Initialize Cashfree PG SDK
       const cashfree = await load({
         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox",
       });
 
-      // 3. Open Checkout Overlay
       const checkoutOptions = {
         paymentSessionId: data.payment_session_id,
-        returnUrl: `${window.location.origin}/demo1/portal/clinic-settings?order_id=${data.order_id}`,
+        returnUrl: `${window.location.origin}/portal/clinic-settings?order_id=${data.order_id}`,
       };
 
       await cashfree.checkout(checkoutOptions);
@@ -313,295 +344,44 @@ export default function ClinicSettingsPage() {
     <DashboardLayout hideSidebar>
       <div className={styles.header}>
         <div className={styles.headerText}>
-          <h1>Clinic Management</h1>
-          <p>Update branding, subscription plan, and manage your medical staff</p>
+          <h1>Hospital Settings</h1>
+          <p>Manage hospital profile, infrastructure, medical staff, and billing.</p>
         </div>
       </div>
 
       {showExpiredWarning && (
         <div className={styles.warningBanner}>
           <AlertTriangle size={18} />
-          <span>Your 14-day trial or subscription has expired. Please choose a plan and subscribe to restore access.</span>
+          <span>Your trial or subscription has expired. Please upgrade your plan to restore access.</span>
         </div>
       )}
 
-      <div className={styles.grid}>
-        {/* Left Column: Clinic Profile & Subscription */}
-        <div className={styles.leftColumn}>
-          {/* Clinic Branding */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={styles.iconBox}>
-                <Building size={20} />
-              </div>
-              <h3>Clinic Branding</h3>
-            </div>
-            <div className={styles.cardBody}>
-              <div className={styles.field}>
-                <label>
-                  <ShieldCheck size={14} /> Official Clinic Name
-                </label>
-                <input
-                  type="text"
-                  value={clinicName}
-                  onChange={(e) => setClinicName(e.target.value)}
-                  placeholder="e.g. City Care Hospital"
-                />
-              </div>
-              <div className={styles.field}>
-                <label>
-                  <MapPin size={14} /> Physical Address
-                </label>
-                <textarea
-                  rows={3}
-                  value={clinicAddress}
-                  onChange={(e) => setClinicAddress(e.target.value)}
-                  placeholder="e.g. 123 Healthcare Ave, Sector 4..."
-                />
-              </div>
-              <button
-                className={styles.saveBtn}
-                onClick={handleSaveClinic}
-                disabled={isSavingClinic}
-              >
-                <Save size={16} />
-                {isSavingClinic ? "Saving..." : "Update Clinic Profile"}
-              </button>
-            </div>
+      {/* Clinic Overview Top Card */}
+      <div className={styles.overviewCard}>
+        <div className={styles.overviewProfile}>
+          <div className={styles.overviewAvatar}>
+            <Activity size={32} />
           </div>
-
-          {/* Ward Management Card */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={styles.iconBox}>
-                <Building size={20} />
-              </div>
-              <h3>Hospital Infrastructure</h3>
-            </div>
-            <div className={styles.cardBody}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: 600, color: "#1e293b", fontSize: 15, marginBottom: 4 }}>
-                    Ward Management
-                  </div>
-                  <div style={{ color: "#64748b", fontSize: 13, paddingRight: 16 }}>
-                    Configure hospital wards, beds, and manage facility capacity.
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <Link 
-                    href="/demo1/portal/ward-management" 
-                    style={{
-                      background: "#f1f5f9",
-                      color: "#3b82f6",
-                      padding: "8px 16px",
-                      borderRadius: "6px",
-                      textDecoration: "none",
-                      fontWeight: 600,
-                      fontSize: 13,
-                      border: "1px solid #e2e8f0",
-                      whiteSpace: "nowrap"
-                    }}
-                  >
-                    Manage Wards →
-                  </Link>
-                  <Link 
-                    href="/demo1/portal/bed-management" 
-                    style={{
-                      background: "#f8fafc",
-                      color: "#64748b",
-                      padding: "8px 16px",
-                      borderRadius: "6px",
-                      textDecoration: "none",
-                      fontWeight: 600,
-                      fontSize: 13,
-                      border: "1px solid #cbd5e1",
-                      whiteSpace: "nowrap"
-                    }}
-                  >
-                    Manage Beds →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Subscription Card */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={styles.iconBox}>
-                <CreditCard size={20} />
-              </div>
-              <h3>Plan & Billing</h3>
-            </div>
-            <div className={styles.cardBody}>
-              {/* Active Subscription Status Banner */}
-              {subscription && subscription.status === "active" ? (
-                <div className={`${styles.subStatusBox} ${styles.subActive}`}>
-                  <div className={styles.subStatusIcon}>
-                    <Zap size={18} />
-                  </div>
-                  <div className={styles.subStatusText}>
-                    <h4>Active: {subscription.plan_name} Tier</h4>
-                    <p>
-                      Expires/Renews on{" "}
-                      {new Date(subscription.end_date).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ) : trial.active ? (
-                <div className={`${styles.subStatusBox} ${styles.trialActive}`}>
-                  <div className={styles.subStatusIcon}>
-                    <Clock size={18} />
-                  </div>
-                  <div className={styles.subStatusText}>
-                    <h4>14-Day Free Trial</h4>
-                    <p>Expires in {trial.daysLeft} days ({trial.endDateStr})</p>
-                  </div>
-                </div>
-              ) : (
-                <div className={`${styles.subStatusBox} ${styles.trialExpired}`}>
-                  <div className={styles.subStatusIcon}>
-                    <AlertTriangle size={18} />
-                  </div>
-                  <div className={styles.subStatusText}>
-                    <h4>Subscription / Trial Expired</h4>
-                    <p>Upgrade to a paid plan below to restore access</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Pricing Tier Selector */}
-              <h4 style={{ fontSize: "14px", fontWeight: "800", color: "#1e293b", margin: "16px 0 8px" }}>
-                Select Subscription Tier
-              </h4>
-
-              <div className={styles.planTierList}>
-                {/* Starter Plan */}
-                <div
-                  className={`${styles.planTier} ${selectedPlan === "Starter" ? styles.planTierSelected : ""}`}
-                  onClick={() => setSelectedPlan("Starter")}
-                >
-                  <input
-                    type="radio"
-                    className={styles.planRadio}
-                    name="billing-plan"
-                    checked={selectedPlan === "Starter"}
-                    onChange={() => setSelectedPlan("Starter")}
-                  />
-                  <div className={styles.planTierInfo}>
-                    <div className={styles.planTierName}>Starter Tier</div>
-                    <div className={styles.planTierPrice}>₹99 / month</div>
-                  </div>
-                </div>
-
-                {/* Clinic Plan */}
-                <div
-                  className={`${styles.planTier} ${selectedPlan === "Clinic" ? styles.planTierSelected : ""}`}
-                  onClick={() => setSelectedPlan("Clinic")}
-                >
-                  <input
-                    type="radio"
-                    className={styles.planRadio}
-                    name="billing-plan"
-                    checked={selectedPlan === "Clinic"}
-                    onChange={() => setSelectedPlan("Clinic")}
-                  />
-                  <div className={styles.planTierInfo}>
-                    <div className={styles.planTierName}>Clinic Tier</div>
-                    <div className={styles.planTierPrice}>₹249 / month</div>
-                  </div>
-                </div>
-
-                {/* Professional Plan */}
-                <div
-                  className={`${styles.planTier} ${selectedPlan === "Professional" ? styles.planTierSelected : ""}`}
-                  onClick={() => setSelectedPlan("Professional")}
-                >
-                  <input
-                    type="radio"
-                    className={styles.planRadio}
-                    name="billing-plan"
-                    checked={selectedPlan === "Professional"}
-                    onChange={() => setSelectedPlan("Professional")}
-                  />
-                  <div className={styles.planTierInfo}>
-                    <div className={styles.planTierName}>Professional Tier</div>
-                    <div className={styles.planTierPrice}>₹499 / month</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tier Details list based on selectedPlan */}
-              <ul className={styles.planFeatures}>
-                {selectedPlan === "Starter" && (
-                  <>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Max 2 Doctors
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Patient Queue Manager
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Basic AI summary metrics
-                    </li>
-                  </>
-                )}
-                {selectedPlan === "Clinic" && (
-                  <>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Max 5 Doctors
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Patient Queue & Analytics
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Multi-language prescriptions
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Priority Email Support
-                    </li>
-                  </>
-                )}
-                {selectedPlan === "Professional" && (
-                  <>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Unlimited Doctors
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Full Queue, billing & analytics
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Custom branding & prescription logos
-                    </li>
-                    <li>
-                      <Check size={14} className={styles.featureCheck} /> Dedicated account manager
-                    </li>
-                  </>
-                )}
-              </ul>
-
-              <button
-                className={styles.saveBtn}
-                onClick={handleUpgradeCheckout}
-                disabled={isCheckingOut || (subscription?.plan_name === selectedPlan && subscription?.status === "active")}
-              >
-                <CreditCard size={16} />
-                {isCheckingOut
-                  ? "Initializing payment..."
-                  : subscription?.plan_name === selectedPlan && subscription?.status === "active"
-                  ? "Current Plan"
-                  : `Pay & Activate Tier (₹${selectedPlan === "Starter" ? "99" : selectedPlan === "Clinic" ? "249" : "499"})`}
-              </button>
+          <div className={styles.overviewInfo}>
+            <h2>{clinicName || "Hospital Name"}</h2>
+            <p><MapPin size={14} /> {clinicAddress || "Hospital Address"}</p>
+            <div className={styles.overviewDetails}>
+              <span className={styles.detailBadge}><Phone size={12} /> {clinicPhone}</span>
+              <span className={styles.detailBadge}><Mail size={12} /> {clinicEmail}</span>
+              <span className={styles.detailBadge}><Hash size={12} /> {clinicRegNumber}</span>
             </div>
           </div>
         </div>
+        <div style={{ alignSelf: "flex-start" }}>
+          <button className={styles.btnSecondary} onClick={() => setIsEditProfileOpen(true)}>
+            <Settings size={16} />
+            Edit Profile
+          </button>
+        </div>
+      </div>
 
-        {/* Right: Staff Management */}
+      <div className={styles.twoColumnGrid}>
+        {/* Left Column: Medical Staff */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.iconBox}>
@@ -612,154 +392,215 @@ export default function ClinicSettingsPage() {
               {doctors?.length || 0} / {maxAllowedDoctors === 999 ? "∞" : maxAllowedDoctors}
             </span>
           </div>
-          <div className={styles.cardBody}>
+          <div className={styles.cardBody} style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+            <div className={styles.searchWrapper}>
+              <Search size={16} className={styles.searchIcon} />
+              <input 
+                type="text" 
+                placeholder="Search doctors by name or specialty..." 
+                className={styles.searchInput}
+                value={docSearchQuery}
+                onChange={e => setDocSearchQuery(e.target.value)}
+              />
+            </div>
+            
             <div className={styles.docList}>
-              {doctors?.map((doc) => (
+              {filteredDoctors?.map((doc) => (
                 <div key={doc.id} className={styles.docItem}>
                   <div className={styles.docAvatar}>
                     {doc.name?.[0].toUpperCase()}
                   </div>
                   <div className={styles.docInfo}>
                     <h4>Dr. {doc.name}</h4>
-                    <p>
-                      {doc.specialty} • {doc.qualification}
-                    </p>
+                    <span className={styles.docSpecialtyBadge}>{doc.specialty}</span>
                   </div>
                   <button
                     className={styles.deleteBtn}
                     onClick={() => handleDeleteDoctor(doc.id, doc.name)}
                     title="Remove Doctor"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
-              {(!doctors || doctors.length === 0) && (
-                <p className={styles.emptyText}>No doctors added yet.</p>
+              {(!filteredDoctors || filteredDoctors.length === 0) && (
+                <p className={styles.emptyText}>No doctors found.</p>
               )}
             </div>
 
-            <button
-              className={styles.addBtn}
-              onClick={() => setIsAddModalOpen(true)}
-              disabled={doctors && doctors.length >= maxAllowedDoctors}
-            >
-              <UserPlus size={18} />
-              Add New Doctor
-            </button>
+            <div className={styles.btnGroup}>
+              <button
+                className={styles.btnPrimary}
+                onClick={() => setIsAddModalOpen(true)}
+                disabled={doctors && doctors.length >= maxAllowedDoctors}
+              >
+                <UserPlus size={16} />
+                Add Doctor
+              </button>
+            </div>
             {doctors && doctors.length >= maxAllowedDoctors && (
               <p className={styles.limitText}>
-                Limit reached. Upgrade your plan to add more doctors.
+                Staff limit reached on current plan.
               </p>
             )}
           </div>
         </div>
+
+        {/* Right Column: Hospital Infrastructure */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div className={styles.iconBox}>
+              <Building size={20} />
+            </div>
+            <h3>Hospital Infrastructure</h3>
+          </div>
+          <div className={styles.cardBody} style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Total Wards</span>
+                <span className={styles.statValue}>{infraStats.wards}</span>
+                <span className={styles.statSub}>Active wards</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Occupancy Rate</span>
+                <span className={styles.statValue}>{infraStats.occupancyRate}</span>
+                <span className={styles.statSubAlert}>High capacity</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Total Beds</span>
+                <span className={styles.statValue}>{infraStats.totalBeds}</span>
+                <span className={styles.statSub}>{infraStats.occupiedBeds} occupied</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Available Beds</span>
+                <span className={styles.statValue}>{infraStats.availableBeds}</span>
+                <span className={styles.statSub}>Ready for admission</span>
+              </div>
+            </div>
+
+            <div className={styles.btnGroup}>
+              <Link href="/portal/ward-management" className={styles.btnSecondary}>
+                <DoorOpen size={16} />
+                Manage Wards
+              </Link>
+              <Link href="/portal/bed-management" className={styles.btnSecondary}>
+                <BedDouble size={16} />
+                Manage Beds
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {isAddModalOpen && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setIsAddModalOpen(false)}
-        >
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
+      {/* Subscription Compact Section */}
+      <div className={styles.subscriptionCard}>
+        <div className={styles.subDetails}>
+          <div className={styles.subIcon}>
+            <Award size={24} />
+          </div>
+          <div className={styles.subInfo}>
+            <h4>{subscription ? \`\${subscription.plan_name} Plan Active\` : trial.active ? '14-Day Free Trial' : 'Subscription Expired'}</h4>
+            <p>
+              {subscription 
+                ? \`Renews on \${new Date(subscription.end_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}\`
+                : trial.active 
+                ? \`Trial ends in \${trial.daysLeft} days\` 
+                : 'Please upgrade to restore access'}
+            </p>
+            <div className={styles.subFeatures}>
+              <span className={styles.subFeature}><Check size={14} className={styles.featureCheck} /> {maxAllowedDoctors === 999 ? 'Unlimited' : maxAllowedDoctors} Doctors</span>
+              <span className={styles.subFeature}><Check size={14} className={styles.featureCheck} /> Queue Manager</span>
+              <span className={styles.subFeature}><Check size={14} className={styles.featureCheck} /> Hospital Infra Features</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginLeft: "16px" }}>
+          <button 
+            className={styles.btnPrimary} 
+            onClick={handleUpgradeCheckout}
+            disabled={isCheckingOut || subscription?.plan_name === "Professional"}
           >
+            <CreditCard size={16} />
+            {isCheckingOut ? "Connecting..." : subscription?.plan_name === "Professional" ? "Highest Tier Active" : "Upgrade Plan"}
+          </button>
+        </div>
+      </div>
+
+      {/* Edit Profile Modal */}
+      {isEditProfileOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsEditProfileOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Edit Hospital Profile</h3>
+              <button className={styles.closeBtn} onClick={() => setIsEditProfileOpen(false)}>✕</button>
+            </div>
+            <form onSubmit={handleSaveClinic} className={styles.modalBody}>
+              <div className={styles.field}>
+                <label><ShieldCheck size={14} /> Hospital Name</label>
+                <input type="text" value={clinicName} onChange={(e) => setClinicName(e.target.value)} required />
+              </div>
+              <div className={styles.field}>
+                <label><Phone size={14} /> Contact Phone</label>
+                <input type="text" value={clinicPhone} onChange={(e) => setClinicPhone(e.target.value)} />
+              </div>
+              <div className={styles.field}>
+                <label><Mail size={14} /> Contact Email</label>
+                <input type="email" value={clinicEmail} onChange={(e) => setClinicEmail(e.target.value)} />
+              </div>
+              <div className={styles.field}>
+                <label><Hash size={14} /> Registration Number</label>
+                <input type="text" value={clinicRegNumber} onChange={(e) => setClinicRegNumber(e.target.value)} />
+              </div>
+              <div className={styles.field}>
+                <label><MapPin size={14} /> Physical Address</label>
+                <textarea rows={3} value={clinicAddress} onChange={(e) => setClinicAddress(e.target.value)} required />
+              </div>
+              <button type="submit" className={styles.modalAddBtn} disabled={isSavingClinic}>
+                {isSavingClinic ? "Saving..." : "Save Profile Updates"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Doctor Modal */}
+      {isAddModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsAddModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h3>Add New Doctor</h3>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setIsAddModalOpen(false)}
-              >
-                ✕
-              </button>
+              <button className={styles.closeBtn} onClick={() => setIsAddModalOpen(false)}>✕</button>
             </div>
             <form onSubmit={handleAddDoctor} className={styles.modalBody}>
               <div className={styles.field}>
-                <label>
-                  <Building size={14} /> Full Name (without Dr. prefix)
-                </label>
-                <input
-                  type="text"
-                  value={newDocName}
-                  onChange={(e) => setNewDocName(e.target.value)}
-                  placeholder="e.g. Ramesh Kumar"
-                  required
-                />
+                <label><Building size={14} /> Full Name (without Dr. prefix)</label>
+                <input type="text" value={newDocName} onChange={(e) => setNewDocName(e.target.value)} required />
               </div>
               <div className={styles.field}>
-                <label>
-                  <Stethoscope size={14} /> Specialty
-                </label>
-                <input
-                  type="text"
-                  value={newDocSpecialty}
-                  onChange={(e) => setNewDocSpecialty(e.target.value)}
-                  placeholder="e.g. Cardiologist"
-                  required
-                />
+                <label><Stethoscope size={14} /> Specialty</label>
+                <input type="text" value={newDocSpecialty} onChange={(e) => setNewDocSpecialty(e.target.value)} required />
               </div>
               <div className={styles.field}>
-                <label>
-                  <Award size={14} /> Qualification
-                </label>
-                <input
-                  type="text"
-                  value={newDocQual}
-                  onChange={(e) => setNewDocQual(e.target.value)}
-                  placeholder="e.g. MBBS, MD"
-                  required
-                />
+                <label><Award size={14} /> Qualification</label>
+                <input type="text" value={newDocQual} onChange={(e) => setNewDocQual(e.target.value)} required />
               </div>
               <div className={styles.field}>
-                <label>
-                  <Phone size={14} /> Contact Number
-                </label>
-                <input
-                  type="text"
-                  value={newDocContact}
-                  onChange={(e) => setNewDocContact(e.target.value)}
-                  placeholder="e.g. 9876543210"
-                />
+                <label><Phone size={14} /> Contact Number</label>
+                <input type="text" value={newDocContact} onChange={(e) => setNewDocContact(e.target.value)} />
               </div>
               <div className={styles.field}>
-                <label>
-                  <FileText size={14} /> Medical License No. <span style={{ color: "#ef4444" }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newDocRegNumber}
-                  onChange={(e) => setNewDocRegNumber(e.target.value)}
-                  placeholder="e.g. MCI-12345"
-                  required
-                />
+                <label><FileText size={14} /> Medical License No. <span style={{ color: "#ef4444" }}>*</span></label>
+                <input type="text" value={newDocRegNumber} onChange={(e) => setNewDocRegNumber(e.target.value)} required />
               </div>
               <div className={styles.field}>
-                <label>
-                  <Calendar size={14} /> License Expiry Date
-                </label>
-                <input
-                  type="date"
-                  value={newDocExpiry}
-                  onChange={(e) => setNewDocExpiry(e.target.value)}
-                />
+                <label><Calendar size={14} /> License Expiry Date</label>
+                <input type="date" value={newDocExpiry} onChange={(e) => setNewDocExpiry(e.target.value)} />
               </div>
               <div className={styles.field}>
-                <label>
-                  <LinkIcon size={14} /> Profile Photo URL
-                </label>
-                <input
-                  type="text"
-                  value={newDocPhoto}
-                  onChange={(e) => setNewDocPhoto(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
-                />
+                <label><LinkIcon size={14} /> Profile Photo URL</label>
+                <input type="text" value={newDocPhoto} onChange={(e) => setNewDocPhoto(e.target.value)} />
               </div>
-              <button
-                type="submit"
-                className={styles.modalAddBtn}
-                disabled={isAddingDoc}
-              >
+              <button type="submit" className={styles.modalAddBtn} disabled={isAddingDoc}>
                 {isAddingDoc ? "Adding..." : "Confirm Registration"}
               </button>
             </form>
