@@ -74,7 +74,7 @@ export default function BedManagementPage() {
       console.error("Error fetching beds:", bedsError.message);
     } else {
       // Map ward_name into beds for easier display
-      const mappedBeds = (bedsData || []).map((bed) => {
+      const mappedBeds = (bedsData || []).map((bed: any) => {
         const ward = (wardsData || []).find((w) => w.id === bed.ward_id);
         return {
           ...bed,
