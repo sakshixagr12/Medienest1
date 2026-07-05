@@ -499,12 +499,12 @@ export default function ClinicSettingsPage() {
             <Award size={24} />
           </div>
           <div className={styles.subInfo}>
-            <h4>{subscription ? \`\${subscription.plan_name} Plan Active\` : trial.active ? '14-Day Free Trial' : 'Subscription Expired'}</h4>
+            <h4>{subscription ? `${subscription.plan_name} Plan Active` : trial.active ? '14-Day Free Trial' : 'Subscription Expired'}</h4>
             <p>
               {subscription 
-                ? \`Renews on \${new Date(subscription.end_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}\`
+                ? `Renews on ${new Date(subscription.end_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
                 : trial.active 
-                ? \`Trial ends in \${trial.daysLeft} days\` 
+                ? `Trial ends in ${trial.daysLeft} days` 
                 : 'Please upgrade to restore access'}
             </p>
             <div className={styles.subFeatures}>
