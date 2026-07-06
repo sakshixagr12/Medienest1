@@ -78,14 +78,32 @@ export default function NurseManagementPage() {
     setIsLoading(true);
     try {
       const [nursesRes, wardsRes] = await Promise.all([
-        supabase.from("nurses").select("*").order("created_at", { ascending: false }),
+        supabase.from("nurses").select(`
+          *,
+          nurse_ward_assignments (
+            ward_id,
+            assignment_type,
+            is_active
+          )
+        `).order("created_at", { ascending: false }),
         supabase.from("wards").select("id, ward_name")
       ]);
 
       if (nursesRes.error) throw nursesRes.error;
       if (wardsRes.error) throw wardsRes.error;
 
-      setNurses(nursesRes.data || []);
+      // Map Primary ward from junction table for UI backward compatibility
+      const processedNurses = (nursesRes.data || []).map((nurse: any) => {
+        const primaryAssignment = nurse.nurse_ward_assignments?.find(
+          (a: any) => a.assignment_type === 'Primary' && a.is_active
+        );
+        return {
+          ...nurse,
+          primary_ward_id: primaryAssignment ? primaryAssignment.ward_id : nurse.primary_ward_id
+        };
+      });
+
+      setNurses(processedNurses);
       setWards(wardsRes.data || []);
     } catch (e: any) {
       console.error("Error fetching data:", e.message);
@@ -125,7 +143,29 @@ export default function NurseManagementPage() {
         throw error;
       }
 
-      setNurses(prev => [data[0], ...prev]);
+      const newNurse = data[0];
+
+      // Create primary ward assignment in the new junction table
+      if (submitData.primary_ward_id) {
+        const { error: assignmentError } = await supabase.from("nurse_ward_assignments").insert([{
+          nurse_id: newNurse.id,
+          ward_id: submitData.primary_ward_id,
+          assignment_type: 'Primary'
+        }]);
+        if (assignmentError) throw assignmentError;
+      }
+
+      // Add dummy assignment data to state to reflect properly in UI
+      const nurseToState = {
+        ...newNurse,
+        nurse_ward_assignments: submitData.primary_ward_id ? [{
+          ward_id: submitData.primary_ward_id,
+          assignment_type: 'Primary',
+          is_active: true
+        }] : []
+      };
+
+      setNurses(prev => [nurseToState, ...prev]);
       setIsAddModalOpen(false);
       resetForm();
     } catch (e: any) {
