@@ -6,7 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { createClient } from "@/lib/supabase/client";
 import { 
   ArrowLeft, Edit, Trash2, Phone, Mail, Hash, 
-  Award, Clock, Calendar, MapPin, FileText, Activity, Users, FileSignature
+  Award, Clock, Calendar, MapPin, FileText, Activity, Users, FileSignature, AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -48,6 +48,7 @@ export default function NurseProfilePage() {
   
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState<Partial<Nurse>>({});
@@ -114,15 +115,46 @@ export default function NurseProfilePage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to remove this nurse? This action cannot be undone.")) return;
-    
+  const handleDeactivate = async () => {
     try {
-      const { error } = await supabase.from("nurses").delete().eq("id", params.id);
+      const { data, error } = await supabase
+        .from("nurses")
+        .update({ 
+          status: "Inactive", 
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", params.id)
+        .select()
+        .single();
+        
       if (error) throw error;
-      router.push("/portal/nurse-management");
+      setNurse(data);
+      setFormData(data);
+      setIsDeactivateModalOpen(false);
     } catch (e: any) {
-      alert("Error deleting nurse: " + e.message);
+      alert("Error deactivating nurse: " + e.message);
+    }
+  };
+
+  const handleReactivate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("nurses")
+        .update({ 
+          status: "Active", 
+          deleted_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", params.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      setNurse(data);
+      setFormData(data);
+    } catch (e: any) {
+      alert("Error reactivating nurse: " + e.message);
     }
   };
 
@@ -177,11 +209,24 @@ export default function NurseProfilePage() {
             <button className={styles.btnAction} onClick={() => setIsEditModalOpen(true)}>
               <Edit size={16} /> Edit Profile
             </button>
-            <button className={`${styles.btnAction} ${styles.btnDanger}`} onClick={handleDelete}>
-              <Trash2 size={16} /> Remove
-            </button>
+            {nurse.status !== "Inactive" ? (
+              <button className={`${styles.btnAction} ${styles.btnDanger}`} onClick={() => setIsDeactivateModalOpen(true)}>
+                <Trash2 size={16} /> Deactivate Nurse
+              </button>
+            ) : (
+              <button className={`${styles.btnAction}`} onClick={handleReactivate}>
+                <Activity size={16} /> Reactivate Nurse
+              </button>
+            )}
           </div>
         </div>
+
+        {nurse.status === "Inactive" && (
+          <div className={styles.inactiveBanner}>
+            <AlertTriangle size={18} />
+            This nurse is currently inactive and cannot receive new assignments.
+          </div>
+        )}
 
         <div className={styles.profileCard}>
           <div className={styles.profileSidebar}>
@@ -428,6 +473,24 @@ export default function NurseProfilePage() {
                 <button type="submit" form="editNurseForm" className={styles.btnSave} disabled={isSaving}>
                   {isSaving ? "Saving..." : "Save Changes"}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Deactivate Modal */}
+        {isDeactivateModalOpen && (
+          <div className={styles.dialogOverlay} onClick={() => setIsDeactivateModalOpen(false)}>
+            <div className={styles.dialogContent} onClick={e => e.stopPropagation()}>
+              <h3 className={styles.dialogTitle}>Deactivate Nurse</h3>
+              <div className={styles.dialogMessage}>
+                This nurse will no longer appear in active lists and cannot be assigned to new patients or wards.
+                <br /><br />
+                Existing historical records will be preserved. This action can be reversed later.
+              </div>
+              <div className={styles.dialogActions}>
+                <button className={styles.btnCancel} onClick={() => setIsDeactivateModalOpen(false)}>Cancel</button>
+                <button className={styles.btnDeactivate} onClick={handleDeactivate}>Deactivate</button>
               </div>
             </div>
           </div>
