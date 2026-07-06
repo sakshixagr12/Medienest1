@@ -43,7 +43,7 @@ export default function NurseManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterShift, setFilterShift] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState("Active");
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -164,7 +164,7 @@ export default function NurseManagementPage() {
       (nurse.email && nurse.email.toLowerCase().includes(searchQuery.toLowerCase()));
       
     const matchesShift = filterShift ? nurse.shift === filterShift : true;
-    const matchesStatus = filterStatus ? nurse.status === filterStatus : true;
+    const matchesStatus = (filterStatus === "All" || !filterStatus) ? true : nurse.status === filterStatus;
 
     return matchesSearch && matchesShift && matchesStatus;
   });
@@ -284,7 +284,7 @@ export default function NurseManagementPage() {
             <option value="General">General</option>
           </select>
           <select className={styles.filterSelect} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="">All Statuses</option>
+            <option value="All">All Statuses</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
             <option value="On Leave">On Leave</option>
