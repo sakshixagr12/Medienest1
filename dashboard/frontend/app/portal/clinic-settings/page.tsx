@@ -367,6 +367,12 @@ export default function ClinicSettingsPage() {
   return (
     <DashboardLayout hideSidebar>
       <div className={styles.header}>
+        <div style={{ marginBottom: '16px' }}>
+          <Link href="/portal" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>
+            <ChevronLeft size={16} />
+            Back to Portal
+          </Link>
+        </div>
         <div className={styles.headerText}>
           <h1>Hospital Settings</h1>
           <p>Manage hospital profile, infrastructure, medical staff, and billing.</p>
