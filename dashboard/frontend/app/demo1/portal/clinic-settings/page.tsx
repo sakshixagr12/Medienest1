@@ -461,6 +461,10 @@ export default function ClinicSettingsPage() {
                 <UserPlus size={16} />
                 Add Doctor
               </button>
+              <Link href="/demo1/portal/nurse-management" className={styles.btnSecondary}>
+                <Users size={16} />
+                Manage Nurses
+              </Link>
             </div>
             {doctors && doctors.length >= maxAllowedDoctors && (
               <p className={styles.limitText}>
