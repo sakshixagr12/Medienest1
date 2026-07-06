@@ -61,14 +61,31 @@ export default function NurseProfilePage() {
     setIsLoading(true);
     try {
       const [nurseRes, wardsRes] = await Promise.all([
-        supabase.from("nurses").select("*").eq("id", params.id).single(),
+        supabase.from("nurses").select(`
+          *,
+          nurse_ward_assignments (
+            ward_id,
+            assignment_type,
+            is_active
+          )
+        `).eq("id", params.id).single(),
         supabase.from("wards").select("id, ward_name")
       ]);
 
       if (nurseRes.error) throw nurseRes.error;
       
-      setNurse(nurseRes.data);
-      setFormData(nurseRes.data);
+      // Map Primary ward from junction table for UI backward compatibility
+      const nurseData = nurseRes.data;
+      const primaryAssignment = nurseData.nurse_ward_assignments?.find(
+        (a: any) => a.assignment_type === 'Primary' && a.is_active
+      );
+      
+      if (primaryAssignment) {
+        nurseData.primary_ward_id = primaryAssignment.ward_id;
+      }
+      
+      setNurse(nurseData);
+      setFormData(nurseData);
       setWards(wardsRes.data || []);
     } catch (e: any) {
       console.error("Error fetching nurse profile:", e.message);
@@ -107,7 +124,35 @@ export default function NurseProfilePage() {
         throw error;
       }
 
-      setNurse(data);
+      // Handle the primary ward assignment in junction table
+      if (submitData.primary_ward_id) {
+        const { data: existingAssignments } = await supabase
+          .from("nurse_ward_assignments")
+          .select("id")
+          .eq("nurse_id", params.id)
+          .eq("assignment_type", "Primary");
+          
+        if (existingAssignments && existingAssignments.length > 0) {
+          // Update the existing one
+          await supabase
+            .from("nurse_ward_assignments")
+            .update({ ward_id: submitData.primary_ward_id, is_active: true })
+            .eq("id", existingAssignments[0].id);
+        } else {
+          // Create new one
+          await supabase
+            .from("nurse_ward_assignments")
+            .insert([{
+              nurse_id: params.id,
+              ward_id: submitData.primary_ward_id,
+              assignment_type: 'Primary',
+              is_active: true
+            }]);
+        }
+      }
+
+      // Re-fetch to get the properly mapped updated data
+      fetchData();
       setIsEditModalOpen(false);
     } catch (e: any) {
       setErrorMsg(e.message);
@@ -296,6 +341,18 @@ export default function NurseProfilePage() {
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Joining Date</span>
                 <span className={styles.detailValue}>{nurse.joining_date || "N/A"}</span>
+              </div>
+            </div>
+
+            {/* Additional Ward Assignments Placeholder */}
+            <div className={styles.detailsGrid} style={{ marginTop: '24px' }}>
+              <div className={styles.detailItem} style={{ gridColumn: '1 / -1' }}>
+                <span className={styles.detailLabel} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <MapPin size={16} /> Additional Ward Assignments
+                </span>
+                <span className={styles.detailValue} style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '8px', display: 'block' }}>
+                  No secondary assignments
+                </span>
               </div>
             </div>
 
