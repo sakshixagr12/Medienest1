@@ -106,6 +106,8 @@ export default function NurseProfilePage() {
 
     try {
       const submitData = { ...formData };
+      delete submitData.employee_id; // Prevent updating the auto-generated ID
+
       if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
       if (submitData.joining_date === "") submitData.joining_date = null as any;
       if (submitData.registration_number === "") submitData.registration_number = null as any;
@@ -119,9 +121,9 @@ export default function NurseProfilePage() {
       
       if (error) {
         if (error.code === '23505') {
-          throw new Error("Employee ID, Phone, or Registration Number already exists.");
+          throw new Error("Phone or Registration Number already exists.");
         }
-        throw error;
+        throw new Error("Unable to update Nurse record. Please try again.");
       }
 
       // Handle the primary ward assignment in junction table
@@ -425,8 +427,8 @@ export default function NurseProfilePage() {
                   </div>
                   
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Employee ID *</label>
-                    <input type="text" name="employee_id" className={styles.input} required value={formData.employee_id || ""} onChange={handleInputChange} />
+                    <label className={styles.label}>Employee ID</label>
+                    <input type="text" className={styles.input} disabled value={formData.employee_id || ""} style={{ opacity: 0.7, cursor: 'not-allowed', backgroundColor: '#f1f5f9' }} />
                   </div>
 
                   <div className={styles.formGroup}>
