@@ -405,7 +405,7 @@ export default function NurseManagementPage() {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Phone Number *</label>
-                    <input type="text" name="phone" className={styles.input} required value={formData.phone} onChange={handleInputChange} />
+                    <input type="tel" name="phone" className={styles.input} required value={formData.phone} onChange={handleInputChange} maxLength={10} pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" />
                   </div>
 
                   <div className={styles.formGroup}>
