@@ -142,7 +142,7 @@ export default function NurseManagementPage() {
         if (error.code === '23505') {
           throw new Error("Phone or Registration Number already exists.");
         }
-        throw new Error("Unable to create Nurse record. Please try again.");
+        throw new Error(`Insertion failed: ${error.message} (Code: ${error.code})`);
       }
 
       const newNurse = data[0];
