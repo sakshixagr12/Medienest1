@@ -69,6 +69,8 @@ export default function NurseManagementPage() {
     date_of_birth: "",
     joining_date: new Date().toISOString().split('T')[0]
   });
+  
+  const [isGeneratingId, setIsGeneratingId] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -128,9 +130,7 @@ export default function NurseManagementPage() {
         throw new Error("Please fill all required fields.");
       }
 
-      // Convert empty strings to null for optional unique/date fields
       const submitData = { ...formData };
-      delete submitData.employee_id; // Let the database trigger generate this safely
       
       if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
       if (submitData.joining_date === "") submitData.joining_date = null as any;
@@ -140,6 +140,9 @@ export default function NurseManagementPage() {
       
       if (error) {
         if (error.code === '23505') {
+          if (error.message && error.message.includes('employee_id')) {
+            throw new Error("This Employee ID was just taken by another user. Please close and reopen the form to get a new ID.");
+          }
           throw new Error("Phone or Registration Number already exists.");
         }
         throw new Error(`Insertion failed: ${error.message} (Code: ${error.code})`);
@@ -242,6 +245,35 @@ export default function NurseManagementPage() {
   const nightShiftNurses = nurses.filter(n => n.shift === "Night").length;
   const inactiveNurses = nurses.filter(n => n.status === "Inactive").length;
 
+  const openAddModal = async () => {
+    setIsAddModalOpen(true);
+    setIsGeneratingId(true);
+    try {
+      // Fetch highest existing NUR- ID
+      const { data, error } = await supabase
+        .from("nurses")
+        .select("employee_id")
+        .like("employee_id", "NUR-%")
+        .order("employee_id", { ascending: false })
+        .limit(1);
+        
+      let nextId = "NUR-0001";
+      if (!error && data && data.length > 0) {
+        const lastId = data[0].employee_id;
+        const numMatch = lastId.match(/\d+$/);
+        if (numMatch) {
+          const nextNum = parseInt(numMatch[0], 10) + 1;
+          nextId = `NUR-${nextNum.toString().padStart(4, '0')}`;
+        }
+      }
+      setFormData(prev => ({ ...prev, employee_id: nextId }));
+    } catch (e) {
+      console.error("Failed to generate next ID", e);
+    } finally {
+      setIsGeneratingId(false);
+    }
+  };
+
   return (
     <DashboardLayout hideSidebar>
       <div className={styles.container}>
@@ -251,7 +283,7 @@ export default function NurseManagementPage() {
             <p className={styles.subtitle}>Manage nursing staff, assignments, and schedules.</p>
           </div>
           <div className={styles.headerActions}>
-            <button className={styles.btnAdd} onClick={() => setIsAddModalOpen(true)}>
+            <button className={styles.btnAdd} onClick={openAddModal}>
               <UserPlus size={16} /> Add Nurse
             </button>
           </div>
@@ -433,7 +465,7 @@ export default function NurseManagementPage() {
                   
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Employee ID</label>
-                    <input type="text" className={styles.input} disabled value="(Auto Generated)" style={{ opacity: 0.7, cursor: 'not-allowed', backgroundColor: '#f1f5f9' }} />
+                    <input type="text" className={styles.input} disabled value={isGeneratingId ? "Generating..." : `${formData.employee_id} (Auto Generated)`} style={{ opacity: 0.7, cursor: 'not-allowed', backgroundColor: '#f1f5f9' }} />
                   </div>
 
                   <div className={styles.formGroup}>
