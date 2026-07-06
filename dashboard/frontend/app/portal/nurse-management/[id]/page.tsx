@@ -91,6 +91,7 @@ export default function NurseProfilePage() {
       const submitData = { ...formData };
       if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
       if (submitData.joining_date === "") submitData.joining_date = null as any;
+      if (submitData.registration_number === "") submitData.registration_number = null as any;
 
       const { data, error } = await supabase
         .from("nurses")
