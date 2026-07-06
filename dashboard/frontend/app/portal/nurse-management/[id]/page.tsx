@@ -25,7 +25,8 @@ interface Nurse {
   primary_ward_id?: string;
   experience_years?: number;
   joining_date?: string;
-  shift: string;
+  shift_id?: string;
+  shifts?: any;
   status: string;
   photo_url?: string;
   address?: string;
@@ -44,6 +45,7 @@ export default function NurseProfilePage() {
   
   const [nurse, setNurse] = useState<Nurse | null>(null);
   const [wards, setWards] = useState<Ward[]>([]);
+  const [shifts, setShifts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Edit modal
@@ -60,16 +62,18 @@ export default function NurseProfilePage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [nurseRes, wardsRes] = await Promise.all([
+      const [nurseRes, wardsRes, shiftsRes] = await Promise.all([
         supabase.from("nurses").select(`
           *,
+          shifts (id, shift_name),
           nurse_ward_assignments (
             ward_id,
             assignment_type,
             is_active
           )
         `).eq("id", params.id).single(),
-        supabase.from("wards").select("id, ward_name")
+        supabase.from("wards").select("id, ward_name"),
+        supabase.from("shifts").select("*").eq("is_active", true).order("display_order")
       ]);
 
       if (nurseRes.error) throw nurseRes.error;
@@ -87,6 +91,7 @@ export default function NurseProfilePage() {
       setNurse(nurseData);
       setFormData(nurseData);
       setWards(wardsRes.data || []);
+      setShifts(shiftsRes.data || []);
     } catch (e: any) {
       console.error("Error fetching nurse profile:", e.message);
     } finally {
@@ -107,6 +112,8 @@ export default function NurseProfilePage() {
     try {
       const submitData = { ...formData };
       delete submitData.employee_id; // Prevent updating the auto-generated ID
+      delete submitData.shifts; // Do not send relation object
+
 
       if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
       if (submitData.joining_date === "") submitData.joining_date = null as any;
@@ -326,7 +333,7 @@ export default function NurseProfilePage() {
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Assigned Shift</span>
-                <span className={styles.detailValue}>{nurse.shift}</span>
+                <span className={styles.detailValue}>{nurse.shifts?.shift_name || "Unassigned"}</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Qualification</span>
@@ -483,11 +490,13 @@ export default function NurseProfilePage() {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Shift *</label>
-                    <select name="shift" className={styles.select} required value={formData.shift || ""} onChange={handleInputChange}>
-                      <option value="Morning">Morning (06:00 - 14:00)</option>
-                      <option value="Evening">Evening (14:00 - 22:00)</option>
-                      <option value="Night">Night (22:00 - 06:00)</option>
-                      <option value="General">General (09:00 - 17:00)</option>
+                    <select name="shift_id" className={styles.select} required value={formData.shift_id || ""} onChange={handleInputChange}>
+                      <option value="">Select Shift</option>
+                      {shifts.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.shift_name} ({s.start_time.substring(0,5)} - {s.end_time.substring(0,5)})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
