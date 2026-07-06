@@ -465,6 +465,10 @@ export default function ClinicSettingsPage() {
                 <Users size={16} />
                 Manage Nurses
               </Link>
+              <Link href="/portal/shift-management" className={styles.btnSecondary}>
+                <Clock size={16} />
+                Shift Management
+              </Link>
             </div>
             {doctors && doctors.length >= maxAllowedDoctors && (
               <p className={styles.limitText}>
