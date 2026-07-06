@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
-import { ArrowLeft, Clock, Users } from "lucide-react";
+import { ArrowLeft, Clock, Users, Activity } from "lucide-react";
+import { EMPLOYEE_ROLES } from "../page";
 
 interface Shift {
   id: string;
@@ -20,12 +21,14 @@ interface Shift {
   description: string;
 }
 
-interface Nurse {
+interface AssignedEmployee {
   id: string;
   employee_id: string;
   full_name: string;
   department: string;
   status: string;
+  roleType: string;
+  link: string;
 }
 
 export default function ShiftDetailsPage() {
@@ -34,7 +37,7 @@ export default function ShiftDetailsPage() {
   const supabase = createClient();
 
   const [shift, setShift] = useState<Shift | null>(null);
-  const [nurses, setNurses] = useState<Nurse[]>([]);
+  const [employees, setEmployees] = useState<AssignedEmployee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -59,17 +62,31 @@ export default function ShiftDetailsPage() {
     }
     setShift(shiftData);
 
-    // Fetch assigned nurses
-    const { data: nursesData, error: nursesError } = await supabase
-      .from("nurses")
-      .select("id, employee_id, full_name, department, status")
-      .eq("shift_id", id);
-
-    if (nursesError) {
-      console.error("Error fetching assigned nurses:", nursesError);
-    } else {
-      setNurses(nursesData || []);
+    // Fetch assigned employees dynamically across roles
+    const fetchedEmployees: AssignedEmployee[] = [];
+    
+    for (const role of EMPLOYEE_ROLES) {
+      const { data: roleData, error: roleError } = await supabase
+        .from(role.tableName)
+        .select("id, employee_id, full_name, department, status")
+        .eq("shift_id", id);
+        
+      if (!roleError && roleData) {
+        roleData.forEach(emp => {
+          fetchedEmployees.push({
+            id: emp.id,
+            employee_id: emp.employee_id || '-',
+            full_name: emp.full_name,
+            department: emp.department || '-',
+            status: emp.status || 'Active',
+            roleType: role.label,
+            link: role.key === 'nurses' ? `/portal/nurse-management/${emp.id}` : '#'
+          });
+        });
+      }
     }
+    
+    setEmployees(fetchedEmployees);
 
     setIsLoading(false);
   };
@@ -115,7 +132,16 @@ export default function ShiftDetailsPage() {
     return `${h}:${m}`;
   };
 
-  const activeStaffCount = nurses.filter(n => n.status === "Active").length;
+  const activeStaffCount = employees.filter(n => n.status === "Active").length;
+  
+  const groupedEmployees = EMPLOYEE_ROLES.map(role => {
+    const roleEmps = employees.filter(e => e.roleType === role.label);
+    return {
+      label: role.label,
+      count: roleEmps.length,
+      employees: roleEmps
+    };
+  });
 
   return (
     <DashboardLayout hideSidebar>
@@ -179,50 +205,78 @@ export default function ShiftDetailsPage() {
             )}
             
             <h2 className={styles.sectionTitle} style={{ marginTop: 40, borderTop: '1px solid #e2e8f0', paddingTop: 32 }}>
-               <Users size={18} />
-               Assigned Staff ({nurses.length} Total, {activeStaffCount} Active)
+               <Activity size={18} />
+               Role Summary
             </h2>
             
-            <div className={styles.tableContainer}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Employee ID</th>
-                    <th>Name</th>
-                    <th>Role/Department</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {nurses.length === 0 ? (
-                    <tr>
-                      <td colSpan={4}>
-                        <div className={styles.emptyState}>
-                          No staff members are currently assigned to this shift.
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    nurses.map(nurse => (
-                      <tr key={nurse.id}>
-                        <td>{nurse.employee_id}</td>
-                        <td style={{ fontWeight: 500 }}>
-                           <Link href={`/portal/nurse-management/${nurse.id}`} style={{ textDecoration: 'none', color: '#0f172a' }}>
-                              {nurse.full_name}
-                           </Link>
-                        </td>
-                        <td>Nurse - {nurse.department}</td>
-                        <td>
-                          <span className={nurse.status === 'Active' ? styles.badgeActive : styles.badgeInactive} style={{ padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>
-                            {nurse.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div className={styles.detailsGrid}>
+              <div className={styles.detailItem} style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <span className={styles.detailLabel}>Total Assigned</span>
+                <span className={styles.detailValue} style={{ fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>{employees.length}</span>
+              </div>
+              
+              {groupedEmployees.map(group => (
+                <div key={group.label} className={styles.detailItem} style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span className={styles.detailLabel}>{group.label}</span>
+                  <span className={styles.detailValue} style={{ fontSize: '20px', fontWeight: 600 }}>{group.count}</span>
+                </div>
+              ))}
             </div>
+            
+            <h2 className={styles.sectionTitle} style={{ marginTop: 40, borderTop: '1px solid #e2e8f0', paddingTop: 32 }}>
+               <Users size={18} />
+               Assigned Employees ({activeStaffCount} Active)
+            </h2>
+            
+            {employees.length === 0 ? (
+               <div className={styles.emptyState}>
+                 No staff members are currently assigned to this shift.
+               </div>
+            ) : (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                 {groupedEmployees.map(group => group.count > 0 && (
+                   <div key={group.label}>
+                     <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                       {group.label} ({group.count})
+                     </h3>
+                     <div className={styles.tableContainer}>
+                       <table className={styles.table}>
+                         <thead>
+                           <tr>
+                             <th>Employee ID</th>
+                             <th>Name</th>
+                             <th>Department</th>
+                             <th>Status</th>
+                           </tr>
+                         </thead>
+                         <tbody>
+                           {group.employees.map(emp => (
+                             <tr key={emp.id}>
+                               <td style={{ color: '#64748b' }}>{emp.employee_id}</td>
+                               <td style={{ fontWeight: 500 }}>
+                                 {emp.link !== '#' ? (
+                                   <Link href={emp.link} style={{ textDecoration: 'none', color: '#0f172a' }}>
+                                      {emp.full_name}
+                                   </Link>
+                                 ) : (
+                                   <span style={{ color: '#0f172a' }}>{emp.full_name}</span>
+                                 )}
+                               </td>
+                               <td>{emp.department}</td>
+                               <td>
+                                 <span className={emp.status === 'Active' ? styles.badgeActive : styles.badgeInactive} style={{ padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>
+                                   {emp.status}
+                                 </span>
+                               </td>
+                             </tr>
+                           ))}
+                         </tbody>
+                       </table>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            )}
 
           </div>
         </div>
