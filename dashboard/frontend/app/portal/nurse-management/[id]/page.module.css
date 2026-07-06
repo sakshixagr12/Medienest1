@@ -406,3 +406,79 @@
   border-radius: 6px;
   border: 1px solid #fecaca;
 }
+
+/* Inactive Banner */
+.inactiveBanner {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  color: #b91c1c;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 4px;
+}
+
+/* Deactivate Dialog */
+.dialogOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dialogContent {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dialogTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.dialogMessage {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btnDeactivate {
+  padding: 10px 20px;
+  background-color: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnDeactivate:hover {
+  background-color: #dc2626;
+}
+
+.btnDeactivate:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
