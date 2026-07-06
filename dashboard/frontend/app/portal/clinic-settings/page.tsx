@@ -86,10 +86,10 @@ export default function ClinicSettingsPage() {
       const { data: wardsData } = await supabase.from("wards").select("id, is_active");
       const { data: bedsData } = await supabase.from("beds").select("id, status");
 
-      const activeWards = wardsData?.filter((w: any) => w.is_active).length || 0;
-      const totalBeds = bedsData?.length || 0;
-      const occupiedBeds = bedsData?.filter((b: any) => b.status === "Occupied").length || 0;
-      const availableBeds = bedsData?.filter((b: any) => b.status === "Available").length || 0;
+      const activeWards = (wardsData || []).filter((w: any) => w.is_active).length;
+      const totalBeds = (bedsData || []).length;
+      const occupiedBeds = (bedsData || []).filter((b: any) => b.status === "Occupied").length;
+      const availableBeds = (bedsData || []).filter((b: any) => b.status === "Available").length;
       const occupancyRate = totalBeds > 0 ? ((occupiedBeds / totalBeds) * 100).toFixed(1) + "%" : "0%";
 
       setInfraStats({
