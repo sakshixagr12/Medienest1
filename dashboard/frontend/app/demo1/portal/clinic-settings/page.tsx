@@ -72,14 +72,37 @@ export default function ClinicSettingsPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showExpiredWarning, setShowExpiredWarning] = useState(false);
   
-  // Infrastructure Mock Stats (would fetch in real app)
+  // Infrastructure Stats
   const [infraStats, setInfraStats] = useState({
-    wards: 4,
-    totalBeds: 120,
-    occupiedBeds: 85,
-    availableBeds: 35,
-    occupancyRate: "70.8%"
+    wards: 0,
+    totalBeds: 0,
+    occupiedBeds: 0,
+    availableBeds: 0,
+    occupancyRate: "0%"
   });
+
+  const fetchInfraStats = async () => {
+    try {
+      const { data: wardsData } = await supabase.from("wards").select("id, is_active");
+      const { data: bedsData } = await supabase.from("beds").select("id, status");
+
+      const activeWards = wardsData?.filter(w => w.is_active).length || 0;
+      const totalBeds = bedsData?.length || 0;
+      const occupiedBeds = bedsData?.filter(b => b.status === "Occupied").length || 0;
+      const availableBeds = bedsData?.filter(b => b.status === "Available").length || 0;
+      const occupancyRate = totalBeds > 0 ? ((occupiedBeds / totalBeds) * 100).toFixed(1) + "%" : "0%";
+
+      setInfraStats({
+        wards: activeWards,
+        totalBeds,
+        occupiedBeds,
+        availableBeds,
+        occupancyRate
+      });
+    } catch (e) {
+      console.error("Error fetching infra stats", e);
+    }
+  };
 
   // Fetch subscription details
   const fetchSubscription = async () => {
@@ -141,6 +164,7 @@ export default function ClinicSettingsPage() {
       setClinicRegNumber("MCI-H-998877");
       
       fetchSubscription();
+      fetchInfraStats();
 
       // Check if redirected back with an order_id
       if (typeof window !== "undefined") {
