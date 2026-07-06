@@ -18,7 +18,15 @@ interface Shift {
   is_default: boolean;
   is_active: boolean;
   description: string;
+  assigned_count?: number;
 }
+
+export const EMPLOYEE_ROLES = [
+  { key: "nurses", label: "Nurses", tableName: "nurses" },
+  { key: "doctors", label: "Doctors", tableName: "doctors" },
+  { key: "receptionists", label: "Receptionists", tableName: "receptionists" },
+  { key: "lab_staff", label: "Lab Staff", tableName: "lab_staff" },
+];
 
 const BADGE_COLORS = [
   { value: "blue", label: "Blue" },
@@ -58,7 +66,7 @@ export default function ShiftManagementPage() {
 
   const fetchShifts = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
+    const { data: shiftData, error } = await supabase
       .from("shifts")
       .select("*")
       .order("display_order", { ascending: true })
@@ -66,9 +74,35 @@ export default function ShiftManagementPage() {
 
     if (error) {
       console.error("Error fetching shifts:", error.message, error);
-    } else {
-      setShifts(data || []);
+      setIsLoading(false);
+      return;
     }
+    
+    // Efficiently aggregate counts across all roles
+    const countsByShift: Record<string, number> = {};
+    (shiftData || []).forEach(s => countsByShift[s.id] = 0);
+
+    for (const role of EMPLOYEE_ROLES) {
+      const { data: activeEmployees, error: roleError } = await supabase
+        .from(role.tableName)
+        .select("shift_id")
+        .eq("status", "Active");
+      
+      if (!roleError && activeEmployees) {
+        activeEmployees.forEach(emp => {
+          if (emp.shift_id && countsByShift[emp.shift_id] !== undefined) {
+             countsByShift[emp.shift_id]++;
+          }
+        });
+      }
+    }
+
+    const shiftsWithCounts = (shiftData || []).map(shift => ({
+      ...shift,
+      assigned_count: countsByShift[shift.id]
+    }));
+
+    setShifts(shiftsWithCounts);
     setIsLoading(false);
   };
 
@@ -183,20 +217,24 @@ export default function ShiftManagementPage() {
     
     // Check assignments before deactivating
     if (shift.is_active) {
-      const { data: assignments, error } = await supabase
-        .from("nurses")
-        .select("id")
-        .eq("shift_id", shift.id)
-        .eq("status", "Active")
-        .limit(1);
-        
-      if (error) {
-        alert("Error checking assignments.");
-        return;
+      let hasActiveEmployees = false;
+      
+      for (const role of EMPLOYEE_ROLES) {
+        const { data: assignments, error } = await supabase
+          .from(role.tableName)
+          .select("id")
+          .eq("shift_id", shift.id)
+          .eq("status", "Active")
+          .limit(1);
+          
+        if (!error && assignments && assignments.length > 0) {
+          hasActiveEmployees = true;
+          break;
+        }
       }
       
-      if (assignments && assignments.length > 0) {
-        alert("Cannot deactivate: This shift is currently assigned to one or more active employees.");
+      if (hasActiveEmployees) {
+        alert("This shift is assigned to active employees. Please reassign them before deactivating or deleting this shift.");
         return;
       }
     }
@@ -346,11 +384,9 @@ export default function ShiftManagementPage() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Shift Code</th>
-                <th>Shift Name</th>
+                <th>Shift</th>
                 <th>Timing</th>
-                <th>Duration</th>
-                <th>Night Shift</th>
+                <th>Employees Assigned</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -372,21 +408,32 @@ export default function ShiftManagementPage() {
                 filteredShifts.map(shift => (
                   <tr key={shift.id}>
                     <td>
-                      <span style={{ fontWeight: 600, color: '#475569' }}>{shift.shift_code}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                           <span className={`${styles.badge} ${getBadgeClass(shift.badge_color)}`} style={{ marginRight: '8px', padding: '2px 8px', fontSize: '11px' }}>
+                             {shift.shift_code}
+                           </span>
+                           {shift.shift_name}
+                        </span>
+                        <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {shift.is_night_shift && (
+                             <span style={{ backgroundColor: '#1e293b', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>NIGHT</span>
+                          )}
+                          Duration: {calculateDuration(shift.start_time, shift.end_time, shift.is_night_shift)}
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <span className={`${styles.badge} ${getBadgeClass(shift.badge_color)}`}>
-                        {shift.shift_name}
-                      </span>
+                      <div style={{ fontWeight: 500, color: '#334155' }}>
+                        {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
+                      </div>
                     </td>
                     <td>
-                      {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
-                    </td>
-                    <td>
-                      {calculateDuration(shift.start_time, shift.end_time, shift.is_night_shift)}
-                    </td>
-                    <td>
-                      {shift.is_night_shift ? "Yes" : "No"}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                         <div style={{ backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '12px', fontWeight: 600, color: '#0f172a', fontSize: '13px' }}>
+                           {shift.assigned_count} Employees
+                         </div>
+                      </div>
                     </td>
                     <td>
                       <span className={`${styles.badge} ${shift.is_active ? styles.badgeActive : styles.badgeInactive}`}>
