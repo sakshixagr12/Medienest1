@@ -1,0 +1,211 @@
+.container {
+  padding: 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #3b82f6;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btnAction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #334155;
+}
+
+.btnAction:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .profileCard {
+    flex-direction: row;
+  }
+}
+
+.profileSidebar {
+  padding: 32px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid #e2e8f0;
+  min-width: 300px;
+}
+
+.iconContainer {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.title {
+  color: #64748b;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+/* Badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.badgeActive { background-color: #dcfce7; color: #16a34a; }
+.badgeInactive { background-color: #f1f5f9; color: #64748b; }
+
+.badgeColorBlue { background-color: #e0f2fe; color: #0284c7; }
+.badgeColorOrange { background-color: #ffedd5; color: #ea580c; }
+.badgeColorPurple { background-color: #f3e8ff; color: #9333ea; }
+.badgeColorGreen { background-color: #dcfce7; color: #16a34a; }
+.badgeColorGray { background-color: #f1f5f9; color: #475569; }
+
+/* Profile Details */
+.profileDetails {
+  padding: 32px;
+  flex: 1;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailLabel {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detailValue {
+  font-size: 15px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* Table styles for assignments */
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th, .table td {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px;
+  background: white;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 15px;
+}
