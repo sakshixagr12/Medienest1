@@ -243,7 +243,7 @@ export default function NurseManagementPage() {
   const inactiveNurses = nurses.filter(n => n.status === "Inactive").length;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout hideSidebar>
       <div className={styles.container}>
         <div className={styles.header}>
           <div>
