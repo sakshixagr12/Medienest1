@@ -49,7 +49,7 @@ export default function WardManagementPage() {
     ward_name: "",
     ward_type: "General",
     floor: "",
-    capacity: 0,
+    capacity: "" as unknown as number,
     description: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export default function WardManagementPage() {
         ward_name: "",
         ward_type: "General",
         floor: "",
-        capacity: 0,
+        capacity: "" as unknown as number,
         description: "",
       });
     }
@@ -529,7 +529,7 @@ export default function WardManagementPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      capacity: parseInt(e.target.value) || 0,
+                      capacity: e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value),
                     })
                   }
                 />
