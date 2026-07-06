@@ -230,6 +230,12 @@
 .badgeShiftNight { background-color: #f1f5f9; color: #475569; }
 .badgeShiftGeneral { background-color: #f3e8ff; color: #9333ea; }
 
+.badgeColorBlue { background-color: #e0f2fe; color: #0284c7; }
+.badgeColorOrange { background-color: #ffedd5; color: #ea580c; }
+.badgeColorPurple { background-color: #f3e8ff; color: #9333ea; }
+.badgeColorGreen { background-color: #dcfce7; color: #16a34a; }
+.badgeColorGray { background-color: #f1f5f9; color: #475569; }
+
 /* Actions */
 .actions {
   display: flex;

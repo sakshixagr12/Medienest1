@@ -24,7 +24,8 @@ interface Nurse {
   primary_ward_id?: string;
   experience_years?: number;
   joining_date?: string;
-  shift: string;
+  shift_id?: string;
+  shifts?: any; // The relation
   status: string;
   photo_url?: string;
   address?: string;
@@ -40,6 +41,7 @@ export default function NurseManagementPage() {
   const supabase = createClient();
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [wards, setWards] = useState<Ward[]>([]);
+  const [shifts, setShifts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterShift, setFilterShift] = useState("");
@@ -60,7 +62,7 @@ export default function NurseManagementPage() {
     registration_number: "",
     department: "",
     primary_ward_id: "",
-    shift: "General",
+    shift_id: "",
     status: "Active",
     experience_years: 0,
     photo_url: "",
@@ -79,20 +81,23 @@ export default function NurseManagementPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [nursesRes, wardsRes] = await Promise.all([
+      const [nursesRes, wardsRes, shiftsRes] = await Promise.all([
         supabase.from("nurses").select(`
           *,
+          shifts ( id, shift_name, badge_color ),
           nurse_ward_assignments (
             ward_id,
             assignment_type,
             is_active
           )
         `).order("created_at", { ascending: false }),
-        supabase.from("wards").select("id, ward_name")
+        supabase.from("wards").select("id, ward_name"),
+        supabase.from("shifts").select("*").eq("is_active", true).order("display_order", { ascending: true })
       ]);
 
       if (nursesRes.error) throw nursesRes.error;
       if (wardsRes.error) throw wardsRes.error;
+      if (shiftsRes.error) throw shiftsRes.error;
 
       // Map Primary ward from junction table for UI backward compatibility
       const processedNurses = (nursesRes.data || []).map((nurse: any) => {
@@ -107,6 +112,7 @@ export default function NurseManagementPage() {
 
       setNurses(processedNurses);
       setWards(wardsRes.data || []);
+      setShifts(shiftsRes.data || []);
     } catch (e: any) {
       console.error("Error fetching data:", e.message);
     } finally {
@@ -126,7 +132,7 @@ export default function NurseManagementPage() {
 
     try {
       // Basic validation (employee_id is now auto-generated so we don't validate it here)
-      if (!formData.full_name || !formData.gender || !formData.phone || !formData.qualification || !formData.department || !formData.primary_ward_id || !formData.shift || !formData.status) {
+      if (!formData.full_name || !formData.gender || !formData.phone || !formData.qualification || !formData.department || !formData.primary_ward_id || !formData.shift_id || !formData.status) {
         throw new Error("Please fill all required fields.");
       }
 
@@ -161,8 +167,10 @@ export default function NurseManagementPage() {
       }
 
       // Add dummy assignment data to state to reflect properly in UI
+      const selectedShift = shifts.find(s => s.id === submitData.shift_id);
       const nurseToState = {
         ...newNurse,
+        shifts: selectedShift ? { id: selectedShift.id, shift_name: selectedShift.shift_name, badge_color: selectedShift.badge_color } : null,
         nurse_ward_assignments: submitData.primary_ward_id ? [{
           ward_id: submitData.primary_ward_id,
           assignment_type: 'Primary',
@@ -191,7 +199,7 @@ export default function NurseManagementPage() {
       registration_number: "",
       department: "",
       primary_ward_id: "",
-      shift: "General",
+      shift_id: "",
       status: "Active",
       experience_years: 0,
       photo_url: "",
@@ -209,7 +217,7 @@ export default function NurseManagementPage() {
       nurse.phone.includes(searchQuery) ||
       (nurse.email && nurse.email.toLowerCase().includes(searchQuery.toLowerCase()));
       
-    const matchesShift = filterShift ? nurse.shift === filterShift : true;
+    const matchesShift = filterShift ? nurse.shift_id === filterShift : true;
     const matchesStatus = (filterStatus === "All" || !filterStatus) ? true : nurse.status === filterStatus;
 
     return matchesSearch && matchesShift && matchesStatus;
@@ -221,8 +229,18 @@ export default function NurseManagementPage() {
     return ward ? ward.ward_name : "Unknown";
   };
 
-  const getShiftBadgeClass = (shift: string) => {
-    switch(shift) {
+  const getShiftBadgeClass = (shiftName?: string, color?: string) => {
+    if (color) {
+      switch(color) {
+        case "blue": return styles.badgeColorBlue;
+        case "orange": return styles.badgeColorOrange;
+        case "purple": return styles.badgeColorPurple;
+        case "green": return styles.badgeColorGreen;
+        default: return styles.badgeColorGray;
+      }
+    }
+    // Fallback for old data
+    switch(shiftName) {
       case "Morning": return styles.badgeShiftMorning;
       case "Evening": return styles.badgeShiftEvening;
       case "Night": return styles.badgeShiftNight;
@@ -242,7 +260,7 @@ export default function NurseManagementPage() {
   // Stats
   const activeNurses = nurses.filter(n => n.status === "Active").length;
   const onLeaveNurses = nurses.filter(n => n.status === "On Leave").length;
-  const nightShiftNurses = nurses.filter(n => n.shift === "Night").length;
+  const nightShiftNurses = nurses.filter(n => n.shifts && n.shifts.shift_name === "Night").length;
   const inactiveNurses = nurses.filter(n => n.status === "Inactive").length;
 
   const openAddModal = async () => {
@@ -353,10 +371,9 @@ export default function NurseManagementPage() {
           </div>
           <select className={styles.filterSelect} value={filterShift} onChange={(e) => setFilterShift(e.target.value)}>
             <option value="">All Shifts</option>
-            <option value="Morning">Morning</option>
-            <option value="Evening">Evening</option>
-            <option value="Night">Night</option>
-            <option value="General">General</option>
+            {shifts.map(s => (
+              <option key={s.id} value={s.id}>{s.shift_name}</option>
+            ))}
           </select>
           <select className={styles.filterSelect} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="All">All Statuses</option>
@@ -420,8 +437,8 @@ export default function NurseManagementPage() {
                       {nurse.email && <div style={{ fontSize: 12, color: '#64748b' }}>{nurse.email}</div>}
                     </td>
                     <td>
-                      <span className={`${styles.badge} ${getShiftBadgeClass(nurse.shift)}`}>
-                        {nurse.shift}
+                      <span className={`${styles.badge} ${getShiftBadgeClass(nurse.shifts?.shift_name || nurse.shift_id, nurse.shifts?.badge_color)}`}>
+                        {nurse.shifts?.shift_name || "Unassigned"}
                       </span>
                     </td>
                     <td>
@@ -520,11 +537,13 @@ export default function NurseManagementPage() {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Shift *</label>
-                    <select name="shift" className={styles.select} required value={formData.shift} onChange={handleInputChange}>
-                      <option value="Morning">Morning (06:00 - 14:00)</option>
-                      <option value="Evening">Evening (14:00 - 22:00)</option>
-                      <option value="Night">Night (22:00 - 06:00)</option>
-                      <option value="General">General (09:00 - 17:00)</option>
+                    <select name="shift_id" className={styles.select} required value={formData.shift_id} onChange={handleInputChange}>
+                      <option value="">Select Shift</option>
+                      {shifts.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.shift_name} ({s.start_time.substring(0,5)} - {s.end_time.substring(0,5)})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
