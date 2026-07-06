@@ -156,7 +156,7 @@ export default function DashboardTopBar({
     <header className={styles.topBar}>
       {/* Back to Portal button when sidebar is hidden */}
       {showBackToPortal && (
-        <Link href="/portal" className={styles.backToPortalBtn}>
+        <button type="button" onClick={() => router.back()} className={styles.backToPortalBtn}>
           <svg
             width="18"
             height="18"
@@ -167,8 +167,8 @@ export default function DashboardTopBar({
           >
             <path d="m15 18-6-6 6-6"/>
           </svg>
-          <span>Back to Portal</span>
-        </Link>
+          <span>Go Back</span>
+        </button>
       )}
 
       {/* Hamburger button - mobile only */}
