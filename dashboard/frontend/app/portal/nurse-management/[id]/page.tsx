@@ -208,7 +208,7 @@ export default function NurseProfilePage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout hideSidebar>
         <div className={styles.container}>
           <div style={{ textAlign: "center", padding: "100px" }}>Loading profile...</div>
         </div>
@@ -218,7 +218,7 @@ export default function NurseProfilePage() {
 
   if (!nurse) {
     return (
-      <DashboardLayout>
+      <DashboardLayout hideSidebar>
         <div className={styles.container}>
           <div style={{ textAlign: "center", padding: "100px" }}>Nurse not found.</div>
           <div style={{ textAlign: "center" }}>
@@ -247,7 +247,7 @@ export default function NurseProfilePage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout hideSidebar>
       <div className={styles.container}>
         <div className={styles.header}>
           <Link href="/portal/nurse-management" className={styles.backLink}>
