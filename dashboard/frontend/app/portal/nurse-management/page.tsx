@@ -110,7 +110,12 @@ export default function NurseManagementPage() {
         throw new Error("Please fill all required fields.");
       }
 
-      const { data, error } = await supabase.from("nurses").insert([formData]).select();
+      // Convert empty strings to null for date fields
+      const submitData = { ...formData };
+      if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
+      if (submitData.joining_date === "") submitData.joining_date = null as any;
+
+      const { data, error } = await supabase.from("nurses").insert([submitData]).select();
       
       if (error) {
         if (error.code === '23505') {

@@ -87,9 +87,13 @@ export default function NurseProfilePage() {
     setErrorMsg("");
 
     try {
+      const submitData = { ...formData };
+      if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
+      if (submitData.joining_date === "") submitData.joining_date = null as any;
+
       const { data, error } = await supabase
         .from("nurses")
-        .update(formData)
+        .update(submitData)
         .eq("id", params.id)
         .select()
         .single();
