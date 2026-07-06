@@ -156,7 +156,17 @@ export default function DashboardTopBar({
     <header className={styles.topBar}>
       {/* Back to Portal button when sidebar is hidden */}
       {showBackToPortal && (
-        <button type="button" onClick={() => router.back()} className={styles.backToPortalBtn}>
+        <button 
+          type="button" 
+          onClick={() => {
+            if (pathname === '/portal/clinic-settings') {
+              router.push('/portal');
+            } else {
+              router.back();
+            }
+          }} 
+          className={styles.backToPortalBtn}
+        >
           <svg
             width="18"
             height="18"
@@ -167,7 +177,7 @@ export default function DashboardTopBar({
           >
             <path d="m15 18-6-6 6-6"/>
           </svg>
-          <span>Go Back</span>
+          <span>{pathname === '/portal/clinic-settings' ? 'Back to Portal' : 'Go Back'}</span>
         </button>
       )}
 
