@@ -30,6 +30,7 @@ const WARD_TYPES = [
 export default function WardManagementPage() {
   const supabase = createClient();
   const [wards, setWards] = useState<Ward[]>([]);
+  const [beds, setBeds] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -69,6 +70,17 @@ export default function WardManagementPage() {
     } else {
       setWards(data || []);
     }
+
+    const { data: bedsData, error: bedsError } = await supabase
+      .from("beds")
+      .select("*");
+
+    if (bedsError) {
+      console.error("Error fetching beds:", bedsError.message, bedsError);
+    } else {
+      setBeds(bedsData || []);
+    }
+
     setIsLoading(false);
   };
 
@@ -328,16 +340,28 @@ export default function WardManagementPage() {
                       <span className={styles.infoValue}>{ward.floor}</span>
                     </div>
                     <div className={styles.infoRow}>
-                      <span className={styles.infoLabel}>Capacity</span>
-                      <span className={styles.infoValue}>{ward.capacity} Beds</span>
+                      <span className={styles.infoLabel}>Total Beds</span>
+                      <span className={styles.infoValue}>{ward.capacity}</span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>Available</span>
+                      <span className={styles.infoValue}>
+                        {beds.filter((b) => b.ward_id === ward.id && b.status === "Available").length}
+                      </span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>Occupied</span>
+                      <span className={styles.infoValue}>
+                        {beds.filter((b) => b.ward_id === ward.id && b.status === "Occupied").length}
+                      </span>
                     </div>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Status</span>
                       <span
                         className={styles.infoValue}
-                        style={{ color: "#16a34a" }}
+                        style={{ color: ward.is_active ? "#16a34a" : "#dc2626" }}
                       >
-                        Active
+                        {ward.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </div>
