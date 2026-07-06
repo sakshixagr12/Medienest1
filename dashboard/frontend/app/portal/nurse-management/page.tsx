@@ -123,13 +123,15 @@ export default function NurseManagementPage() {
     setErrorMsg("");
 
     try {
-      // Basic validation
-      if (!formData.full_name || !formData.employee_id || !formData.gender || !formData.phone || !formData.qualification || !formData.department || !formData.primary_ward_id || !formData.shift || !formData.status) {
+      // Basic validation (employee_id is now auto-generated so we don't validate it here)
+      if (!formData.full_name || !formData.gender || !formData.phone || !formData.qualification || !formData.department || !formData.primary_ward_id || !formData.shift || !formData.status) {
         throw new Error("Please fill all required fields.");
       }
 
       // Convert empty strings to null for optional unique/date fields
       const submitData = { ...formData };
+      delete submitData.employee_id; // Let the database trigger generate this safely
+      
       if (submitData.date_of_birth === "") submitData.date_of_birth = null as any;
       if (submitData.joining_date === "") submitData.joining_date = null as any;
       if (submitData.registration_number === "") submitData.registration_number = null as any;
@@ -138,9 +140,9 @@ export default function NurseManagementPage() {
       
       if (error) {
         if (error.code === '23505') {
-          throw new Error("Employee ID, Phone, or Registration Number already exists.");
+          throw new Error("Phone or Registration Number already exists.");
         }
-        throw error;
+        throw new Error("Unable to create Nurse record. Please try again.");
       }
 
       const newNurse = data[0];
@@ -430,8 +432,8 @@ export default function NurseManagementPage() {
                   </div>
                   
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Employee ID *</label>
-                    <input type="text" name="employee_id" className={styles.input} required value={formData.employee_id} onChange={handleInputChange} />
+                    <label className={styles.label}>Employee ID</label>
+                    <input type="text" className={styles.input} disabled value="(Auto Generated)" style={{ opacity: 0.7, cursor: 'not-allowed', backgroundColor: '#f1f5f9' }} />
                   </div>
 
                   <div className={styles.formGroup}>
