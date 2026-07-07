@@ -3095,18 +3095,22 @@ function AdmissionRecordRedesign() {
                         {/* --- Main Left Column --- */}
                         <div className={styles.mainColumn}>
                           
-                          {/* Patient Search Card */}
+                          {/* Merged Admission Information Card */}
                           <div className={styles.summaryCard}>
+                            <div className={styles.cardHeader} style={{ marginBottom: 24 }}>
+                              <div className={styles.cardTitle}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                1. ADMISSION INFORMATION
+                              </div>
+                              <span className={styles.cardTitleBadge}>REQUIRED</span>
+                            </div>
+
+                            <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1px solid #e2e8f0", paddingBottom: 8, marginBottom: 16 }}>
+                              Patient Search
+                            </div>
+
                             <div className={styles.patientSearchHeader}>
                               <div className={styles.patientSearchHeaderLeft}>
-                                <div className={styles.cardTitle}>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                                    <circle cx="12" cy="7" r="4" />
-                                  </svg>
-                                  Patient Context
-                                </div>
-                                <span className={styles.cardTitleBadge}>REQUIRED</span>
                               </div>
                               {(!searchParams.get("patientId") && !isNewPatientMode && !summary.patientId) && (
                                 <button type="button" className={styles.btnRegisterNew} onClick={() => setIsNewPatientMode(true)}>
@@ -3218,11 +3222,10 @@ function AdmissionRecordRedesign() {
                                 </div>
                               </div>
                             )}
-                          </div>
 
                           {/* Selected Patient Card */}
                           {(summary.patientId && summary.patientName) && (
-                            <div className={styles.summaryCard} style={{ padding: 0, overflow: 'hidden' }}>
+                            <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: 8, marginBottom: 24 }}>
                               <div style={{ background: '#f8fafc', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, color: '#334155' }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                 Selected Patient
@@ -3251,11 +3254,9 @@ function AdmissionRecordRedesign() {
                             </div>
                           )}
 
-                          {/* Patient Details Card */}
-                          <div className={styles.summaryCard}>
-                            <div className={styles.cardHeader}>
-                              <div className={styles.cardTitle}>Patient Details</div>
-                            </div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1px solid #e2e8f0", paddingBottom: 8, marginBottom: 16 }}>
+                            Patient Details
+                          </div>
                             <div className={styles.grid3Col}>
                               <div className="field">
                                 <label>Age</label>
@@ -3318,13 +3319,12 @@ function AdmissionRecordRedesign() {
                                 onChange={(e) => updateField("department", e.target.value)} 
                               />
                             </div>
-                          </div>
+                            </div>
 
                           {/* Admission Details Card */}
-                          <div className={styles.summaryCard}>
-                            <div className={styles.cardHeader}>
-                              <div className={styles.cardTitle}>Admission Details</div>
-                            </div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1px solid #e2e8f0", paddingBottom: 8, marginBottom: 16, marginTop: 24 }}>
+                            Admission Details
+                          </div>
                             <div className={styles.grid2Col}>
                               <div className="field">
                                 <label>Admission Source</label>
