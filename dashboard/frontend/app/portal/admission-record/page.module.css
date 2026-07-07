@@ -195,16 +195,16 @@
   display: grid;
   grid-template-columns: 20% 1fr;
   gap: 40px;
-  align-items: flex-start;
 }
 
 /* --- Left Column: Context --- */
-.leftColumn {
+.leftColumn, .sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
   position: sticky;
-  top: 24px;
+  top: 100px; /* clear the sticky topbar */
+  align-self: start;
 }
 
 /* --- Right Column: Clinical WorkArea --- */
@@ -2609,7 +2609,6 @@
   display: grid;
   grid-template-columns: 1fr 25%;
   gap: 24px;
-  align-items: start;
 }
 
 @media (max-width: 1024px) {
@@ -2629,7 +2628,8 @@
   flex-direction: column;
   gap: 20px;
   position: sticky;
-  top: 24px;
+  top: 100px; /* clear the sticky topbar */
+  align-self: start;
 }
 
 .patientSearchHeader {
