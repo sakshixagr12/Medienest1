@@ -1021,9 +1021,15 @@ function AdmissionRecordRedesign() {
     }
   }, []); // Run ONLY on mount
 
+  const isNavigating = useRef(false);
+
   // 2. Sync URL changes to State (e.g. Browser Back/Forward)
   useEffect(() => {
     if (!isInitialized) return;
+    if (isNavigating.current) {
+      isNavigating.current = false;
+      return;
+    }
     const urlStep = searchParams.get("step");
     if (urlStep && !isNaN(parseInt(urlStep))) {
       const parsed = parseInt(urlStep);
@@ -1043,6 +1049,7 @@ function AdmissionRecordRedesign() {
     localStorage.setItem("admission_draft_step", step.toString());
     const currentUrlStep = searchParams.get("step");
     if (currentUrlStep !== step.toString()) {
+      isNavigating.current = true;
       const params = new URLSearchParams(searchParams.toString());
       params.set("step", step.toString());
       router.replace(`?${params.toString()}`, { scroll: false });
