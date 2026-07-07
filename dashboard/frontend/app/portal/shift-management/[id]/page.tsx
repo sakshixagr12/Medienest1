@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
 import { ArrowLeft, Clock, Users, Activity } from "lucide-react";
-import { EMPLOYEE_ROLES } from "../page";
+import { EMPLOYEE_ROLES } from "../constants";
 
 interface Shift {
   id: string;
