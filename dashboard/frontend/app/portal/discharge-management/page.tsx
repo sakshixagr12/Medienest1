@@ -134,6 +134,21 @@ export default function DischargeManagementPage() {
   }).length;
   const totalCount = recentlyDischarged.length;
 
+  const getAvatarStyle = (name: string) => {
+    if (!name) return { bg: '#f1f5f9', color: '#475569' };
+    const char = name.charCodeAt(0);
+    const colors = [
+      { bg: '#fee2e2', color: '#991b1b' }, // Red
+      { bg: '#ffedd5', color: '#9a3412' }, // Orange
+      { bg: '#fef08a', color: '#854d0e' }, // Yellow
+      { bg: '#dcfce7', color: '#166534' }, // Green
+      { bg: '#dbeafe', color: '#1e40af' }, // Blue
+      { bg: '#e0e7ff', color: '#3730a3' }, // Indigo
+      { bg: '#fae8ff', color: '#86198f' }  // Fuchsia
+    ];
+    return colors[char % colors.length];
+  };
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -153,19 +168,39 @@ export default function DischargeManagementPage() {
 
         <div className={styles.summaryCards}>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryTitle}>Pending Discharges</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '8px', background: '#e0e7ff', color: '#3730a3', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+              </div>
+              <p className={styles.summaryTitle}>Pending Discharges</p>
+            </div>
             <p className={styles.summaryValue}>{pendingCount}</p>
           </div>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryTitle}>Ready for Discharge</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '8px', background: '#dcfce7', color: '#166534', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <p className={styles.summaryTitle}>Ready for Discharge</p>
+            </div>
             <p className={styles.summaryValue}>{readyCount}</p>
           </div>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryTitle}>Today's Discharges</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '8px', background: '#fef08a', color: '#854d0e', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <p className={styles.summaryTitle}>Today's Discharges</p>
+            </div>
             <p className={styles.summaryValue}>{todayCount}</p>
           </div>
           <div className={styles.summaryCard}>
-            <p className={styles.summaryTitle}>Total Discharges</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '8px', background: '#f1f5f9', color: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <p className={styles.summaryTitle}>Total Discharges</p>
+            </div>
             <p className={styles.summaryValue}>{totalCount}</p>
           </div>
         </div>
@@ -251,11 +286,11 @@ export default function DischargeManagementPage() {
                     {filteredPendingDischarges.map((record) => (
                       <tr key={record.id}>
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <span style={{ fontWeight: 700, color: "var(--sanctuary-ink)" }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                            <span style={{ fontWeight: 700, color: "#1e40af", background: "#dbeafe", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", border: "1px solid #bfdbfe" }}>
                               {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
                             </span>
-                            <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)", display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                               {record.date_admission ? new Date(record.date_admission).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
                             </span>
@@ -263,19 +298,19 @@ export default function DischargeManagementPage() {
                         </td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(23, 3, 55, 0.05)', color: 'var(--sanctuary-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: getAvatarStyle(record.patient_name).bg, color: getAvatarStyle(record.patient_name).color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', border: `1px solid ${getAvatarStyle(record.patient_name).color}33` }}>
                               {record.patient_name ? record.patient_name.charAt(0).toUpperCase() : "?"}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <span style={{ fontWeight: 700, color: "var(--sanctuary-primary)" }}>{record.patient_name || "—"}</span>
+                              <span style={{ fontWeight: 700, color: "var(--sanctuary-ink)" }}>{record.patient_name || "—"}</span>
                               <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)" }}>ID: {record.patient_id ? record.patient_id.substring(0, 8).toUpperCase() : "—"}</span>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: 600 }}>{record.department || "General"}</span>
-                            <span style={{ fontSize: 13, color: "var(--sanctuary-ink-l)" }}>{record.ward ? `${record.ward} / Bed ${record.bed || "—"}` : "—"}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                            <span style={{ fontWeight: 600, color: "#475569", background: "#f1f5f9", padding: "2px 8px", borderRadius: "12px", fontSize: "12px", border: "1px solid #e2e8f0" }}>{record.department || "General"}</span>
+                            <span style={{ fontSize: 13, color: "var(--sanctuary-ink-l)", paddingLeft: '2px', marginTop: '2px' }}>{record.ward ? `${record.ward} / Bed ${record.bed || "—"}` : "—"}</span>
                           </div>
                         </td>
                         <td>
@@ -349,11 +384,11 @@ export default function DischargeManagementPage() {
                     {filteredRecentlyDischarged.map((record) => (
                       <tr key={record.id}>
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <span style={{ fontWeight: 700, color: "var(--sanctuary-ink)" }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                            <span style={{ fontWeight: 700, color: "#1e40af", background: "#dbeafe", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", border: "1px solid #bfdbfe" }}>
                               {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
                             </span>
-                            <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)", display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                               {record.date_discharge ? new Date(record.date_discharge).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : record.date_admission ? new Date(record.date_admission).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
                             </span>
@@ -361,19 +396,19 @@ export default function DischargeManagementPage() {
                         </td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(23, 3, 55, 0.05)', color: 'var(--sanctuary-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: getAvatarStyle(record.patient_name).bg, color: getAvatarStyle(record.patient_name).color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', border: `1px solid ${getAvatarStyle(record.patient_name).color}33` }}>
                               {record.patient_name ? record.patient_name.charAt(0).toUpperCase() : "?"}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <span style={{ fontWeight: 700, color: "var(--sanctuary-primary)" }}>{record.patient_name || "—"}</span>
+                              <span style={{ fontWeight: 700, color: "var(--sanctuary-ink)" }}>{record.patient_name || "—"}</span>
                               <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)" }}>ID: {record.patient_id ? record.patient_id.substring(0, 8).toUpperCase() : "—"}</span>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontWeight: 600 }}>{record.department || "General"}</span>
-                            <span style={{ fontSize: 13, color: "var(--sanctuary-ink-l)" }}>{record.ward ? `${record.ward} / Bed ${record.bed || "—"}` : "—"}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                            <span style={{ fontWeight: 600, color: "#475569", background: "#f1f5f9", padding: "2px 8px", borderRadius: "12px", fontSize: "12px", border: "1px solid #e2e8f0" }}>{record.department || "General"}</span>
+                            <span style={{ fontSize: 13, color: "var(--sanctuary-ink-l)", paddingLeft: '2px', marginTop: '2px' }}>{record.ward ? `${record.ward} / Bed ${record.bed || "—"}` : "—"}</span>
                           </div>
                         </td>
                         <td>
