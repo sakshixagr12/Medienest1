@@ -3414,69 +3414,7 @@ function AdmissionRecordRedesign() {
                         {/* --- Right Sidebar Column --- */}
                         <div className={styles.sidebar}>
                           
-                          {/* Alerts & History */}
-                          <div className={styles.alertCard}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                              Alerts &amp; History
-                            </div>
-                            
-                            {(((summary.allergies || "").trim() || summary.has_diabetes || summary.has_hypertension || summary.has_thyroid)) ? (
-                              <>
-                                {(summary.allergies || "").trim() && (
-                                  <div className={`${styles.alertItem} ${styles.alertRed}`}>
-                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                                    <div className={styles.alertContent}>
-                                      <div className={styles.alertTitle}>Allergy</div>
-                                      <div className={styles.alertSub}>{summary.allergies}</div>
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {summary.has_diabetes && (
-                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
-                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                                    <div className={styles.alertContent}>
-                                      <div className={styles.alertTitle}>Condition</div>
-                                      <div className={styles.alertSub}>Diabetes</div>
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {summary.has_hypertension && (
-                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
-                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                                    <div className={styles.alertContent}>
-                                      <div className={styles.alertTitle}>Condition</div>
-                                      <div className={styles.alertSub}>Hypertension</div>
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {summary.has_thyroid && (
-                                  <div className={`${styles.alertItem} ${styles.alertYellow}`}>
-                                    <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                                    <div className={styles.alertContent}>
-                                      <div className={styles.alertTitle}>Condition</div>
-                                      <div className={styles.alertSub}>Thyroid</div>
-                                    </div>
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div style={{ fontSize: 13, color: '#64748b' }}>No critical alerts recorded.</div>
-                            )}
 
-                            {summary.past_surgeries && (
-                              <div className={`${styles.alertItem} ${styles.alertBlue}`}>
-                                <div className={styles.alertIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
-                                <div className={styles.alertContent}>
-                                  <div className={styles.alertTitle}>Past Surgeries</div>
-                                  <div className={styles.alertSub}>{summary.past_surgeries}</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
 
                           {/* Admission Summary Sidebar */}
                           <div className={styles.alertCard}>
