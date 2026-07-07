@@ -3296,10 +3296,6 @@ function AdmissionRecordRedesign() {
                                   <option>Female</option>
                                   <option>Other</option>
                                 </select>
-                              </div>
-                            </div>
-
-                            <div className={styles.grid2Col}>
                               <div className="field">
                                 <label>Phone Number</label>
                                 <input
@@ -3310,6 +3306,7 @@ function AdmissionRecordRedesign() {
                               </div>
                             </div>
                             
+
                             <div className="field">
                               <label>Department</label>
                               <input 
