@@ -3319,7 +3319,6 @@ function AdmissionRecordRedesign() {
                                 onChange={(e) => updateField("department", e.target.value)} 
                               />
                             </div>
-                            </div>
 
                           {/* Admission Details Card */}
                           <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1px solid #e2e8f0", paddingBottom: 8, marginBottom: 16, marginTop: 24 }}>
