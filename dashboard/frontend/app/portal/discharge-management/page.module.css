@@ -158,9 +158,9 @@
 }
 
 .btnAction {
-  background: #fff;
-  color: var(--sanctuary-primary);
-  border: 1.5px solid var(--border);
+  background: var(--sanctuary-primary);
+  color: #fff;
+  border: 1.5px solid var(--sanctuary-primary);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 13px;
@@ -171,8 +171,8 @@
 }
 
 .btnAction:hover {
-  border-color: var(--sanctuary-primary);
-  background: var(--sanctuary-primary);
+  background: var(--sanctuary-ink);
+  border-color: var(--sanctuary-ink);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.1);
+  box-shadow: 0 4px 12px rgba(23, 3, 55, 0.2);
 }
