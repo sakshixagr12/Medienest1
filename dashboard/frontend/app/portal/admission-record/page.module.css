@@ -2605,7 +2605,7 @@
 /* --- Step 1 Redesign Layout --- */
 .mainLayout {
   display: grid;
-  grid-template-columns: 1fr 20%;
+  grid-template-columns: 1fr 25%;
   gap: 24px;
   align-items: start;
 }
@@ -2626,6 +2626,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: sticky;
+  top: 24px;
 }
 
 .patientSearchHeader {
