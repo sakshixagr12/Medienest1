@@ -2605,7 +2605,7 @@
 /* --- Step 1 Redesign Layout --- */
 .mainLayout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 20%;
   gap: 24px;
   align-items: start;
 }

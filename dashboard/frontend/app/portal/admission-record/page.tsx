@@ -3418,34 +3418,48 @@ function AdmissionRecordRedesign() {
 
                           {/* Admission Summary Sidebar */}
                           <div className={styles.alertCard}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #f1f5f9', paddingBottom: 12 }}>
-                              Admission Summary
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 800, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 12, marginBottom: 16 }}>
+                              Admission Summary (Live)
                             </div>
                             
-                            <div className={styles.summaryList}>
-                              <div className={styles.summaryRow}>
-                                <span className={styles.summaryLabel}>Source</span>
-                                <span className={styles.summaryValue}>{summary.admission_type || 'OPD'}</span>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Patient</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.patientName || 'Not Entered'}</div>
                               </div>
-                              <div className={styles.summaryRow}>
-                                <span className={styles.summaryLabel}>Attending Doctor</span>
-                                <span className={styles.summaryValue}>{summary.doctor ? `Dr. ${summary.doctor}` : 'Not Selected'}</span>
+                              
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Doctor</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.doctor ? `Dr. ${summary.doctor}` : 'Not Selected'}</div>
                               </div>
-                              <div className={styles.summaryRow}>
-                                <span className={styles.summaryLabel}>Admission Date &amp; Time</span>
-                                <span className={styles.summaryValue}>{summary.date_admission ? new Date(summary.date_admission).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Not Selected'}</span>
-                              </div>
-                              <div className={styles.summaryRow}>
-                                <span className={styles.summaryLabel}>Triage / Severity</span>
-                                <div style={{ marginTop: 4 }}>
-                                  <span className={`${styles.triageBtn} ${summary.severity ? styles.active : ""} ${summary.severity ? styles[summary.severity.toLowerCase()] : styles.mild}`} style={{ padding: '2px 8px', fontSize: 11 }}>
+                              
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Severity</div>
+                                <div style={{ marginTop: 2 }}>
+                                  <span className={`${styles.triageBtn} ${summary.severity ? styles.active : ""} ${summary.severity ? styles[summary.severity.toLowerCase()] : styles.mild}`} style={{ padding: '4px 10px', fontSize: 12 }}>
                                     {summary.severity || 'MILD'}
                                   </span>
                                 </div>
                               </div>
-                              <div className={styles.summaryRow}>
-                                <span className={styles.summaryLabel}>Ward / Bed</span>
-                                <span className={styles.summaryValue}>{(summary.ward || summary.bed) ? `${summary.ward || 'Not Assigned'} / ${summary.bed || 'Not Assigned'}` : 'Not Assigned'}</span>
+                              
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Ward</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.ward || 'Not Assigned'}</div>
+                              </div>
+                              
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Bed</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.bed || 'Not Assigned'}</div>
+                              </div>
+                              
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Admission Time</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>{summary.date_admission ? new Date(summary.date_admission).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Not Selected'}</div>
+                              </div>
+                              
+                              <div style={{ marginTop: 8, padding: 12, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Estimated Cost</div>
+                                <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>--</div>
                               </div>
                             </div>
                           </div>
