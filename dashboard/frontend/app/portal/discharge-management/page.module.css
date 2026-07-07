@@ -249,9 +249,9 @@
 }
 
 .btnAction:disabled {
-  background: #e2e8f0;
-  border-color: #e2e8f0;
-  color: #94a3b8;
+  background: #cbd5e1;
+  border-color: #cbd5e1;
+  color: #475569;
   cursor: not-allowed;
 }
 
