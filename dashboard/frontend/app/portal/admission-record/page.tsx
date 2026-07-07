@@ -3343,7 +3343,7 @@ function AdmissionRecordRedesign() {
                                 <select value={summary.ward || ""} onChange={(e) => handleWardChange(e.target.value)}>
                                   <option value="">Select Ward</option>
                                   {wards.map((w: any) => (
-                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                    <option key={w.id} value={w.id}>{w.ward_name}</option>
                                   ))}
                                 </select>
                               </div>
@@ -3444,7 +3444,7 @@ function AdmissionRecordRedesign() {
                               
                               <div>
                                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px dashed #cbd5e1', paddingBottom: 4, marginBottom: 6 }}>Ward</div>
-                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.ward || 'Not Assigned'}</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: '#1e293b' }}>{summary.ward ? (wards.find(w => w.id === summary.ward)?.ward_name || summary.ward) : 'Not Assigned'}</div>
                               </div>
                               
                               <div>
