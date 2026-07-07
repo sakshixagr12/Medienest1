@@ -3296,6 +3296,7 @@ function AdmissionRecordRedesign() {
                                   <option>Female</option>
                                   <option>Other</option>
                                 </select>
+                              </div>
                               <div className="field">
                                 <label>Phone Number</label>
                                 <input
@@ -3321,7 +3322,7 @@ function AdmissionRecordRedesign() {
                           <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1px solid #e2e8f0", paddingBottom: 8, marginBottom: 16, marginTop: 24 }}>
                             Admission Details
                           </div>
-                            <div className={styles.grid2Col}>
+                            <div className={styles.grid3Col}>
                               <div className="field">
                                 <label>Admission Source</label>
                                 <select value={summary.admission_type || "OPD"} onChange={(e) => updateField("admission_type", e.target.value)}>
@@ -3330,9 +3331,6 @@ function AdmissionRecordRedesign() {
                                   <option>Referral</option>
                                 </select>
                               </div>
-                            </div>
-
-                            <div className={styles.grid2Col}>
                               <div className="field">
                                 <label>Ward</label>
                                 <select value={summary.ward || ""} onChange={(e) => handleWardChange(e.target.value)}>
