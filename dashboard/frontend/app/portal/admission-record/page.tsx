@@ -3109,20 +3109,10 @@ function AdmissionRecordRedesign() {
                               Patient Search
                             </div>
 
-                            <div className={styles.patientSearchHeader}>
-                              <div className={styles.patientSearchHeaderLeft}>
-                              </div>
-                              {(!searchParams.get("patientId") && !isNewPatientMode && !summary.patientId) && (
-                                <button type="button" className={styles.btnRegisterNew} onClick={() => setIsNewPatientMode(true)}>
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                  Register New Patient
-                                </button>
-                              )}
-                            </div>
-                            
                             {(!searchParams.get("patientId") && !isNewPatientMode && !summary.patientId) ? (
-                              <div className="field" style={{ position: "relative" }} ref={searchInputRef}>
-                                <div style={{ position: "relative" }}>
+                              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                                <div className="field" style={{ position: "relative", flex: 1 }} ref={searchInputRef}>
+                                  <div style={{ position: "relative" }}>
                                   <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                   <input
                                     type="text"
@@ -3353,22 +3343,34 @@ function AdmissionRecordRedesign() {
                               </div>
                             </div>
 
-                            <div className="field">
-                              <label>Admission Date &amp; Time</label>
-                              <div style={{ display: 'flex', gap: 12 }}>
-                                <input
-                                  type="datetime-local"
-                                  style={{ flex: 1 }}
-                                  value={summary.date_admission || ""}
-                                  onChange={(e) => updateField("date_admission", e.target.value)}
-                                />
-                                <button type="button" className={styles.btnNow} onClick={() => {
-                                  const d = new Date();
-                                  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                                  updateField("date_admission", d.toISOString().slice(0, 16));
-                                }}>
-                                  Now
-                                </button>
+                            <div className={styles.grid2Col}>
+                              <div className="field">
+                                <label>Admission Date &amp; Time</label>
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                  <input
+                                    type="datetime-local"
+                                    style={{ flex: 1 }}
+                                    value={summary.date_admission || ""}
+                                    onChange={(e) => updateField("date_admission", e.target.value)}
+                                  />
+                                  <button type="button" className={styles.btnNow} onClick={() => {
+                                    const d = new Date();
+                                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                                    updateField("date_admission", d.toISOString().slice(0, 16));
+                                  }}>
+                                    Now
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="field">
+                                <label>Attending Doctor</label>
+                                <select value={summary.doctor || ""} onChange={(e) => updateField("doctor", e.target.value)}>
+                                  <option value="">Select Doctor</option>
+                                  {doctors?.map((d: any) => (
+                                    <option key={d.id} value={d.name}>Dr. {d.name}</option>
+                                  ))}
+                                </select>
                               </div>
                             </div>
 
@@ -3386,18 +3388,6 @@ function AdmissionRecordRedesign() {
                                     {lvl}
                                   </button>
                                 ))}
-                              </div>
-                            </div>
-
-                            <div className={styles.grid2Col}>
-                              <div className="field">
-                                <label>Attending Doctor</label>
-                                <select value={summary.doctor || ""} onChange={(e) => updateField("doctor", e.target.value)}>
-                                  <option value="">Select Doctor</option>
-                                  {doctors?.map((d: any) => (
-                                    <option key={d.id} value={d.name}>Dr. {d.name}</option>
-                                  ))}
-                                </select>
                               </div>
                             </div>
                           </div>
