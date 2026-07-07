@@ -109,6 +109,13 @@ export default function DischargeManagementPage() {
     <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.header}>
+          <button 
+            onClick={() => router.back()} 
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: '16px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Back
+          </button>
           <h1 className={styles.title}>Discharge Management</h1>
           <p className={styles.subtitle}>
             Manage pending and completed patient discharges.
