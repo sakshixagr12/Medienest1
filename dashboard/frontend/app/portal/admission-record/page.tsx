@@ -872,11 +872,10 @@ function AdmissionRecordRedesign() {
   useEffect(() => {
     if (!clinic?.id) return;
     const fetchWards = async () => {
-      const { data } = await supabase.from("wards")
+      const { data, error } = await supabase.from("wards")
         .select("*")
-        .eq("clinic_id", clinic.id)
-        .eq("is_active", true)
         .order("ward_name", { ascending: true });
+      if (error) console.error("Error fetching wards:", error);
       if (data) setWards(data);
     };
     fetchWards();
