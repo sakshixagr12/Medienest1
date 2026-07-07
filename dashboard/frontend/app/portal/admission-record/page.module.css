@@ -193,7 +193,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 20% 1fr;
   gap: 40px;
   align-items: flex-start;
 }
@@ -2387,7 +2387,7 @@
 
 @media (max-width: 1400px) {
   .layout {
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 20% 1fr;
     gap: 24px;
   }
 }
