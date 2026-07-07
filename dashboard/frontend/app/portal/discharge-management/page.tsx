@@ -285,7 +285,7 @@ export default function DischargeManagementPage() {
                         </td>
                         <td>
                           <button
-                            className={styles.btnActionSecondary}
+                            className={styles.btnAction}
                             onClick={async () => {
                               if (record.discharge_summary_id) {
                                 router.push(`/portal/discharge-summary/view?id=${record.discharge_summary_id}`);
