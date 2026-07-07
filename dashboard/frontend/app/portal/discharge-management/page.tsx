@@ -337,26 +337,50 @@ export default function DischargeManagementPage() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
-                      <th>Admission ID</th>
-                      <th>Patient Name</th>
+                      <th>Admission Details</th>
+                      <th>Patient</th>
+                      <th>Location</th>
                       <th>Consultant</th>
-                      <th>Discharge Date</th>
                       <th>Status</th>
-                      <th>Actions</th>
+                      <th style={{ textAlign: 'right' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredRecentlyDischarged.map((record) => (
                       <tr key={record.id}>
-                        <td style={{ color: "var(--sanctuary-ink-l)", fontSize: 13 }}>
-                          {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
-                        </td>
-                        <td style={{ fontWeight: 700, color: "var(--sanctuary-primary)" }}>{record.patient_name || "—"}</td>
-                        <td>{record.doctor_name || "—"}</td>
                         <td>
-                          {record.date_discharge
-                            ? new Date(record.date_discharge).toLocaleDateString()
-                            : record.date_admission ? new Date(record.date_admission).toLocaleDateString() : "—"}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontWeight: 700, color: "var(--sanctuary-ink)" }}>
+                              {record.id ? record.id.substring(0, 8).toUpperCase() : "—"}
+                            </span>
+                            <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              {record.date_discharge ? new Date(record.date_discharge).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : record.date_admission ? new Date(record.date_admission).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(23, 3, 55, 0.05)', color: 'var(--sanctuary-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                              {record.patient_name ? record.patient_name.charAt(0).toUpperCase() : "?"}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <span style={{ fontWeight: 700, color: "var(--sanctuary-primary)" }}>{record.patient_name || "—"}</span>
+                              <span style={{ fontSize: 12, color: "var(--sanctuary-ink-l)" }}>ID: {record.patient_id ? record.patient_id.substring(0, 8).toUpperCase() : "—"}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontWeight: 600 }}>{record.department || "General"}</span>
+                            <span style={{ fontSize: 13, color: "var(--sanctuary-ink-l)" }}>{record.ward ? `${record.ward} / Bed ${record.bed || "—"}` : "—"}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sanctuary-ink-l)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span style={{ fontWeight: 600 }}>{record.doctor_name || "—"}</span>
+                          </div>
                         </td>
                         <td>
                           <span className={`${styles.badge} ${styles.badgeCompleted}`}>
@@ -364,7 +388,7 @@ export default function DischargeManagementPage() {
                             Completed
                           </span>
                         </td>
-                        <td>
+                        <td style={{ textAlign: 'right' }}>
                           <button
                             className={styles.btnAction}
                             onClick={async () => {
