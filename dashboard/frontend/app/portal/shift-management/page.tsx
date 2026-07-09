@@ -84,7 +84,7 @@ export default function ShiftManagementPage() {
         .eq("status", "Active");
       
       if (!roleError && activeEmployees) {
-        activeEmployees.forEach(emp => {
+        activeEmployees.forEach((emp: any) => {
           if (emp.shift_id && countsByShift[emp.shift_id] !== undefined) {
              countsByShift[emp.shift_id]++;
           }
