@@ -92,7 +92,7 @@ export default function ShiftManagementPage() {
       }
     }
 
-    const shiftsWithCounts = (shiftData || []).map(shift => ({
+    const shiftsWithCounts = (shiftData || []).map((shift: any) => ({
       ...shift,
       assigned_count: countsByShift[shift.id]
     }));
