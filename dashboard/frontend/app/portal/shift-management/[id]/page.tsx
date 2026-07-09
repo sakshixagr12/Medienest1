@@ -72,7 +72,7 @@ export default function ShiftDetailsPage() {
         .eq("shift_id", id);
         
       if (!roleError && roleData) {
-        roleData.forEach(emp => {
+        roleData.forEach((emp: any) => {
           fetchedEmployees.push({
             id: emp.id,
             employee_id: emp.employee_id || '-',
