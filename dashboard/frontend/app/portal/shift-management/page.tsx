@@ -75,7 +75,7 @@ export default function ShiftManagementPage() {
     
     // Efficiently aggregate counts across all roles
     const countsByShift: Record<string, number> = {};
-    (shiftData || []).forEach(s => countsByShift[s.id] = 0);
+    (shiftData || []).forEach((s: any) => countsByShift[s.id] = 0);
 
     for (const role of EMPLOYEE_ROLES) {
       const { data: activeEmployees, error: roleError } = await supabase
