@@ -368,7 +368,7 @@ export default function DischargeManagementPage() {
                 <p className={styles.emptyText} style={{ opacity: 0.8 }}>No recent discharges found.</p>
               </div>
             ) : (
-              <div className={styles.tableContainer}>
+              <div className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
                 <table className={styles.table}>
                   <thead>
                     <tr>

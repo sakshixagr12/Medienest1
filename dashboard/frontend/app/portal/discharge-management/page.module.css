@@ -191,6 +191,39 @@
   overflow-x: auto;
 }
 
+.scrollableTableContainer {
+  width: 100%;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.scrollableTableContainer::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollableTableContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollableTableContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.scrollableTableContainer::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.scrollableTableContainer th {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  border-bottom: none;
+  box-shadow: inset 0 -2px 0 var(--border);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
