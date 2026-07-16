@@ -270,7 +270,7 @@ export default function DischargeManagementPage() {
                 <p className={styles.emptyText} style={{ fontSize: 13, marginTop: 4, opacity: 0.8 }}>All eligible patients have been discharged.</p>
               </div>
             ) : (
-              <div className={styles.tableContainer}>
+              <div className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
                 <table className={styles.table}>
                   <thead>
                     <tr>

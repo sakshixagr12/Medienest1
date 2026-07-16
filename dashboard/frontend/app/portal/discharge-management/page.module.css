@@ -195,6 +195,7 @@
   width: 100%;
   max-height: 450px;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .scrollableTableContainer::-webkit-scrollbar {
