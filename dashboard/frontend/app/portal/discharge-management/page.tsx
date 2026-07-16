@@ -249,11 +249,11 @@ export default function DischargeManagementPage() {
             </div>
             
             {loading ? (
-              <div className={styles.emptyState}>
+              <div key="loading" className={styles.emptyState}>
                 <p className={styles.emptyText}>Loading...</p>
               </div>
             ) : filteredPendingDischarges.length === 0 ? (
-              <div className={styles.emptyState}>
+              <div key="empty" className={styles.emptyState}>
                 <svg
                   className={styles.emptyIcon}
                   width="48"
@@ -270,7 +270,7 @@ export default function DischargeManagementPage() {
                 <p className={styles.emptyText} style={{ fontSize: 13, marginTop: 4, opacity: 0.8 }}>All eligible patients have been discharged.</p>
               </div>
             ) : (
-              <div className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
+              <div key="table" className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -364,11 +364,11 @@ export default function DischargeManagementPage() {
             </div>
             
             {filteredRecentlyDischarged.length === 0 ? (
-              <div className={styles.emptyState}>
+              <div key="empty-recent" className={styles.emptyState}>
                 <p className={styles.emptyText} style={{ opacity: 0.8 }}>No recent discharges found.</p>
               </div>
             ) : (
-              <div className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
+              <div key="table-recent" className={`${styles.tableContainer} ${styles.scrollableTableContainer}`}>
                 <table className={styles.table}>
                   <thead>
                     <tr>
